@@ -97,20 +97,27 @@ $$ \text{FinalScore} = (\text{BaseScore} + \text{GoldScore}) \times \text{HP\_Mu
     *   Green ghost = valid placement.
     *   Red ghost = invalid placement (on path or overlapping tower).
 
+### Build/Upgrade Rules
+*   **Standard Build**: The only tower that can be placed directly is the **Archer Tower (Standard)**.
+*   **Branch Upgrades**: A built Archer Tower can be upgraded into exactly one branch: Rapid Fire, Sniper, Rock Cannon, Ice Tower, or Poison Tower.
+*   **Tiering**: Each tower (including the branch choice) supports two upgrade tiers: Level 1 -> Level 2.
+*   **Example Path**: Archer (Standard) L1 -> Sniper L1 -> Sniper L2.
+*   **Restrictions**: Branch choice is locked after selection; selling always refunds 70% of total spend.
+
 ### Tower Types (Stats Table)
 
-All towers have **Level 1** and **Level 2** stats.
+All branches share the same build flow: Build Archer (Standard) Level 1, then upgrade to the chosen branch at Level 1, then upgrade that branch to Level 2.
 
-| Tower Name | Type | Range (px) | Fire Rate (ms) | Dmg | Cost (Build/Upgr) | Special Effect |
+| Tower | Type | Range (px) | Fire Rate (ms) | Dmg | Cost (Build / L1->L2) | Special Effect |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Archer** (Root) | Physical | 200 | 800 | 10 | 70 / - | Basic single target. |
-| **Rapid Fire** | Physical | 180 | 300 | 6 | - / 120 | High DPS, low dmg per hit. Weak vs Armor. |
-| **Sniper** | Physical | 450 | 2000 | 60 | - / 150 | High dmg per hit. Crit 20% (2x dmg). Priority: High HP. |
-| **Rock Cannon** | Physical | 220 | 1500 | 25 | - / 140 | Splash Radius: 100px. |
-| **Ice Tower** | Magic | 180 | 1000 | 8 | - / 130 | Slows target by 40% for 2s. No stacking. |
-| **Poison** | Magic | 200 | 1200 | 5 | - / 130 | DoT: 5 dmg/sec for 5s. Stacks up to 3 times. |
+| **Archer (Standard)** | Physical | 200 | 800 | 10 | 70 / 90 | Basic single target. Enables branching. |
+| **Rapid Fire** | Physical | 180 | 300 | 6 | 120 / 140 | High DPS, low dmg per hit. Weak vs Armor. |
+| **Sniper** | Physical | 450 | 2000 | 60 | 150 / 170 | High dmg per hit. Crit 20% (2x dmg). Priority: High HP. |
+| **Rock Cannon** | Physical | 220 | 1500 | 25 | 140 / 160 | Splash Radius: 100px. |
+| **Ice Tower** | Magic | 180 | 1000 | 8 | 130 / 150 | Slows target by 40% for 2s. No stacking. |
+| **Poison** | Magic | 200 | 1200 | 5 | 130 / 150 | DoT: 5 dmg/sec for 5s. Stacks up to 3 times. |
 
-*Note: Level 2 upgrades generally increase Damage by 50% and Range/Rate by small margins.*
+*Note: Level 2 upgrades generally increase damage by ~50% and modestly improve range/rate. Costs shown are branch-upgrade costs (Archer build is always first).* 
 
 ---
 
@@ -297,13 +304,13 @@ This plan is designed to be executed sequentially.
 *   **Deliverable**: Full loop: Start -> Play -> Lose/Win.
 
 ### Step 7: Tower Variations & Upgrades
-*   **Goal**: Implement all 5 tower types and Upgrade Logic.
+*   **Goal**: Implement branching upgrades from the single buildable tower (Archer) into 5 tower types with two levels each.
 *   **Actions**:
-    *   Implement `TowerFactory` to handle types (Archer, Rapid, Sniper, Ice, Poison).
-    *   Implement specific projectile logic (Splash for Rock, Slow effect for Ice).
-    *   Create `TowerSelectionUI`: When clicking pad, pick type.
-    *   Create `UpgradeUI`: When clicking tower, show Upgrade/Sell buttons.
-*   **Deliverable**: All towers buildable and upgradeable.
+    *   Implement `TowerFactory` supporting build of Archer (Standard) only; branching upgrades unlock Rapid, Sniper, Rock Cannon, Ice, Poison.
+    *   Enforce branch lock-in after the first upgrade choice; upgrades allow Level 1 -> Level 2 within that branch.
+    *   Implement specific projectile logic (Splash for Rock Cannon, Slow for Ice, DoT for Poison, crit for Sniper, high rate for Rapid).
+    *   Create `UpgradeUI`: On clicking a tower, show branch choices if unbranched; show Level 2 upgrade and Sell when branched.
+*   **Deliverable**: Archer placement works; branching and Level 2 upgrades function for all five types.
 
 ### Step 8: Advanced Enemies & Stats
 *   **Goal**: Armor, Shields, Jumps.

@@ -13,59 +13,95 @@ export interface TowerStats {
   critMultiplier?: number;
 }
 
+export type TowerBranch = 'archer' | 'rapidfire' | 'sniper' | 'rockcannon' | 'icetower' | 'poison';
+
 export interface TowerConfig {
   key: string;
   name: string;
   type: 'physical' | 'magic';
-  buildCost: number;
-  upgradeCost?: number;
+  branch: TowerBranch;
+  level: 1 | 2;
+  buildCost?: number;        // Only for archer (the only buildable tower)
+  upgradeCost: number;       // Cost to upgrade TO this config
   description: string;
-  upgradesTo?: string[];   // tower keys this can upgrade to
-  upgradesFrom?: string;   // tower key this upgrades from
-  level: number;
   stats: TowerStats;
 }
 
-// All tower configurations
+// Branch upgrade options from Archer
+export const BRANCH_OPTIONS: TowerBranch[] = ['rapidfire', 'sniper', 'rockcannon', 'icetower', 'poison'];
+
+// All tower configurations keyed by "branch_level" (e.g., "archer_1", "sniper_2")
 export const TOWER_CONFIGS: Record<string, TowerConfig> = {
-  archer: {
-    key: 'archer',
+  // === ARCHER (Standard - the only buildable tower) ===
+  archer_1: {
+    key: 'archer_1',
     name: 'Archer Tower',
     type: 'physical',
-    buildCost: 70,
-    description: 'Basic single target tower',
-    upgradesTo: ['rapidfire', 'sniper'],
+    branch: 'archer',
     level: 1,
+    buildCost: 70,
+    upgradeCost: 0,
+    description: 'Basic single target tower. Can branch into specialized towers.',
     stats: {
       range: 200,
       fireRate: 800,
       damage: 10
     }
   },
-  rapidfire: {
-    key: 'rapidfire',
+  archer_2: {
+    key: 'archer_2',
+    name: 'Archer Tower II',
+    type: 'physical',
+    branch: 'archer',
+    level: 2,
+    upgradeCost: 90,
+    description: 'Improved archer. Can still branch into specialized towers.',
+    stats: {
+      range: 220,
+      fireRate: 700,
+      damage: 15
+    }
+  },
+
+  // === RAPID FIRE ===
+  rapidfire_1: {
+    key: 'rapidfire_1',
     name: 'Rapid Fire',
     type: 'physical',
-    buildCost: 70,
+    branch: 'rapidfire',
+    level: 1,
     upgradeCost: 120,
     description: 'High attack speed, low damage. Weak vs armor.',
-    upgradesFrom: 'archer',
-    level: 2,
     stats: {
       range: 180,
       fireRate: 300,
       damage: 6
     }
   },
-  sniper: {
-    key: 'sniper',
+  rapidfire_2: {
+    key: 'rapidfire_2',
+    name: 'Rapid Fire II',
+    type: 'physical',
+    branch: 'rapidfire',
+    level: 2,
+    upgradeCost: 140,
+    description: 'Even faster attacks. Shreds unarmored targets.',
+    stats: {
+      range: 190,
+      fireRate: 250,
+      damage: 9
+    }
+  },
+
+  // === SNIPER ===
+  sniper_1: {
+    key: 'sniper_1',
     name: 'Sniper Tower',
     type: 'physical',
-    buildCost: 70,
+    branch: 'sniper',
+    level: 1,
     upgradeCost: 150,
     description: 'Long range, high damage. 20% crit chance.',
-    upgradesFrom: 'archer',
-    level: 2,
     stats: {
       range: 450,
       fireRate: 2000,
@@ -74,13 +110,32 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       critMultiplier: 2
     }
   },
-  rockcannon: {
-    key: 'rockcannon',
+  sniper_2: {
+    key: 'sniper_2',
+    name: 'Sniper Tower II',
+    type: 'physical',
+    branch: 'sniper',
+    level: 2,
+    upgradeCost: 170,
+    description: 'Deadly precision. 25% crit chance.',
+    stats: {
+      range: 500,
+      fireRate: 1800,
+      damage: 90,
+      critChance: 0.25,
+      critMultiplier: 2
+    }
+  },
+
+  // === ROCK CANNON ===
+  rockcannon_1: {
+    key: 'rockcannon_1',
     name: 'Rock Cannon',
     type: 'physical',
-    buildCost: 90,
-    description: 'Splash damage in area.',
+    branch: 'rockcannon',
     level: 1,
+    upgradeCost: 140,
+    description: 'Splash damage in 100px radius.',
     stats: {
       range: 220,
       fireRate: 1500,
@@ -88,13 +143,31 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       splashRadius: 100
     }
   },
-  icetower: {
-    key: 'icetower',
+  rockcannon_2: {
+    key: 'rockcannon_2',
+    name: 'Rock Cannon II',
+    type: 'physical',
+    branch: 'rockcannon',
+    level: 2,
+    upgradeCost: 160,
+    description: 'Bigger explosions. 120px splash radius.',
+    stats: {
+      range: 240,
+      fireRate: 1400,
+      damage: 38,
+      splashRadius: 120
+    }
+  },
+
+  // === ICE TOWER ===
+  icetower_1: {
+    key: 'icetower_1',
     name: 'Ice Tower',
     type: 'magic',
-    buildCost: 80,
-    description: 'Slows enemies by 40% for 2s. Ignores armor.',
+    branch: 'icetower',
     level: 1,
+    upgradeCost: 130,
+    description: 'Slows enemies by 40% for 2s. Ignores armor.',
     stats: {
       range: 180,
       fireRate: 1000,
@@ -103,18 +176,53 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       slowDuration: 2000
     }
   },
-  poison: {
-    key: 'poison',
+  icetower_2: {
+    key: 'icetower_2',
+    name: 'Ice Tower II',
+    type: 'magic',
+    branch: 'icetower',
+    level: 2,
+    upgradeCost: 150,
+    description: 'Freezing cold. 50% slow for 2.5s.',
+    stats: {
+      range: 200,
+      fireRate: 900,
+      damage: 12,
+      slowPercent: 0.5,
+      slowDuration: 2500
+    }
+  },
+
+  // === POISON ===
+  poison_1: {
+    key: 'poison_1',
     name: 'Poison Tower',
     type: 'magic',
-    buildCost: 80,
-    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor.',
+    branch: 'poison',
     level: 1,
+    upgradeCost: 130,
+    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor.',
     stats: {
       range: 200,
       fireRate: 1200,
       damage: 5,
       dotDamage: 5,
+      dotDuration: 5000
+    }
+  },
+  poison_2: {
+    key: 'poison_2',
+    name: 'Poison Tower II',
+    type: 'magic',
+    branch: 'poison',
+    level: 2,
+    upgradeCost: 150,
+    description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x.',
+    stats: {
+      range: 220,
+      fireRate: 1100,
+      damage: 8,
+      dotDamage: 8,
       dotDuration: 5000
     }
   }
@@ -128,12 +236,24 @@ export class Tower extends Phaser.GameObjects.Container {
   private graphics: Phaser.GameObjects.Graphics;
   private rangeGraphics: Phaser.GameObjects.Graphics;
   private totalInvested: number;
+  private currentBranch: TowerBranch;
+  private currentLevel: 1 | 2;
+  
+  // Combat state
+  private lastFireTime: number = 0;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string) {
+  constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string = 'archer_1') {
     super(scene, x, y);
     
-    this.config = { ...TOWER_CONFIGS[towerKey] };
-    this.totalInvested = this.config.buildCost;
+    const initialConfig = TOWER_CONFIGS[towerKey];
+    if (!initialConfig) {
+      throw new Error(`Invalid tower key: ${towerKey}`);
+    }
+    
+    this.config = { ...initialConfig };
+    this.currentBranch = initialConfig.branch;
+    this.currentLevel = initialConfig.level;
+    this.totalInvested = initialConfig.buildCost || 0;
     
     // Create graphics
     this.graphics = scene.add.graphics();
@@ -154,12 +274,12 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Draw tower based on its type
+   * Draw tower based on its branch type
    */
   private drawTower(): void {
     this.graphics.clear();
     
-    switch (this.config.key) {
+    switch (this.currentBranch) {
       case 'archer':
         this.drawArcherTower();
         break;
@@ -182,12 +302,32 @@ export class Tower extends Phaser.GameObjects.Container {
         this.drawArcherTower();
     }
     
+    // Draw level indicator for level 2 towers
+    if (this.currentLevel === 2) {
+      this.drawLevelIndicator();
+    }
+    
     // Draw range circle
     this.rangeGraphics.clear();
     this.rangeGraphics.lineStyle(2, 0xffffff, 0.3);
     this.rangeGraphics.strokeCircle(0, 0, this.config.stats.range);
     this.rangeGraphics.fillStyle(0xffffff, 0.1);
     this.rangeGraphics.fillCircle(0, 0, this.config.stats.range);
+  }
+
+  /**
+   * Draw level 2 indicator (stars)
+   */
+  private drawLevelIndicator(): void {
+    const g = this.graphics;
+    // Draw two small gold diamonds above the tower to indicate level 2
+    g.fillStyle(0xffd700, 1);
+    // Left diamond
+    g.fillTriangle(-12, -95, -8, -100, -4, -95);
+    g.fillTriangle(-12, -95, -8, -90, -4, -95);
+    // Right diamond
+    g.fillTriangle(4, -95, 8, -100, 12, -95);
+    g.fillTriangle(4, -95, 8, -90, 12, -95);
   }
 
   private drawArcherTower(): void {
@@ -647,6 +787,59 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Get current branch
+   */
+  getBranch(): TowerBranch {
+    return this.currentBranch;
+  }
+
+  /**
+   * Get current level
+   */
+  getLevel(): 1 | 2 {
+    return this.currentLevel;
+  }
+
+  /**
+   * Check if tower can branch (only archer can branch to specializations)
+   */
+  canBranch(): boolean {
+    return this.currentBranch === 'archer';
+  }
+
+  /**
+   * Check if tower can upgrade to level 2
+   */
+  canUpgradeLevel(): boolean {
+    return this.currentLevel === 1;
+  }
+
+  /**
+   * Get available upgrade options for this tower
+   * Returns: { branches?: TowerBranch[], levelUp?: string }
+   */
+  getUpgradeOptions(): { branches?: TowerBranch[]; levelUp?: string } {
+    const options: { branches?: TowerBranch[]; levelUp?: string } = {};
+    
+    if (this.currentBranch === 'archer') {
+      // Archer can branch to specializations
+      options.branches = BRANCH_OPTIONS;
+      
+      // Archer can also upgrade to level 2 if at level 1
+      if (this.currentLevel === 1) {
+        options.levelUp = 'archer_2';
+      }
+    } else {
+      // Specialized towers can only upgrade level
+      if (this.currentLevel === 1) {
+        options.levelUp = `${this.currentBranch}_2`;
+      }
+    }
+    
+    return options;
+  }
+
+  /**
    * Get total gold invested in this tower
    */
   getTotalInvested(): number {
@@ -661,13 +854,30 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Upgrade the tower to a new type
+   * Upgrade the tower to a new config (branch or level up)
    */
   upgrade(newKey: string): boolean {
     const newConfig = TOWER_CONFIGS[newKey];
-    if (!newConfig || !newConfig.upgradeCost) return false;
+    if (!newConfig) return false;
+    
+    // Validate upgrade path
+    if (this.currentBranch === 'archer') {
+      // From archer, can go to any branch L1 or archer L2
+      const validUpgrade = 
+        (newConfig.branch === 'archer' && newConfig.level === 2 && this.currentLevel === 1) ||
+        (newConfig.branch !== 'archer' && newConfig.level === 1);
+      
+      if (!validUpgrade) return false;
+    } else {
+      // From specialized, can only go to same branch L2
+      if (newConfig.branch !== this.currentBranch || newConfig.level !== 2 || this.currentLevel !== 1) {
+        return false;
+      }
+    }
     
     this.config = { ...newConfig };
+    this.currentBranch = newConfig.branch;
+    this.currentLevel = newConfig.level;
     this.totalInvested += newConfig.upgradeCost;
     this.drawTower();
     
@@ -687,5 +897,47 @@ export class Tower extends Phaser.GameObjects.Container {
    */
   getRange(): number {
     return this.config.stats.range;
+  }
+
+  /**
+   * Get tower's fire rate
+   */
+  getFireRate(): number {
+    return this.config.stats.fireRate;
+  }
+
+  /**
+   * Get tower's damage
+   */
+  getDamage(): number {
+    return this.config.stats.damage;
+  }
+
+  /**
+   * Check if tower is ready to fire
+   */
+  canFire(currentTime: number): boolean {
+    return currentTime - this.lastFireTime >= this.config.stats.fireRate;
+  }
+
+  /**
+   * Mark that the tower has fired
+   */
+  recordFire(currentTime: number): void {
+    this.lastFireTime = currentTime;
+  }
+
+  /**
+   * Get targeting priority for Sniper (highest HP first)
+   */
+  getTargetPriority(): 'closest' | 'highestHP' | 'furthestAlongPath' {
+    return this.currentBranch === 'sniper' ? 'highestHP' : 'closest';
+  }
+
+  /**
+   * Check if this tower's damage is magic (ignores armor)
+   */
+  isMagic(): boolean {
+    return this.config.type === 'magic';
   }
 }

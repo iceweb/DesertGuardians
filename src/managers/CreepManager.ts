@@ -46,8 +46,8 @@ export class CreepManager {
    * Get a creep from the pool
    */
   private getFromPool(): Creep | null {
-    // Find an inactive creep in the pool
-    const creep = this.pool.find(c => !c.getIsActive());
+    // Find a creep that can be reused (not active AND not dying)
+    const creep = this.pool.find(c => c.canBeReused());
     return creep || null;
   }
 
@@ -80,7 +80,9 @@ export class CreepManager {
    * Handle creep reaching the end
    */
   private handleCreepReachedEnd(creep: Creep): void {
+    console.log(`CreepManager.handleCreepReachedEnd called, activeCreeps before: ${this.activeCreeps.length}`);
     this.removeFromActive(creep);
+    console.log(`CreepManager.handleCreepReachedEnd, activeCreeps after: ${this.activeCreeps.length}, calling onCreepReachedEnd: ${!!this.onCreepReachedEnd}`);
     this.onCreepReachedEnd?.(creep);
   }
 
@@ -115,6 +117,17 @@ export class CreepManager {
    */
   getActiveCount(): number {
     return this.activeCreeps.length;
+  }
+
+  /**
+   * Debug: Log all active creeps and their states
+   */
+  debugActiveCreeps(): void {
+    console.log(`CreepManager DEBUG: ${this.activeCreeps.length} active creeps:`);
+    for (let i = 0; i < this.activeCreeps.length; i++) {
+      const creep = this.activeCreeps[i];
+      console.log(`  [${i}] type=${creep.getConfig().type}, pos=(${creep.x.toFixed(0)}, ${creep.y.toFixed(0)}), isActive=${creep.getIsActive()}, visible=${creep.visible}, hp=${creep.getCurrentHealth()}`);
+    }
   }
 
   /**

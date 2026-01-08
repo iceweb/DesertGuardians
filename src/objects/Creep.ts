@@ -7,6 +7,9 @@ export interface CreepConfig {
   speed: number;        // pixels per second
   armor: number;
   goldReward: number;
+  // Special abilities
+  hasShield?: boolean;     // Blocks first 3 hits completely
+  canJump?: boolean;       // Leaps forward 150px every 4 seconds
 }
 
 export const CREEP_TYPES: Record<string, CreepConfig> = {
@@ -37,6 +40,22 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 40,
     armor: 2,
     goldReward: 100
+  },
+  jumper: {
+    type: 'jumper',
+    maxHealth: 120,
+    speed: 70,
+    armor: 1,
+    goldReward: 30,
+    canJump: true
+  },
+  shielded: {
+    type: 'shielded',
+    maxHealth: 100,
+    speed: 65,
+    armor: 0,
+    goldReward: 35,
+    hasShield: true
   }
 };
 
@@ -50,6 +69,7 @@ export class Creep extends Phaser.GameObjects.Container {
   private distanceTraveled: number = 0;
   private currentHealth: number = 0;
   private isActive: boolean = false;
+  private isDying: boolean = false;  // True during death animation
   
   // Graphics components
   private bodyGraphics!: Phaser.GameObjects.Graphics;
@@ -59,6 +79,23 @@ export class Creep extends Phaser.GameObjects.Container {
   // Animation
   private bounceTime: number = 0;
   private faceDirection: number = 1; // 1 = right, -1 = left
+  
+  // Status effects
+  private slowAmount: number = 0;      // 0-1, current slow percentage
+  private slowEndTime: number = 0;     // timestamp when slow ends
+  private poisonStacks: { damage: number; endTime: number }[] = [];
+  private poisonTickTimer: number = 0;
+  private statusGraphics!: Phaser.GameObjects.Graphics;
+  
+  // Special abilities
+  private shieldHitsRemaining: number = 0;   // Shield blocks remaining
+  private shieldGraphics!: Phaser.GameObjects.Graphics;
+  private jumpCooldown: number = 0;          // Time until next jump
+  private isJumping: boolean = false;        // Currently in jump animation
+  private jumpWarningTime: number = 0;       // Flash warning before jump
+  private readonly JUMP_COOLDOWN = 4000;     // 4 seconds between jumps
+  private readonly JUMP_DISTANCE = 150;      // Jump 150px forward
+  private readonly JUMP_WARNING_DURATION = 500; // Flash white 0.5s before jump
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y);
@@ -67,8 +104,10 @@ export class Creep extends Phaser.GameObjects.Container {
     this.bodyGraphics = scene.add.graphics();
     this.healthBarBg = scene.add.graphics();
     this.healthBarFg = scene.add.graphics();
+    this.statusGraphics = scene.add.graphics();
+    this.shieldGraphics = scene.add.graphics();
     
-    this.add([this.bodyGraphics, this.healthBarBg, this.healthBarFg]);
+    this.add([this.bodyGraphics, this.healthBarBg, this.healthBarFg, this.statusGraphics, this.shieldGraphics]);
     
     scene.add.existing(this);
     this.setDepth(30);
@@ -87,6 +126,12 @@ export class Creep extends Phaser.GameObjects.Container {
     this.isActive = true;
     this.bounceTime = Math.random() * Math.PI * 2; // Random start phase
     
+    // Initialize special abilities
+    this.shieldHitsRemaining = this.config.hasShield ? 3 : 0;
+    this.jumpCooldown = this.config.canJump ? this.JUMP_COOLDOWN : 0;
+    this.isJumping = false;
+    this.jumpWarningTime = 0;
+    
     // Set initial position
     const startPos = pathSystem.getStartPoint();
     this.setPosition(startPos.x, startPos.y);
@@ -96,6 +141,7 @@ export class Creep extends Phaser.GameObjects.Container {
     
     this.drawCreep();
     this.updateHealthBar();
+    this.updateShieldVisual();
   }
 
   /**
@@ -106,25 +152,34 @@ export class Creep extends Phaser.GameObjects.Container {
     
     const type = this.config.type;
     
+    // Apply jump warning flash (white tint)
+    const isFlashing = this.jumpWarningTime > 0;
+    
     switch (type) {
       case 'furball':
-        this.drawFurball();
+        this.drawFurball(isFlashing);
         break;
       case 'runner':
-        this.drawRunner();
+        this.drawRunner(isFlashing);
         break;
       case 'tank':
-        this.drawTank();
+        this.drawTank(isFlashing);
         break;
       case 'boss':
-        this.drawBoss();
+        this.drawBoss(isFlashing);
+        break;
+      case 'jumper':
+        this.drawJumper(isFlashing);
+        break;
+      case 'shielded':
+        this.drawShielded(isFlashing);
         break;
       default:
-        this.drawFurball();
+        this.drawFurball(isFlashing);
     }
   }
 
-  private drawFurball(): void {
+  private drawFurball(_isFlashing: boolean = false): void {
     const g = this.bodyGraphics;
     const bounce = Math.sin(this.bounceTime * 8) * 3;
     const squish = 1 + Math.sin(this.bounceTime * 8) * 0.1;
@@ -172,7 +227,7 @@ export class Creep extends Phaser.GameObjects.Container {
     g.fillEllipse(8, 15, 6, 4);
   }
 
-  private drawRunner(): void {
+  private drawRunner(_isFlashing: boolean = false): void {
     const g = this.bodyGraphics;
     const bounce = Math.sin(this.bounceTime * 12) * 4; // Faster bounce
     const legPhase = Math.sin(this.bounceTime * 12);
@@ -217,7 +272,7 @@ export class Creep extends Phaser.GameObjects.Container {
     g.fillCircle(18 * this.faceDirection, -4 + bounce, 2);
   }
 
-  private drawTank(): void {
+  private drawTank(_isFlashing: boolean = false): void {
     const g = this.bodyGraphics;
     const bounce = Math.sin(this.bounceTime * 5) * 2; // Slower bounce
     
@@ -268,7 +323,7 @@ export class Creep extends Phaser.GameObjects.Container {
     g.fillEllipse(12, 18, 10, 6);
   }
 
-  private drawBoss(): void {
+  private drawBoss(_isFlashing: boolean = false): void {
     const g = this.bodyGraphics;
     const bounce = Math.sin(this.bounceTime * 4) * 3;
     const pulse = 1 + Math.sin(this.bounceTime * 6) * 0.05;
@@ -343,6 +398,164 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Draw Elite Jumper - athletic creature with spring legs
+   */
+  private drawJumper(isFlashing: boolean = false): void {
+    const g = this.bodyGraphics;
+    const bounce = this.isJumping ? -15 : Math.sin(this.bounceTime * 10) * 5;
+    const legSquat = this.isJumping ? 0.5 : 1;
+    
+    // Flash white when about to jump
+    const bodyColor = isFlashing ? 0xFFFFFF : 0x32CD32; // Lime green
+    const darkColor = isFlashing ? 0xDDDDDD : 0x228B22;
+    
+    // Shadow (smaller when jumping)
+    const shadowAlpha = this.isJumping ? 0.15 : 0.3;
+    g.fillStyle(0x000000, shadowAlpha);
+    g.fillEllipse(0, 20, 26, 10);
+    
+    // Spring legs
+    g.fillStyle(darkColor, 1);
+    g.fillEllipse(-8, 14 * legSquat, 6, 10 * legSquat);
+    g.fillEllipse(8, 14 * legSquat, 6, 10 * legSquat);
+    
+    // Body (athletic build)
+    g.fillStyle(bodyColor, 1);
+    g.fillEllipse(0, -4 + bounce, 20, 18);
+    
+    // Spots pattern
+    g.fillStyle(darkColor, 1);
+    g.fillCircle(-6, -8 + bounce, 4);
+    g.fillCircle(4, -2 + bounce, 5);
+    g.fillCircle(-3, 4 + bounce, 3);
+    
+    // Head
+    g.fillStyle(bodyColor, 1);
+    g.fillEllipse(10 * this.faceDirection, -8 + bounce, 12, 10);
+    
+    // Big springy ears
+    g.fillStyle(bodyColor, 1);
+    g.fillEllipse(0, -26 + bounce, 6, 16);
+    g.fillEllipse(8 * this.faceDirection, -24 + bounce, 5, 14);
+    g.fillStyle(0xFFB6C1, 0.7);
+    g.fillEllipse(0, -24 + bounce, 3, 10);
+    g.fillEllipse(8 * this.faceDirection, -22 + bounce, 2.5, 9);
+    
+    // Eyes (alert, energetic)
+    g.fillStyle(0x000000, 1);
+    g.fillCircle(14 * this.faceDirection, -10 + bounce, 4);
+    g.fillStyle(0xFFFFFF, 1);
+    g.fillCircle(12 * this.faceDirection, -12 + bounce, 2);
+    
+    // Nose
+    g.fillStyle(0xFF69B4, 1);
+    g.fillCircle(18 * this.faceDirection, -6 + bounce, 3);
+    
+    // Jump dust cloud effect
+    if (this.isJumping) {
+      g.fillStyle(0xDEB887, 0.5);
+      for (let i = 0; i < 5; i++) {
+        const angle = (i / 5) * Math.PI * 2;
+        const dist = 15 + Math.random() * 10;
+        g.fillCircle(Math.cos(angle) * dist, 20 + Math.random() * 5, 4 + Math.random() * 3);
+      }
+    }
+  }
+
+  /**
+   * Draw Elite Shielded - mystical creature with magical barrier
+   */
+  private drawShielded(_isFlashing: boolean = false): void {
+    const g = this.bodyGraphics;
+    const bounce = Math.sin(this.bounceTime * 7) * 3;
+    const shimmer = Math.sin(this.bounceTime * 15) * 0.1;
+    
+    // Shadow
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(0, 18, 28, 10);
+    
+    // Body (mystical purple-blue)
+    g.fillStyle(0x9400D3, 1); // Dark violet
+    g.fillEllipse(0, -3 + bounce, 22, 20);
+    
+    // Magical markings
+    g.fillStyle(0xE6E6FA, 0.6 + shimmer); // Lavender
+    g.fillCircle(-5, -8 + bounce, 3);
+    g.fillCircle(5, 0 + bounce, 4);
+    g.fillCircle(-2, 6 + bounce, 2);
+    // Rune-like pattern
+    g.lineStyle(2, 0xE6E6FA, 0.5);
+    g.beginPath();
+    g.moveTo(-8, -2 + bounce);
+    g.lineTo(0, -10 + bounce);
+    g.lineTo(8, -2 + bounce);
+    g.strokePath();
+    
+    // Head
+    g.fillStyle(0xBA55D3, 1); // Medium orchid
+    g.fillEllipse(10 * this.faceDirection, -5 + bounce, 12, 10);
+    
+    // Mystical gem on forehead
+    g.fillStyle(0x00FFFF, 0.8 + shimmer);
+    g.fillCircle(8 * this.faceDirection, -14 + bounce, 4);
+    g.fillStyle(0xFFFFFF, 0.9);
+    g.fillCircle(6 * this.faceDirection, -15 + bounce, 1.5);
+    
+    // Eyes (glowing)
+    g.fillStyle(0x00FFFF, 0.9);
+    g.fillCircle(14 * this.faceDirection, -7 + bounce, 4);
+    g.fillStyle(0xFFFFFF, 1);
+    g.fillCircle(13 * this.faceDirection, -8 + bounce, 2);
+    
+    // Ears (with magical tips)
+    g.fillStyle(0x9400D3, 1);
+    g.fillEllipse(0, -22 + bounce, 5, 12);
+    g.fillEllipse(6 * this.faceDirection, -20 + bounce, 4, 10);
+    g.fillStyle(0x00FFFF, 0.7);
+    g.fillCircle(0, -30 + bounce, 3);
+    g.fillCircle(6 * this.faceDirection, -27 + bounce, 2.5);
+    
+    // Feet
+    g.fillStyle(0x7B68EE, 1);
+    g.fillEllipse(-8, 15, 6, 4);
+    g.fillEllipse(8, 15, 6, 4);
+  }
+
+  /**
+   * Update the shield visual effect
+   */
+  private updateShieldVisual(): void {
+    this.shieldGraphics.clear();
+    
+    if (this.shieldHitsRemaining <= 0) return;
+    
+    const shimmer = Math.sin(this.bounceTime * 10) * 0.15;
+    const pulse = 1 + Math.sin(this.bounceTime * 5) * 0.05;
+    
+    // Outer glow
+    this.shieldGraphics.fillStyle(0x00BFFF, 0.15 + shimmer);
+    this.shieldGraphics.fillCircle(0, -5, 38 * pulse);
+    
+    // Main shield bubble
+    this.shieldGraphics.lineStyle(3, 0x00BFFF, 0.6 + shimmer);
+    this.shieldGraphics.strokeCircle(0, -5, 32 * pulse);
+    
+    // Inner shield
+    this.shieldGraphics.lineStyle(2, 0x87CEEB, 0.4);
+    this.shieldGraphics.strokeCircle(0, -5, 28 * pulse);
+    
+    // Shield hit indicators (small circles showing remaining hits)
+    const indicatorY = -42;
+    for (let i = 0; i < this.shieldHitsRemaining; i++) {
+      const indicatorX = (i - 1) * 10;
+      this.shieldGraphics.fillStyle(0x00FFFF, 0.9);
+      this.shieldGraphics.fillCircle(indicatorX, indicatorY, 4);
+      this.shieldGraphics.lineStyle(1, 0xFFFFFF, 1);
+      this.shieldGraphics.strokeCircle(indicatorX, indicatorY, 4);
+    }
+  }
+
+  /**
    * Update health bar display
    */
   private updateHealthBar(): void {
@@ -375,12 +588,26 @@ export class Creep extends Phaser.GameObjects.Container {
   update(delta: number): void {
     if (!this.isActive) return;
     
+    const currentTime = this.scene.time.now;
+    
+    // Update status effects
+    this.updateStatusEffects(delta, currentTime);
+    
+    // Update jump ability
+    this.updateJumpAbility(delta);
+    
     // Update animation time
     this.bounceTime += delta / 1000;
     
-    // Move along path
-    const moveDistance = (this.config.speed * delta) / 1000;
-    this.distanceTraveled += moveDistance;
+    // Calculate effective speed (with slow)
+    const speedMultiplier = this.slowEndTime > currentTime ? (1 - this.slowAmount) : 1;
+    const effectiveSpeed = this.config.speed * speedMultiplier;
+    
+    // Move along path (unless jumping)
+    if (!this.isJumping) {
+      const moveDistance = (effectiveSpeed * delta) / 1000;
+      this.distanceTraveled += moveDistance;
+    }
     
     // Get new position from path
     const pathData = this.pathSystem.getPositionAt(this.distanceTraveled);
@@ -390,11 +617,21 @@ export class Creep extends Phaser.GameObjects.Container {
       this.faceDirection = pathData.direction.x > 0 ? 1 : -1;
     }
     
-    // Set position
-    this.setPosition(pathData.position.x, pathData.position.y);
+    // Set position (unless mid-jump, which is handled by tween)
+    if (!this.isJumping) {
+      this.setPosition(pathData.position.x, pathData.position.y);
+    }
     
     // Redraw with animation
     this.drawCreep();
+    
+    // Update shield visual
+    if (this.shieldHitsRemaining > 0) {
+      this.updateShieldVisual();
+    }
+    
+    // Draw status indicators
+    this.drawStatusEffects(currentTime);
     
     // Check if reached end
     if (this.pathSystem.hasReachedEnd(this.distanceTraveled)) {
@@ -403,9 +640,245 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Update jump ability (cooldown, warning, execution)
+   */
+  private updateJumpAbility(delta: number): void {
+    if (!this.config.canJump || this.isJumping) return;
+    
+    // Update jump warning timer
+    if (this.jumpWarningTime > 0) {
+      this.jumpWarningTime -= delta;
+      
+      // Time to jump!
+      if (this.jumpWarningTime <= 0) {
+        this.executeJump();
+      }
+      return;
+    }
+    
+    // Update jump cooldown
+    if (this.jumpCooldown > 0) {
+      this.jumpCooldown -= delta;
+      
+      // Start warning phase
+      if (this.jumpCooldown <= 0) {
+        this.jumpWarningTime = this.JUMP_WARNING_DURATION;
+      }
+    }
+  }
+
+  /**
+   * Execute the jump - leap forward along the path
+   */
+  private executeJump(): void {
+    this.isJumping = true;
+    
+    // Calculate new distance after jump
+    const newDistance = this.distanceTraveled + this.JUMP_DISTANCE;
+    const targetData = this.pathSystem.getPositionAt(newDistance);
+    
+    // Create dust cloud at start position
+    this.showJumpDustCloud();
+    
+    // Animate the jump
+    this.scene.tweens.add({
+      targets: this,
+      x: targetData.position.x,
+      y: targetData.position.y,
+      duration: 300,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        this.distanceTraveled = newDistance;
+        this.isJumping = false;
+        this.jumpCooldown = this.JUMP_COOLDOWN;
+        
+        // Dust cloud at landing
+        this.showJumpDustCloud();
+      }
+    });
+    
+    // Arc the creep up during jump
+    this.scene.tweens.add({
+      targets: this,
+      y: '-=40',
+      duration: 150,
+      yoyo: true,
+      ease: 'Quad.easeOut'
+    });
+  }
+
+  /**
+   * Show dust cloud effect for jump
+   */
+  private showJumpDustCloud(): void {
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2 + Math.random() * 0.5;
+      const dust = this.scene.add.graphics();
+      dust.fillStyle(0xDEB887, 0.7);
+      dust.fillCircle(0, 0, 4 + Math.random() * 4);
+      dust.setPosition(this.x, this.y + 15);
+      dust.setDepth(25);
+      
+      this.scene.tweens.add({
+        targets: dust,
+        x: this.x + Math.cos(angle) * 30,
+        y: this.y + 15 + Math.sin(angle) * 15,
+        alpha: 0,
+        scale: 1.5,
+        duration: 400,
+        onComplete: () => dust.destroy()
+      });
+    }
+  }
+
+  /**
+   * Update status effects (poison ticks, slow expiry)
+   */
+  private updateStatusEffects(delta: number, currentTime: number): void {
+    // Process poison stacks
+    if (this.poisonStacks.length > 0) {
+      this.poisonTickTimer += delta;
+      
+      // Tick every 1000ms (1 second)
+      if (this.poisonTickTimer >= 1000) {
+        this.poisonTickTimer = 0;
+        
+        // Calculate total poison damage from active stacks (max 3)
+        let totalPoisonDamage = 0;
+        this.poisonStacks = this.poisonStacks.filter(stack => {
+          if (currentTime < stack.endTime) {
+            totalPoisonDamage += stack.damage;
+            return true;
+          }
+          return false;
+        });
+        
+        // Apply poison damage (ignores armor - it's magic)
+        if (totalPoisonDamage > 0 && this.isActive) {
+          this.currentHealth -= totalPoisonDamage;
+          this.updateHealthBar();
+          this.showPoisonDamage(totalPoisonDamage);
+          
+          if (this.currentHealth <= 0) {
+            this.die();
+          }
+        }
+      }
+    }
+    
+    // Clear slow if expired
+    if (this.slowEndTime > 0 && currentTime >= this.slowEndTime) {
+      this.slowAmount = 0;
+      this.slowEndTime = 0;
+    }
+  }
+
+  /**
+   * Show poison damage number
+   */
+  private showPoisonDamage(damage: number): void {
+    const text = this.scene.add.text(this.x, this.y - 40, `-${damage}`, {
+      fontSize: '14px',
+      color: '#00ff00',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: text,
+      y: text.y - 30,
+      alpha: 0,
+      duration: 800,
+      onComplete: () => text.destroy()
+    });
+  }
+
+  /**
+   * Draw status effect indicators
+   */
+  private drawStatusEffects(currentTime: number): void {
+    this.statusGraphics.clear();
+    
+    const isSlowed = this.slowEndTime > currentTime;
+    const isPoisoned = this.poisonStacks.length > 0;
+    
+    if (isSlowed) {
+      // Draw ice particles around creep
+      this.statusGraphics.fillStyle(0x87ceeb, 0.6);
+      for (let i = 0; i < 4; i++) {
+        const angle = (currentTime / 500 + i * Math.PI / 2) % (Math.PI * 2);
+        const x = Math.cos(angle) * 18;
+        const y = Math.sin(angle) * 10 - 5;
+        this.statusGraphics.fillCircle(x, y, 3);
+      }
+    }
+    
+    if (isPoisoned) {
+      // Draw poison bubbles
+      this.statusGraphics.fillStyle(0x00ff00, 0.5);
+      const stackCount = Math.min(this.poisonStacks.length, 3);
+      for (let i = 0; i < stackCount; i++) {
+        const angle = (currentTime / 400 + i * Math.PI * 2 / 3) % (Math.PI * 2);
+        const x = Math.cos(angle) * 15;
+        const y = Math.sin(angle) * 8 + 5;
+        this.statusGraphics.fillCircle(x, y, 2 + i);
+      }
+    }
+  }
+
+  /**
+   * Apply slow effect (doesn't stack, refreshes duration)
+   */
+  applySlow(percent: number, durationMs: number): void {
+    const currentTime = this.scene.time.now;
+    this.slowAmount = percent;
+    this.slowEndTime = currentTime + durationMs;
+  }
+
+  /**
+   * Apply poison effect (stacks up to 3 times)
+   */
+  applyPoison(damagePerSecond: number, durationMs: number): void {
+    const currentTime = this.scene.time.now;
+    
+    // Max 3 stacks
+    if (this.poisonStacks.length >= 3) {
+      // Refresh oldest stack
+      this.poisonStacks[0] = {
+        damage: damagePerSecond,
+        endTime: currentTime + durationMs
+      };
+    } else {
+      this.poisonStacks.push({
+        damage: damagePerSecond,
+        endTime: currentTime + durationMs
+      });
+    }
+  }
+
+  /**
    * Take damage from a tower
    */
   takeDamage(amount: number, isMagic: boolean = false): number {
+    // Don't take damage if already dead
+    if (!this.isActive) {
+      return 0;
+    }
+    
+    // Check if shield blocks the hit
+    if (this.shieldHitsRemaining > 0) {
+      this.shieldHitsRemaining--;
+      this.showShieldBlockEffect();
+      this.updateShieldVisual();
+      
+      // Shield breaks completely - show break effect
+      if (this.shieldHitsRemaining === 0) {
+        this.showShieldBreakEffect();
+      }
+      
+      return 0; // No damage taken
+    }
+    
     // Apply armor (magic ignores armor)
     const actualDamage = isMagic ? amount : Math.max(1, amount - this.config.armor);
     this.currentHealth -= actualDamage;
@@ -426,9 +899,89 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Show shield block effect
+   */
+  private showShieldBlockEffect(): void {
+    // Flash the shield
+    this.scene.tweens.add({
+      targets: this.shieldGraphics,
+      alpha: 0.3,
+      duration: 50,
+      yoyo: true,
+      repeat: 2
+    });
+    
+    // Show "BLOCKED" text
+    const text = this.scene.add.text(this.x, this.y - 50, 'BLOCKED', {
+      fontSize: '14px',
+      color: '#00BFFF',
+      stroke: '#000000',
+      strokeThickness: 3,
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: text,
+      y: text.y - 25,
+      alpha: 0,
+      duration: 600,
+      onComplete: () => text.destroy()
+    });
+  }
+
+  /**
+   * Show shield break effect
+   */
+  private showShieldBreakEffect(): void {
+    // Create shield fragments
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const fragment = this.scene.add.graphics();
+      fragment.fillStyle(0x00BFFF, 0.8);
+      fragment.fillCircle(0, 0, 5);
+      fragment.setPosition(this.x, this.y - 5);
+      fragment.setDepth(100);
+      
+      this.scene.tweens.add({
+        targets: fragment,
+        x: this.x + Math.cos(angle) * 50,
+        y: this.y - 5 + Math.sin(angle) * 50,
+        alpha: 0,
+        scale: 0.5,
+        duration: 400,
+        onComplete: () => fragment.destroy()
+      });
+    }
+    
+    // Show "SHIELD BROKEN" text
+    const text = this.scene.add.text(this.x, this.y - 60, 'SHIELD BROKEN!', {
+      fontSize: '16px',
+      color: '#FF6347',
+      stroke: '#000000',
+      strokeThickness: 3,
+      fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: text,
+      y: text.y - 30,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => text.destroy()
+    });
+  }
+
+  /**
    * Called when creep reaches the castle
    */
   private reachEnd(): void {
+    // Prevent multiple calls
+    if (!this.isActive) {
+      console.log('Creep.reachEnd: Already inactive, skipping');
+      return;
+    }
+    
+    console.log(`Creep.reachEnd: Creep reached end at (${this.x}, ${this.y})`);
     this.isActive = false;
     this.emit('reachedEnd', this);
     this.deactivate();
@@ -438,9 +991,25 @@ export class Creep extends Phaser.GameObjects.Container {
    * Called when creep dies
    */
   private die(): void {
-    this.isActive = false;
+    // Prevent multiple death calls
+    if (!this.isActive || this.isDying) {
+      console.log('Creep.die: Already dead/dying, skipping');
+      return;
+    }
     
-    // Death effect
+    this.isActive = false;
+    this.isDying = true;
+    
+    // Store gold reward before any state changes
+    const goldReward = this.config.goldReward;
+    
+    console.log(`Creep.die: Creep dying, goldReward=${goldReward}`);
+    
+    // Emit the died event IMMEDIATELY so the creep is removed from active list
+    // This prevents the creep from being reused while the death animation plays
+    this.emit('died', this, goldReward);
+    
+    // Death effect animation (purely visual, doesn't affect game state)
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
@@ -448,7 +1017,7 @@ export class Creep extends Phaser.GameObjects.Container {
       scaleY: 0.5,
       duration: 200,
       onComplete: () => {
-        this.emit('died', this, this.config.goldReward);
+        console.log('Creep.die: Death tween complete, deactivating');
         this.deactivate();
       }
     });
@@ -459,6 +1028,7 @@ export class Creep extends Phaser.GameObjects.Container {
    */
   deactivate(): void {
     this.isActive = false;
+    this.isDying = false;
     this.setActive(false);
     this.setVisible(false);
     this.setAlpha(1);
@@ -466,6 +1036,20 @@ export class Creep extends Phaser.GameObjects.Container {
     this.bodyGraphics.clear();
     this.healthBarBg.clear();
     this.healthBarFg.clear();
+    this.statusGraphics.clear();
+    this.shieldGraphics.clear();
+    
+    // Reset status effects
+    this.slowAmount = 0;
+    this.slowEndTime = 0;
+    this.poisonStacks = [];
+    this.poisonTickTimer = 0;
+    
+    // Reset abilities
+    this.shieldHitsRemaining = 0;
+    this.jumpCooldown = 0;
+    this.isJumping = false;
+    this.jumpWarningTime = 0;
   }
 
   /**
@@ -494,6 +1078,13 @@ export class Creep extends Phaser.GameObjects.Container {
    */
   getIsActive(): boolean {
     return this.isActive;
+  }
+
+  /**
+   * Check if creep can be reused (not active AND not dying)
+   */
+  canBeReused(): boolean {
+    return !this.isActive && !this.isDying;
   }
 
   /**

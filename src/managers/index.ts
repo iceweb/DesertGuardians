@@ -6,3 +6,4 @@ export { CreepManager } from './CreepManager';
 export { WaveManager, WAVE_CONFIGS } from './WaveManager';
 export type { WaveDef, WaveCreepGroup } from './WaveManager';
 export { TowerManager } from './TowerManager';
+export { ProjectileManager } from './ProjectileManager';

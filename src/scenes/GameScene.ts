@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager } from '../managers';
+import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager } from '../managers';
+import type { ProjectileConfig } from '../objects';
+import { Creep } from '../objects';
 
 export class GameScene extends Phaser.Scene {
   private mapManager!: MapManager;
@@ -7,6 +9,7 @@ export class GameScene extends Phaser.Scene {
   private creepManager!: CreepManager;
   private waveManager!: WaveManager;
   private towerManager!: TowerManager;
+  private projectileManager!: ProjectileManager;
 
   // Game state
   private gold: number = 150;
@@ -17,11 +20,18 @@ export class GameScene extends Phaser.Scene {
   private goldText!: Phaser.GameObjects.Text;
   private waveText!: Phaser.GameObjects.Text;
   private hpText!: Phaser.GameObjects.Text;
+  private hpBar!: Phaser.GameObjects.Graphics;
+  private countdownText!: Phaser.GameObjects.Text;
   private startWaveButton!: Phaser.GameObjects.Text;
+  private startWaveButtonBg!: Phaser.GameObjects.Graphics;
+  private startWaveHitArea!: Phaser.GameObjects.Rectangle;
 
   // Path collision settings
   private readonly PATH_WIDTH = 60;
   private readonly TOWER_RADIUS = 32;
+  
+  // Castle position for HP bar
+  private castlePosition!: Phaser.Math.Vector2;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -56,6 +66,9 @@ export class GameScene extends Phaser.Scene {
     this.towerManager = new TowerManager(this, this.pathSystem);
     this.setupTowerCallbacks();
 
+    // Initialize projectile manager
+    this.projectileManager = new ProjectileManager(this, this.creepManager);
+
     // Draw sky gradient background
     this.drawSkyBackground();
     
@@ -73,6 +86,9 @@ export class GameScene extends Phaser.Scene {
 
     // Create HUD
     this.createHUD(width, height);
+
+    // Launch UIScene as overlay
+    this.scene.launch('UIScene');
 
     console.log('GameScene: Desert Guardians initialized - Click anywhere to place towers!');
   }
@@ -114,14 +130,20 @@ export class GameScene extends Phaser.Scene {
       console.log(`Wave ${waveNumber} started!`);
       this.updateHUD();
       this.startWaveButton.setVisible(false);
+      this.startWaveButtonBg.setVisible(false);
+      this.startWaveHitArea.setVisible(false);
+      this.startWaveHitArea.disableInteractive();
+      
+      // Emit event to UIScene
+      this.registry.events.emit('wave-started', waveNumber);
     };
 
     this.waveManager.onWaveComplete = (waveNumber: number) => {
-      console.log(`Wave ${waveNumber} complete!`);
-      // Show start button for next wave (unless all waves done)
+      console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
+      // Automatically start next wave after a countdown (unless all waves done)
       if (waveNumber < this.waveManager.getTotalWaves()) {
-        this.startWaveButton.setText(`▶ Start Wave ${waveNumber + 1}`);
-        this.startWaveButton.setVisible(true);
+        console.log(`GameScene.onWaveComplete: Showing countdown for wave ${waveNumber + 1}`);
+        this.showWaveCountdown(waveNumber + 1);
       }
       this.updateHUD();
     };
@@ -135,6 +157,9 @@ export class GameScene extends Phaser.Scene {
       this.gold += goldReward;
       this.showFloatingText(`+${goldReward}`, this.input.activePointer.x, this.input.activePointer.y, 0xffd700);
       this.updateHUD();
+      
+      // Emit event to UIScene
+      this.registry.events.emit('creep-killed', goldReward);
     };
 
     this.waveManager.onCreepLeaked = () => {
@@ -143,6 +168,9 @@ export class GameScene extends Phaser.Scene {
       
       // Camera shake for damage feedback
       this.cameras.main.shake(200, 0.01);
+      
+      // Emit event to UIScene for damage flash
+      this.registry.events.emit('castle-damaged', this.castleHP);
       
       if (this.castleHP <= 0 && !this.gameOver) {
         this.showDefeat();
@@ -178,7 +206,7 @@ export class GameScene extends Phaser.Scene {
   private showVictory(): void {
     this.gameOver = true;
     
-    const overlay = this.add.rectangle(
+    this.add.rectangle(
       this.cameras.main.centerX,
       this.cameras.main.centerY,
       this.cameras.main.width,
@@ -208,7 +236,10 @@ export class GameScene extends Phaser.Scene {
       padding: { x: 20, y: 10 }
     }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
 
-    menuBtn.on('pointerdown', () => this.scene.start('MenuScene'));
+    menuBtn.on('pointerdown', () => {
+      this.scene.stop('UIScene');
+      this.scene.start('MenuScene');
+    });
   }
 
   /**
@@ -217,7 +248,7 @@ export class GameScene extends Phaser.Scene {
   private showDefeat(): void {
     this.gameOver = true;
     
-    const overlay = this.add.rectangle(
+    this.add.rectangle(
       this.cameras.main.centerX,
       this.cameras.main.centerY,
       this.cameras.main.width,
@@ -249,7 +280,10 @@ export class GameScene extends Phaser.Scene {
       padding: { x: 20, y: 10 }
     }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
 
-    menuBtn.on('pointerdown', () => this.scene.start('MenuScene'));
+    menuBtn.on('pointerdown', () => {
+      this.scene.stop('UIScene');
+      this.scene.start('MenuScene');
+    });
   }
 
   /**
@@ -260,10 +294,72 @@ export class GameScene extends Phaser.Scene {
     this.waveText.setText(`⚔️ WAVE ${this.waveManager.getCurrentWave()} / ${this.waveManager.getTotalWaves()}`);
     this.hpText.setText(`❤️ ${this.castleHP}`);
     
+    // Update HP bar
+    this.updateHPBar();
+    
     // Flash HP red when low
     if (this.castleHP <= 3) {
       this.hpText.setColor('#ff0000');
     }
+  }
+
+  /**
+   * Update visual HP bar (below castle)
+   */
+  private updateHPBar(): void {
+    this.hpBar.clear();
+    
+    if (!this.castlePosition) return;
+    
+    const barWidth = 100;
+    const barHeight = 10;
+    const x = this.castlePosition.x - barWidth / 2;
+    const y = this.castlePosition.y + 55;
+    
+    // Background
+    this.hpBar.fillStyle(0x000000, 0.7);
+    this.hpBar.fillRoundedRect(x - 2, y - 2, barWidth + 4, barHeight + 4, 4);
+    
+    // HP fill
+    const hpPercent = Math.max(0, this.castleHP / 10);
+    const fillColor = hpPercent > 0.5 ? 0x00ff00 : hpPercent > 0.25 ? 0xffff00 : 0xff0000;
+    this.hpBar.fillStyle(fillColor, 1);
+    this.hpBar.fillRoundedRect(x, y, barWidth * hpPercent, barHeight, 3);
+    
+    // Border
+    this.hpBar.lineStyle(2, 0xffffff, 0.6);
+    this.hpBar.strokeRoundedRect(x - 2, y - 2, barWidth + 4, barHeight + 4, 4);
+  }
+
+  /**
+   * Show countdown before next wave
+   */
+  private showWaveCountdown(nextWave: number): void {
+    let countdown = 3;
+    
+    console.log(`GameScene.showWaveCountdown: Starting countdown for wave ${nextWave}`);
+    
+    this.countdownText.setText(`Wave ${nextWave} in ${countdown}...`);
+    this.countdownText.setVisible(true);
+    
+    const countdownTimer = this.time.addEvent({
+      delay: 1000,
+      repeat: 2,  // Fire 3 times total (for 2, 1, 0)
+      callback: () => {
+        countdown--;
+        console.log(`GameScene.showWaveCountdown: countdown = ${countdown}`);
+        if (countdown > 0) {
+          this.countdownText.setText(`Wave ${nextWave} in ${countdown}...`);
+        } else {
+          this.countdownText.setVisible(false);
+          countdownTimer.destroy();  // Clean up timer
+          if (!this.gameOver) {
+            console.log(`GameScene.showWaveCountdown: Starting wave ${nextWave}`);
+            this.waveManager.startWave();
+          }
+        }
+      }
+    });
   }
 
   private drawSkyBackground(): void {
@@ -362,13 +458,7 @@ export class GameScene extends Phaser.Scene {
     graphics.beginPath();
     graphics.moveTo(x, baseY + h);
     
-    // Draw smooth dune curve
-    const cp1x = x + w * 0.25;
-    const cp1y = baseY - h * 0.2;
-    const cp2x = x + w * 0.75;
-    const cp2y = baseY - h * 0.3;
-    
-    // Bezier-like curve using small steps
+    // Draw smooth dune curve using sine-based interpolation
     for (let t = 0; t <= 1; t += 0.02) {
       const px = x + w * t;
       const py = baseY + h - h * Math.sin(t * Math.PI) * (0.8 + Math.sin(t * 2) * 0.2);
@@ -384,7 +474,6 @@ export class GameScene extends Phaser.Scene {
     const DECO_PATH_MARGIN = 80; // Minimum distance from path center for decorations
     const HUD_MARGIN = 140; // Keep decorations below this Y value
     const width = this.cameras.main.width;
-    const height = this.cameras.main.height;
     
     // Helper to check if position is valid for decoration
     const isValidDecoPosition = (x: number, y: number): boolean => {
@@ -739,7 +828,6 @@ export class GameScene extends Phaser.Scene {
     scarab.setDepth(6);
     
     const scale = 0.8 + Math.random() * 0.4;
-    const rotation = Math.random() * Math.PI * 2;
     
     // Glow effect
     scarab.fillStyle(0xffd700, 0.2);
@@ -1131,7 +1219,7 @@ export class GameScene extends Phaser.Scene {
 
   private addPathDetails(
     segments: { start: Phaser.Math.Vector2; end: Phaser.Math.Vector2; direction: Phaser.Math.Vector2; length: number }[],
-    pathWidth: number
+    _pathWidth: number
   ): void {
     const details = this.add.graphics();
     details.setDepth(1.5);
@@ -1154,7 +1242,7 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private isOnPath(x: number, y: number): boolean {
+  private _isOnPath(x: number, y: number): boolean {
     const segments = this.pathSystem.getSegments();
     const checkRadius = this.PATH_WIDTH / 2 + this.TOWER_RADIUS + 10;
     
@@ -1210,6 +1298,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private drawSpawnAndGoal(spawn: Phaser.Math.Vector2, goal: Phaser.Math.Vector2): void {
+    // Store castle position for HP bar
+    this.castlePosition = goal.clone();
+    
     // ===== SPAWN PORTAL =====
     const spawnGraphics = this.add.graphics();
     spawnGraphics.setDepth(15);
@@ -1244,15 +1335,6 @@ export class GameScene extends Phaser.Scene {
       const ry = spawn.y + Math.sin(angle) * 55;
       spawnGraphics.strokeCircle(rx, ry, 5);
     }
-    
-    // Spawn label
-    this.add.text(spawn.x + 70, spawn.y, '👾 SPAWN', {
-      fontFamily: 'Arial Black',
-      fontSize: '20px',
-      color: '#00ff00',
-      stroke: '#003300',
-      strokeThickness: 4
-    }).setOrigin(0, 0.5).setDepth(16);
     
     // ===== CASTLE =====
     const castle = this.add.graphics();
@@ -1346,15 +1428,6 @@ export class GameScene extends Phaser.Scene {
     castle.fillStyle(0xffeeaa, 0.7);
     castle.fillRect(goal.x - 55, goal.y - 80, 10, 14);
     castle.fillRect(goal.x + 45, goal.y - 80, 10, 14);
-    
-    // Castle label
-    this.add.text(goal.x, goal.y + 35, '🏰 CASTLE', {
-      fontFamily: 'Arial Black',
-      fontSize: '18px',
-      color: '#ffd700',
-      stroke: '#3a2a1a',
-      strokeThickness: 4
-    }).setOrigin(0.5).setDepth(16);
   }
 
   private createHUD(width: number, height: number): void {
@@ -1404,31 +1477,84 @@ export class GameScene extends Phaser.Scene {
       strokeThickness: 3
     }).setOrigin(1, 0.5).setDepth(101);
 
-    // Start Wave button (center bottom area)
-    this.startWaveButton = this.add.text(width / 2, height - 70, '▶ Start Wave 1', {
+    // HP Bar (below castle)
+    this.hpBar = this.add.graphics();
+    this.hpBar.setDepth(20);  // Above castle (depth 15) but below towers
+    this.updateHPBar();
+
+    // Wave countdown text (center of screen, large and bold)
+    this.countdownText = this.add.text(width / 2, height / 2, '', {
       fontFamily: 'Arial Black',
-      fontSize: '24px',
-      color: '#ffffff',
-      backgroundColor: '#228b22',
-      padding: { x: 20, y: 12 }
+      fontSize: '72px',
+      color: '#ffd700',
+      stroke: '#8b4513',
+      strokeThickness: 8,
+      shadow: {
+        offsetX: 4,
+        offsetY: 4,
+        color: '#000000',
+        blur: 8,
+        fill: true
+      }
+    }).setOrigin(0.5).setDepth(150).setVisible(false);
+
+    // Start Wave button (center bottom area) - Desert themed
+    this.startWaveButtonBg = this.add.graphics();
+    this.startWaveButtonBg.setDepth(100);
+    const buttonBg = this.startWaveButtonBg;
+    
+    // Draw desert-styled button background
+    const btnX = width / 2;
+    const btnY = height - 70;
+    const btnWidth = 220;
+    const btnHeight = 55;
+    
+    const drawButton = (hover: boolean) => {
+      buttonBg.clear();
+      
+      // Outer stone border
+      buttonBg.fillStyle(hover ? 0x8b6914 : 0x6b4914, 1);
+      buttonBg.fillRoundedRect(btnX - btnWidth/2 - 4, btnY - btnHeight/2 - 4, btnWidth + 8, btnHeight + 8, 8);
+      
+      // Inner gradient-like fill
+      buttonBg.fillStyle(hover ? 0xd4a574 : 0xc9956c, 1);
+      buttonBg.fillRoundedRect(btnX - btnWidth/2, btnY - btnHeight/2, btnWidth, btnHeight, 6);
+      
+      // Top highlight
+      buttonBg.fillStyle(hover ? 0xebc99a : 0xdbb88a, 1);
+      buttonBg.fillRoundedRect(btnX - btnWidth/2 + 4, btnY - btnHeight/2 + 4, btnWidth - 8, btnHeight/2 - 4, 4);
+      
+      // Decorative corner accents
+      buttonBg.fillStyle(0x4a3520, 1);
+      buttonBg.fillTriangle(btnX - btnWidth/2, btnY - btnHeight/2, btnX - btnWidth/2 + 15, btnY - btnHeight/2, btnX - btnWidth/2, btnY - btnHeight/2 + 15);
+      buttonBg.fillTriangle(btnX + btnWidth/2, btnY - btnHeight/2, btnX + btnWidth/2 - 15, btnY - btnHeight/2, btnX + btnWidth/2, btnY - btnHeight/2 + 15);
+      buttonBg.fillTriangle(btnX - btnWidth/2, btnY + btnHeight/2, btnX - btnWidth/2 + 15, btnY + btnHeight/2, btnX - btnWidth/2, btnY + btnHeight/2 - 15);
+      buttonBg.fillTriangle(btnX + btnWidth/2, btnY + btnHeight/2, btnX + btnWidth/2 - 15, btnY + btnHeight/2, btnX + btnWidth/2, btnY + btnHeight/2 - 15);
+    };
+    
+    drawButton(false);
+    
+    this.startWaveButton = this.add.text(btnX, btnY, '⚔ Start Wave 1', {
+      fontFamily: 'Arial Black',
+      fontSize: '22px',
+      color: '#2a1a0a',
+      stroke: '#ffd700',
+      strokeThickness: 1
     }).setOrigin(0.5).setDepth(101).setInteractive({ useHandCursor: true });
 
-    this.startWaveButton.on('pointerover', () => this.startWaveButton.setStyle({ backgroundColor: '#32cd32' }));
-    this.startWaveButton.on('pointerout', () => this.startWaveButton.setStyle({ backgroundColor: '#228b22' }));
-    this.startWaveButton.on('pointerdown', () => {
+    // Hit area for the whole button
+    this.startWaveHitArea = this.add.rectangle(btnX, btnY, btnWidth, btnHeight, 0xffffff, 0);
+    this.startWaveHitArea.setDepth(102).setInteractive({ useHandCursor: true });
+    const hitArea = this.startWaveHitArea;
+
+    hitArea.on('pointerover', () => drawButton(true));
+    hitArea.on('pointerout', () => drawButton(false));
+    hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
       if (!this.gameOver) {
         this.waveManager.startWave();
       }
     });
-
-    // Instructions
-    this.add.text(width / 2, height - 25, 'Click anywhere outside the path to place towers', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5).setDepth(101);
 
     // Back to menu button
     const backButton = this.add.text(25, height - 25, '← Menu', {
@@ -1441,7 +1567,10 @@ export class GameScene extends Phaser.Scene {
 
     backButton.on('pointerover', () => backButton.setStyle({ backgroundColor: '#6b4d30' }));
     backButton.on('pointerout', () => backButton.setStyle({ backgroundColor: '#4a3520' }));
-    backButton.on('pointerdown', () => this.scene.start('MenuScene'));
+    backButton.on('pointerdown', () => {
+      this.scene.stop('UIScene');
+      this.scene.start('MenuScene');
+    });
   }
 
   update(_time: number, delta: number): void {
@@ -1449,6 +1578,80 @@ export class GameScene extends Phaser.Scene {
     
     // Update all creeps
     this.creepManager.update(delta);
+    
+    // Update all projectiles
+    this.projectileManager.update(delta);
+    
+    // Tower combat - find targets and fire
+    this.updateTowerCombat();
+  }
+
+  /**
+   * Update tower combat - targeting and firing
+   */
+  private updateTowerCombat(): void {
+    const currentTime = this.time.now;
+    const towers = this.towerManager.getTowers();
+    const creeps = this.creepManager.getActiveCreeps();
+    
+    for (const tower of towers) {
+      // Check if tower can fire
+      if (!tower.canFire(currentTime)) continue;
+      
+      // Find target based on tower priority
+      const target = this.findTarget(tower, creeps);
+      
+      if (target) {
+        // Fire projectile
+        const config: ProjectileConfig = {
+          speed: 400,
+          damage: tower.getDamage(),
+          isMagic: tower.isMagic(),
+          branch: tower.getBranch(),
+          stats: tower.getConfig().stats
+        };
+        
+        this.projectileManager.fire(tower.x, tower.y - 40, target, config);
+        tower.recordFire(currentTime);
+      }
+    }
+  }
+
+  /**
+   * Find the best target for a tower
+   */
+  private findTarget(tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string }, creeps: Creep[]): Creep | null {
+    const priority = tower.getTargetPriority();
+    let bestTarget: Creep | null = null;
+    let bestValue = -Infinity;
+    
+    for (const creep of creeps) {
+      if (!creep.getIsActive()) continue;
+      if (!tower.isInRange(creep.x, creep.y)) continue;
+      
+      let value: number;
+      
+      switch (priority) {
+        case 'highestHP':
+          value = creep.getCurrentHealth();
+          break;
+        case 'furthestAlongPath':
+          value = creep.getDistanceTraveled();
+          break;
+        case 'closest':
+        default:
+          // For closest, we want minimum distance, so negate
+          value = -Phaser.Math.Distance.Between(tower.x, tower.y, creep.x, creep.y);
+          break;
+      }
+      
+      if (value > bestValue) {
+        bestValue = value;
+        bestTarget = creep;
+      }
+    }
+    
+    return bestTarget;
   }
 
   getPathSystem(): PathSystem {

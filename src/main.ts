@@ -11,7 +11,7 @@ import './style.css';
 
 // Game configuration - 1920x1080 for crisp visuals on modern displays
 const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO, // AUTO will use WebGL if available, Canvas otherwise
+  type: Phaser.WEBGL, // Force WebGL for best quality
   width: 1920,
   height: 1080,
   parent: 'game-container',
@@ -39,7 +39,11 @@ const config: Phaser.Types.Core.GameConfig = {
   render: {
     pixelArt: false,
     antialias: true,
-  }
+    roundPixels: true,       // Prevent sub-pixel rendering blur
+    transparent: false,
+  },
+  // Ensure high DPI/Retina support
+  autoFocus: true,
 };
 
 // Create the game instance

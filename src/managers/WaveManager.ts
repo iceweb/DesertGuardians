@@ -115,38 +115,45 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'boss', count: 2, intervalMs: 8000, delayStart: 5000 }
   ]},
   
-  // Wave 21: Aftermath
+  // Wave 21: Aftermath + first jumpers
   { waveNumber: 21, creeps: [
-    { type: 'furball', count: 20, intervalMs: 500 },
-    { type: 'runner', count: 15, intervalMs: 400, delayStart: 3000 }
+    { type: 'furball', count: 15, intervalMs: 600 },
+    { type: 'jumper', count: 3, intervalMs: 2500, delayStart: 3000 },
+    { type: 'runner', count: 10, intervalMs: 400, delayStart: 5000 }
   ]},
   
-  // Wave 22: Tank siege
+  // Wave 22: First shielded enemies
   { waveNumber: 22, creeps: [
-    { type: 'tank', count: 12, intervalMs: 1500 },
+    { type: 'shielded', count: 4, intervalMs: 3000 },
+    { type: 'tank', count: 8, intervalMs: 1500, delayStart: 2000 },
     { type: 'runner', count: 10, intervalMs: 600, delayStart: 5000 }
   ]},
   
-  // Wave 23: Elite intro (using existing types, harder configs)
+  // Wave 23: Elite mixed assault
   { waveNumber: 23, creeps: [
-    { type: 'runner', count: 20, intervalMs: 300 },
-    { type: 'tank', count: 8, intervalMs: 1200, delayStart: 3000 },
-    { type: 'boss', count: 1, intervalMs: 1000, delayStart: 8000 }
+    { type: 'jumper', count: 5, intervalMs: 2000 },
+    { type: 'shielded', count: 5, intervalMs: 2000, delayStart: 3000 },
+    { type: 'tank', count: 6, intervalMs: 1500, delayStart: 5000 },
+    { type: 'boss', count: 1, intervalMs: 1000, delayStart: 10000 }
   ]},
   
-  // Wave 24: Penultimate
+  // Wave 24: Penultimate chaos
   { waveNumber: 24, creeps: [
-    { type: 'tank', count: 15, intervalMs: 1000 },
-    { type: 'runner', count: 20, intervalMs: 350, delayStart: 4000 },
-    { type: 'boss', count: 2, intervalMs: 5000, delayStart: 10000 }
+    { type: 'runner', count: 15, intervalMs: 350 },
+    { type: 'jumper', count: 6, intervalMs: 1800, delayStart: 2000 },
+    { type: 'shielded', count: 6, intervalMs: 1800, delayStart: 4000 },
+    { type: 'tank', count: 10, intervalMs: 1200, delayStart: 6000 },
+    { type: 'boss', count: 2, intervalMs: 6000, delayStart: 12000 }
   ]},
   
-  // Wave 25: FINAL WAVE
+  // Wave 25: FINAL WAVE - Everything!
   { waveNumber: 25, creeps: [
-    { type: 'furball', count: 15, intervalMs: 400 },
-    { type: 'runner', count: 20, intervalMs: 300, delayStart: 2000 },
-    { type: 'tank', count: 10, intervalMs: 1000, delayStart: 4000 },
-    { type: 'boss', count: 3, intervalMs: 6000, delayStart: 8000 }
+    { type: 'furball', count: 10, intervalMs: 500 },
+    { type: 'runner', count: 15, intervalMs: 350, delayStart: 2000 },
+    { type: 'jumper', count: 8, intervalMs: 1500, delayStart: 3000 },
+    { type: 'shielded', count: 8, intervalMs: 1500, delayStart: 4000 },
+    { type: 'tank', count: 10, intervalMs: 1000, delayStart: 6000 },
+    { type: 'boss', count: 3, intervalMs: 5000, delayStart: 10000 }
   ]}
 ];
 
@@ -237,11 +244,16 @@ export class WaveManager {
     let spawned = 0;
     
     const spawnOne = () => {
-      if (spawned >= group.count) return;
+      if (spawned >= group.count) {
+        console.log(`WaveManager.spawnOne: Already spawned ${spawned}/${group.count}, stopping`);
+        return;
+      }
       
-      this.creepManager.spawn(group.type);
+      const creep = this.creepManager.spawn(group.type);
       spawned++;
       this.creepsSpawned++;
+      
+      console.log(`WaveManager.spawnOne: Spawned ${group.type} #${spawned}/${group.count}, total spawned: ${this.creepsSpawned}/${this.creepsToSpawn}, creep: ${creep ? 'success' : 'FAILED'}`);
       
       this.onWaveProgress?.(this.creepsSpawned, this.creepsToSpawn);
       
@@ -251,10 +263,15 @@ export class WaveManager {
       }
     };
     
-    // Apply delay if specified
+    // Apply delay if specified, spawn immediately if no delay
     const delay = group.delayStart || 0;
-    const timer = this.scene.time.delayedCall(delay, spawnOne);
-    this.spawnTimers.push(timer);
+    if (delay > 0) {
+      const timer = this.scene.time.delayedCall(delay, spawnOne);
+      this.spawnTimers.push(timer);
+    } else {
+      // Spawn first one immediately, then schedule the rest
+      spawnOne();
+    }
   }
 
   /**
@@ -273,6 +290,7 @@ export class WaveManager {
    * Handle creep reaching the end
    */
   private handleCreepReachedEnd(_creep: Creep): void {
+    console.log(`WaveManager.handleCreepReachedEnd called, creepsLeaked before: ${this.creepsLeaked}`);
     this.creepsLeaked++;
     
     this.onCreepLeaked?.();
@@ -284,8 +302,16 @@ export class WaveManager {
    */
   private checkWaveComplete(): void {
     const totalHandled = this.creepsKilled + this.creepsLeaked;
+    const activeCount = this.creepManager.getActiveCount();
     
-    if (totalHandled >= this.creepsToSpawn && this.creepManager.getActiveCount() === 0) {
+    console.log(`WaveManager.checkWaveComplete: killed=${this.creepsKilled}, leaked=${this.creepsLeaked}, totalHandled=${totalHandled}, creepsToSpawn=${this.creepsToSpawn}, activeCount=${activeCount}, waveInProgress=${this.waveInProgress}`);
+    
+    if (!this.waveInProgress) {
+      console.log('WaveManager.checkWaveComplete: Wave not in progress, skipping');
+      return;
+    }
+    
+    if (totalHandled >= this.creepsToSpawn && activeCount === 0) {
       this.waveInProgress = false;
       
       console.log(`WaveManager: Wave ${this.currentWave} complete! Killed: ${this.creepsKilled}, Leaked: ${this.creepsLeaked}`);
@@ -295,6 +321,12 @@ export class WaveManager {
       // Check if all waves done
       if (this.currentWave >= WAVE_CONFIGS.length) {
         this.onAllWavesComplete?.();
+      }
+    } else {
+      console.log(`WaveManager.checkWaveComplete: Wave not complete yet - need ${this.creepsToSpawn - totalHandled} more creeps handled or ${activeCount} active creeps to die`);
+      // Debug: Show details of remaining active creeps when only a few left
+      if (activeCount <= 3 && activeCount > 0) {
+        this.creepManager.debugActiveCreeps();
       }
     }
   }

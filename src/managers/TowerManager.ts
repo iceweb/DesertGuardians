@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { Tower, TOWER_CONFIGS } from '../objects/Tower';
+import type { TowerBranch } from '../objects/Tower';
 import { PathSystem } from './PathSystem';
 
 /**
@@ -13,7 +14,6 @@ export class TowerManager {
   
   // Placement state
   private placementGraphics: Phaser.GameObjects.Graphics;
-  private placementTowerKey: string = 'archer';
   
   // Build menu
   private buildMenuContainer: Phaser.GameObjects.Container | null = null;
@@ -68,8 +68,16 @@ export class TowerManager {
     // Don't show preview if menus are open
     if (this.buildMenuContainer || this.upgradeMenuContainer) return;
     
+    // Don't show preview if hovering over a tower
+    if (this.getTowerAt(x, y)) return;
+    
+    // Don't show preview in HUD areas (top and bottom)
+    if (y < this.HUD_HEIGHT + 20) return;
+    if (y > this.scene.cameras.main.height - 100) return;
+    
     const canPlace = this.canPlaceAt(x, y);
-    const config = TOWER_CONFIGS[this.placementTowerKey];
+    // Always use archer_1 stats for placement preview (only buildable tower)
+    const config = TOWER_CONFIGS['archer_1'];
     
     if (canPlace) {
       // Green valid indicator
@@ -210,110 +218,117 @@ export class TowerManager {
   }
 
   /**
-   * Show the build menu at position
+   * Show the build menu at position (only Archer Tower can be built)
    */
   private showBuildMenu(x: number, y: number): void {
     this.closeMenus();
     
     const playerGold = this.getPlayerGold?.() || 0;
+    const archerConfig = TOWER_CONFIGS['archer_1'];
+    const canAfford = playerGold >= (archerConfig.buildCost || 70);
     
     // Create menu container
-    this.buildMenuContainer = this.scene.add.container(x, y - 80);
+    this.buildMenuContainer = this.scene.add.container(x, y - 100);
     this.buildMenuContainer.setDepth(200);
     
-    // Menu background
+    // Menu background - larger for better readability
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
-    bg.fillRoundedRect(-140, -60, 280, 120, 10);
-    bg.lineStyle(2, 0xd4a574, 1);
-    bg.strokeRoundedRect(-140, -60, 280, 120, 10);
+    bg.fillRoundedRect(-130, -70, 260, 140, 12);
+    bg.lineStyle(3, 0xd4a574, 1);
+    bg.strokeRoundedRect(-130, -70, 260, 140, 12);
     this.buildMenuContainer!.add(bg);
     
     // Title
-    const title = this.scene.add.text(0, -45, 'Build Tower', {
+    const title = this.scene.add.text(0, -52, 'Build Tower', {
       fontFamily: 'Arial Black',
-      fontSize: '16px',
+      fontSize: '20px',
       color: '#ffd700'
     }).setOrigin(0.5);
     this.buildMenuContainer!.add(title);
     
-    // Tower buttons
-    const towerOptions = [
-      { key: 'archer', name: 'Archer', cost: 70, color: 0xcc3333 },
-      { key: 'rockcannon', name: 'Cannon', cost: 90, color: 0x8b4513 },
-      { key: 'icetower', name: 'Ice', cost: 80, color: 0x87ceeb },
-      { key: 'poison', name: 'Poison', cost: 80, color: 0x00ff00 }
-    ];
+    // Archer Tower button (only option)
+    const btnBg = this.scene.add.graphics();
+    btnBg.fillStyle(canAfford ? 0x3a3a3a : 0x2a2a2a, 1);
+    btnBg.fillRoundedRect(-110, -28, 220, 80, 8);
+    btnBg.lineStyle(2, canAfford ? 0xcc3333 : 0x555555, 1);
+    btnBg.strokeRoundedRect(-110, -28, 220, 80, 8);
+    this.buildMenuContainer!.add(btnBg);
     
-    const buttonWidth = 60;
-    const startX = -((towerOptions.length - 1) * buttonWidth) / 2;
+    // Tower icon
+    const icon = this.scene.add.graphics();
+    icon.fillStyle(canAfford ? 0xcc3333 : 0x555555, 1);
+    icon.fillCircle(-70, 12, 28);
+    // Add archer symbol on icon
+    icon.lineStyle(3, canAfford ? 0xffffff : 0x888888, 0.8);
+    icon.lineBetween(-70, -5, -70, 25);
+    icon.lineBetween(-82, 5, -58, 5);
+    this.buildMenuContainer!.add(icon);
     
-    towerOptions.forEach((opt, index) => {
-      const bx = startX + index * buttonWidth;
-      const canAfford = playerGold >= opt.cost;
-      
-      // Button background
-      const btn = this.scene.add.graphics();
-      btn.fillStyle(canAfford ? 0x3a3a3a : 0x2a2a2a, 1);
-      btn.fillRoundedRect(bx - 25, -25, 50, 65, 5);
-      btn.lineStyle(2, canAfford ? opt.color : 0x555555, 1);
-      btn.strokeRoundedRect(bx - 25, -25, 50, 65, 5);
-      this.buildMenuContainer!.add(btn);
-      
-      // Tower icon (colored circle)
-      const icon = this.scene.add.graphics();
-      icon.fillStyle(canAfford ? opt.color : 0x555555, 1);
-      icon.fillCircle(bx, -5, 15);
-      this.buildMenuContainer!.add(icon);
-      
-      // Name
-      const nameText = this.scene.add.text(bx, 18, opt.name, {
-        fontFamily: 'Arial',
-        fontSize: '10px',
-        color: canAfford ? '#ffffff' : '#666666'
-      }).setOrigin(0.5);
-      this.buildMenuContainer!.add(nameText);
-      
-      // Cost
-      const costText = this.scene.add.text(bx, 32, `${opt.cost}g`, {
-        fontFamily: 'Arial',
-        fontSize: '11px',
-        color: canAfford ? '#ffd700' : '#ff4444'
-      }).setOrigin(0.5);
-      this.buildMenuContainer!.add(costText);
-      
-      // Make interactive
-      if (canAfford) {
-        const hitArea = this.scene.add.rectangle(bx, 7, 50, 65, 0xffffff, 0);
-        hitArea.setInteractive({ useHandCursor: true });
-        hitArea.on('pointerdown', () => {
-          this.buildTower(x, y, opt.key);
-        });
-        hitArea.on('pointerover', () => {
-          btn.clear();
-          btn.fillStyle(0x5a5a5a, 1);
-          btn.fillRoundedRect(bx - 25, -25, 50, 65, 5);
-          btn.lineStyle(2, opt.color, 1);
-          btn.strokeRoundedRect(bx - 25, -25, 50, 65, 5);
-        });
-        hitArea.on('pointerout', () => {
-          btn.clear();
-          btn.fillStyle(0x3a3a3a, 1);
-          btn.fillRoundedRect(bx - 25, -25, 50, 65, 5);
-          btn.lineStyle(2, opt.color, 1);
-          btn.strokeRoundedRect(bx - 25, -25, 50, 65, 5);
-        });
-        this.buildMenuContainer!.add(hitArea);
-      }
-    });
+    // Name
+    const nameText = this.scene.add.text(20, -12, 'Archer Tower', {
+      fontFamily: 'Arial Black',
+      fontSize: '16px',
+      color: canAfford ? '#ffffff' : '#666666'
+    }).setOrigin(0.5);
+    this.buildMenuContainer!.add(nameText);
+    
+    // Stats description
+    const stats = archerConfig.stats;
+    const fireRateSec = (stats.fireRate / 1000).toFixed(1);
+    const descText = this.scene.add.text(20, 18, 
+      `DMG: ${stats.damage}  |  Range: ${stats.range}m\nRate: ${fireRateSec}s  |  Single target`, {
+      fontFamily: 'Arial',
+      fontSize: '10px',
+      color: canAfford ? '#cccccc' : '#555555',
+      align: 'center',
+      lineSpacing: 4
+    }).setOrigin(0.5);
+    this.buildMenuContainer!.add(descText);
+    
+    // Cost
+    const costText = this.scene.add.text(0, 58, `Cost: ${archerConfig.buildCost}g`, {
+      fontFamily: 'Arial Black',
+      fontSize: '14px',
+      color: canAfford ? '#ffd700' : '#ff4444'
+    }).setOrigin(0.5);
+    this.buildMenuContainer!.add(costText);
+    
+    // Make interactive
+    if (canAfford) {
+      const hitArea = this.scene.add.rectangle(0, 12, 220, 80, 0xffffff, 0);
+      hitArea.setInteractive({ useHandCursor: true });
+      hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+        event.stopPropagation();
+        this.buildTower(x, y, 'archer_1');
+      });
+      hitArea.on('pointerover', () => {
+        btnBg.clear();
+        btnBg.fillStyle(0x5a5a5a, 1);
+        btnBg.fillRoundedRect(-110, -28, 220, 80, 8);
+        btnBg.lineStyle(2, 0xcc3333, 1);
+        btnBg.strokeRoundedRect(-110, -28, 220, 80, 8);
+      });
+      hitArea.on('pointerout', () => {
+        btnBg.clear();
+        btnBg.fillStyle(0x3a3a3a, 1);
+        btnBg.fillRoundedRect(-110, -28, 220, 80, 8);
+        btnBg.lineStyle(2, 0xcc3333, 1);
+        btnBg.strokeRoundedRect(-110, -28, 220, 80, 8);
+      });
+      this.buildMenuContainer!.add(hitArea);
+    }
     
     // Close button
-    const closeBtn = this.scene.add.text(125, -50, '✕', {
+    const closeBtn = this.scene.add.text(115, -58, '✕', {
       fontFamily: 'Arial',
-      fontSize: '18px',
+      fontSize: '22px',
       color: '#ff6666'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      this.closeMenus();
+    });
     this.buildMenuContainer!.add(closeBtn);
   }
 
@@ -335,7 +350,7 @@ export class TowerManager {
     });
     
     // Notify callback
-    this.onTowerBuilt?.(tower, config.buildCost);
+    this.onTowerBuilt?.(tower, config.buildCost || 0);
     
     // Close menu
     this.closeMenus();
@@ -359,6 +374,95 @@ export class TowerManager {
   }
 
   /**
+   * Draw a mini tower icon for the upgrade menu
+   */
+  private drawMiniTowerIcon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, branch: TowerBranch, canAfford: boolean): void {
+    const alpha = canAfford ? 1 : 0.4;
+    const scale = 0.5;
+    
+    switch (branch) {
+      case 'rapidfire':
+        // Metal tower with multiple slits
+        graphics.fillStyle(0x4a4a4a, alpha);
+        graphics.fillRect(x - 12 * scale, y + 10 * scale, 24 * scale, 15 * scale);
+        graphics.fillStyle(0x6a6a6a, alpha);
+        graphics.fillRect(x - 10 * scale, y - 30 * scale, 20 * scale, 40 * scale);
+        graphics.fillStyle(0xffd700, alpha);
+        graphics.fillRect(x - 4 * scale, y - 20 * scale, 3 * scale, 10 * scale);
+        graphics.fillRect(x + 1 * scale, y - 22 * scale, 3 * scale, 12 * scale);
+        break;
+        
+      case 'sniper':
+        // Tall thin tower with scope
+        graphics.fillStyle(0x5a5a5a, alpha);
+        graphics.fillRect(x - 10 * scale, y + 10 * scale, 20 * scale, 12 * scale);
+        graphics.fillStyle(0x8a8a8a, alpha);
+        graphics.fillRect(x - 6 * scale, y - 45 * scale, 12 * scale, 55 * scale);
+        graphics.fillStyle(0x4a4a8a, alpha);
+        graphics.fillCircle(x, y - 25 * scale, 6 * scale);
+        graphics.lineStyle(1, 0xff0000, alpha);
+        graphics.lineBetween(x - 4 * scale, y - 25 * scale, x + 4 * scale, y - 25 * scale);
+        graphics.lineBetween(x, y - 29 * scale, x, y - 21 * scale);
+        break;
+        
+      case 'rockcannon':
+        // Heavy stone tower with cannon
+        graphics.fillStyle(0x6a5a4a, alpha);
+        graphics.fillRect(x - 16 * scale, y + 5 * scale, 32 * scale, 18 * scale);
+        graphics.fillStyle(0x8a7a6a, alpha);
+        graphics.fillRect(x - 14 * scale, y - 25 * scale, 28 * scale, 30 * scale);
+        graphics.fillStyle(0x3a3a3a, alpha);
+        graphics.fillCircle(x, y - 30 * scale, 8 * scale);
+        graphics.fillStyle(0x2a2a2a, alpha);
+        graphics.fillCircle(x, y - 30 * scale, 5 * scale);
+        break;
+        
+      case 'icetower':
+        // Ice crystal spire
+        graphics.fillStyle(0x87ceeb, alpha);
+        graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
+        graphics.fillStyle(0xb0e0e6, alpha * 0.9);
+        graphics.fillTriangle(x - 10 * scale, y + 8 * scale, x, y - 40 * scale, x + 10 * scale, y + 8 * scale);
+        graphics.fillStyle(0xe0ffff, alpha * 0.7);
+        graphics.fillTriangle(x - 6 * scale, y + 5 * scale, x, y - 35 * scale, x + 6 * scale, y + 5 * scale);
+        // Sparkles
+        graphics.fillStyle(0xffffff, alpha * 0.8);
+        graphics.fillCircle(x - 4 * scale, y - 15 * scale, 2 * scale);
+        graphics.fillCircle(x + 3 * scale, y - 25 * scale, 2 * scale);
+        break;
+        
+      case 'poison':
+        // Gnarled wood with cauldron
+        graphics.fillStyle(0x4a3a2a, alpha);
+        graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
+        graphics.fillStyle(0x3a2a1a, alpha);
+        graphics.fillRect(x - 8 * scale, y - 25 * scale, 16 * scale, 35 * scale);
+        graphics.fillStyle(0x2a2a2a, alpha);
+        graphics.fillCircle(x, y - 30 * scale, 10 * scale);
+        graphics.fillStyle(0x00ff00, alpha * 0.8);
+        graphics.fillCircle(x, y - 32 * scale, 7 * scale);
+        // Bubbles
+        graphics.fillStyle(0x88ff88, alpha * 0.7);
+        graphics.fillCircle(x - 2 * scale, y - 35 * scale, 2 * scale);
+        graphics.fillCircle(x + 3 * scale, y - 30 * scale, 2 * scale);
+        break;
+        
+      default: // archer
+        graphics.fillStyle(0x8b7355, alpha);
+        graphics.fillRect(x - 14 * scale, y + 8 * scale, 28 * scale, 12 * scale);
+        graphics.fillStyle(0xd4a574, alpha);
+        graphics.fillRect(x - 11 * scale, y - 35 * scale, 22 * scale, 45 * scale);
+        graphics.fillStyle(0x2a1a0a, alpha);
+        graphics.fillRect(x - 4 * scale, y - 20 * scale, 8 * scale, 14 * scale);
+        graphics.fillStyle(0xc9a06c, alpha);
+        graphics.fillRect(x - 10 * scale, y - 40 * scale, 8 * scale, 8 * scale);
+        graphics.fillRect(x - 3 * scale, y - 40 * scale, 8 * scale, 8 * scale);
+        graphics.fillRect(x + 4 * scale, y - 40 * scale, 8 * scale, 8 * scale);
+        break;
+    }
+  }
+
+  /**
    * Show upgrade/sell menu for tower
    */
   private showUpgradeMenu(tower: Tower): void {
@@ -366,75 +470,190 @@ export class TowerManager {
     
     const config = tower.getConfig();
     const playerGold = this.getPlayerGold?.() || 0;
+    const upgradeOptions = tower.getUpgradeOptions();
+    
+    // Calculate menu dimensions - much larger now
+    const hasBranches = upgradeOptions.branches && upgradeOptions.branches.length > 0;
+    const hasLevelUp = !!upgradeOptions.levelUp;
+    const menuWidth = hasBranches ? 520 : 320;
+    const menuHeight = hasBranches ? (hasLevelUp ? 320 : 280) : 160;
     
     // Create menu container
-    this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - 100);
+    this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - (menuHeight / 2) - 40);
     this.upgradeMenuContainer.setDepth(200);
     
     // Menu background
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
-    bg.fillRoundedRect(-120, -50, 240, 100, 10);
-    bg.lineStyle(2, 0xd4a574, 1);
-    bg.strokeRoundedRect(-120, -50, 240, 100, 10);
+    bg.fillRoundedRect(-menuWidth / 2, -menuHeight / 2, menuWidth, menuHeight, 12);
+    bg.lineStyle(3, 0xd4a574, 1);
+    bg.strokeRoundedRect(-menuWidth / 2, -menuHeight / 2, menuWidth, menuHeight, 12);
     this.upgradeMenuContainer.add(bg);
     
-    // Tower name
-    const title = this.scene.add.text(0, -38, config.name, {
+    // Tower name and level
+    const levelText = tower.getLevel() === 2 ? ' II' : '';
+    const title = this.scene.add.text(0, -menuHeight / 2 + 22, `${config.name}${levelText}`, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '20px',
       color: '#ffd700'
     }).setOrigin(0.5);
     this.upgradeMenuContainer.add(title);
     
-    // Stats
-    const stats = this.scene.add.text(0, -20, `DMG: ${config.stats.damage} | Range: ${config.stats.range} | Rate: ${config.stats.fireRate}ms`, {
+    // Stats with better formatting
+    const fireRateSec = (config.stats.fireRate / 1000).toFixed(1);
+    const stats = this.scene.add.text(0, -menuHeight / 2 + 48, `DMG: ${config.stats.damage}  |  Range: ${config.stats.range}m  |  Rate: ${fireRateSec}s`, {
       fontFamily: 'Arial',
-      fontSize: '10px',
+      fontSize: '14px',
       color: '#cccccc'
     }).setOrigin(0.5);
     this.upgradeMenuContainer.add(stats);
     
-    // Upgrade buttons (if available)
-    if (config.upgradesTo && config.upgradesTo.length > 0) {
-      const startX = config.upgradesTo.length === 2 ? -50 : 0;
+    let yOffset = -menuHeight / 2 + 95;
+    
+    // Branch upgrade options (only for Archer towers)
+    if (hasBranches) {
+      const branchLabel = this.scene.add.text(0, yOffset, 'Specialize Into:', {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: '#aaaaaa'
+      }).setOrigin(0.5);
+      this.upgradeMenuContainer.add(branchLabel);
+      yOffset += 25;
       
-      config.upgradesTo.forEach((upgradeKey, index) => {
-        const upgradeConfig = TOWER_CONFIGS[upgradeKey];
-        if (!upgradeConfig || !upgradeConfig.upgradeCost) return;
+      const branchColors: Record<TowerBranch, number> = {
+        archer: 0xcc3333,
+        rapidfire: 0xffd700,
+        sniper: 0x4169e1,
+        rockcannon: 0xff6600,
+        icetower: 0x87ceeb,
+        poison: 0x00ff00
+      };
+      
+      const branchNames: Record<TowerBranch, string> = {
+        archer: 'Archer',
+        rapidfire: 'Rapid Fire',
+        sniper: 'Sniper',
+        rockcannon: 'Cannon',
+        icetower: 'Ice',
+        poison: 'Poison'
+      };
+      
+      const branches = upgradeOptions.branches!;
+      const btnWidth = 90;
+      const btnHeight = 100;
+      const startX = -((branches.length - 1) * btnWidth) / 2;
+      
+      branches.forEach((branch, index) => {
+        const branchConfig = TOWER_CONFIGS[`${branch}_1`];
+        if (!branchConfig) return;
         
-        const bx = startX + index * 100;
-        const canAfford = playerGold >= upgradeConfig.upgradeCost;
+        const bx = startX + index * btnWidth;
+        const cost = branchConfig.upgradeCost;
+        const canAfford = playerGold >= cost;
+        const color = branchColors[branch];
         
-        const btn = this.scene.add.text(bx, 10, `↑ ${upgradeConfig.name}\n${upgradeConfig.upgradeCost}g`, {
-          fontFamily: 'Arial',
+        // Button background
+        const btn = this.scene.add.graphics();
+        btn.fillStyle(canAfford ? 0x2a2a2a : 0x1a1a1a, 1);
+        btn.fillRoundedRect(bx - 40, yOffset, 80, btnHeight, 8);
+        btn.lineStyle(2, canAfford ? color : 0x444444, 1);
+        btn.strokeRoundedRect(bx - 40, yOffset, 80, btnHeight, 8);
+        this.upgradeMenuContainer!.add(btn);
+        
+        // Tower icon - draw actual mini tower
+        const towerIcon = this.scene.add.graphics();
+        this.drawMiniTowerIcon(towerIcon, bx, yOffset + 45, branch, canAfford);
+        this.upgradeMenuContainer!.add(towerIcon);
+        
+        // Name
+        const nameText = this.scene.add.text(bx, yOffset + 72, branchNames[branch], {
+          fontFamily: 'Arial Black',
           fontSize: '11px',
+          color: canAfford ? '#ffffff' : '#666666'
+        }).setOrigin(0.5);
+        this.upgradeMenuContainer!.add(nameText);
+        
+        // Cost
+        const costText = this.scene.add.text(bx, yOffset + 88, `${cost}g`, {
+          fontFamily: 'Arial',
+          fontSize: '12px',
+          color: canAfford ? '#ffd700' : '#ff4444'
+        }).setOrigin(0.5);
+        this.upgradeMenuContainer!.add(costText);
+        
+        // Make interactive
+        if (canAfford) {
+          const hitArea = this.scene.add.rectangle(bx, yOffset + btnHeight / 2, 80, btnHeight, 0xffffff, 0);
+          hitArea.setInteractive({ useHandCursor: true });
+          hitArea.on('pointerdown', () => {
+            this.upgradeTower(tower, `${branch}_1`);
+          });
+          hitArea.on('pointerover', () => {
+            btn.clear();
+            btn.fillStyle(0x4a4a4a, 1);
+            btn.fillRoundedRect(bx - 40, yOffset, 80, btnHeight, 8);
+            btn.lineStyle(3, color, 1);
+            btn.strokeRoundedRect(bx - 40, yOffset, 80, btnHeight, 8);
+          });
+          hitArea.on('pointerout', () => {
+            btn.clear();
+            btn.fillStyle(0x2a2a2a, 1);
+            btn.fillRoundedRect(bx - 40, yOffset, 80, btnHeight, 8);
+            btn.lineStyle(2, color, 1);
+            btn.strokeRoundedRect(bx - 40, yOffset, 80, btnHeight, 8);
+          });
+          this.upgradeMenuContainer!.add(hitArea);
+        }
+      });
+      
+      yOffset += btnHeight + 15;
+    }
+    
+    // Level up option (for archer L1 -> L2 or specialized L1 -> L2)
+    if (hasLevelUp) {
+      const levelUpConfig = TOWER_CONFIGS[upgradeOptions.levelUp!];
+      if (levelUpConfig) {
+        const cost = levelUpConfig.upgradeCost;
+        const canAfford = playerGold >= cost;
+        
+        const lvlBtn = this.scene.add.text(-100, yOffset + 15, `⬆ Upgrade to Level 2 - ${cost}g`, {
+          fontFamily: 'Arial Black',
+          fontSize: '14px',
           color: canAfford ? '#00ff00' : '#666666',
           backgroundColor: canAfford ? '#2a4a2a' : '#2a2a2a',
-          padding: { x: 8, y: 4 },
-          align: 'center'
+          padding: { x: 16, y: 10 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: canAfford });
         
         if (canAfford) {
-          btn.on('pointerdown', () => {
-            this.upgradeTower(tower, upgradeKey);
+          lvlBtn.on('pointerdown', () => {
+            this.upgradeTower(tower, upgradeOptions.levelUp!);
           });
-          btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#3a6a3a' }));
-          btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#2a4a2a' }));
+          lvlBtn.on('pointerover', () => lvlBtn.setStyle({ backgroundColor: '#3a6a3a' }));
+          lvlBtn.on('pointerout', () => lvlBtn.setStyle({ backgroundColor: '#2a4a2a' }));
         }
         
-        this.upgradeMenuContainer!.add(btn);
-      });
+        this.upgradeMenuContainer.add(lvlBtn);
+      }
+    } else if (!hasBranches) {
+      // Tower is maxed out
+      const maxText = this.scene.add.text(-100, yOffset + 15, '★ MAX LEVEL ★', {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: '#ffd700',
+        backgroundColor: '#3a3a2a',
+        padding: { x: 16, y: 10 }
+      }).setOrigin(0.5);
+      this.upgradeMenuContainer.add(maxText);
     }
     
     // Sell button
     const sellValue = tower.getSellValue();
-    const sellBtn = this.scene.add.text(80, 32, `Sell: ${sellValue}g`, {
-      fontFamily: 'Arial',
-      fontSize: '12px',
+    const sellBtn = this.scene.add.text(100, yOffset + 15, `Sell: ${sellValue}g`, {
+      fontFamily: 'Arial Black',
+      fontSize: '14px',
       color: '#ff6666',
       backgroundColor: '#4a2a2a',
-      padding: { x: 8, y: 4 }
+      padding: { x: 16, y: 10 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     sellBtn.on('pointerdown', () => this.sellTower(tower));
     sellBtn.on('pointerover', () => sellBtn.setStyle({ backgroundColor: '#6a3a3a' }));
@@ -442,9 +661,9 @@ export class TowerManager {
     this.upgradeMenuContainer.add(sellBtn);
     
     // Close button
-    const closeBtn = this.scene.add.text(105, -40, '✕', {
+    const closeBtn = this.scene.add.text(menuWidth / 2 - 20, -menuHeight / 2 + 18, '✕', {
       fontFamily: 'Arial',
-      fontSize: '18px',
+      fontSize: '24px',
       color: '#ff6666'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     closeBtn.on('pointerdown', () => this.closeMenus());
