@@ -1,11 +1,19 @@
 import Phaser from 'phaser';
+import { GameControlsManager } from './GameControlsManager';
+import { GameOverlayManager } from './GameOverlayManager';
+import { CreepInfoPanel } from './CreepInfoPanel';
 
 /**
  * HUDManager handles all HUD rendering and state display.
- * Extracted from GameScene to centralize UI logic.
+ * Delegates to specialized managers for game controls, overlays, and info panels.
  */
 export class HUDManager {
   private scene: Phaser.Scene;
+  
+  // Delegated managers
+  private gameControls: GameControlsManager;
+  private overlayManager: GameOverlayManager;
+  private creepInfoPanel: CreepInfoPanel;
   
   // HUD elements
   private goldText!: Phaser.GameObjects.Text;
@@ -25,24 +33,22 @@ export class HUDManager {
   private totalWaves: number = 0;
   private castlePosition: Phaser.Math.Vector2 | null = null;
   
-  // Game speed and pause
-  private gameSpeed: number = 1;
-  private speedButton!: Phaser.GameObjects.Text;
-  private speedButtonBg!: Phaser.GameObjects.Graphics;
-  private isPaused: boolean = false;
-  private pauseButton!: Phaser.GameObjects.Text;
-  private pauseButtonBg!: Phaser.GameObjects.Graphics;
-  private pauseOverlay: Phaser.GameObjects.Container | null = null;
-  
   // Callbacks
   public onStartWaveClicked?: () => void;
-  public onMenuClicked?: () => void;
   
-  // Creep info popup
-  private creepInfoContainer: Phaser.GameObjects.Container | null = null;
+  public get onMenuClicked(): (() => void) | undefined {
+    return this.overlayManager.onMenuClicked;
+  }
+  
+  public set onMenuClicked(callback: (() => void) | undefined) {
+    this.overlayManager.onMenuClicked = callback;
+  }
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
+    this.gameControls = new GameControlsManager(scene);
+    this.overlayManager = new GameOverlayManager(scene);
+    this.creepInfoPanel = new CreepInfoPanel(scene);
   }
 
   /**
@@ -56,10 +62,12 @@ export class HUDManager {
     this.createHUDBar(width);
     this.createWaveControls(width, height);
     this.createBackButton(height);
-    this.createSpeedButton(width, height);
-    this.createPauseButton(width, height);
+    this.gameControls.create(width, height);
     this.createHPBar();
     this.createCountdownText(width, height);
+    
+    // Wire up overlay manager with gold text reference
+    this.overlayManager.setGoldTextRef(this.goldText);
   }
 
   /**
@@ -189,196 +197,17 @@ export class HUDManager {
   }
 
   /**
-   * Create game speed toggle button
-   */
-  private createSpeedButton(width: number, height: number): void {
-    const btnX = width - 160;
-    const btnY = height - 25;
-    
-    this.speedButtonBg = this.scene.add.graphics();
-    this.speedButtonBg.setDepth(100);
-    
-    const drawSpeedButton = (hover: boolean) => {
-      this.speedButtonBg.clear();
-      this.speedButtonBg.fillStyle(hover ? 0x6b4d30 : 0x4a3520, 1);
-      this.speedButtonBg.fillRoundedRect(btnX - 45, btnY - 18, 90, 36, 6);
-      this.speedButtonBg.lineStyle(2, this.gameSpeed === 2 ? 0xffd700 : 0x8b6914, 1);
-      this.speedButtonBg.strokeRoundedRect(btnX - 45, btnY - 18, 90, 36, 6);
-    };
-    
-    drawSpeedButton(false);
-    
-    this.speedButton = this.scene.add.text(btnX, btnY, '⏩ 1x', {
-      fontFamily: 'Arial Black',
-      fontSize: '18px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5).setDepth(101);
-    
-    // Create hit area
-    const hitArea = this.scene.add.rectangle(btnX, btnY, 90, 36, 0xffffff, 0);
-    hitArea.setDepth(102).setInteractive({ useHandCursor: true });
-    
-    hitArea.on('pointerover', () => drawSpeedButton(true));
-    hitArea.on('pointerout', () => drawSpeedButton(false));
-    hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.toggleGameSpeed();
-      drawSpeedButton(true);
-    });
-  }
-
-  /**
-   * Toggle game speed between 1x and 2x
-   */
-  private toggleGameSpeed(): void {
-    if (this.gameSpeed === 1) {
-      this.gameSpeed = 2;
-      this.speedButton.setText('⏩ 2x');
-      this.speedButton.setColor('#ffd700');
-    } else {
-      this.gameSpeed = 1;
-      this.speedButton.setText('⏩ 1x');
-      this.speedButton.setColor('#ffffff');
-    }
-    
-    // Redraw button to update border color
-    this.speedButtonBg.clear();
-    this.speedButtonBg.fillStyle(0x4a3520, 1);
-    this.speedButtonBg.fillRoundedRect(this.scene.cameras.main.width - 160 - 45, this.scene.cameras.main.height - 25 - 18, 90, 36, 6);
-    this.speedButtonBg.lineStyle(2, this.gameSpeed === 2 ? 0xffd700 : 0x8b6914, 1);
-    this.speedButtonBg.strokeRoundedRect(this.scene.cameras.main.width - 160 - 45, this.scene.cameras.main.height - 25 - 18, 90, 36, 6);
-  }
-
-  /**
-   * Create pause button
-   */
-  private createPauseButton(width: number, height: number): void {
-    const btnX = width - 60;
-    const btnY = height - 25;
-    
-    this.pauseButtonBg = this.scene.add.graphics();
-    this.pauseButtonBg.setDepth(100);
-    
-    const drawPauseButton = (hover: boolean) => {
-      this.pauseButtonBg.clear();
-      this.pauseButtonBg.fillStyle(hover ? 0x6b4d30 : 0x4a3520, 1);
-      this.pauseButtonBg.fillRoundedRect(btnX - 35, btnY - 18, 70, 36, 6);
-      this.pauseButtonBg.lineStyle(2, this.isPaused ? 0x00ff00 : 0x8b6914, 1);
-      this.pauseButtonBg.strokeRoundedRect(btnX - 35, btnY - 18, 70, 36, 6);
-    };
-    
-    drawPauseButton(false);
-    
-    this.pauseButton = this.scene.add.text(btnX, btnY, '⏸', {
-      fontFamily: 'Arial Black',
-      fontSize: '18px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5).setDepth(101);
-    
-    // Create hit area
-    const hitArea = this.scene.add.rectangle(btnX, btnY, 70, 36, 0xffffff, 0);
-    hitArea.setDepth(102).setInteractive({ useHandCursor: true });
-    
-    hitArea.on('pointerover', () => drawPauseButton(true));
-    hitArea.on('pointerout', () => drawPauseButton(false));
-    hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.togglePause();
-      drawPauseButton(true);
-    });
-  }
-
-  /**
-   * Toggle pause state
-   */
-  private togglePause(): void {
-    this.isPaused = !this.isPaused;
-    
-    if (this.isPaused) {
-      this.pauseButton.setText('▶');
-      this.pauseButton.setColor('#00ff00');
-      this.showPauseOverlay();
-    } else {
-      this.pauseButton.setText('⏸');
-      this.pauseButton.setColor('#ffffff');
-      this.hidePauseOverlay();
-    }
-    
-    // Redraw button to update border color
-    const width = this.scene.cameras.main.width;
-    const height = this.scene.cameras.main.height;
-    const btnX = width - 60;
-    const btnY = height - 25;
-    
-    this.pauseButtonBg.clear();
-    this.pauseButtonBg.fillStyle(0x4a3520, 1);
-    this.pauseButtonBg.fillRoundedRect(btnX - 35, btnY - 18, 70, 36, 6);
-    this.pauseButtonBg.lineStyle(2, this.isPaused ? 0x00ff00 : 0x8b6914, 1);
-    this.pauseButtonBg.strokeRoundedRect(btnX - 35, btnY - 18, 70, 36, 6);
-  }
-
-  /**
-   * Show pause overlay
-   */
-  private showPauseOverlay(): void {
-    if (this.pauseOverlay) return;
-    
-    const width = this.scene.cameras.main.width;
-    const height = this.scene.cameras.main.height;
-    
-    this.pauseOverlay = this.scene.add.container(width / 2, height / 2);
-    this.pauseOverlay.setDepth(150);
-    
-    // Semi-transparent background
-    const bg = this.scene.add.graphics();
-    bg.fillStyle(0x000000, 0.5);
-    bg.fillRect(-width / 2, -height / 2, width, height);
-    this.pauseOverlay.add(bg);
-    
-    // Pause text
-    const pauseText = this.scene.add.text(0, 0, '⏸ PAUSED', {
-      fontFamily: 'Arial Black',
-      fontSize: '64px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 6
-    }).setOrigin(0.5);
-    this.pauseOverlay.add(pauseText);
-    
-    const hint = this.scene.add.text(0, 50, 'Click ▶ to resume', {
-      fontFamily: 'Arial',
-      fontSize: '20px',
-      color: '#cccccc'
-    }).setOrigin(0.5);
-    this.pauseOverlay.add(hint);
-  }
-
-  /**
-   * Hide pause overlay
-   */
-  private hidePauseOverlay(): void {
-    if (this.pauseOverlay) {
-      this.pauseOverlay.destroy();
-      this.pauseOverlay = null;
-    }
-  }
-
-  /**
-   * Check if game is paused
+   * Check if game is paused - delegates to GameControlsManager
    */
   isPausedState(): boolean {
-    return this.isPaused;
+    return this.gameControls.isPausedState();
   }
 
   /**
-   * Get current game speed
+   * Get current game speed - delegates to GameControlsManager
    */
   getGameSpeed(): number {
-    return this.gameSpeed;
+    return this.gameControls.getGameSpeed();
   }
 
   /**
@@ -426,97 +255,10 @@ export class HUDManager {
   }
 
   /**
-   * Show wave completion gold bonus with flying coin animation
+   * Show wave completion gold bonus - delegates to GameOverlayManager
    */
   showWaveBonus(waveNumber: number, bonusGold: number, onComplete: () => void): void {
-    const width = this.scene.cameras.main.width;
-    const height = this.scene.cameras.main.height;
-    
-    // Create bonus text in center of screen
-    const bonusText = this.scene.add.text(width / 2, height / 2 - 50, `Wave ${waveNumber} Complete!`, {
-      fontFamily: 'Arial Black',
-      fontSize: '32px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5).setDepth(250).setAlpha(0);
-    
-    const goldText = this.scene.add.text(width / 2, height / 2, `+${bonusGold}g Bonus!`, {
-      fontFamily: 'Arial Black',
-      fontSize: '28px',
-      color: '#ffff00',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(250).setAlpha(0);
-    
-    // Fade in text
-    this.scene.tweens.add({
-      targets: [bonusText, goldText],
-      alpha: 1,
-      duration: 300,
-      ease: 'Power2'
-    });
-    
-    // Create flying coins
-    const coinCount = Math.min(8, Math.max(3, Math.floor(bonusGold / 10)));
-    const coins: Phaser.GameObjects.Text[] = [];
-    
-    for (let i = 0; i < coinCount; i++) {
-      const coin = this.scene.add.text(
-        width / 2 + Phaser.Math.Between(-50, 50),
-        height / 2 + 30 + Phaser.Math.Between(-20, 20),
-        '💰',
-        { fontSize: '24px' }
-      ).setOrigin(0.5).setDepth(251).setAlpha(0);
-      coins.push(coin);
-    }
-    
-    // After short delay, animate coins flying to gold counter
-    this.scene.time.delayedCall(600, () => {
-      coins.forEach((coin, index) => {
-        this.scene.tweens.add({
-          targets: coin,
-          alpha: 1,
-          duration: 100,
-          delay: index * 50
-        });
-        
-        this.scene.tweens.add({
-          targets: coin,
-          x: 60,
-          y: 32,
-          duration: 600 + index * 80,
-          delay: 100 + index * 50,
-          ease: 'Power2.easeIn',
-          onComplete: () => {
-            coin.destroy();
-            // Flash gold text
-            this.goldText.setScale(1.2);
-            this.scene.tweens.add({
-              targets: this.goldText,
-              scale: 1,
-              duration: 150,
-              ease: 'Power2'
-            });
-          }
-        });
-      });
-      
-      // Fade out bonus text
-      this.scene.tweens.add({
-        targets: [bonusText, goldText],
-        alpha: 0,
-        y: '-=30',
-        duration: 500,
-        delay: 800,
-        ease: 'Power2',
-        onComplete: () => {
-          bonusText.destroy();
-          goldText.destroy();
-          onComplete();
-        }
-      });
-    });
+    this.overlayManager.showWaveBonus(waveNumber, bonusGold, onComplete);
   }
 
   /**
@@ -616,237 +358,52 @@ export class HUDManager {
   }
 
   /**
-   * Show floating text (gold gain, damage, etc.)
+   * Show floating text - delegates to GameOverlayManager
    */
   showFloatingText(text: string, x: number, y: number, color: number): void {
-    const floatText = this.scene.add.text(x, y, text, {
-      fontFamily: 'Arial Black',
-      fontSize: '20px',
-      color: `#${color.toString(16).padStart(6, '0')}`,
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(200);
-
-    this.scene.tweens.add({
-      targets: floatText,
-      y: y - 50,
-      alpha: 0,
-      duration: 1000,
-      ease: 'Power2',
-      onComplete: () => floatText.destroy()
-    });
+    this.overlayManager.showFloatingText(text, x, y, color);
   }
 
   /**
-   * Show victory screen
+   * Show victory screen - delegates to GameOverlayManager
    */
   showVictory(gold: number, castleHP: number): void {
-    const scene = this.scene;
-    
-    scene.add.rectangle(
-      scene.cameras.main.centerX,
-      scene.cameras.main.centerY,
-      scene.cameras.main.width,
-      scene.cameras.main.height,
-      0x000000, 0.7
-    ).setDepth(300);
-
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY - 50, '🏆 VICTORY! 🏆', {
-      fontFamily: 'Arial Black',
-      fontSize: '64px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 6
-    }).setOrigin(0.5).setDepth(301);
-
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 30, `Castle HP: ${castleHP}/10 | Gold: ${gold}`, {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setDepth(301);
-
-    const menuBtn = scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 100, '← Back to Menu', {
-      fontFamily: 'Arial',
-      fontSize: '28px',
-      color: '#ffffff',
-      backgroundColor: '#4a3520',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
-
-    menuBtn.on('pointerdown', () => {
-      this.onMenuClicked?.();
-    });
+    this.overlayManager.showVictory(gold, castleHP);
   }
 
   /**
-   * Show defeat screen
+   * Show defeat screen - delegates to GameOverlayManager
    */
   showDefeat(currentWave: number, totalWaves: number, creepsKilled: number): void {
-    const scene = this.scene;
-    
-    scene.add.rectangle(
-      scene.cameras.main.centerX,
-      scene.cameras.main.centerY,
-      scene.cameras.main.width,
-      scene.cameras.main.height,
-      0x000000, 0.7
-    ).setDepth(300);
-
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY - 50, '💀 DEFEAT 💀', {
-      fontFamily: 'Arial Black',
-      fontSize: '64px',
-      color: '#ff4444',
-      stroke: '#000000',
-      strokeThickness: 6
-    }).setOrigin(0.5).setDepth(301);
-
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 30, 
-      `Wave: ${currentWave}/${totalWaves} | Creeps Killed: ${creepsKilled}`, {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setDepth(301);
-
-    const menuBtn = scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 100, '← Back to Menu', {
-      fontFamily: 'Arial',
-      fontSize: '28px',
-      color: '#ffffff',
-      backgroundColor: '#4a3520',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
-
-    menuBtn.on('pointerdown', () => {
-      this.onMenuClicked?.();
-    });
+    this.overlayManager.showDefeat(currentWave, totalWaves, creepsKilled);
   }
 
   /**
-   * Show creep stats popup
+   * Show creep stats popup - delegates to CreepInfoPanel
    */
-  showCreepStats(creepType: string, currentHP: number, maxHP: number, speed: number, armor: number, goldReward: number, x: number, y: number, hasShield?: boolean, shieldHitsRemaining?: number, canJump?: boolean): void {
-    // Close existing popup
-    this.hideCreepStats();
-    
-    // Position popup above the creep
-    const popupX = x;
-    const popupY = Math.max(100, y - 80);
-    
-    this.creepInfoContainer = this.scene.add.container(popupX, popupY);
-    this.creepInfoContainer.setDepth(250);
-    
-    // Background
-    const bg = this.scene.add.graphics();
-    bg.fillStyle(0x1a0a00, 0.95);
-    bg.fillRoundedRect(-110, -50, 220, 100, 8);
-    bg.lineStyle(2, 0xd4a574, 1);
-    bg.strokeRoundedRect(-110, -50, 220, 100, 8);
-    this.creepInfoContainer.add(bg);
-    
-    // Creep type name with color coding
-    const typeColors: Record<string, string> = {
-      furball: '#88cc88',
-      runner: '#ffcc44',
-      tank: '#888888',
-      boss: '#ff4444',
-      jumper: '#aa88ff',
-      shielded: '#44ccff'
-    };
-    const typeColor = typeColors[creepType] || '#ffffff';
-    const typeName = creepType.charAt(0).toUpperCase() + creepType.slice(1);
-    
-    const title = this.scene.add.text(0, -38, typeName, {
-      fontFamily: 'Arial Black',
-      fontSize: '16px',
-      color: typeColor,
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5);
-    this.creepInfoContainer.add(title);
-    
-    // HP bar
-    const hpPercent = currentHP / maxHP;
-    const hpBarWidth = 180;
-    const hpBarHeight = 12;
-    
-    const hpBarBg = this.scene.add.graphics();
-    hpBarBg.fillStyle(0x333333, 1);
-    hpBarBg.fillRoundedRect(-hpBarWidth/2, -20, hpBarWidth, hpBarHeight, 3);
-    this.creepInfoContainer.add(hpBarBg);
-    
-    const hpBarFill = this.scene.add.graphics();
-    const hpColor = hpPercent > 0.5 ? 0x00ff00 : hpPercent > 0.25 ? 0xffff00 : 0xff0000;
-    hpBarFill.fillStyle(hpColor, 1);
-    hpBarFill.fillRoundedRect(-hpBarWidth/2 + 2, -18, (hpBarWidth - 4) * hpPercent, hpBarHeight - 4, 2);
-    this.creepInfoContainer.add(hpBarFill);
-    
-    const hpText = this.scene.add.text(0, -14, `${Math.ceil(currentHP)} / ${maxHP}`, {
-      fontFamily: 'Arial',
-      fontSize: '10px',
-      color: '#000000',
-      stroke: '#ffffff',
-      strokeThickness: 2
-    }).setOrigin(0.5);
-    this.creepInfoContainer.add(hpText);
-    
-    // Stats row
-    const statsY = 5;
-    const statSpacing = 55;
-    
-    // Speed
-    const speedText = this.scene.add.text(-statSpacing, statsY, `⚡ ${speed}`, {
-      fontFamily: 'Arial',
-      fontSize: '12px',
-      color: '#ffcc44'
-    }).setOrigin(0.5);
-    this.creepInfoContainer.add(speedText);
-    
-    // Armor
-    const armorText = this.scene.add.text(0, statsY, `🛡️ ${armor}`, {
-      fontFamily: 'Arial',
-      fontSize: '12px',
-      color: '#aaaaaa'
-    }).setOrigin(0.5);
-    this.creepInfoContainer.add(armorText);
-    
-    // Gold reward
-    const goldText = this.scene.add.text(statSpacing, statsY, `💰 ${goldReward}`, {
-      fontFamily: 'Arial',
-      fontSize: '12px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
-    this.creepInfoContainer.add(goldText);
-    
-    // Special abilities
-    let specialText = '';
-    if (hasShield && shieldHitsRemaining && shieldHitsRemaining > 0) {
-      specialText += `🔵 Shield: ${shieldHitsRemaining} hits  `;
-    }
-    if (canJump) {
-      specialText += '🦘 Can Jump';
-    }
-    
-    if (specialText) {
-      const special = this.scene.add.text(0, 28, specialText, {
-        fontFamily: 'Arial',
-        fontSize: '11px',
-        color: '#44ccff'
-      }).setOrigin(0.5);
-      this.creepInfoContainer.add(special);
-    }
-    
-    // Auto-hide after 3 seconds
-    this.scene.time.delayedCall(3000, () => {
-      this.hideCreepStats();
-    });
+  showCreepStats(
+    creepType: string,
+    currentHP: number,
+    maxHP: number,
+    speed: number,
+    armor: number,
+    goldReward: number,
+    x: number,
+    y: number,
+    hasShield?: boolean,
+    shieldHitsRemaining?: number,
+    canJump?: boolean
+  ): void {
+    this.creepInfoPanel.show(
+      creepType, currentHP, maxHP, speed, armor, goldReward,
+      x, y, hasShield, shieldHitsRemaining, canJump
+    );
   }
 
   /**
-   * Hide creep stats popup
+   * Hide creep stats popup - delegates to CreepInfoPanel
    */
   hideCreepStats(): void {
-    if (this.creepInfoContainer) {
-      this.creepInfoContainer.destroy();
-      this.creepInfoContainer = null;
-    }
+    this.creepInfoPanel.hide();
   }
 }

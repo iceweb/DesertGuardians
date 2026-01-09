@@ -52,9 +52,9 @@ export class CreepManager {
   }
 
   /**
-   * Spawn a creep of a given type
+   * Spawn a creep of a given type with wave-based scaling
    */
-  spawn(creepType: string): Creep | null {
+  spawn(creepType: string, waveNumber: number = 1): Creep | null {
     const creep = this.getFromPool();
     
     if (!creep) {
@@ -62,7 +62,7 @@ export class CreepManager {
       return null;
     }
     
-    creep.spawn(this.pathSystem, creepType);
+    creep.spawn(this.pathSystem, creepType, waveNumber);
     this.activeCreeps.push(creep);
     
     return creep;

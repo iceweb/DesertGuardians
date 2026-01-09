@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { Tower, TOWER_CONFIGS } from '../objects/Tower';
+import { Tower } from '../objects/Tower';
+import { TOWER_CONFIGS } from '../data';
 import { PathSystem } from './PathSystem';
 import { TowerUIManager } from './TowerUIManager';
 

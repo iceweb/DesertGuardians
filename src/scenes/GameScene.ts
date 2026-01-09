@@ -16,7 +16,7 @@ export class GameScene extends Phaser.Scene {
   private audioManager!: AudioManager;
 
   // Game state
-  private gold: number = 200;
+  private gold: number = 180;
   private castleHP: number = 10;
   private gameOver: boolean = false;
   
@@ -33,7 +33,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     // Reset game state
-    this.gold = 200;
+    this.gold = 180;
     this.castleHP = 10;
     this.gameOver = false;
     this.virtualGameTime = 0;
@@ -166,8 +166,11 @@ export class GameScene extends Phaser.Scene {
       console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
       this.audioManager.playSFX('wave_complete');
       
-      // Calculate wave bonus: base 15 gold + 3 per wave (Wave 1: 18g, Wave 10: 45g, Wave 25: 90g)
-      const waveBonus = 15 + (waveNumber * 3);
+      // Calculate wave bonus: base 20 gold + 15% interest on current gold, capped at 75
+      // Rewards both progression and saving gold
+      const baseBonus = 20;
+      const interestBonus = Math.min(55, Math.floor(this.gold * 0.15));
+      const waveBonus = baseBonus + interestBonus;
       
       // Show wave bonus animation, then proceed to next wave
       this.hudManager.showWaveBonus(waveNumber, waveBonus, () => {

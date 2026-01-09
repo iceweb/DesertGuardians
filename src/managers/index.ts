@@ -10,5 +10,8 @@ export { TowerManager } from './TowerManager';
 export { TowerUIManager } from './TowerUIManager';
 export { ProjectileManager } from './ProjectileManager';
 export { HUDManager } from './HUDManager';
+export { GameControlsManager } from './GameControlsManager';
+export { GameOverlayManager } from './GameOverlayManager';
+export { CreepInfoPanel } from './CreepInfoPanel';
 export { AudioManager } from './AudioManager';
 export type { SFXKey } from './AudioManager';

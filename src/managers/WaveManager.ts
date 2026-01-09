@@ -92,6 +92,7 @@ export class WaveManager {
    */
   private startSpawningGroup(group: WaveCreepGroup): void {
     let spawned = 0;
+    const waveNumber = this.currentWave; // Capture wave number for scaling
     
     const spawnOne = () => {
       if (spawned >= group.count) {
@@ -99,7 +100,7 @@ export class WaveManager {
         return;
       }
       
-      const creep = this.creepManager.spawn(group.type);
+      const creep = this.creepManager.spawn(group.type, waveNumber);
       spawned++;
       this.creepsSpawned++;
       

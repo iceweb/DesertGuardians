@@ -1,64 +1,13 @@
 import Phaser from 'phaser';
 import { PathSystem } from '../managers';
 import { CreepGraphics } from '../graphics';
+import type { CreepConfig } from '../data';
+import { CREEP_TYPES } from '../data';
+import { StatusEffectHandler } from './StatusEffectHandler';
 
-export interface CreepConfig {
-  type: string;
-  maxHealth: number;
-  speed: number;        // pixels per second
-  armor: number;
-  goldReward: number;
-  // Special abilities
-  hasShield?: boolean;     // Blocks first 3 hits completely
-  canJump?: boolean;       // Leaps forward 150px every 4 seconds
-}
-
-export const CREEP_TYPES: Record<string, CreepConfig> = {
-  furball: {
-    type: 'furball',
-    maxHealth: 55,
-    speed: 85,
-    armor: 0,
-    goldReward: 10
-  },
-  runner: {
-    type: 'runner',
-    maxHealth: 35,
-    speed: 150,
-    armor: 0,
-    goldReward: 8
-  },
-  tank: {
-    type: 'tank',
-    maxHealth: 240,
-    speed: 50,
-    armor: 5,
-    goldReward: 25
-  },
-  boss: {
-    type: 'boss',
-    maxHealth: 1200,
-    speed: 45,
-    armor: 3,
-    goldReward: 100
-  },
-  jumper: {
-    type: 'jumper',
-    maxHealth: 140,
-    speed: 75,
-    armor: 2,
-    goldReward: 30,
-    canJump: true
-  },
-  shielded: {
-    type: 'shielded',
-    maxHealth: 120,
-    speed: 70,
-    armor: 1,
-    goldReward: 35,
-    hasShield: true
-  }
-};
+// Re-export types for backwards compatibility
+export type { CreepConfig } from '../data';
+export { CREEP_TYPES } from '../data';
 
 /**
  * Creep game object that follows a path from spawn to castle.
@@ -81,12 +30,9 @@ export class Creep extends Phaser.GameObjects.Container {
   private bounceTime: number = 0;
   private faceDirection: number = 1; // 1 = right, -1 = left
   
-  // Status effects
-  private slowAmount: number = 0;      // 0-1, current slow percentage
-  private slowEndTime: number = 0;     // timestamp when slow ends
-  private poisonStacks: { damage: number; endTime: number }[] = [];
-  private poisonTickTimer: number = 0;
+  // Status effects (delegated to handler)
   private statusGraphics!: Phaser.GameObjects.Graphics;
+  private statusEffects!: StatusEffectHandler;
   
   // Special abilities
   private shieldHitsRemaining: number = 0;   // Shield blocks remaining
@@ -110,6 +56,9 @@ export class Creep extends Phaser.GameObjects.Container {
     
     this.add([this.bodyGraphics, this.healthBarBg, this.healthBarFg, this.statusGraphics, this.shieldGraphics]);
     
+    // Create status effect handler
+    this.statusEffects = new StatusEffectHandler(scene, this.statusGraphics);
+    
     scene.add.existing(this);
     this.setDepth(30);
     this.setActive(false);
@@ -121,11 +70,23 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Initialize/reset the creep for spawning
+   * Initialize/reset the creep for spawning with wave-based HP scaling
+   * HP scaling: +8% per wave, capped at 2.5x base HP at wave 19+
    */
-  spawn(pathSystem: PathSystem, creepType: string): void {
+  spawn(pathSystem: PathSystem, creepType: string, waveNumber: number = 1): void {
     this.pathSystem = pathSystem;
-    this.config = CREEP_TYPES[creepType] || CREEP_TYPES.furball;
+    const baseConfig = CREEP_TYPES[creepType] || CREEP_TYPES.furball;
+    
+    // Apply wave-based HP scaling: 8% per wave, capped at 2.5x
+    const hpMultiplier = Math.min(2.5, 1 + (waveNumber - 1) * 0.08);
+    const scaledMaxHealth = Math.floor(baseConfig.maxHealth * hpMultiplier);
+    
+    // Create a scaled config for this creep instance
+    this.config = {
+      ...baseConfig,
+      maxHealth: scaledMaxHealth
+    };
+    
     this.distanceTraveled = 0;
     this.currentHealth = this.config.maxHealth;
     this.isActive = true;
@@ -136,6 +97,19 @@ export class Creep extends Phaser.GameObjects.Container {
     this.jumpCooldown = this.config.canJump ? this.JUMP_COOLDOWN : 0;
     this.isJumping = false;
     this.jumpWarningTime = 0;
+    
+    // Reset status effects and wire up poison damage callback
+    this.statusEffects.reset();
+    this.statusEffects.setOnPoisonDamage((damage: number) => {
+      if (this.isActive) {
+        this.currentHealth -= damage;
+        this.updateHealthBar();
+        this.showPoisonDamage(damage);
+        if (this.currentHealth <= 0) {
+          this.die();
+        }
+      }
+    });
     
     // Set initial position
     const startPos = pathSystem.getStartPoint();
@@ -207,7 +181,7 @@ export class Creep extends Phaser.GameObjects.Container {
     const currentTime = this.scene.time.now;
     
     // Update status effects
-    this.updateStatusEffects(delta, currentTime);
+    this.statusEffects.update(delta);
     
     // Update jump ability
     this.updateJumpAbility(delta);
@@ -216,7 +190,7 @@ export class Creep extends Phaser.GameObjects.Container {
     this.bounceTime += delta / 1000;
     
     // Calculate effective speed (with slow)
-    const speedMultiplier = this.slowEndTime > currentTime ? (1 - this.slowAmount) : 1;
+    const speedMultiplier = this.statusEffects.getSpeedMultiplier();
     const effectiveSpeed = this.config.speed * speedMultiplier;
     
     // Move along path (unless jumping)
@@ -247,7 +221,7 @@ export class Creep extends Phaser.GameObjects.Container {
     }
     
     // Draw status indicators
-    this.drawStatusEffects(currentTime);
+    this.statusEffects.draw(currentTime);
     
     // Check if reached end
     if (this.pathSystem.hasReachedEnd(this.distanceTraveled)) {
@@ -348,48 +322,6 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Update status effects (poison ticks, slow expiry)
-   */
-  private updateStatusEffects(delta: number, currentTime: number): void {
-    // Process poison stacks
-    if (this.poisonStacks.length > 0) {
-      this.poisonTickTimer += delta;
-      
-      // Tick every 1000ms (1 second)
-      if (this.poisonTickTimer >= 1000) {
-        this.poisonTickTimer = 0;
-        
-        // Calculate total poison damage from active stacks (max 3)
-        let totalPoisonDamage = 0;
-        this.poisonStacks = this.poisonStacks.filter(stack => {
-          if (currentTime < stack.endTime) {
-            totalPoisonDamage += stack.damage;
-            return true;
-          }
-          return false;
-        });
-        
-        // Apply poison damage (ignores armor - it's magic)
-        if (totalPoisonDamage > 0 && this.isActive) {
-          this.currentHealth -= totalPoisonDamage;
-          this.updateHealthBar();
-          this.showPoisonDamage(totalPoisonDamage);
-          
-          if (this.currentHealth <= 0) {
-            this.die();
-          }
-        }
-      }
-    }
-    
-    // Clear slow if expired
-    if (this.slowEndTime > 0 && currentTime >= this.slowEndTime) {
-      this.slowAmount = 0;
-      this.slowEndTime = 0;
-    }
-  }
-
-  /**
    * Show poison damage number
    */
   private showPoisonDamage(damage: number): void {
@@ -410,66 +342,17 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Draw status effect indicators
-   */
-  private drawStatusEffects(currentTime: number): void {
-    this.statusGraphics.clear();
-    
-    const isSlowed = this.slowEndTime > currentTime;
-    const isPoisoned = this.poisonStacks.length > 0;
-    
-    if (isSlowed) {
-      // Draw ice particles around creep
-      this.statusGraphics.fillStyle(0x87ceeb, 0.6);
-      for (let i = 0; i < 4; i++) {
-        const angle = (currentTime / 500 + i * Math.PI / 2) % (Math.PI * 2);
-        const x = Math.cos(angle) * 18;
-        const y = Math.sin(angle) * 10 - 5;
-        this.statusGraphics.fillCircle(x, y, 3);
-      }
-    }
-    
-    if (isPoisoned) {
-      // Draw poison bubbles
-      this.statusGraphics.fillStyle(0x00ff00, 0.5);
-      const stackCount = Math.min(this.poisonStacks.length, 3);
-      for (let i = 0; i < stackCount; i++) {
-        const angle = (currentTime / 400 + i * Math.PI * 2 / 3) % (Math.PI * 2);
-        const x = Math.cos(angle) * 15;
-        const y = Math.sin(angle) * 8 + 5;
-        this.statusGraphics.fillCircle(x, y, 2 + i);
-      }
-    }
-  }
-
-  /**
-   * Apply slow effect (doesn't stack, refreshes duration)
+   * Apply slow effect - delegates to StatusEffectHandler
    */
   applySlow(percent: number, durationMs: number): void {
-    const currentTime = this.scene.time.now;
-    this.slowAmount = percent;
-    this.slowEndTime = currentTime + durationMs;
+    this.statusEffects.applySlow(percent, durationMs);
   }
 
   /**
-   * Apply poison effect (stacks up to 3 times)
+   * Apply poison effect - delegates to StatusEffectHandler
    */
   applyPoison(damagePerSecond: number, durationMs: number): void {
-    const currentTime = this.scene.time.now;
-    
-    // Max 3 stacks
-    if (this.poisonStacks.length >= 3) {
-      // Refresh oldest stack
-      this.poisonStacks[0] = {
-        damage: damagePerSecond,
-        endTime: currentTime + durationMs
-      };
-    } else {
-      this.poisonStacks.push({
-        damage: damagePerSecond,
-        endTime: currentTime + durationMs
-      });
-    }
+    this.statusEffects.applyPoison(damagePerSecond, durationMs);
   }
 
   /**
@@ -653,13 +536,8 @@ export class Creep extends Phaser.GameObjects.Container {
     this.healthBarBg.clear();
     this.healthBarFg.clear();
     this.statusGraphics.clear();
-    this.shieldGraphics.clear();
-    
-    // Reset status effects
-    this.slowAmount = 0;
-    this.slowEndTime = 0;
-    this.poisonStacks = [];
-    this.poisonTickTimer = 0;
+    this.statusEffects.clear();
+    this.statusEffects.reset();
     
     // Reset abilities
     this.shieldHitsRemaining = 0;

@@ -1,6 +1,10 @@
-export { Creep, CREEP_TYPES } from './Creep';
-export type { CreepConfig } from './Creep';
-export { Tower, TOWER_CONFIGS, BRANCH_OPTIONS } from './Tower';
-export type { TowerStats, TowerConfig, TowerBranch } from './Tower';
+export { Creep } from './Creep';
+export type { CreepConfig } from '../data';
+export { CREEP_TYPES } from '../data';
+export { Tower } from './Tower';
+export type { TowerStats, TowerConfig, TowerBranch } from '../data';
+export { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
 export { Projectile } from './Projectile';
 export type { ProjectileConfig } from './Projectile';
+export { StatusEffectHandler } from './StatusEffectHandler';
+export type { PoisonStack } from './StatusEffectHandler';

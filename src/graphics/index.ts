@@ -2,6 +2,8 @@ export * from './GameEnvironment';
 export * from './CreepGraphics';
 export * from './TowerGraphics';
 export * from './EnvironmentDecorations';
+export * from './AnimatorBase';
+export * from './PathRenderer';
 export * from './RapidFireAnimator';
 export * from './ArcherAnimator';
 export * from './CannonAnimator';

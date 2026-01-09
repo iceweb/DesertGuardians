@@ -17,81 +17,95 @@ export interface WaveDef {
 
 /**
  * Hardcoded wave configurations for all 25 waves.
- * Difficulty increased: more creeps, faster spawns, earlier introduction of tough enemies
+ * REBALANCED: Tighter economy, HP scales with wave, mid-game density increased
  */
 export const WAVE_CONFIGS: WaveDef[] = [
-  // Wave 1: Introduction - more furballs
-  { waveNumber: 1, creeps: [{ type: 'furball', count: 12, intervalMs: 1200 }] },
+  // Wave 1: Introduction - gentle start
+  { waveNumber: 1, creeps: [{ type: 'furball', count: 8, intervalMs: 1400 }] },
   
-  // Wave 2: More furballs, faster
-  { waveNumber: 2, creeps: [{ type: 'furball', count: 18, intervalMs: 1000 }] },
+  // Wave 2: More furballs
+  { waveNumber: 2, creeps: [{ type: 'furball', count: 12, intervalMs: 1100 }] },
   
   // Wave 3: First runners - earlier introduction
   { waveNumber: 3, creeps: [
-    { type: 'furball', count: 10, intervalMs: 1200 },
-    { type: 'runner', count: 8, intervalMs: 600, delayStart: 2000 }
+    { type: 'furball', count: 8, intervalMs: 1200 },
+    { type: 'runner', count: 10, intervalMs: 600, delayStart: 2000 }
   ]},
   
-  // Wave 4: Runner focused - more and faster
-  { waveNumber: 4, creeps: [{ type: 'runner', count: 18, intervalMs: 500 }] },
+  // Wave 4: Runner focused
+  { waveNumber: 4, creeps: [{ type: 'runner', count: 20, intervalMs: 450 }] },
   
-  // Wave 5: Mixed assault - heavier
+  // Wave 5: Mixed assault - INCREASED DENSITY
   { waveNumber: 5, creeps: [
-    { type: 'furball', count: 12, intervalMs: 1000 },
-    { type: 'runner', count: 12, intervalMs: 500, delayStart: 1500 }
+    { type: 'furball', count: 16, intervalMs: 900 },
+    { type: 'runner', count: 16, intervalMs: 450, delayStart: 1500 }
   ]},
   
-  // Wave 6: First tanks - earlier and more
+  // Wave 6: First tanks - earlier with more support
   { waveNumber: 6, creeps: [
-    { type: 'furball', count: 15, intervalMs: 800 },
-    { type: 'tank', count: 4, intervalMs: 2500, delayStart: 3000 }
+    { type: 'furball', count: 18, intervalMs: 700 },
+    { type: 'tank', count: 5, intervalMs: 2200, delayStart: 2500 }
   ]},
   
-  // Wave 7: Tank focus - more tanks
-  { waveNumber: 7, creeps: [{ type: 'tank', count: 8, intervalMs: 2000 }] },
+  // Wave 7: Tank focus + first jumper preview - INCREASED DENSITY
+  { waveNumber: 7, creeps: [
+    { type: 'tank', count: 10, intervalMs: 1800 },
+    { type: 'jumper', count: 2, intervalMs: 2500, delayStart: 4000 }
+  ]},
   
-  // Wave 8: Speed and armor mix - heavier
+  // Wave 8: Speed and armor mix - INCREASED DENSITY
   { waveNumber: 8, creeps: [
-    { type: 'runner', count: 20, intervalMs: 400 },
-    { type: 'tank', count: 5, intervalMs: 1800, delayStart: 2000 }
+    { type: 'runner', count: 28, intervalMs: 350 },
+    { type: 'tank', count: 6, intervalMs: 1600, delayStart: 2000 }
   ]},
   
-  // Wave 9: Pre-boss buildup - intense
+  // Wave 9: Pre-boss buildup + shielded preview - INCREASED DENSITY
   { waveNumber: 9, creeps: [
-    { type: 'furball', count: 20, intervalMs: 600 },
-    { type: 'tank', count: 6, intervalMs: 1800, delayStart: 3000 }
+    { type: 'furball', count: 25, intervalMs: 550 },
+    { type: 'tank', count: 7, intervalMs: 1600, delayStart: 2500 },
+    { type: 'shielded', count: 2, intervalMs: 3000, delayStart: 5000 }
   ]},
   
-  // Wave 10: FIRST BOSS - earlier with more support
+  // Wave 10: FIRST BOSS - with mixed support
   { waveNumber: 10, creeps: [
-    { type: 'furball', count: 15, intervalMs: 800 },
-    { type: 'tank', count: 3, intervalMs: 2000, delayStart: 2000 },
-    { type: 'boss', count: 1, intervalMs: 1000, delayStart: 4000 }
+    { type: 'furball', count: 18, intervalMs: 700 },
+    { type: 'tank', count: 4, intervalMs: 1800, delayStart: 2000 },
+    { type: 'jumper', count: 3, intervalMs: 2500, delayStart: 3500 },
+    { type: 'boss', count: 1, intervalMs: 1000, delayStart: 5000 }
   ]},
   
-  // Wave 11: Recovery wave - but harder
+  // Wave 11: Post-boss pressure - INCREASED DENSITY
   { waveNumber: 11, creeps: [
-    { type: 'furball', count: 20, intervalMs: 700 },
-    { type: 'runner', count: 10, intervalMs: 500, delayStart: 3000 }
+    { type: 'furball', count: 25, intervalMs: 600 },
+    { type: 'runner', count: 15, intervalMs: 400, delayStart: 2500 },
+    { type: 'shielded', count: 3, intervalMs: 2500, delayStart: 4000 }
   ]},
   
-  // Wave 12: Runner swarm - massive
-  { waveNumber: 12, creeps: [{ type: 'runner', count: 35, intervalMs: 300 }] },
+  // Wave 12: Runner swarm + jumpers - INCREASED DENSITY
+  { waveNumber: 12, creeps: [
+    { type: 'runner', count: 40, intervalMs: 280 },
+    { type: 'jumper', count: 5, intervalMs: 2000, delayStart: 3000 }
+  ]},
   
-  // Wave 13: Heavy tanks - more
-  { waveNumber: 13, creeps: [{ type: 'tank', count: 12, intervalMs: 1600 }] },
+  // Wave 13: Heavy tanks + shielded - INCREASED DENSITY
+  { waveNumber: 13, creeps: [
+    { type: 'tank', count: 14, intervalMs: 1400 },
+    { type: 'shielded', count: 5, intervalMs: 2200, delayStart: 3000 }
+  ]},
   
-  // Wave 14: Mixed chaos - intense
+  // Wave 14: Mixed chaos - INCREASED DENSITY
   { waveNumber: 14, creeps: [
-    { type: 'furball', count: 15, intervalMs: 600 },
-    { type: 'runner', count: 15, intervalMs: 400, delayStart: 1500 },
-    { type: 'tank', count: 6, intervalMs: 2000, delayStart: 3000 }
+    { type: 'furball', count: 20, intervalMs: 550 },
+    { type: 'runner', count: 20, intervalMs: 350, delayStart: 1500 },
+    { type: 'tank', count: 8, intervalMs: 1800, delayStart: 3000 },
+    { type: 'jumper', count: 4, intervalMs: 2200, delayStart: 5000 }
   ]},
   
-  // Wave 15: Tank army with boss
+  // Wave 15: Tank army with boss - INCREASED DENSITY
   { waveNumber: 15, creeps: [
-    { type: 'tank', count: 12, intervalMs: 1500 },
-    { type: 'furball', count: 12, intervalMs: 800, delayStart: 2000 },
+    { type: 'tank', count: 14, intervalMs: 1300 },
+    { type: 'shielded', count: 6, intervalMs: 2000, delayStart: 2000 },
+    { type: 'furball', count: 15, intervalMs: 700, delayStart: 3000 },
     { type: 'boss', count: 1, intervalMs: 1000, delayStart: 8000 }
   ]},
   

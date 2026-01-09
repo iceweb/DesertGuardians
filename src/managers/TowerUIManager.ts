@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { Tower, TOWER_CONFIGS } from '../objects/Tower';
+import { Tower } from '../objects/Tower';
+import { TOWER_CONFIGS } from '../data';
 import type { TowerBranch } from '../objects/Tower';
 
 /**
@@ -62,7 +63,7 @@ export class TowerUIManager {
       this.placementGraphics.strokeCircle(x, y, TOWER_RADIUS);
       this.placementGraphics.fillStyle(0x00ff00, 0.2);
       this.placementGraphics.fillCircle(x, y, TOWER_RADIUS);
-      this.placementGraphics.lineStyle(1, 0x00ff00, 0.3);
+      this.placementGraphics.lineStyle(4, 0x00ff00, 0.5);
       this.placementGraphics.strokeCircle(x, y, config.stats.range);
     }
     // No red circle for invalid positions - just clear and show nothing
@@ -355,12 +356,12 @@ export class TowerUIManager {
         const nextLevel = levelUpConfig.level;
         const levelLabel = nextLevel === 2 ? 'Level 2' : 'Level 3';
         
-        const lvlBtn = this.scene.add.text(-70, yOffset + 15, `⬆ Upgrade to ${levelLabel} - ${cost}g`, {
+        const lvlBtn = this.scene.add.text(-105, yOffset + 15, `⬆ Upgrade to ${levelLabel} - ${cost}g`, {
           fontFamily: 'Arial Black',
           fontSize: '14px',
           color: canAfford ? '#00ff00' : '#666666',
           backgroundColor: canAfford ? '#2a4a2a' : '#2a2a2a',
-          padding: { x: 16, y: 10 }
+          padding: { x: 12, y: 10 }
         }).setOrigin(0.5).setInteractive({ useHandCursor: canAfford });
         
         if (canAfford) {
@@ -374,23 +375,23 @@ export class TowerUIManager {
         this.upgradeMenuContainer.add(lvlBtn);
       }
     } else if (!hasBranches) {
-      const maxText = this.scene.add.text(-70, yOffset + 15, '★ MAX LEVEL ★', {
+      const maxText = this.scene.add.text(-105, yOffset + 15, '★ MAX LEVEL ★', {
         fontFamily: 'Arial Black',
         fontSize: '14px',
         color: '#ffd700',
         backgroundColor: '#3a3a2a',
-        padding: { x: 16, y: 10 }
+        padding: { x: 12, y: 10 }
       }).setOrigin(0.5);
       this.upgradeMenuContainer.add(maxText);
     }
     
     const sellValue = tower.getSellValue();
-    const sellBtn = this.scene.add.text(0, yOffset + 15, `Sell: ${sellValue}g`, {
+    const sellBtn = this.scene.add.text(105, yOffset + 15, `Sell: ${sellValue}g`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: '#ff6666',
       backgroundColor: '#4a2a2a',
-      padding: { x: 16, y: 10 }
+      padding: { x: 12, y: 10 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     sellBtn.on('pointerdown', () => this.onSellRequested?.(tower));
     sellBtn.on('pointerover', () => sellBtn.setStyle({ backgroundColor: '#6a3a3a' }));
