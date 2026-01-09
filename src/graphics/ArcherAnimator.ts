@@ -40,7 +40,7 @@ export class ArcherAnimator {
   private cheerArmAngle: number = 0;
   
   // Tower heights per level (Y position of archer from tower base at y=0)
-  private readonly ARCHER_Y = [-70, -85, -100];
+  private readonly ARCHER_Y = [-35, -42, -50];
   
   // Bow position in local space (used for arrow spawn calculation)
   private readonly BOW_LOCAL_X = -20;
@@ -55,6 +55,7 @@ export class ArcherAnimator {
     
     // Create archer container that will rotate as a unit
     this.archerContainer = scene.add.container(0, this.ARCHER_Y[level - 1]);
+    this.archerContainer.setScale(1.3);  // Scale up character 30%
     
     // Create graphics for rotating parts
     this.archerGraphics = scene.add.graphics();
@@ -228,12 +229,12 @@ export class ArcherAnimator {
     
     const level = this.level;
     
-    // Shadow
+    // Shadow - consistent size
     g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 50 + level * 5, 18 + level * 2);
+    g.fillEllipse(0, 25, 50, 18);
     
-    const baseWidth = 28 + level * 6;
-    const towerHeight = 55 + level * 15;
+    const baseWidth = 32;
+    const towerHeight = 42;
     
     // Base platform
     if (level === 1) {
@@ -377,9 +378,9 @@ export class ArcherAnimator {
     // Platform (circular top where archer stands)
     const platY = this.ARCHER_Y[level - 1] + 10;
     g.fillStyle(0x8b7355, 1);
-    g.fillEllipse(0, platY, 30 + level * 4, 12 + level * 2);
+    g.fillEllipse(0, platY, 30, 12);
     g.fillStyle(0x9a8265, 1);
-    g.fillEllipse(0, platY - 2, 26 + level * 4, 10 + level * 2);
+    g.fillEllipse(0, platY - 2, 26, 10);
   }
   
   /**
@@ -581,7 +582,7 @@ export class ArcherAnimator {
     
     // === SHOULDERS/CLOAK (base) ===
     g.fillStyle(cloakColor, 1);
-    g.fillEllipse(0, bodyY + 6, 24 + this.level * 2, 14 + this.level * 2);
+    g.fillEllipse(0, bodyY + 6, 28, 18);
     g.fillStyle(cloakDark, 1);
     g.fillEllipse(-8, bodyY + 6, 6, 12);
     g.fillEllipse(8, bodyY + 6, 6, 12);

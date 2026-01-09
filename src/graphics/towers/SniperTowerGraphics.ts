@@ -4,16 +4,16 @@ import Phaser from 'phaser';
  * Sniper tower graphics rendering.
  */
 export function drawSniperTower(g: Phaser.GameObjects.Graphics, level: number): void {
-  // Shadow
+  // Shadow - consistent size for all levels
   g.fillStyle(0x000000, 0.3);
-  g.fillEllipse(0, 25, 40 + level * 6, 15 + level * 2);
+  g.fillEllipse(0, 25, 42, 16);
   
   // Level 1: Simple watchtower with rifle
   // Level 2: Steel observation tower with advanced scope
   // Level 3: High-tech laser targeting tower with stealth camo
   
-  const baseWidth = 20 + level * 5;
-  const towerHeight = 70 + level * 20;
+  const baseWidth = 24;
+  const towerHeight = 55;
   
   if (level === 1) {
     // Simple wooden base

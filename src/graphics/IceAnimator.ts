@@ -44,7 +44,7 @@ export class IceAnimator {
   private cheerArmAngle: number = 0;
   
   // Tower heights per level
-  private readonly MAGE_Y = [-55, -70, -85];
+  private readonly MAGE_Y = [-28, -35, -42];
   
   // Staff position in local space (points LEFT like archer's bow)
   private readonly STAFF_LOCAL_X = -18;
@@ -60,6 +60,7 @@ export class IceAnimator {
     
     // Create mage container
     this.mageContainer = scene.add.container(0, this.MAGE_Y[level - 1]);
+    this.mageContainer.setScale(1.3);  // Scale up character 30%
     
     // Create graphics for rotating parts
     this.mageGraphics = scene.add.graphics();
@@ -264,12 +265,12 @@ export class IceAnimator {
     
     const level = this.level;
     
-    // Shadow with ice tint
+    // Shadow with ice tint - consistent size
     g.fillStyle(0x4466aa, 0.3);
-    g.fillEllipse(0, 25, 50 + level * 5, 18 + level * 2);
+    g.fillEllipse(0, 25, 48, 18);
     
-    const baseWidth = 26 + level * 5;
-    const towerHeight = 40 + level * 15;
+    const baseWidth = 28;
+    const towerHeight = 35;
     
     // Base platform - icy stone
     if (level === 1) {
@@ -364,12 +365,12 @@ export class IceAnimator {
     // Mage platform - frozen
     const platY = this.MAGE_Y[level - 1] + 10;
     g.fillStyle(0x88aacc, 1);
-    g.fillEllipse(0, platY, 28 + level * 4, 12 + level * 2);
+    g.fillEllipse(0, platY, 28, 12);
     g.fillStyle(0xaaccee, 1);
-    g.fillEllipse(0, platY - 2, 24 + level * 4, 10 + level * 2);
+    g.fillEllipse(0, platY - 2, 24, 10);
     // Frost rim
     g.lineStyle(1, 0xccffff, 0.6);
-    g.strokeEllipse(0, platY - 2, 24 + level * 4, 10 + level * 2);
+    g.strokeEllipse(0, platY - 2, 24, 10);
   }
   
   /**
@@ -410,7 +411,7 @@ export class IceAnimator {
     
     // === ROBES (flowing) ===
     g.fillStyle(robeColor, 1);
-    g.fillEllipse(0, bodyY + 6, 24 + this.level * 2, 16 + this.level * 2);
+    g.fillEllipse(0, bodyY + 6, 28, 20);
     g.fillStyle(robeDark, 1);
     g.fillEllipse(-8, bodyY + 6, 6, 14);
     g.fillEllipse(8, bodyY + 6, 6, 14);
@@ -419,7 +420,7 @@ export class IceAnimator {
     
     // Robe frost trim
     g.lineStyle(1, 0xccddff, 0.5);
-    g.strokeEllipse(0, bodyY + 6, 24 + this.level * 2, 16 + this.level * 2);
+    g.strokeEllipse(0, bodyY + 6, 28, 20);
     
     // === HOOD ===
     if (this.level === 1) {
@@ -483,7 +484,7 @@ export class IceAnimator {
     
     // === ROBES ===
     g.fillStyle(robeColor, 1);
-    g.fillEllipse(0, bodyY + 6, 24 + this.level * 2, 16 + this.level * 2);
+    g.fillEllipse(0, bodyY + 6, 28, 20);
     g.fillStyle(robeDark, 1);
     g.fillEllipse(-8, bodyY + 6, 6, 14);
     g.fillEllipse(8, bodyY + 6, 6, 14);

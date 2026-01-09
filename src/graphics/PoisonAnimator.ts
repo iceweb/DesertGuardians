@@ -48,7 +48,7 @@ export class PoisonAnimator {
   private cheerArmAngle: number = 0;
   
   // Tower heights per level
-  private readonly ALCHEMIST_Y = [-55, -70, -85];
+  private readonly ALCHEMIST_Y = [-28, -35, -42];
   
   // Weapon positions in local space
   // Level 1-2: Throwing arm (points LEFT like archer)
@@ -66,6 +66,7 @@ export class PoisonAnimator {
     
     // Create alchemist container
     this.alchemistContainer = scene.add.container(0, this.ALCHEMIST_Y[level - 1]);
+    this.alchemistContainer.setScale(1.3);  // Scale up character 30%
     
     // Create graphics for rotating parts
     this.alchemistGraphics = scene.add.graphics();
@@ -296,12 +297,12 @@ export class PoisonAnimator {
     
     const level = this.level;
     
-    // Shadow with toxic tint
+    // Shadow with toxic tint - consistent size
     g.fillStyle(0x228822, 0.3);
-    g.fillEllipse(0, 25, 50 + level * 5, 18 + level * 2);
+    g.fillEllipse(0, 25, 50, 18);
     
-    const baseWidth = 26 + level * 5;
-    const towerHeight = 40 + level * 15;
+    const baseWidth = 28;
+    const towerHeight = 35;
     
     // Base platform - laboratory style
     if (level === 1) {
@@ -405,9 +406,9 @@ export class PoisonAnimator {
     // Platform
     const platY = this.ALCHEMIST_Y[level - 1] + 10;
     g.fillStyle(0x5a5a5a, 1);
-    g.fillEllipse(0, platY, 28 + level * 4, 12 + level * 2);
+    g.fillEllipse(0, platY, 28, 12);
     g.fillStyle(0x6a6a6a, 1);
-    g.fillEllipse(0, platY - 2, 24 + level * 4, 10 + level * 2);
+    g.fillEllipse(0, platY - 2, 24, 10);
   }
   
   /**
@@ -447,7 +448,7 @@ export class PoisonAnimator {
     
     // === ROBES ===
     g.fillStyle(robeColor, 1);
-    g.fillEllipse(0, bodyY + 6, 22 + this.level * 2, 16 + this.level);
+    g.fillEllipse(0, bodyY + 6, 26, 18);
     g.fillStyle(robeDark, 1);
     g.fillEllipse(-8, bodyY + 6, 6, 12);
     g.fillEllipse(8, bodyY + 6, 6, 12);
@@ -521,7 +522,7 @@ export class PoisonAnimator {
     
     // === ROBES ===
     g.fillStyle(robeColor, 1);
-    g.fillEllipse(0, bodyY + 6, 22 + this.level * 2, 16 + this.level);
+    g.fillEllipse(0, bodyY + 6, 26, 18);
     g.fillStyle(robeDark, 1);
     g.fillEllipse(-8, bodyY + 6, 6, 12);
     g.fillEllipse(8, bodyY + 6, 6, 12);

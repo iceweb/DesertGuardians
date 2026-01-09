@@ -38,9 +38,9 @@ export class ResultsScene extends Phaser.Scene {
   private resultData!: GameResultData;
   private finalScore: number = 0;
   private scoreBreakdown!: {
-    baseScore: number;
+    waveScore: number;
     goldScore: number;
-    hpMultiplier: number;
+    hpBonus: number;
     timeMultiplier: number;
   };
   
@@ -68,14 +68,14 @@ export class ResultsScene extends Phaser.Scene {
   private calculateScore(): void {
     const data = this.resultData;
     
-    // Base Score: 1000 points per wave completed
-    const baseScore = data.waveReached * 1000;
+    // Wave Score: 1000 points per wave completed
+    const waveScore = data.waveReached * 1000;
     
     // Gold Score: Total gold earned × 10
     const goldScore = data.totalGoldEarned * 10;
     
-    // HP Multiplier: 1 + (CurrentHP / 10) - max 2.0
-    const hpMultiplier = 1 + (data.castleHP / data.maxCastleHP);
+    // HP Bonus: 500 points per HP remaining (max 5000 for 10 HP)
+    const hpBonus = data.castleHP * 500;
     
     // Time Multiplier:
     // Target = 900 seconds (15 min)
@@ -88,13 +88,13 @@ export class ResultsScene extends Phaser.Scene {
       timeMultiplier = Math.max(1.0, 1.5 - (data.runTimeSeconds - 900) / 1800);
     }
     
-    // Final score
-    this.finalScore = Math.floor((baseScore + goldScore) * hpMultiplier * timeMultiplier);
+    // Final score: (base scores + HP bonus) × time multiplier
+    this.finalScore = Math.floor((waveScore + goldScore + hpBonus) * timeMultiplier);
     
     this.scoreBreakdown = {
-      baseScore,
+      waveScore,
       goldScore,
-      hpMultiplier,
+      hpBonus,
       timeMultiplier
     };
     
@@ -173,8 +173,11 @@ export class ResultsScene extends Phaser.Scene {
    * Create stats display
    */
   private createStatsDisplay(width: number): void {
+    const centerX = width / 2;
     const startY = 130;
     const lineHeight = 32;
+    const labelOffset = 120;  // Distance from center to label (left)
+    const valueOffset = 120;  // Distance from center to value (right)
     
     const stats = [
       { label: 'Wave Reached', value: `${this.resultData.waveReached} / ${this.resultData.totalWaves}`, color: '#ffffff' },
@@ -187,13 +190,13 @@ export class ResultsScene extends Phaser.Scene {
     stats.forEach((stat, index) => {
       const y = startY + index * lineHeight;
       
-      this.add.text(width / 2 - 150, y, stat.label + ':', {
+      this.add.text(centerX - labelOffset, y, stat.label + ':', {
         fontFamily: 'Arial',
         fontSize: '20px',
         color: '#c9a86c'
-      }).setOrigin(0, 0.5);
+      }).setOrigin(1, 0.5);
       
-      this.add.text(width / 2 + 150, y, stat.value, {
+      this.add.text(centerX + valueOffset, y, stat.value, {
         fontFamily: 'Arial Black',
         fontSize: '20px',
         color: stat.color
@@ -205,33 +208,36 @@ export class ResultsScene extends Phaser.Scene {
    * Create score breakdown display
    */
   private createScoreBreakdown(width: number): void {
+    const centerX = width / 2;
     const startY = 310;
     const lineHeight = 28;
+    const labelOffset = 100;  // Distance from center to label (left)
+    const valueOffset = 130;  // Distance from center to value (right)
     
     // Section title
-    this.add.text(width / 2, startY - 10, '─── Score Breakdown ───', {
+    this.add.text(centerX, startY - 10, '─── Score Breakdown ───', {
       fontFamily: 'Arial',
       fontSize: '18px',
       color: '#888888'
     }).setOrigin(0.5);
     
     const breakdown = [
-      { label: 'Wave Bonus', value: `${this.resultData.waveReached} × 1000 = ${this.scoreBreakdown.baseScore}` },
+      { label: 'Wave Bonus', value: `${this.resultData.waveReached} × 1000 = ${this.scoreBreakdown.waveScore}` },
       { label: 'Gold Bonus', value: `${this.resultData.totalGoldEarned} × 10 = ${this.scoreBreakdown.goldScore}` },
-      { label: 'HP Multiplier', value: `× ${this.scoreBreakdown.hpMultiplier.toFixed(2)}` },
+      { label: 'HP Bonus', value: `${this.resultData.castleHP} × 500 = ${this.scoreBreakdown.hpBonus}` },
       { label: 'Time Multiplier', value: `× ${this.scoreBreakdown.timeMultiplier.toFixed(2)}` }
     ];
     
     breakdown.forEach((item, index) => {
       const y = startY + 20 + index * lineHeight;
       
-      this.add.text(width / 2 - 140, y, item.label + ':', {
+      this.add.text(centerX - labelOffset, y, item.label + ':', {
         fontFamily: 'Arial',
         fontSize: '16px',
         color: '#999999'
-      }).setOrigin(0, 0.5);
+      }).setOrigin(1, 0.5);
       
-      this.add.text(width / 2 + 140, y, item.value, {
+      this.add.text(centerX + valueOffset, y, item.value, {
         fontFamily: 'Arial',
         fontSize: '16px',
         color: '#cccccc'
@@ -241,13 +247,13 @@ export class ResultsScene extends Phaser.Scene {
     // Final score (large)
     const finalY = startY + 20 + breakdown.length * lineHeight + 30;
     
-    this.add.text(width / 2, finalY, 'FINAL SCORE', {
+    this.add.text(centerX, finalY, 'FINAL SCORE', {
       fontFamily: 'Arial',
       fontSize: '24px',
       color: '#d4a574'
     }).setOrigin(0.5);
     
-    this.add.text(width / 2, finalY + 45, this.finalScore.toLocaleString(), {
+    this.add.text(centerX, finalY + 45, this.finalScore.toLocaleString(), {
       fontFamily: 'Arial Black',
       fontSize: '48px',
       color: '#ffd700',

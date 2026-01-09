@@ -4,16 +4,16 @@ import Phaser from 'phaser';
  * Archer tower graphics rendering.
  */
 export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): void {
-  // Shadow - larger at higher levels
+  // Shadow - consistent size for all levels
   g.fillStyle(0x000000, 0.3);
-  g.fillEllipse(0, 25, 50 + level * 5, 18 + level * 2);
+  g.fillEllipse(0, 25, 50, 18);
   
   // Level 1: Simple wooden watchtower
   // Level 2: Reinforced stone tower with flags
   // Level 3: Grand fortress with gold trim and multiple archers
   
-  const baseWidth = 28 + level * 6;
-  const towerHeight = 55 + level * 15;
+  const baseWidth = 32;
+  const towerHeight = 42;
   
   // Stone/wood base - material changes with level
   if (level === 1) {

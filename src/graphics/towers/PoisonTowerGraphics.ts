@@ -25,16 +25,16 @@ export function drawPoisonTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillCircle(0, -35, 110);
   }
   
-  // Shadow with green tint
+  // Shadow with green tint - consistent size for all levels
   g.fillStyle(0x2a3a2a, 0.3);
-  g.fillEllipse(0, 25, 48 + level * 8, 17 + level * 3);
+  g.fillEllipse(0, 25, 50, 18);
   
   // Level 1: Simple witch's hut with small cauldron
   // Level 2: Twisted tree tower with bubbling vat
   // Level 3: Massive plague tower with overflowing toxic waste
   
-  const baseWidth = 26 + level * 6;
-  const towerHeight = 52 + level * 14;
+  const baseWidth = 30;
+  const towerHeight = 40;
   
   if (level === 1) {
     // Gnarled wooden base

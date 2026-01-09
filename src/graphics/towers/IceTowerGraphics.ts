@@ -25,16 +25,16 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.fillCircle(0, -40, 120);
   }
   
-  // Shadow (with blue tint)
+  // Shadow (with blue tint) - consistent size for all levels
   g.fillStyle(0x4a6080, 0.3);
-  g.fillEllipse(0, 25, 45 + level * 8, 16 + level * 3);
+  g.fillEllipse(0, 25, 48, 18);
   
   // Level 1: Simple ice shard
   // Level 2: Crystal cluster with floating shards  
   // Level 3: Massive frozen citadel with aurora effect
   
-  const baseWidth = 24 + level * 6;
-  const spireHeight = 75 + level * 20;
+  const baseWidth = 28;
+  const spireHeight = 58;
   
   if (level === 1) {
     // Simple frozen base

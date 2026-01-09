@@ -66,7 +66,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'archer',
     level: 3,
-    upgradeCost: 130,
+    upgradeCost: 250,  // Increased from 130 - late game investment
     description: 'Master archer. Elite single-target damage.',
     stats: {
       range: 250,
@@ -86,8 +86,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'High attack speed, low damage. Weak vs armor.',
     stats: {
       range: 180,
-      fireRate: 300,
-      damage: 6
+      fireRate: 280,
+      damage: 8
     }
   },
   rapidfire_2: {
@@ -100,8 +100,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Even faster attacks. Shreds unarmored targets.',
     stats: {
       range: 190,
-      fireRate: 250,
-      damage: 9
+      fireRate: 220,
+      damage: 13
     }
   },
   rapidfire_3: {
@@ -110,12 +110,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'rapidfire',
     level: 3,
-    upgradeCost: 220,
+    upgradeCost: 380,  // Increased from 220 - late game investment
     description: 'Machine gun fury. Devastating DPS.',
     stats: {
       range: 200,
-      fireRate: 220,
-      damage: 12
+      fireRate: 180,
+      damage: 18
     }
   },
 
@@ -158,7 +158,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'sniper',
     level: 3,
-    upgradeCost: 260,
+    upgradeCost: 420,  // Increased from 260 - late game investment
     description: 'Assassin elite. 30% crit with 2.5x damage.',
     stats: {
       range: 550,
@@ -206,7 +206,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'rockcannon',
     level: 3,
-    upgradeCost: 240,
+    upgradeCost: 400,  // Increased from 240 - late game investment
     description: 'Devastation. 150px splash radius.',
     stats: {
       range: 260,
@@ -223,7 +223,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'icetower',
     level: 1,
-    upgradeCost: 130,
+    upgradeCost: 100,
     description: 'Slows enemies by 40% for 2s. Ignores armor.',
     stats: {
       range: 180,
@@ -239,7 +239,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'icetower',
     level: 2,
-    upgradeCost: 150,
+    upgradeCost: 120,
     description: 'Freezing cold. 50% slow for 2.5s.',
     stats: {
       range: 200,
@@ -255,7 +255,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'icetower',
     level: 3,
-    upgradeCost: 190,
+    upgradeCost: 240,
     description: 'Absolute zero. 60% slow for 3s.',
     stats: {
       range: 220,
@@ -273,7 +273,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'poison',
     level: 1,
-    upgradeCost: 130,
+    upgradeCost: 100,
     description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor.',
     stats: {
       range: 200,
@@ -289,7 +289,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'poison',
     level: 2,
-    upgradeCost: 150,
+    upgradeCost: 120,
     description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x.',
     stats: {
       range: 220,
@@ -305,7 +305,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'poison',
     level: 3,
-    upgradeCost: 190,
+    upgradeCost: 240,
     description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x.',
     stats: {
       range: 240,

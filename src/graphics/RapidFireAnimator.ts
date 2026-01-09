@@ -39,7 +39,7 @@ export class RapidFireAnimator {
   private muzzleFlashTimer: number = 0;
   
   // Tower heights per level (Y position of turret pivot from tower base at y=0)
-  private readonly TURRET_Y = [-57, -69, -81]; // Negative because up is negative Y
+  private readonly TURRET_Y = [-29, -35, -41]; // Negative because up is negative Y
   
   // Barrel tip offset from turret center (for projectile spawn)
   private readonly BARREL_LENGTH = [25, 30, 45];
@@ -54,6 +54,7 @@ export class RapidFireAnimator {
     // Create turret container that will rotate as a unit
     // Position it at the top of the tower
     this.turretContainer = scene.add.container(0, this.TURRET_Y[level - 1]);
+    this.turretContainer.setScale(1.3);  // Scale up character 30%
     
     // Create graphics for rotating parts (all drawn centered at 0,0)
     this.turretGraphics = scene.add.graphics();
@@ -220,11 +221,11 @@ export class RapidFireAnimator {
     const g = this.baseGraphics;
     g.clear();
     
-    const baseWidth = 25 + this.level * 6;
+    const baseWidth = 30;
     
-    // Shadow
+    // Shadow - consistent size
     g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 50 + this.level * 8, 18 + this.level * 2);
+    g.fillEllipse(0, 25, 52, 18);
     
     if (this.level === 1) {
       // Simple sandbag base

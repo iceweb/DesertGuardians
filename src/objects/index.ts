@@ -8,3 +8,6 @@ export { Projectile } from './Projectile';
 export type { ProjectileConfig } from './Projectile';
 export { StatusEffectHandler } from './StatusEffectHandler';
 export type { PoisonStack } from './StatusEffectHandler';
+export { CreepAbilities } from './CreepAbilities';
+export type { AbilityState, AbilityCallbacks } from './CreepAbilities';
+export { CreepEffects } from './CreepEffects';

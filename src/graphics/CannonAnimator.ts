@@ -39,7 +39,7 @@ export class CannonAnimator {
   private cheerArmAngle: number = 0;
   
   // Tower heights per level (Y position of operator from tower base at y=0)
-  private readonly OPERATOR_Y = [-60, -75, -90];
+  private readonly OPERATOR_Y = [-30, -38, -45];
   
   // Cannon barrel length for projectile spawn
   private readonly BARREL_LENGTH = [25, 32, 42];
@@ -53,6 +53,7 @@ export class CannonAnimator {
     
     // Create cannon container that will rotate as a unit
     this.cannonContainer = scene.add.container(0, this.OPERATOR_Y[level - 1]);
+    this.cannonContainer.setScale(1.3);  // Scale up character 30%
     
     // Create graphics for rotating parts
     this.operatorGraphics = scene.add.graphics();
@@ -208,12 +209,12 @@ export class CannonAnimator {
     
     const level = this.level;
     
-    // Shadow
+    // Shadow - consistent size
     g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 55 + level * 6, 20 + level * 2);
+    g.fillEllipse(0, 25, 55, 20);
     
-    const baseWidth = 32 + level * 6;
-    const towerHeight = 45 + level * 15;
+    const baseWidth = 36;
+    const towerHeight = 38;
     
     // Base platform - reinforced concrete/metal
     if (level === 1) {
@@ -329,12 +330,12 @@ export class CannonAnimator {
     // Platform for cannon
     const platY = this.OPERATOR_Y[level - 1] + 12;
     g.fillStyle(0x4a4a4a, 1);
-    g.fillEllipse(0, platY, 35 + level * 4, 14 + level * 2);
+    g.fillEllipse(0, platY, 34, 14);
     g.fillStyle(0x5a5a5a, 1);
-    g.fillEllipse(0, platY - 2, 30 + level * 4, 12 + level * 2);
+    g.fillEllipse(0, platY - 2, 30, 12);
     // Rotation ring
     g.lineStyle(2, 0x3a3a3a, 1);
-    g.strokeEllipse(0, platY - 2, 28 + level * 4, 10 + level * 2);
+    g.strokeEllipse(0, platY - 2, 28, 10);
   }
   
   /**
@@ -373,7 +374,7 @@ export class CannonAnimator {
     
     // === SHOULDERS/BODY ===
     g.fillStyle(uniformColor, 1);
-    g.fillEllipse(0, bodyY + 4, 26 + this.level * 2, 16 + this.level);
+    g.fillEllipse(0, bodyY + 4, 30, 18);
     g.fillStyle(uniformDark, 1);
     g.fillEllipse(-10, bodyY + 4, 6, 12);
     g.fillEllipse(10, bodyY + 4, 6, 12);
@@ -431,7 +432,7 @@ export class CannonAnimator {
     
     // === SHOULDERS/BODY ===
     g.fillStyle(uniformColor, 1);
-    g.fillEllipse(0, bodyY + 4, 26 + this.level * 2, 16 + this.level);
+    g.fillEllipse(0, bodyY + 4, 30, 18);
     g.fillStyle(uniformDark, 1);
     g.fillEllipse(-10, bodyY + 4, 6, 12);
     g.fillEllipse(10, bodyY + 4, 6, 12);

@@ -4,16 +4,16 @@ import Phaser from 'phaser';
  * RapidFire tower graphics rendering.
  */
 export function drawRapidFireTower(g: Phaser.GameObjects.Graphics, level: number): void {
-  // Shadow
+  // Shadow - consistent size for all levels
   g.fillStyle(0x000000, 0.3);
-  g.fillEllipse(0, 25, 50 + level * 8, 18 + level * 2);
+  g.fillEllipse(0, 25, 52, 18);
   
   // Level 1: Simple machine gun post
   // Level 2: Reinforced bunker with dual guns
   // Level 3: Advanced gatling fortress with rotating barrels
   
-  const baseWidth = 25 + level * 6;
-  const towerHeight = 50 + level * 12;
+  const baseWidth = 30;
+  const towerHeight = 37;
   
   if (level === 1) {
     // Simple sandbag base

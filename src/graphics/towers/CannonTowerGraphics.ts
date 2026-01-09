@@ -4,16 +4,16 @@ import Phaser from 'phaser';
  * Rock Cannon tower graphics rendering.
  */
 export function drawRockCannonTower(g: Phaser.GameObjects.Graphics, level: number): void {
-  // Shadow
+  // Shadow - consistent size for all levels
   g.fillStyle(0x000000, 0.3);
-  g.fillEllipse(0, 28, 55 + level * 10, 20 + level * 3);
+  g.fillEllipse(0, 28, 55, 20);
   
   // Level 1: Simple catapult
   // Level 2: Reinforced trebuchet
   // Level 3: Massive siege cannon with glowing core
   
-  const baseWidth = 30 + level * 8;
-  const towerHeight = 45 + level * 12;
+  const baseWidth = 36;
+  const towerHeight = 35;
   
   if (level === 1) {
     // Wooden base

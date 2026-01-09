@@ -16,7 +16,7 @@ export class GameScene extends Phaser.Scene {
   private audioManager!: AudioManager;
 
   // Game state
-  private gold: number = 180;
+  private gold: number = 220;
   private castleHP: number = 10;
   private gameOver: boolean = false;
   
@@ -33,7 +33,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     // Reset game state
-    this.gold = 180;
+    this.gold = 220;
     this.castleHP = 10;
     this.gameOver = false;
     this.virtualGameTime = 0;
@@ -54,6 +54,7 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize wave manager
     this.waveManager = new WaveManager(this, this.creepManager);
+    this.waveManager.setPathSystem(this.pathSystem);
     this.setupWaveCallbacks();
 
     // Initialize tower manager
@@ -166,11 +167,9 @@ export class GameScene extends Phaser.Scene {
       console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
       this.audioManager.playSFX('wave_complete');
       
-      // Calculate wave bonus: base 20 gold + 15% interest on current gold, capped at 75
-      // Rewards both progression and saving gold
-      const baseBonus = 20;
-      const interestBonus = Math.min(55, Math.floor(this.gold * 0.15));
-      const waveBonus = baseBonus + interestBonus;
+      // Calculate wave bonus: starts at 25, increases by 14 every 5 waves
+      // Waves 1-5: 25g, Waves 6-10: 39g, Waves 11-15: 53g, Waves 16-20: 67g, Waves 21-25: 81g
+      const waveBonus = 25 + Math.floor((waveNumber - 1) / 5) * 14;
       
       // Show wave bonus animation, then proceed to next wave
       this.hudManager.showWaveBonus(waveNumber, waveBonus, () => {
@@ -308,6 +307,9 @@ export class GameScene extends Phaser.Scene {
     // Update all creeps with scaled delta
     this.creepManager.update(scaledDelta);
     
+    // Update wave manager (for sequential group spawning)
+    this.waveManager.update();
+    
     // Update all projectiles with scaled delta
     this.projectileManager.update(scaledDelta);
     
@@ -419,14 +421,25 @@ export class GameScene extends Phaser.Scene {
   /**
    * Find the best target for a tower
    */
-  private findTarget(tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string }, creeps: Creep[]): Creep | null {
+  private findTarget(tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string; getBranch?: () => string }, creeps: Creep[]): Creep | null {
     const priority = tower.getTargetPriority();
+    const branch = tower.getBranch?.() || '';
+    
+    // Ground-only towers cannot target flying creeps
+    const isGroundOnly = branch === 'rockcannon' || branch === 'poison';
+    
     let bestTarget: Creep | null = null;
     let bestValue = -Infinity;
     
     for (const creep of creeps) {
       if (!creep.getIsActive()) continue;
       if (!tower.isInRange(creep.x, creep.y)) continue;
+      
+      // Check if creep can be targeted (not burrowed, not in ghost phase)
+      if (!creep.canBeTargeted()) continue;
+      
+      // Ground-only towers cannot target flying creeps
+      if (isGroundOnly && creep.isFlying()) continue;
       
       let value: number;
       
