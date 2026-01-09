@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, HUDManager } from '../managers';
+import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, HUDManager, AudioManager } from '../managers';
 import type { ProjectileConfig } from '../objects';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
@@ -13,6 +13,7 @@ export class GameScene extends Phaser.Scene {
   private projectileManager!: ProjectileManager;
   private environment!: GameEnvironment;
   private hudManager!: HUDManager;
+  private audioManager!: AudioManager;
 
   // Game state
   private gold: number = 200;
@@ -61,6 +62,7 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize projectile manager
     this.projectileManager = new ProjectileManager(this, this.creepManager);
+    this.setupProjectileCallbacks();
 
     // Initialize and draw environment
     this.environment = new GameEnvironment(this, this.pathSystem);
@@ -71,6 +73,11 @@ export class GameScene extends Phaser.Scene {
     this.hudManager.create(this.waveManager.getTotalWaves());
     this.hudManager.setCastlePosition(this.environment.getCastlePosition());
     this.setupHUDCallbacks();
+
+    // Initialize audio manager and start BGM
+    this.audioManager = AudioManager.getInstance();
+    this.audioManager.initialize();
+    this.audioManager.playBGM();
 
     // Launch UIScene as overlay
     this.scene.launch('UIScene');
@@ -92,6 +99,7 @@ export class GameScene extends Phaser.Scene {
     this.towerManager.onTowerBuilt = (_tower, cost) => {
       this.gold -= cost;
       this.hudManager.updateGold(this.gold);
+      this.audioManager.playSFX('build_thud');
       console.log(`Tower built! Cost: ${cost}g, Remaining gold: ${this.gold}`);
     };
 
@@ -99,6 +107,7 @@ export class GameScene extends Phaser.Scene {
     this.towerManager.onTowerSold = (_tower, refund) => {
       this.gold += refund;
       this.hudManager.updateGold(this.gold);
+      this.audioManager.playSFX('sell_tower');
       console.log(`Tower sold! Refund: ${refund}g, Total gold: ${this.gold}`);
     };
 
@@ -106,8 +115,28 @@ export class GameScene extends Phaser.Scene {
     this.towerManager.onTowerUpgraded = (_tower, cost) => {
       this.gold -= cost;
       this.hudManager.updateGold(this.gold);
+      this.audioManager.playSFX('upgrade_tower');
       console.log(`Tower upgraded! Cost: ${cost}g, Remaining gold: ${this.gold}`);
     };
+  }
+
+  /**
+   * Setup projectile manager event callbacks for hit sounds
+   */
+  private setupProjectileCallbacks(): void {
+    this.projectileManager.on('hit', (hitType: 'shield' | 'armor' | 'flesh') => {
+      switch (hitType) {
+        case 'shield':
+          this.audioManager.playSFX('hit_shield');
+          break;
+        case 'armor':
+          this.audioManager.playSFX('hit_armor');
+          break;
+        case 'flesh':
+          this.audioManager.playSFX('hit_flesh');
+          break;
+      }
+    });
   }
 
   /**
@@ -121,6 +150,7 @@ export class GameScene extends Phaser.Scene {
       console.log(`Wave ${waveNumber} started!`);
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
+      this.audioManager.playSFX('wave_start');
       
       // Track game start time when wave 1 begins
       if (waveNumber === 1 && !this.hasGameStarted) {
@@ -134,6 +164,7 @@ export class GameScene extends Phaser.Scene {
 
     this.waveManager.onWaveComplete = (waveNumber: number) => {
       console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
+      this.audioManager.playSFX('wave_complete');
       
       // Calculate wave bonus: base 15 gold + 3 per wave (Wave 1: 18g, Wave 10: 45g, Wave 25: 90g)
       const waveBonus = 15 + (waveNumber * 3);
@@ -158,6 +189,7 @@ export class GameScene extends Phaser.Scene {
     this.waveManager.onAllWavesComplete = () => {
       console.log('All waves complete! Victory!');
       this.gameOver = true;
+      this.audioManager.playSFX('victory');
       this.goToResults(true);
     };
 
@@ -165,6 +197,7 @@ export class GameScene extends Phaser.Scene {
       this.gold += goldReward;
       this.hudManager.showFloatingText(`+${goldReward}`, deathX, deathY, 0xffd700);
       this.hudManager.updateGold(this.gold);
+      this.audioManager.playSFX('gold_earn');
       
       // Emit event to UIScene
       this.registry.events.emit('creep-killed', goldReward);
@@ -173,6 +206,7 @@ export class GameScene extends Phaser.Scene {
     this.waveManager.onCreepLeaked = () => {
       this.castleHP--;
       this.hudManager.updateCastleHP(this.castleHP);
+      this.audioManager.playSFX('creep_leak');
       
       // Camera shake for damage feedback
       this.cameras.main.shake(200, 0.01);
@@ -182,6 +216,7 @@ export class GameScene extends Phaser.Scene {
       
       if (this.castleHP <= 0 && !this.gameOver) {
         this.gameOver = true;
+        this.audioManager.playSFX('defeat');
         this.goToResults(false);
       }
     };
@@ -276,8 +311,33 @@ export class GameScene extends Phaser.Scene {
     // Update tower manager (for UI refresh on gold change)
     this.towerManager.update();
     
+    // Update all towers (for animations)
+    this.updateTowers(scaledDelta);
+    
     // Tower combat - find targets and fire (uses virtual time)
     this.updateTowerCombat();
+  }
+
+  /**
+   * Update all towers (for animations like rapidfire turret rotation)
+   */
+  private updateTowers(delta: number): void {
+    const towers = this.towerManager.getTowers();
+    const creeps = this.creepManager.getActiveCreeps();
+    
+    for (const tower of towers) {
+      // Find potential target for turret tracking (even if can't fire yet)
+      const target = this.findTarget(tower, creeps);
+      
+      if (target) {
+        tower.setCurrentTarget({ x: target.x, y: target.y });
+      } else {
+        tower.setCurrentTarget(null);
+      }
+      
+      // Update tower animations
+      tower.update(delta);
+    }
   }
 
   /**
@@ -297,6 +357,15 @@ export class GameScene extends Phaser.Scene {
       const target = this.findTarget(tower, creeps);
       
       if (target) {
+        // Trigger tower's fire animation FIRST (for animated towers like rapidfire)
+        // This also calculates barrel tip position for projectile spawn
+        tower.onFire();
+        
+        // Get projectile spawn position (barrel tip for rapidfire, default offset for others)
+        const spawnOffset = tower.getProjectileSpawnOffset();
+        const spawnX = tower.x + spawnOffset.x;
+        const spawnY = tower.y + spawnOffset.y;
+        
         // Fire projectile
         const config: ProjectileConfig = {
           speed: 400,
@@ -307,9 +376,40 @@ export class GameScene extends Phaser.Scene {
           level: tower.getLevel()
         };
         
-        this.projectileManager.fire(tower.x, tower.y - 40, target, config);
+        const projectile = this.projectileManager.fire(spawnX, spawnY, target, config, tower);
+        if (!projectile) continue;
+        
         tower.recordFire(currentTime);
+        
+        // Play tower-specific shooting sound
+        this.playTowerShootSound(tower.getBranch());
       }
+    }
+  }
+
+  /**
+   * Play shooting sound based on tower type
+   */
+  private playTowerShootSound(branch: string): void {
+    switch (branch) {
+      case 'archer':
+        this.audioManager.playSFX('shoot_arrow');
+        break;
+      case 'rapidfire':
+        this.audioManager.playSFX('shoot_rapidfire');
+        break;
+      case 'sniper':
+        this.audioManager.playSFX('shoot_sniper');
+        break;
+      case 'rockcannon':
+        this.audioManager.playSFX('shoot_cannon');
+        break;
+      case 'icetower':
+        this.audioManager.playSFX('shoot_ice');
+        break;
+      case 'poison':
+        this.audioManager.playSFX('shoot_poison');
+        break;
     }
   }
 

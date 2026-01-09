@@ -53,8 +53,10 @@ export class TowerUIManager {
     
     const canPlace = this.canPlaceAt?.(x, y) ?? false;
     const config = TOWER_CONFIGS['archer_1'];
-    const TOWER_RADIUS = 30;
+    const TOWER_RADIUS = 25;
     
+    // Only show placement preview when position is valid
+    // Invalid positions just show default arrow cursor
     if (canPlace) {
       this.placementGraphics.lineStyle(3, 0x00ff00, 0.8);
       this.placementGraphics.strokeCircle(x, y, TOWER_RADIUS);
@@ -62,12 +64,8 @@ export class TowerUIManager {
       this.placementGraphics.fillCircle(x, y, TOWER_RADIUS);
       this.placementGraphics.lineStyle(1, 0x00ff00, 0.3);
       this.placementGraphics.strokeCircle(x, y, config.stats.range);
-    } else {
-      this.placementGraphics.lineStyle(3, 0xff0000, 0.8);
-      this.placementGraphics.strokeCircle(x, y, TOWER_RADIUS);
-      this.placementGraphics.fillStyle(0xff0000, 0.2);
-      this.placementGraphics.fillCircle(x, y, TOWER_RADIUS);
     }
+    // No red circle for invalid positions - just clear and show nothing
   }
 
   /**
@@ -222,8 +220,8 @@ export class TowerUIManager {
     
     const hasBranches = upgradeOptions.branches && upgradeOptions.branches.length > 0;
     const hasLevelUp = !!upgradeOptions.levelUp;
-    const menuWidth = hasBranches ? 520 : 420;
-    const menuHeight = hasBranches ? (hasLevelUp ? 320 : 280) : 200;
+    const menuWidth = hasBranches ? 600 : 420;
+    const menuHeight = hasBranches ? 280 : 200;
     
     this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - (menuHeight / 2) - 40);
     this.upgradeMenuContainer.setDepth(200);
@@ -285,7 +283,9 @@ export class TowerUIManager {
       const startX = -((branches.length - 1) * btnWidth) / 2;
       
       branches.forEach((branch, index) => {
-        const branchConfig = TOWER_CONFIGS[`${branch}_1`];
+        // For archer branch from archer L1, use archer_2 (upgrade path)
+        const branchKey = branch === 'archer' ? 'archer_2' : `${branch}_1`;
+        const branchConfig = TOWER_CONFIGS[branchKey];
         if (!branchConfig) return;
         
         const bx = startX + index * btnWidth;
@@ -323,7 +323,7 @@ export class TowerUIManager {
           const hitArea = this.scene.add.rectangle(bx, by + btnHeight / 2, 86, btnHeight, 0xffffff, 0);
           hitArea.setInteractive({ useHandCursor: true });
           hitArea.on('pointerdown', () => {
-            this.onUpgradeRequested?.(tower, `${branch}_1`);
+            this.onUpgradeRequested?.(tower, branchKey);
           });
           hitArea.on('pointerover', () => {
             btn.clear();
@@ -346,7 +346,8 @@ export class TowerUIManager {
       yOffset += btnHeight + 15;
     }
     
-    if (hasLevelUp) {
+    // Only show levelUp button when no branches displayed (branches include archer upgrade)
+    if (hasLevelUp && !hasBranches) {
       const levelUpConfig = TOWER_CONFIGS[upgradeOptions.levelUp!];
       if (levelUpConfig) {
         const cost = levelUpConfig.upgradeCost;
@@ -384,7 +385,7 @@ export class TowerUIManager {
     }
     
     const sellValue = tower.getSellValue();
-    const sellBtn = this.scene.add.text(120, yOffset + 15, `Sell: ${sellValue}g`, {
+    const sellBtn = this.scene.add.text(0, yOffset + 15, `Sell: ${sellValue}g`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: '#ff6666',

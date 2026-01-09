@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 import type { Highscore } from './ResultsScene';
+import { AudioManager } from '../managers';
 
 const HIGHSCORES_KEY = 'tower_defense_highscores';
 
 export class MenuScene extends Phaser.Scene {
   private highscoreContainer: Phaser.GameObjects.Container | null = null;
+  private settingsContainer: Phaser.GameObjects.Container | null = null;
+  private audioManager!: AudioManager;
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -13,6 +16,10 @@ export class MenuScene extends Phaser.Scene {
   create(): void {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
+
+    // Initialize audio manager
+    this.audioManager = AudioManager.getInstance();
+    this.audioManager.initialize();
 
     // Background
     this.cameras.main.setBackgroundColor('#1a0a00'); // Dark desert night
@@ -56,6 +63,7 @@ export class MenuScene extends Phaser.Scene {
     });
 
     startButton.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
       this.startGame();
     });
 
@@ -79,11 +87,36 @@ export class MenuScene extends Phaser.Scene {
     });
 
     highscoresButton.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
       this.showHighscores();
     });
 
+    // Settings button
+    const settingsButton = this.add.text(width / 2, height / 2 + 185, '⚙  Settings', {
+      fontFamily: 'Arial',
+      fontSize: '24px',
+      color: '#ffffff',
+      backgroundColor: '#3a2a18',
+      padding: { x: 20, y: 10 }
+    });
+    settingsButton.setOrigin(0.5);
+    settingsButton.setInteractive({ useHandCursor: true });
+
+    settingsButton.on('pointerover', () => {
+      settingsButton.setStyle({ backgroundColor: '#5a4228' });
+    });
+
+    settingsButton.on('pointerout', () => {
+      settingsButton.setStyle({ backgroundColor: '#3a2a18' });
+    });
+
+    settingsButton.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
+      this.showSettings();
+    });
+
     // Version text
-    const version = this.add.text(width - 10, height - 10, 'v0.9.0 - Step 9', {
+    const version = this.add.text(width - 10, height - 10, 'v1.0.0 - Step 10', {
       fontFamily: 'Arial',
       fontSize: '12px',
       color: '#666666'
@@ -232,7 +265,10 @@ export class MenuScene extends Phaser.Scene {
     
     closeBtn.on('pointerover', () => closeBtn.setStyle({ backgroundColor: '#6b4d30' }));
     closeBtn.on('pointerout', () => closeBtn.setStyle({ backgroundColor: '#4a3520' }));
-    closeBtn.on('pointerdown', () => this.closeHighscores());
+    closeBtn.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
+      this.closeHighscores();
+    });
     
     this.highscoreContainer.add(closeBtn);
     
@@ -282,5 +318,194 @@ export class MenuScene extends Phaser.Scene {
     const day = date.getDate().toString().padStart(2, '0');
     const year = date.getFullYear().toString().slice(-2);
     return `${month}/${day}/${year}`;
+  }
+
+  /**
+   * Show settings modal with volume controls
+   */
+  private showSettings(): void {
+    // If already showing, close it
+    if (this.settingsContainer) {
+      this.closeSettings();
+      return;
+    }
+    
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    this.settingsContainer = this.add.container(width / 2, height / 2);
+    this.settingsContainer.setDepth(100);
+    
+    // Background panel
+    const bg = this.add.graphics();
+    bg.fillStyle(0x1a0a00, 0.98);
+    bg.fillRoundedRect(-200, -150, 400, 300, 16);
+    bg.lineStyle(3, 0xd4a574, 1);
+    bg.strokeRoundedRect(-200, -150, 400, 300, 16);
+    this.settingsContainer.add(bg);
+    
+    // Title
+    const title = this.add.text(0, -120, '⚙ SETTINGS', {
+      fontFamily: 'Arial Black',
+      fontSize: '28px',
+      color: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+    this.settingsContainer.add(title);
+    
+    // BGM Volume
+    this.createVolumeSlider('Music', -50, this.audioManager.getBGMVolume(), (value) => {
+      this.audioManager.setBGMVolume(value);
+    });
+    
+    // SFX Volume  
+    this.createVolumeSlider('Effects', 20, this.audioManager.getSFXVolume(), (value) => {
+      this.audioManager.setSFXVolume(value);
+    });
+    
+    // Close button
+    const closeBtn = this.add.text(0, 110, '✕ Close', {
+      fontFamily: 'Arial',
+      fontSize: '20px',
+      color: '#ffffff',
+      backgroundColor: '#4a3520',
+      padding: { x: 25, y: 10 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    
+    closeBtn.on('pointerover', () => closeBtn.setStyle({ backgroundColor: '#6b4d30' }));
+    closeBtn.on('pointerout', () => closeBtn.setStyle({ backgroundColor: '#4a3520' }));
+    closeBtn.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
+      this.closeSettings();
+    });
+    
+    this.settingsContainer.add(closeBtn);
+    
+    // Fade in animation
+    this.settingsContainer.setAlpha(0);
+    this.tweens.add({
+      targets: this.settingsContainer,
+      alpha: 1,
+      duration: 200
+    });
+  }
+
+  /**
+   * Create a volume slider control
+   */
+  private createVolumeSlider(label: string, y: number, initialValue: number, onChange: (value: number) => void): void {
+    if (!this.settingsContainer) return;
+    
+    // Label
+    const labelText = this.add.text(-150, y, label + ':', {
+      fontFamily: 'Arial',
+      fontSize: '18px',
+      color: '#c9a86c'
+    }).setOrigin(0, 0.5);
+    this.settingsContainer.add(labelText);
+    
+    // Slider track
+    const trackWidth = 200;
+    const trackHeight = 8;
+    const trackX = -50;
+    
+    const track = this.add.graphics();
+    track.fillStyle(0x2a1a08, 1);
+    track.fillRoundedRect(trackX, y - trackHeight / 2, trackWidth, trackHeight, 4);
+    track.lineStyle(1, 0x4a3520, 1);
+    track.strokeRoundedRect(trackX, y - trackHeight / 2, trackWidth, trackHeight, 4);
+    this.settingsContainer.add(track);
+    
+    // Filled portion
+    const fill = this.add.graphics();
+    this.settingsContainer.add(fill);
+    
+    // Slider handle
+    const handle = this.add.graphics();
+    handle.fillStyle(0xd4a574, 1);
+    handle.fillCircle(0, 0, 12);
+    handle.lineStyle(2, 0xffd700, 1);
+    handle.strokeCircle(0, 0, 12);
+    handle.setPosition(trackX + initialValue * trackWidth, y);
+    handle.setInteractive(new Phaser.Geom.Circle(0, 0, 15), Phaser.Geom.Circle.Contains);
+    handle.input!.cursor = 'pointer';
+    this.settingsContainer.add(handle);
+    
+    // Value text
+    const valueText = this.add.text(trackX + trackWidth + 20, y, `${Math.round(initialValue * 100)}%`, {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#ffffff'
+    }).setOrigin(0, 0.5);
+    this.settingsContainer.add(valueText);
+    
+    // Update fill
+    const updateFill = (value: number) => {
+      fill.clear();
+      fill.fillStyle(0xd4a574, 1);
+      fill.fillRoundedRect(trackX, y - trackHeight / 2, value * trackWidth, trackHeight, 4);
+    };
+    updateFill(initialValue);
+    
+    // Drag handling
+    let isDragging = false;
+    
+    handle.on('pointerdown', () => {
+      isDragging = true;
+    });
+    
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (!isDragging || !this.settingsContainer) return;
+      
+      // Convert to container-local coordinates
+      const localX = pointer.x - this.settingsContainer.x;
+      const clampedX = Phaser.Math.Clamp(localX, trackX, trackX + trackWidth);
+      const value = (clampedX - trackX) / trackWidth;
+      
+      handle.setX(clampedX);
+      valueText.setText(`${Math.round(value * 100)}%`);
+      updateFill(value);
+      onChange(value);
+    });
+    
+    this.input.on('pointerup', () => {
+      isDragging = false;
+    });
+    
+    // Click on track to jump
+    const trackHitArea = this.add.rectangle(trackX + trackWidth / 2, y, trackWidth, 30, 0x000000, 0);
+    trackHitArea.setInteractive({ useHandCursor: true });
+    this.settingsContainer.add(trackHitArea);
+    
+    trackHitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (!this.settingsContainer) return;
+      const localX = pointer.x - this.settingsContainer.x;
+      const clampedX = Phaser.Math.Clamp(localX, trackX, trackX + trackWidth);
+      const value = (clampedX - trackX) / trackWidth;
+      
+      handle.setX(clampedX);
+      valueText.setText(`${Math.round(value * 100)}%`);
+      updateFill(value);
+      onChange(value);
+      this.audioManager.playSFX('ui_click');
+    });
+  }
+
+  /**
+   * Close settings modal
+   */
+  private closeSettings(): void {
+    if (this.settingsContainer) {
+      this.tweens.add({
+        targets: this.settingsContainer,
+        alpha: 0,
+        duration: 150,
+        onComplete: () => {
+          this.settingsContainer?.destroy();
+          this.settingsContainer = null;
+        }
+      });
+    }
   }
 }

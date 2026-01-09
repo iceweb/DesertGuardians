@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Creep } from './Creep';
 import type { TowerBranch, TowerStats } from './Tower';
+import type { Tower } from './Tower';
 
 export interface ProjectileConfig {
   speed: number;
@@ -20,6 +21,7 @@ export class Projectile extends Phaser.GameObjects.Container {
   private config: ProjectileConfig | null = null;
   private isActive: boolean = false;
   private speed: number = 400;
+  private sourceTower: Tower | null = null;
   
   // Trail effect
   private trail: Phaser.GameObjects.Graphics;
@@ -43,13 +45,14 @@ export class Projectile extends Phaser.GameObjects.Container {
   /**
    * Fire the projectile at a target
    */
-  fire(x: number, y: number, target: Creep, config: ProjectileConfig): void {
+  fire(x: number, y: number, target: Creep, config: ProjectileConfig, sourceTower?: Tower): void {
     this.setPosition(x, y);
     this.target = target;
     this.config = config;
     this.speed = config.speed;
     this.isActive = true;
     this.trailPositions = [];
+    this.sourceTower = sourceTower || null;
     
     this.setActive(true);
     this.setVisible(true);
@@ -388,8 +391,22 @@ export class Projectile extends Phaser.GameObjects.Container {
       }
     }
     
+    // Emit hit event for audio (before takeDamage modifies shield/armor state)
+    const hitType = this.target.getShieldHitsRemaining() > 0 ? 'shield' 
+      : this.target.getConfig().armor > 0 ? 'armor' 
+      : 'flesh';
+    this.emit('hit', hitType);
+    
+    // Check if target was alive before damage
+    const wasAlive = this.target.getIsActive();
+    
     // Apply damage
     this.target.takeDamage(damage, this.config.isMagic);
+    
+    // Check if we killed the target
+    if (wasAlive && !this.target.getIsActive() && this.sourceTower) {
+      this.emit('kill', this.sourceTower);
+    }
     
     // Special effects
     this.applySpecialEffects();

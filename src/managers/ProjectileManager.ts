@@ -3,11 +3,13 @@ import { Projectile } from '../objects/Projectile';
 import type { ProjectileConfig } from '../objects/Projectile';
 import { Creep } from '../objects/Creep';
 import { CreepManager } from './CreepManager';
+import type { Tower } from '../objects/Tower';
 
 /**
  * ProjectileManager handles object pooling and lifecycle of all projectiles.
+ * Extends EventEmitter to allow GameScene to listen for hit events for audio.
  */
-export class ProjectileManager {
+export class ProjectileManager extends Phaser.Events.EventEmitter {
   private scene: Phaser.Scene;
   private creepManager: CreepManager;
   private pool: Projectile[] = [];
@@ -15,6 +17,7 @@ export class ProjectileManager {
   private readonly POOL_SIZE = 100;
 
   constructor(scene: Phaser.Scene, creepManager: CreepManager) {
+    super();
     this.scene = scene;
     this.creepManager = creepManager;
     
@@ -34,6 +37,12 @@ export class ProjectileManager {
       // Listen for splash damage events
       projectile.on('splash', this.handleSplash, this);
       
+      // Listen for hit events and forward to GameScene for audio
+      projectile.on('hit', this.handleHit, this);
+      
+      // Listen for kill events to notify source tower
+      projectile.on('kill', this.handleKill, this);
+      
       this.pool.push(projectile);
     }
     
@@ -51,7 +60,7 @@ export class ProjectileManager {
   /**
    * Fire a projectile from a tower at a target
    */
-  fire(x: number, y: number, target: Creep, config: ProjectileConfig): Projectile | null {
+  fire(x: number, y: number, target: Creep, config: ProjectileConfig, sourceTower?: Tower): Projectile | null {
     const projectile = this.getFromPool();
     
     if (!projectile) {
@@ -59,10 +68,24 @@ export class ProjectileManager {
       return null;
     }
     
-    projectile.fire(x, y, target, config);
+    projectile.fire(x, y, target, config, sourceTower);
     this.activeProjectiles.push(projectile);
     
     return projectile;
+  }
+
+  /**
+   * Handle hit event from projectile and forward it for audio
+   */
+  private handleHit(hitType: 'shield' | 'armor' | 'flesh'): void {
+    this.emit('hit', hitType);
+  }
+
+  /**
+   * Handle kill event - notify the source tower for animations
+   */
+  private handleKill(tower: Tower): void {
+    tower.onKill();
   }
 
   /**

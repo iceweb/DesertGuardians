@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { AudioManager } from '../managers';
 
 /**
  * Data passed from GameScene to ResultsScene
@@ -103,6 +104,10 @@ export class ResultsScene extends Phaser.Scene {
   create(): void {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
+    
+    // Stop game BGM
+    const audioManager = AudioManager.getInstance();
+    audioManager.stopBGM();
 
     this.cameras.main.setBackgroundColor('#1a0a00');
     
@@ -293,6 +298,7 @@ export class ResultsScene extends Phaser.Scene {
    */
   private createButtons(width: number, height: number): void {
     const buttonY = height - 70;
+    const audioManager = AudioManager.getInstance();
     
     // Submit/Save button
     const submitBtn = this.add.text(width / 2 - 120, buttonY, '💾 Save Score', {
@@ -305,7 +311,10 @@ export class ResultsScene extends Phaser.Scene {
     
     submitBtn.on('pointerover', () => submitBtn.setStyle({ backgroundColor: '#5a8540' }));
     submitBtn.on('pointerout', () => submitBtn.setStyle({ backgroundColor: '#4a7530' }));
-    submitBtn.on('pointerdown', () => this.saveScore());
+    submitBtn.on('pointerdown', () => {
+      audioManager.playSFX('ui_click');
+      this.saveScore();
+    });
     
     // Play Again button
     const playAgainBtn = this.add.text(width / 2 + 120, buttonY, '🔄 Play Again', {
@@ -318,7 +327,10 @@ export class ResultsScene extends Phaser.Scene {
     
     playAgainBtn.on('pointerover', () => playAgainBtn.setStyle({ backgroundColor: '#6b4d30' }));
     playAgainBtn.on('pointerout', () => playAgainBtn.setStyle({ backgroundColor: '#4a3520' }));
-    playAgainBtn.on('pointerdown', () => this.scene.start('GameScene'));
+    playAgainBtn.on('pointerdown', () => {
+      audioManager.playSFX('ui_click');
+      this.scene.start('GameScene');
+    });
     
     // Menu button
     const menuBtn = this.add.text(width / 2, buttonY + 50, '← Back to Menu', {
@@ -329,7 +341,10 @@ export class ResultsScene extends Phaser.Scene {
     
     menuBtn.on('pointerover', () => menuBtn.setColor('#ffffff'));
     menuBtn.on('pointerout', () => menuBtn.setColor('#888888'));
-    menuBtn.on('pointerdown', () => this.scene.start('MenuScene'));
+    menuBtn.on('pointerdown', () => {
+      audioManager.playSFX('ui_click');
+      this.scene.start('MenuScene');
+    });
   }
 
   /**

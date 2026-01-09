@@ -782,7 +782,9 @@ export class HUDManager {
     const hpText = this.scene.add.text(0, -14, `${Math.ceil(currentHP)} / ${maxHP}`, {
       fontFamily: 'Arial',
       fontSize: '10px',
-      color: '#ffffff'
+      color: '#000000',
+      stroke: '#ffffff',
+      strokeThickness: 2
     }).setOrigin(0.5);
     this.creepInfoContainer.add(hpText);
     

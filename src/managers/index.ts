@@ -10,3 +10,5 @@ export { TowerManager } from './TowerManager';
 export { TowerUIManager } from './TowerUIManager';
 export { ProjectileManager } from './ProjectileManager';
 export { HUDManager } from './HUDManager';
+export { AudioManager } from './AudioManager';
+export type { SFXKey } from './AudioManager';

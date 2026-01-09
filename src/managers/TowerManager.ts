@@ -18,7 +18,8 @@ export class TowerManager {
   
   // Settings
   private readonly PATH_BUFFER = 40;
-  private readonly TOWER_RADIUS = 30;
+  private readonly TOWER_RADIUS = 25;
+  private readonly TOWER_SPACING = 20; // Minimum gap between towers
   private readonly HUD_HEIGHT = 60;
   
   // Callbacks
@@ -159,7 +160,8 @@ export class TowerManager {
    * Check if position overlaps with existing tower
    */
   private isOverlappingTower(x: number, y: number, excludeTower?: Tower): boolean {
-    const minDist = this.TOWER_RADIUS * 2 + 10;
+    // Towers need 2x radius plus spacing gap between them
+    const minDist = this.TOWER_RADIUS * 2 + this.TOWER_SPACING;
     
     for (const tower of this.towers) {
       if (tower === excludeTower) continue;
