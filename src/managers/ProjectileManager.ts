@@ -83,24 +83,112 @@ export class ProjectileManager {
   }
 
   /**
-   * Show visual splash effect
+   * Show visual splash effect - explosion animation where cannonball lands
    */
   private showSplashEffect(x: number, y: number, radius: number): void {
-    const splash = this.scene.add.graphics();
-    splash.fillStyle(0xff6600, 0.4);
-    splash.fillCircle(x, y, radius);
-    splash.lineStyle(3, 0xff3300, 0.8);
-    splash.strokeCircle(x, y, radius);
-    splash.setDepth(25);
+    // Create main explosion flash - draw at origin and position the graphics
+    const explosionFlash = this.scene.add.graphics();
+    explosionFlash.setPosition(x, y);
+    explosionFlash.fillStyle(0xffaa00, 0.9);
+    explosionFlash.fillCircle(0, 0, radius * 0.3);
+    explosionFlash.setDepth(26);
     
     this.scene.tweens.add({
-      targets: splash,
+      targets: explosionFlash,
       alpha: 0,
-      scaleX: 1.3,
-      scaleY: 1.3,
-      duration: 300,
-      onComplete: () => splash.destroy()
+      scaleX: 3,
+      scaleY: 3,
+      duration: 150,
+      onComplete: () => explosionFlash.destroy()
     });
+    
+    // Create explosion ring - draw at origin and position the graphics
+    const explosionRing = this.scene.add.graphics();
+    explosionRing.setPosition(x, y);
+    explosionRing.lineStyle(4, 0xff6600, 1);
+    explosionRing.strokeCircle(0, 0, radius * 0.2);
+    explosionRing.setDepth(25);
+    
+    this.scene.tweens.add({
+      targets: explosionRing,
+      alpha: 0,
+      scaleX: 4,
+      scaleY: 4,
+      duration: 300,
+      onComplete: () => explosionRing.destroy()
+    });
+    
+    // Create debris particles flying outward
+    const numDebris = 8;
+    for (let i = 0; i < numDebris; i++) {
+      const angle = (i / numDebris) * Math.PI * 2 + Math.random() * 0.5;
+      const speed = 80 + Math.random() * 60;
+      const debris = this.scene.add.graphics();
+      debris.setPosition(x, y);
+      
+      // Random debris color (brown/grey rocks)
+      const colors = [0x8b4513, 0x696969, 0xa0522d, 0x808080];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = 3 + Math.random() * 4;
+      
+      debris.fillStyle(color, 1);
+      debris.fillCircle(0, 0, size);
+      debris.setDepth(24);
+      
+      const targetX = x + Math.cos(angle) * speed;
+      const targetY = y + Math.sin(angle) * speed;
+      
+      // Arc the debris upward then down
+      this.scene.tweens.add({
+        targets: debris,
+        x: targetX,
+        y: targetY,
+        alpha: 0,
+        duration: 400 + Math.random() * 200,
+        ease: 'Power2',
+        onComplete: () => debris.destroy()
+      });
+    }
+    
+    // Create dust cloud - draw at origin and position the graphics
+    const dustCloud = this.scene.add.graphics();
+    dustCloud.setPosition(x, y);
+    dustCloud.fillStyle(0xdeb887, 0.5);
+    dustCloud.fillCircle(0, 0, radius * 0.5);
+    dustCloud.setDepth(23);
+    
+    this.scene.tweens.add({
+      targets: dustCloud,
+      alpha: 0,
+      scaleX: 2,
+      scaleY: 1.5,
+      y: y - 20,
+      duration: 500,
+      onComplete: () => dustCloud.destroy()
+    });
+    
+    // Create smaller secondary explosions
+    for (let i = 0; i < 3; i++) {
+      const offsetX = (Math.random() - 0.5) * radius * 0.6;
+      const offsetY = (Math.random() - 0.5) * radius * 0.6;
+      
+      this.scene.time.delayedCall(50 + i * 40, () => {
+        const spark = this.scene.add.graphics();
+        spark.setPosition(x + offsetX, y + offsetY);
+        spark.fillStyle(0xffcc00, 0.8);
+        spark.fillCircle(0, 0, 8);
+        spark.setDepth(25);
+        
+        this.scene.tweens.add({
+          targets: spark,
+          alpha: 0,
+          scaleX: 2,
+          scaleY: 2,
+          duration: 200,
+          onComplete: () => spark.destroy()
+        });
+      });
+    }
   }
 
   /**

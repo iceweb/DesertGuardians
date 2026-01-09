@@ -13,7 +13,7 @@ export class CreepManager {
   private readonly POOL_SIZE = 50;
   
   // Event callbacks
-  public onCreepDied?: (creep: Creep, goldReward: number) => void;
+  public onCreepDied?: (creep: Creep, goldReward: number, deathX: number, deathY: number) => void;
   public onCreepReachedEnd?: (creep: Creep) => void;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
@@ -72,8 +72,11 @@ export class CreepManager {
    * Handle creep death
    */
   private handleCreepDied(creep: Creep, goldReward: number): void {
+    // Capture creep position before removing from active list
+    const deathX = creep.x;
+    const deathY = creep.y;
     this.removeFromActive(creep);
-    this.onCreepDied?.(creep, goldReward);
+    this.onCreepDied?.(creep, goldReward, deathX, deathY);
   }
 
   /**

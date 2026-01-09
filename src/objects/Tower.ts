@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { TowerGraphics } from '../graphics';
 
 export interface TowerStats {
   range: number;
@@ -20,7 +21,7 @@ export interface TowerConfig {
   name: string;
   type: 'physical' | 'magic';
   branch: TowerBranch;
-  level: 1 | 2;
+  level: 1 | 2 | 3;
   buildCost?: number;        // Only for archer (the only buildable tower)
   upgradeCost: number;       // Cost to upgrade TO this config
   description: string;
@@ -62,6 +63,20 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 15
     }
   },
+  archer_3: {
+    key: 'archer_3',
+    name: 'Archer Tower III',
+    type: 'physical',
+    branch: 'archer',
+    level: 3,
+    upgradeCost: 130,
+    description: 'Master archer. Elite single-target damage.',
+    stats: {
+      range: 250,
+      fireRate: 600,
+      damage: 22
+    }
+  },
 
   // === RAPID FIRE ===
   rapidfire_1: {
@@ -90,6 +105,20 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 190,
       fireRate: 250,
       damage: 9
+    }
+  },
+  rapidfire_3: {
+    key: 'rapidfire_3',
+    name: 'Rapid Fire III',
+    type: 'physical',
+    branch: 'rapidfire',
+    level: 3,
+    upgradeCost: 180,
+    description: 'Machine gun fury. Devastating DPS.',
+    stats: {
+      range: 200,
+      fireRate: 180,
+      damage: 12
     }
   },
 
@@ -126,6 +155,22 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       critMultiplier: 2
     }
   },
+  sniper_3: {
+    key: 'sniper_3',
+    name: 'Sniper Tower III',
+    type: 'physical',
+    branch: 'sniper',
+    level: 3,
+    upgradeCost: 220,
+    description: 'Assassin elite. 30% crit with 2.5x damage.',
+    stats: {
+      range: 550,
+      fireRate: 1600,
+      damage: 130,
+      critChance: 0.30,
+      critMultiplier: 2.5
+    }
+  },
 
   // === ROCK CANNON ===
   rockcannon_1: {
@@ -156,6 +201,21 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       fireRate: 1400,
       damage: 38,
       splashRadius: 120
+    }
+  },
+  rockcannon_3: {
+    key: 'rockcannon_3',
+    name: 'Rock Cannon III',
+    type: 'physical',
+    branch: 'rockcannon',
+    level: 3,
+    upgradeCost: 200,
+    description: 'Devastation. 150px splash radius.',
+    stats: {
+      range: 260,
+      fireRate: 1200,
+      damage: 55,
+      splashRadius: 150
     }
   },
 
@@ -192,6 +252,22 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       slowDuration: 2500
     }
   },
+  icetower_3: {
+    key: 'icetower_3',
+    name: 'Ice Tower III',
+    type: 'magic',
+    branch: 'icetower',
+    level: 3,
+    upgradeCost: 190,
+    description: 'Absolute zero. 60% slow for 3s.',
+    stats: {
+      range: 220,
+      fireRate: 800,
+      damage: 18,
+      slowPercent: 0.6,
+      slowDuration: 3000
+    }
+  },
 
   // === POISON ===
   poison_1: {
@@ -225,6 +301,22 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       dotDamage: 8,
       dotDuration: 5000
     }
+  },
+  poison_3: {
+    key: 'poison_3',
+    name: 'Poison Tower III',
+    type: 'magic',
+    branch: 'poison',
+    level: 3,
+    upgradeCost: 190,
+    description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x.',
+    stats: {
+      range: 240,
+      fireRate: 1000,
+      damage: 12,
+      dotDamage: 12,
+      dotDuration: 6000
+    }
   }
 };
 
@@ -237,7 +329,7 @@ export class Tower extends Phaser.GameObjects.Container {
   private rangeGraphics: Phaser.GameObjects.Graphics;
   private totalInvested: number;
   private currentBranch: TowerBranch;
-  private currentLevel: 1 | 2;
+  private currentLevel: 1 | 2 | 3;
   
   // Combat state
   private lastFireTime: number = 0;
@@ -277,499 +369,8 @@ export class Tower extends Phaser.GameObjects.Container {
    * Draw tower based on its branch type
    */
   private drawTower(): void {
-    this.graphics.clear();
-    
-    switch (this.currentBranch) {
-      case 'archer':
-        this.drawArcherTower();
-        break;
-      case 'rapidfire':
-        this.drawRapidFireTower();
-        break;
-      case 'sniper':
-        this.drawSniperTower();
-        break;
-      case 'rockcannon':
-        this.drawRockCannonTower();
-        break;
-      case 'icetower':
-        this.drawIceTower();
-        break;
-      case 'poison':
-        this.drawPoisonTower();
-        break;
-      default:
-        this.drawArcherTower();
-    }
-    
-    // Draw level indicator for level 2 towers
-    if (this.currentLevel === 2) {
-      this.drawLevelIndicator();
-    }
-    
-    // Draw range circle
-    this.rangeGraphics.clear();
-    this.rangeGraphics.lineStyle(2, 0xffffff, 0.3);
-    this.rangeGraphics.strokeCircle(0, 0, this.config.stats.range);
-    this.rangeGraphics.fillStyle(0xffffff, 0.1);
-    this.rangeGraphics.fillCircle(0, 0, this.config.stats.range);
-  }
-
-  /**
-   * Draw level 2 indicator (stars)
-   */
-  private drawLevelIndicator(): void {
-    const g = this.graphics;
-    // Draw two small gold diamonds above the tower to indicate level 2
-    g.fillStyle(0xffd700, 1);
-    // Left diamond
-    g.fillTriangle(-12, -95, -8, -100, -4, -95);
-    g.fillTriangle(-12, -95, -8, -90, -4, -95);
-    // Right diamond
-    g.fillTriangle(4, -95, 8, -100, 12, -95);
-    g.fillTriangle(4, -95, 8, -90, 12, -95);
-  }
-
-  private drawArcherTower(): void {
-    const g = this.graphics;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 50, 18);
-    
-    // Stone base
-    g.fillStyle(0x8b7355, 1);
-    g.fillRect(-28, 8, 56, 18);
-    g.fillStyle(0x9a8265, 1);
-    g.fillRect(-25, 10, 50, 14);
-    
-    // Stone texture
-    g.lineStyle(1, 0x6b5344, 0.5);
-    g.lineBetween(-24, 17, 24, 17);
-    g.lineBetween(-10, 10, -10, 24);
-    g.lineBetween(10, 10, 10, 24);
-    
-    // Tower body
-    g.fillStyle(0xd4a574, 1);
-    g.beginPath();
-    g.moveTo(-22, 10);
-    g.lineTo(-18, -55);
-    g.lineTo(18, -55);
-    g.lineTo(22, 10);
-    g.closePath();
-    g.fillPath();
-    
-    // Lighter panel
-    g.fillStyle(0xe8c896, 1);
-    g.beginPath();
-    g.moveTo(-16, 5);
-    g.lineTo(-13, -50);
-    g.lineTo(13, -50);
-    g.lineTo(16, 5);
-    g.closePath();
-    g.fillPath();
-    
-    // Brick lines
-    g.lineStyle(1, 0xb8956a, 0.6);
-    for (let i = 0; i < 5; i++) {
-      const yPos = -45 + i * 12;
-      const widthAtY = 14 + (i * 0.5);
-      g.lineBetween(-widthAtY, yPos, widthAtY, yPos);
-    }
-    g.lineBetween(0, -50, 0, 5);
-    g.lineBetween(-8, -45, -7, 0);
-    g.lineBetween(8, -45, 7, 0);
-    
-    // Archer window
-    g.fillStyle(0x2a1a0a, 1);
-    g.fillRect(-7, -35, 14, 22);
-    g.fillCircle(0, -35, 7);
-    g.fillStyle(0x1a0a00, 1);
-    g.fillRect(-5, -33, 10, 18);
-    g.fillCircle(0, -33, 5);
-    g.fillStyle(0xff6600, 0.4);
-    g.fillRect(-2, -30, 4, 12);
-    
-    // Battlements
-    g.fillStyle(0xc9a06c, 1);
-    g.fillRect(-20, -62, 10, 10);
-    g.fillRect(-5, -62, 10, 10);
-    g.fillRect(10, -62, 10, 10);
-    g.fillRect(-22, -55, 44, 5);
-    
-    // Banner
-    g.fillStyle(0x4a3a2a, 1);
-    g.fillRect(-2, -85, 4, 25);
-    g.fillStyle(0xcc3333, 1);
-    g.beginPath();
-    g.moveTo(2, -85);
-    g.lineTo(22, -78);
-    g.lineTo(22, -70);
-    g.lineTo(2, -65);
-    g.closePath();
-    g.fillPath();
-    g.fillStyle(0xff4444, 1);
-    g.beginPath();
-    g.moveTo(2, -83);
-    g.lineTo(18, -78);
-    g.lineTo(18, -74);
-    g.lineTo(2, -70);
-    g.closePath();
-    g.fillPath();
-    g.fillStyle(0xffd700, 1);
-    g.fillRect(8, -80, 6, 2);
-    g.fillRect(10, -82, 2, 6);
-    
-    // Gold trim
-    g.lineStyle(2, 0xdaa520, 0.8);
-    g.lineBetween(-20, -55, 20, -55);
-    
-    // Torches
-    g.fillStyle(0x3a2a1a, 1);
-    g.fillRect(-25, -25, 5, 8);
-    g.fillRect(20, -25, 5, 8);
-    g.fillStyle(0xff6600, 0.8);
-    g.fillCircle(-22, -30, 4);
-    g.fillCircle(23, -30, 4);
-    g.fillStyle(0xffaa00, 0.9);
-    g.fillCircle(-22, -32, 2);
-    g.fillCircle(23, -32, 2);
-    
-    // Corner stones
-    g.fillStyle(0xa08060, 1);
-    g.fillRect(-24, 0, 6, 10);
-    g.fillRect(18, 0, 6, 10);
-  }
-
-  private drawRapidFireTower(): void {
-    const g = this.graphics;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 50, 18);
-    
-    // Base
-    g.fillStyle(0x4a4a4a, 1);
-    g.fillRect(-30, 5, 60, 20);
-    g.fillStyle(0x5a5a5a, 1);
-    g.fillRect(-27, 8, 54, 14);
-    
-    // Metal body
-    g.fillStyle(0x6a6a6a, 1);
-    g.beginPath();
-    g.moveTo(-20, 8);
-    g.lineTo(-16, -45);
-    g.lineTo(16, -45);
-    g.lineTo(20, 8);
-    g.closePath();
-    g.fillPath();
-    
-    g.fillStyle(0x8a8a8a, 1);
-    g.beginPath();
-    g.moveTo(-14, 4);
-    g.lineTo(-11, -40);
-    g.lineTo(11, -40);
-    g.lineTo(14, 4);
-    g.closePath();
-    g.fillPath();
-    
-    // Multiple arrow slits (rapid fire!)
-    g.fillStyle(0x2a2a2a, 1);
-    g.fillRect(-8, -35, 4, 12);
-    g.fillRect(-1, -38, 4, 15);
-    g.fillRect(6, -35, 4, 12);
-    
-    // Yellow glow
-    g.fillStyle(0xffff00, 0.3);
-    g.fillRect(-7, -33, 2, 8);
-    g.fillRect(0, -36, 2, 11);
-    g.fillRect(7, -33, 2, 8);
-    
-    // Top platform
-    g.fillStyle(0x5a5a5a, 1);
-    g.fillRect(-18, -50, 36, 6);
-    
-    // Crossbow mechanism
-    g.fillStyle(0x3a3a3a, 1);
-    g.fillRect(-12, -58, 24, 8);
-    g.fillStyle(0x8b4513, 1);
-    g.fillRect(-15, -55, 6, 4);
-    g.fillRect(9, -55, 6, 4);
-    
-    // Yellow banner
-    g.fillStyle(0xffd700, 1);
-    g.fillRect(-2, -75, 4, 18);
-    g.fillStyle(0xffaa00, 1);
-    g.beginPath();
-    g.moveTo(2, -75);
-    g.lineTo(18, -70);
-    g.lineTo(18, -62);
-    g.lineTo(2, -60);
-    g.closePath();
-    g.fillPath();
-  }
-
-  private drawSniperTower(): void {
-    const g = this.graphics;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 30, 45, 16);
-    
-    // Tall thin base
-    g.fillStyle(0x5a5a5a, 1);
-    g.fillRect(-20, 10, 40, 18);
-    
-    // Tall body
-    g.fillStyle(0x8a8a8a, 1);
-    g.beginPath();
-    g.moveTo(-15, 12);
-    g.lineTo(-10, -80);
-    g.lineTo(10, -80);
-    g.lineTo(15, 12);
-    g.closePath();
-    g.fillPath();
-    
-    g.fillStyle(0x9a9a9a, 1);
-    g.beginPath();
-    g.moveTo(-10, 8);
-    g.lineTo(-6, -75);
-    g.lineTo(6, -75);
-    g.lineTo(10, 8);
-    g.closePath();
-    g.fillPath();
-    
-    // Scope window
-    g.fillStyle(0x2a2a4a, 1);
-    g.fillCircle(0, -50, 10);
-    g.fillStyle(0x4a4a8a, 0.5);
-    g.fillCircle(0, -50, 7);
-    g.fillStyle(0x00ffff, 0.3);
-    g.fillCircle(-2, -52, 3);
-    
-    // Crosshair
-    g.lineStyle(1, 0xff0000, 0.8);
-    g.lineBetween(-6, -50, 6, -50);
-    g.lineBetween(0, -56, 0, -44);
-    
-    // Top platform
-    g.fillStyle(0x6a6a6a, 1);
-    g.fillRect(-12, -85, 24, 6);
-    
-    // Sniper crossbow
-    g.fillStyle(0x4a4a4a, 1);
-    g.fillRect(-4, -95, 8, 12);
-    g.fillStyle(0x8b4513, 1);
-    g.fillRect(-20, -90, 40, 4);
-    
-    // Blue banner (precision)
-    g.fillStyle(0x2a2a4a, 1);
-    g.fillRect(-2, -110, 4, 18);
-    g.fillStyle(0x4169e1, 1);
-    g.beginPath();
-    g.moveTo(2, -110);
-    g.lineTo(18, -105);
-    g.lineTo(18, -97);
-    g.lineTo(2, -95);
-    g.closePath();
-    g.fillPath();
-  }
-
-  private drawRockCannonTower(): void {
-    const g = this.graphics;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 28, 55, 20);
-    
-    // Heavy stone base
-    g.fillStyle(0x6a5a4a, 1);
-    g.fillRect(-32, 5, 64, 22);
-    g.fillStyle(0x7a6a5a, 1);
-    g.fillRect(-28, 8, 56, 16);
-    
-    // Stone patterns
-    g.lineStyle(2, 0x5a4a3a, 0.6);
-    g.lineBetween(-28, 15, 28, 15);
-    g.lineBetween(-15, 8, -15, 25);
-    g.lineBetween(15, 8, 15, 25);
-    
-    // Thick body
-    g.fillStyle(0x8a7a6a, 1);
-    g.beginPath();
-    g.moveTo(-28, 8);
-    g.lineTo(-24, -40);
-    g.lineTo(24, -40);
-    g.lineTo(28, 8);
-    g.closePath();
-    g.fillPath();
-    
-    g.fillStyle(0x9a8a7a, 1);
-    g.beginPath();
-    g.moveTo(-22, 4);
-    g.lineTo(-18, -35);
-    g.lineTo(18, -35);
-    g.lineTo(22, 4);
-    g.closePath();
-    g.fillPath();
-    
-    // Cannon barrel
-    g.fillStyle(0x3a3a3a, 1);
-    g.fillRect(-8, -55, 16, 20);
-    g.fillStyle(0x4a4a4a, 1);
-    g.fillRect(-6, -53, 12, 15);
-    g.fillCircle(0, -55, 10);
-    g.fillStyle(0x2a2a2a, 1);
-    g.fillCircle(0, -55, 6);
-    
-    // Rocks around
-    g.fillStyle(0x5a4a3a, 1);
-    g.fillCircle(-20, -20, 6);
-    g.fillCircle(22, -18, 5);
-    g.fillCircle(-18, -8, 4);
-    
-    // Orange banner (explosive)
-    g.fillStyle(0x4a3a2a, 1);
-    g.fillRect(-2, -75, 4, 22);
-    g.fillStyle(0xff6600, 1);
-    g.beginPath();
-    g.moveTo(2, -75);
-    g.lineTo(20, -68);
-    g.lineTo(20, -58);
-    g.lineTo(2, -55);
-    g.closePath();
-    g.fillPath();
-  }
-
-  private drawIceTower(): void {
-    const g = this.graphics;
-    
-    // Icy glow
-    g.fillStyle(0x00ffff, 0.1);
-    g.fillCircle(0, -20, 50);
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 50, 18);
-    
-    // Ice crystal base
-    g.fillStyle(0x87ceeb, 1);
-    g.fillRect(-25, 5, 50, 18);
-    g.fillStyle(0xadd8e6, 0.8);
-    g.fillRect(-22, 8, 44, 12);
-    
-    // Main crystal spire
-    g.fillStyle(0xb0e0e6, 0.9);
-    g.beginPath();
-    g.moveTo(-18, 8);
-    g.lineTo(-5, -60);
-    g.lineTo(5, -60);
-    g.lineTo(18, 8);
-    g.closePath();
-    g.fillPath();
-    
-    // Crystal highlight
-    g.fillStyle(0xe0ffff, 0.7);
-    g.beginPath();
-    g.moveTo(-10, 5);
-    g.lineTo(-2, -55);
-    g.lineTo(2, -55);
-    g.lineTo(8, 5);
-    g.closePath();
-    g.fillPath();
-    
-    // Side crystals
-    g.fillStyle(0xadd8e6, 0.8);
-    g.beginPath();
-    g.moveTo(-25, 10);
-    g.lineTo(-15, -30);
-    g.lineTo(-10, 10);
-    g.closePath();
-    g.fillPath();
-    
-    g.beginPath();
-    g.moveTo(25, 10);
-    g.lineTo(15, -30);
-    g.lineTo(10, 10);
-    g.closePath();
-    g.fillPath();
-    
-    // Snowflake top
-    g.lineStyle(2, 0xffffff, 0.9);
-    g.lineBetween(0, -70, 0, -55);
-    g.lineBetween(-8, -65, 8, -58);
-    g.lineBetween(-8, -58, 8, -65);
-    
-    // Sparkles
-    g.fillStyle(0xffffff, 0.8);
-    g.fillCircle(-12, -40, 2);
-    g.fillCircle(10, -35, 2);
-    g.fillCircle(-5, -20, 2);
-    g.fillCircle(8, -25, 2);
-  }
-
-  private drawPoisonTower(): void {
-    const g = this.graphics;
-    
-    // Poison glow
-    g.fillStyle(0x00ff00, 0.1);
-    g.fillCircle(0, -15, 45);
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 25, 50, 18);
-    
-    // Gnarled wood base
-    g.fillStyle(0x4a3a2a, 1);
-    g.fillRect(-25, 5, 50, 18);
-    g.fillStyle(0x5a4a3a, 1);
-    g.fillRect(-22, 8, 44, 12);
-    
-    // Twisted trunk
-    g.fillStyle(0x3a2a1a, 1);
-    g.beginPath();
-    g.moveTo(-15, 10);
-    g.lineTo(-18, -20);
-    g.lineTo(-12, -35);
-    g.lineTo(-5, -45);
-    g.lineTo(5, -45);
-    g.lineTo(12, -35);
-    g.lineTo(18, -20);
-    g.lineTo(15, 10);
-    g.closePath();
-    g.fillPath();
-    
-    // Bark texture
-    g.lineStyle(1, 0x2a1a0a, 0.6);
-    g.lineBetween(-12, -10, -14, -30);
-    g.lineBetween(12, -10, 14, -30);
-    g.lineBetween(-5, 0, -8, -40);
-    g.lineBetween(5, 0, 8, -40);
-    
-    // Poison cauldron
-    g.fillStyle(0x2a2a2a, 1);
-    g.fillCircle(0, -50, 15);
-    g.fillStyle(0x00ff00, 0.8);
-    g.fillCircle(0, -52, 11);
-    
-    // Bubbles
-    g.fillStyle(0x88ff88, 0.7);
-    g.fillCircle(-4, -55, 3);
-    g.fillCircle(5, -53, 2);
-    g.fillCircle(0, -48, 4);
-    
-    // Dripping poison
-    g.fillStyle(0x00ff00, 0.6);
-    g.fillEllipse(-10, -40, 3, 8);
-    g.fillEllipse(12, -38, 3, 6);
-    
-    // Skull decoration
-    g.fillStyle(0xd0d0d0, 1);
-    g.fillCircle(0, -15, 8);
-    g.fillStyle(0x1a1a1a, 1);
-    g.fillCircle(-3, -17, 2);
-    g.fillCircle(3, -17, 2);
-    g.fillTriangle(0, -14, -2, -10, 2, -10);
+    TowerGraphics.drawTower(this.graphics, this.currentBranch, this.currentLevel);
+    TowerGraphics.drawRangeCircle(this.rangeGraphics, this.config.stats.range);
   }
 
   /**
@@ -796,7 +397,7 @@ export class Tower extends Phaser.GameObjects.Container {
   /**
    * Get current level
    */
-  getLevel(): 1 | 2 {
+  getLevel(): 1 | 2 | 3 {
     return this.currentLevel;
   }
 
@@ -808,10 +409,10 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Check if tower can upgrade to level 2
+   * Check if tower can upgrade to next level
    */
   canUpgradeLevel(): boolean {
-    return this.currentLevel === 1;
+    return this.currentLevel < 3;
   }
 
   /**
@@ -825,14 +426,14 @@ export class Tower extends Phaser.GameObjects.Container {
       // Archer can branch to specializations
       options.branches = BRANCH_OPTIONS;
       
-      // Archer can also upgrade to level 2 if at level 1
-      if (this.currentLevel === 1) {
-        options.levelUp = 'archer_2';
+      // Archer can also upgrade to next level if not at max
+      if (this.currentLevel < 3) {
+        options.levelUp = `archer_${this.currentLevel + 1}`;
       }
     } else {
       // Specialized towers can only upgrade level
-      if (this.currentLevel === 1) {
-        options.levelUp = `${this.currentBranch}_2`;
+      if (this.currentLevel < 3) {
+        options.levelUp = `${this.currentBranch}_${this.currentLevel + 1}`;
       }
     }
     
@@ -862,15 +463,15 @@ export class Tower extends Phaser.GameObjects.Container {
     
     // Validate upgrade path
     if (this.currentBranch === 'archer') {
-      // From archer, can go to any branch L1 or archer L2
+      // From archer, can go to any branch L1 or next archer level
       const validUpgrade = 
-        (newConfig.branch === 'archer' && newConfig.level === 2 && this.currentLevel === 1) ||
+        (newConfig.branch === 'archer' && newConfig.level === this.currentLevel + 1 && this.currentLevel < 3) ||
         (newConfig.branch !== 'archer' && newConfig.level === 1);
       
       if (!validUpgrade) return false;
     } else {
-      // From specialized, can only go to same branch L2
-      if (newConfig.branch !== this.currentBranch || newConfig.level !== 2 || this.currentLevel !== 1) {
+      // From specialized, can only go to same branch next level
+      if (newConfig.branch !== this.currentBranch || newConfig.level !== this.currentLevel + 1 || this.currentLevel >= 3) {
         return false;
       }
     }
@@ -928,10 +529,11 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Get targeting priority for Sniper (highest HP first)
+   * Get targeting priority - prioritize leading creep (furthest along path)
+   * Sniper targets highest HP instead
    */
   getTargetPriority(): 'closest' | 'highestHP' | 'furthestAlongPath' {
-    return this.currentBranch === 'sniper' ? 'highestHP' : 'closest';
+    return this.currentBranch === 'sniper' ? 'highestHP' : 'furthestAlongPath';
   }
 
   /**

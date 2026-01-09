@@ -8,6 +8,7 @@ export interface ProjectileConfig {
   isMagic: boolean;
   branch: TowerBranch;
   stats: TowerStats;
+  level: number;  // Tower level for visual scaling
 }
 
 /**
@@ -57,73 +58,227 @@ export class Projectile extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Draw projectile based on tower type
+   * Draw projectile based on tower type and level
    */
   private drawProjectile(): void {
     this.graphics.clear();
     
     if (!this.config) return;
     
+    const level = this.config.level || 1;
+    const scale = 1 + (level - 1) * 0.2; // 1.0, 1.2, 1.4 for levels 1-3
+    
     switch (this.config.branch) {
       case 'archer':
-        // Arrow
-        this.graphics.fillStyle(0x8b4513, 1);
-        this.graphics.fillRect(-8, -2, 16, 4);
-        this.graphics.fillStyle(0xaaaaaa, 1);
-        this.graphics.fillTriangle(8, 0, 14, -4, 14, 4);
-        this.graphics.fillStyle(0xcc6633, 1);
-        this.graphics.fillTriangle(-8, 0, -12, -3, -12, 3);
+        this.drawArcherProjectile(level, scale);
         break;
         
       case 'rapidfire':
-        // Fast bullet
-        this.graphics.fillStyle(0xffd700, 1);
-        this.graphics.fillCircle(0, 0, 4);
-        this.graphics.fillStyle(0xffff00, 0.8);
-        this.graphics.fillCircle(0, 0, 2);
+        this.drawRapidFireProjectile(level, scale);
         break;
         
       case 'sniper':
-        // High-velocity round
-        this.graphics.fillStyle(0x4169e1, 1);
-        this.graphics.fillRect(-10, -2, 20, 4);
-        this.graphics.fillStyle(0x6495ed, 1);
-        this.graphics.fillRect(-8, -1, 16, 2);
+        this.drawSniperProjectile(level, scale);
         break;
         
       case 'rockcannon':
-        // Boulder
-        this.graphics.fillStyle(0x696969, 1);
-        this.graphics.fillCircle(0, 0, 10);
-        this.graphics.fillStyle(0x808080, 1);
-        this.graphics.fillCircle(-2, -2, 8);
-        this.graphics.fillStyle(0x5a5a5a, 1);
-        this.graphics.fillCircle(3, 3, 4);
+        this.drawRockCannonProjectile(level, scale);
         break;
         
       case 'icetower':
-        // Ice shard
-        this.graphics.fillStyle(0x87ceeb, 0.9);
-        this.graphics.fillTriangle(-8, 0, 0, -5, 8, 0);
-        this.graphics.fillTriangle(-8, 0, 0, 5, 8, 0);
-        this.graphics.fillStyle(0xe0ffff, 0.7);
-        this.graphics.fillTriangle(-4, 0, 0, -3, 4, 0);
+        this.drawIceProjectile(level, scale);
         break;
         
       case 'poison':
-        // Poison glob
-        this.graphics.fillStyle(0x00aa00, 0.9);
-        this.graphics.fillCircle(0, 0, 6);
-        this.graphics.fillStyle(0x00ff00, 0.7);
-        this.graphics.fillCircle(-1, -1, 4);
-        this.graphics.fillStyle(0x88ff88, 0.5);
-        this.graphics.fillCircle(-2, -2, 2);
+        this.drawPoisonProjectile(level, scale);
         break;
         
       default:
         // Generic projectile
         this.graphics.fillStyle(0xffff00, 1);
-        this.graphics.fillCircle(0, 0, 5);
+        this.graphics.fillCircle(0, 0, 5 * scale);
+    }
+  }
+
+  /**
+   * Draw archer arrow - more elaborate at higher levels
+   */
+  private drawArcherProjectile(level: number, scale: number): void {
+    const arrowLength = 16 * scale;
+    const arrowWidth = 4 * scale;
+    
+    // Arrow shaft
+    this.graphics.fillStyle(level >= 3 ? 0x654321 : 0x8b4513, 1);
+    this.graphics.fillRect(-arrowLength / 2, -arrowWidth / 2, arrowLength, arrowWidth);
+    
+    // Arrow head - larger and more detailed at higher levels
+    const headSize = 4 + level * 2;
+    this.graphics.fillStyle(level >= 3 ? 0xcccccc : 0xaaaaaa, 1);
+    this.graphics.fillTriangle(arrowLength / 2, 0, arrowLength / 2 + headSize, -headSize, arrowLength / 2 + headSize, headSize);
+    
+    // Fletching - more elaborate at higher levels
+    this.graphics.fillStyle(level >= 3 ? 0xff6633 : 0xcc6633, 1);
+    this.graphics.fillTriangle(-arrowLength / 2, 0, -arrowLength / 2 - 4 * scale, -3 * scale, -arrowLength / 2 - 4 * scale, 3 * scale);
+    
+    if (level >= 2) {
+      // Extra fletching
+      this.graphics.fillStyle(level >= 3 ? 0xffd700 : 0xaa5522, 1);
+      this.graphics.fillTriangle(-arrowLength / 2 + 3, 0, -arrowLength / 2 - 2 * scale, -2 * scale, -arrowLength / 2 - 2 * scale, 2 * scale);
+    }
+    
+    if (level >= 3) {
+      // Golden glow effect
+      this.graphics.fillStyle(0xffd700, 0.3);
+      this.graphics.fillCircle(arrowLength / 2 + headSize / 2, 0, headSize);
+    }
+  }
+
+  /**
+   * Draw rapid fire bullet - more at higher levels
+   */
+  private drawRapidFireProjectile(level: number, scale: number): void {
+    const bulletSize = 4 * scale;
+    
+    // Main bullet
+    this.graphics.fillStyle(level >= 3 ? 0xffaa00 : 0xffd700, 1);
+    this.graphics.fillCircle(0, 0, bulletSize);
+    this.graphics.fillStyle(level >= 3 ? 0xffff44 : 0xffff00, 0.8);
+    this.graphics.fillCircle(0, 0, bulletSize * 0.5);
+    
+    if (level >= 2) {
+      // Tracer effect
+      this.graphics.fillStyle(0xffffff, 0.6);
+      this.graphics.fillCircle(-bulletSize, 0, bulletSize * 0.4);
+    }
+    
+    if (level >= 3) {
+      // Fire effect around bullet
+      this.graphics.fillStyle(0xff6600, 0.5);
+      this.graphics.fillCircle(0, 0, bulletSize * 1.5);
+      this.graphics.fillStyle(0xff0000, 0.3);
+      this.graphics.fillCircle(-bulletSize * 0.5, 0, bulletSize * 0.8);
+    }
+  }
+
+  /**
+   * Draw sniper round - more powerful looking at higher levels
+   */
+  private drawSniperProjectile(level: number, scale: number): void {
+    const bulletLength = 20 * scale;
+    const bulletWidth = 4 * scale;
+    
+    // Core round
+    this.graphics.fillStyle(level >= 3 ? 0x6495ed : 0x4169e1, 1);
+    this.graphics.fillRect(-bulletLength / 2, -bulletWidth / 2, bulletLength, bulletWidth);
+    this.graphics.fillStyle(level >= 3 ? 0x87ceeb : 0x6495ed, 1);
+    this.graphics.fillRect(-bulletLength / 2 + 2, -bulletWidth / 4, bulletLength - 4, bulletWidth / 2);
+    
+    if (level >= 2) {
+      // Energy trail
+      this.graphics.fillStyle(0x4169e1, 0.5);
+      this.graphics.fillRect(-bulletLength, -bulletWidth / 4, bulletLength / 2, bulletWidth / 2);
+    }
+    
+    if (level >= 3) {
+      // Armor piercing tip
+      this.graphics.fillStyle(0xffd700, 1);
+      this.graphics.fillTriangle(bulletLength / 2, 0, bulletLength / 2 + 6, -2, bulletLength / 2 + 6, 2);
+      // Energy glow
+      this.graphics.fillStyle(0x00ffff, 0.3);
+      this.graphics.fillCircle(bulletLength / 2, 0, bulletWidth * 2);
+    }
+  }
+
+  /**
+   * Draw boulder - larger and more detailed at higher levels
+   */
+  private drawRockCannonProjectile(level: number, scale: number): void {
+    const rockSize = 10 * scale;
+    
+    // Main boulder
+    this.graphics.fillStyle(level >= 3 ? 0x7a7a7a : 0x696969, 1);
+    this.graphics.fillCircle(0, 0, rockSize);
+    this.graphics.fillStyle(level >= 3 ? 0x9a9a9a : 0x808080, 1);
+    this.graphics.fillCircle(-2 * scale, -2 * scale, rockSize * 0.8);
+    this.graphics.fillStyle(level >= 3 ? 0x5a5a5a : 0x5a5a5a, 1);
+    this.graphics.fillCircle(3 * scale, 3 * scale, rockSize * 0.4);
+    
+    if (level >= 2) {
+      // Cracks/details
+      this.graphics.lineStyle(1, 0x4a4a4a, 0.5);
+      this.graphics.lineBetween(-rockSize * 0.5, -rockSize * 0.3, rockSize * 0.3, rockSize * 0.2);
+    }
+    
+    if (level >= 3) {
+      // Flaming boulder
+      this.graphics.fillStyle(0xff6600, 0.4);
+      this.graphics.fillCircle(0, 0, rockSize * 1.3);
+      this.graphics.fillStyle(0xff0000, 0.3);
+      this.graphics.fillCircle(-rockSize * 0.3, -rockSize * 0.3, rockSize * 0.6);
+    }
+  }
+
+  /**
+   * Draw ice shard - more crystalline at higher levels
+   */
+  private drawIceProjectile(level: number, scale: number): void {
+    const shardSize = 8 * scale;
+    
+    // Main ice shard
+    this.graphics.fillStyle(level >= 3 ? 0xa0e0ff : 0x87ceeb, 0.9);
+    this.graphics.fillTriangle(-shardSize, 0, 0, -shardSize * 0.6, shardSize, 0);
+    this.graphics.fillTriangle(-shardSize, 0, 0, shardSize * 0.6, shardSize, 0);
+    
+    // Inner crystal
+    this.graphics.fillStyle(level >= 3 ? 0xffffff : 0xe0ffff, 0.7);
+    this.graphics.fillTriangle(-shardSize * 0.5, 0, 0, -shardSize * 0.4, shardSize * 0.5, 0);
+    
+    if (level >= 2) {
+      // Additional crystal spikes
+      this.graphics.fillStyle(0xc0e0ff, 0.6);
+      this.graphics.fillTriangle(0, -shardSize * 0.4, shardSize * 0.3, -shardSize * 0.8, shardSize * 0.5, -shardSize * 0.3);
+      this.graphics.fillTriangle(0, shardSize * 0.4, shardSize * 0.3, shardSize * 0.8, shardSize * 0.5, shardSize * 0.3);
+    }
+    
+    if (level >= 3) {
+      // Frost aura
+      this.graphics.fillStyle(0xffffff, 0.3);
+      this.graphics.fillCircle(0, 0, shardSize * 1.2);
+      // Sparkle
+      this.graphics.fillStyle(0xffffff, 0.9);
+      this.graphics.fillCircle(shardSize * 0.3, -shardSize * 0.2, 2);
+    }
+  }
+
+  /**
+   * Draw poison glob - more toxic at higher levels
+   */
+  private drawPoisonProjectile(level: number, scale: number): void {
+    const globSize = 6 * scale;
+    
+    // Main glob
+    this.graphics.fillStyle(level >= 3 ? 0x00cc00 : 0x00aa00, 0.9);
+    this.graphics.fillCircle(0, 0, globSize);
+    this.graphics.fillStyle(level >= 3 ? 0x44ff44 : 0x00ff00, 0.7);
+    this.graphics.fillCircle(-1 * scale, -1 * scale, globSize * 0.7);
+    this.graphics.fillStyle(level >= 3 ? 0xaaffaa : 0x88ff88, 0.5);
+    this.graphics.fillCircle(-2 * scale, -2 * scale, globSize * 0.35);
+    
+    if (level >= 2) {
+      // Dripping effect
+      this.graphics.fillStyle(0x00ff00, 0.6);
+      this.graphics.fillCircle(globSize * 0.5, globSize * 0.3, globSize * 0.3);
+      this.graphics.fillCircle(-globSize * 0.4, globSize * 0.4, globSize * 0.25);
+    }
+    
+    if (level >= 3) {
+      // Toxic aura
+      this.graphics.fillStyle(0x00ff00, 0.2);
+      this.graphics.fillCircle(0, 0, globSize * 1.5);
+      // Bubbles
+      this.graphics.fillStyle(0x88ff88, 0.7);
+      this.graphics.fillCircle(-globSize * 0.6, -globSize * 0.6, 2);
+      this.graphics.fillCircle(globSize * 0.5, -globSize * 0.4, 1.5);
     }
   }
 

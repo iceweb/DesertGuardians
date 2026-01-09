@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PathSystem } from '../managers';
+import { CreepGraphics } from '../graphics';
 
 export interface CreepConfig {
   type: string;
@@ -15,45 +16,45 @@ export interface CreepConfig {
 export const CREEP_TYPES: Record<string, CreepConfig> = {
   furball: {
     type: 'furball',
-    maxHealth: 50,
-    speed: 80,
+    maxHealth: 55,
+    speed: 85,
     armor: 0,
     goldReward: 10
   },
   runner: {
     type: 'runner',
-    maxHealth: 30,
+    maxHealth: 35,
     speed: 150,
     armor: 0,
     goldReward: 8
   },
   tank: {
     type: 'tank',
-    maxHealth: 200,
+    maxHealth: 240,
     speed: 50,
-    armor: 4,
+    armor: 5,
     goldReward: 25
   },
   boss: {
     type: 'boss',
-    maxHealth: 1000,
-    speed: 40,
-    armor: 2,
+    maxHealth: 1200,
+    speed: 45,
+    armor: 3,
     goldReward: 100
   },
   jumper: {
     type: 'jumper',
-    maxHealth: 120,
-    speed: 70,
-    armor: 1,
+    maxHealth: 140,
+    speed: 75,
+    armor: 2,
     goldReward: 30,
     canJump: true
   },
   shielded: {
     type: 'shielded',
-    maxHealth: 100,
-    speed: 65,
-    armor: 0,
+    maxHealth: 120,
+    speed: 70,
+    armor: 1,
     goldReward: 35,
     hasShield: true
   }
@@ -113,6 +114,10 @@ export class Creep extends Phaser.GameObjects.Container {
     this.setDepth(30);
     this.setActive(false);
     this.setVisible(false);
+    
+    // Make creeps interactive for clicking
+    this.setSize(40, 40);
+    this.setInteractive({ useHandCursor: true });
   }
 
   /**
@@ -148,411 +153,22 @@ export class Creep extends Phaser.GameObjects.Container {
    * Draw the creep based on its type
    */
   private drawCreep(): void {
-    this.bodyGraphics.clear();
-    
-    const type = this.config.type;
-    
-    // Apply jump warning flash (white tint)
     const isFlashing = this.jumpWarningTime > 0;
-    
-    switch (type) {
-      case 'furball':
-        this.drawFurball(isFlashing);
-        break;
-      case 'runner':
-        this.drawRunner(isFlashing);
-        break;
-      case 'tank':
-        this.drawTank(isFlashing);
-        break;
-      case 'boss':
-        this.drawBoss(isFlashing);
-        break;
-      case 'jumper':
-        this.drawJumper(isFlashing);
-        break;
-      case 'shielded':
-        this.drawShielded(isFlashing);
-        break;
-      default:
-        this.drawFurball(isFlashing);
-    }
-  }
-
-  private drawFurball(_isFlashing: boolean = false): void {
-    const g = this.bodyGraphics;
-    const bounce = Math.sin(this.bounceTime * 8) * 3;
-    const squish = 1 + Math.sin(this.bounceTime * 8) * 0.1;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 18, 28, 10);
-    
-    // Body (fluffy ball)
-    g.fillStyle(0x8B4513, 1); // Brown fur
-    g.fillEllipse(0 * this.faceDirection, -5 + bounce, 24 * squish, 22 / squish);
-    
-    // Fur texture (lighter patches)
-    g.fillStyle(0xA0522D, 1);
-    g.fillEllipse(-6 * this.faceDirection, -8 + bounce, 8, 10);
-    g.fillEllipse(6 * this.faceDirection, -2 + bounce, 10, 8);
-    
-    // Face
-    g.fillStyle(0xDEB887, 1); // Tan face
-    g.fillEllipse(8 * this.faceDirection, -6 + bounce, 12, 10);
-    
-    // Eyes
-    g.fillStyle(0x000000, 1);
-    g.fillCircle(10 * this.faceDirection, -9 + bounce, 3);
-    g.fillCircle(14 * this.faceDirection, -7 + bounce, 2);
-    // Eye shine
-    g.fillStyle(0xFFFFFF, 1);
-    g.fillCircle(9 * this.faceDirection, -10 + bounce, 1);
-    
-    // Nose
-    g.fillStyle(0xFF69B4, 1);
-    g.fillCircle(16 * this.faceDirection, -4 + bounce, 3);
-    
-    // Ears
-    g.fillStyle(0x8B4513, 1);
-    g.fillEllipse(-4 * this.faceDirection, -20 + bounce, 6, 10);
-    g.fillEllipse(4 * this.faceDirection, -22 + bounce, 6, 10);
-    g.fillStyle(0xFFB6C1, 0.7);
-    g.fillEllipse(-4 * this.faceDirection, -19 + bounce, 3, 6);
-    g.fillEllipse(4 * this.faceDirection, -21 + bounce, 3, 6);
-    
-    // Tiny feet
-    g.fillStyle(0x654321, 1);
-    g.fillEllipse(-8, 15, 6, 4);
-    g.fillEllipse(8, 15, 6, 4);
-  }
-
-  private drawRunner(_isFlashing: boolean = false): void {
-    const g = this.bodyGraphics;
-    const bounce = Math.sin(this.bounceTime * 12) * 4; // Faster bounce
-    const legPhase = Math.sin(this.bounceTime * 12);
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 16, 24, 8);
-    
-    // Legs (animated running)
-    g.fillStyle(0x4169E1, 1);
-    g.fillEllipse(-6, 12 + legPhase * 4, 5, 8);
-    g.fillEllipse(6, 12 - legPhase * 4, 5, 8);
-    
-    // Body (sleek)
-    g.fillStyle(0x6495ED, 1); // Cornflower blue
-    g.fillEllipse(0 * this.faceDirection, -2 + bounce, 18, 16);
-    
-    // Stripe
-    g.fillStyle(0x4169E1, 1);
-    g.fillEllipse(0, -2 + bounce, 14, 8);
-    
-    // Head
-    g.fillStyle(0x6495ED, 1);
-    g.fillEllipse(10 * this.faceDirection, -6 + bounce, 12, 10);
-    
-    // Big ears (for speed!)
-    g.fillStyle(0x6495ED, 1);
-    g.fillEllipse(2 * this.faceDirection, -22 + bounce, 5, 14);
-    g.fillEllipse(8 * this.faceDirection, -20 + bounce, 5, 12);
-    g.fillStyle(0xFFB6C1, 0.6);
-    g.fillEllipse(2 * this.faceDirection, -20 + bounce, 2, 8);
-    g.fillEllipse(8 * this.faceDirection, -18 + bounce, 2, 7);
-    
-    // Eyes
-    g.fillStyle(0x000000, 1);
-    g.fillCircle(14 * this.faceDirection, -8 + bounce, 3);
-    g.fillStyle(0xFFFFFF, 1);
-    g.fillCircle(13 * this.faceDirection, -9 + bounce, 1);
-    
-    // Nose
-    g.fillStyle(0xFF1493, 1);
-    g.fillCircle(18 * this.faceDirection, -4 + bounce, 2);
-  }
-
-  private drawTank(_isFlashing: boolean = false): void {
-    const g = this.bodyGraphics;
-    const bounce = Math.sin(this.bounceTime * 5) * 2; // Slower bounce
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 22, 40, 14);
-    
-    // Body (big and round)
-    g.fillStyle(0x696969, 1); // Dark gray
-    g.fillEllipse(0, 0 + bounce, 32, 28);
-    
-    // Armor plates
-    g.fillStyle(0x808080, 1);
-    g.fillEllipse(0, -8 + bounce, 26, 14);
-    g.fillStyle(0x505050, 1);
-    g.beginPath();
-    g.arc(0, -5 + bounce, 18, -2.5, -0.6, false);
-    g.lineTo(0, -5 + bounce);
-    g.closePath();
-    g.fillPath();
-    
-    // Head
-    g.fillStyle(0x808080, 1);
-    g.fillEllipse(14 * this.faceDirection, -2 + bounce, 14, 12);
-    
-    // Helmet
-    g.fillStyle(0x505050, 1);
-    g.fillRect(8 * this.faceDirection, -12 + bounce, 14, 6);
-    
-    // Eyes (small, determined)
-    g.fillStyle(0xFF0000, 0.8);
-    g.fillCircle(18 * this.faceDirection, -4 + bounce, 3);
-    g.fillStyle(0xFFFF00, 1);
-    g.fillCircle(18 * this.faceDirection, -4 + bounce, 1.5);
-    
-    // Tusks
-    g.fillStyle(0xFFFFF0, 1);
-    g.beginPath();
-    g.moveTo(20 * this.faceDirection, 2 + bounce);
-    g.lineTo(28 * this.faceDirection, -2 + bounce);
-    g.lineTo(26 * this.faceDirection, 4 + bounce);
-    g.closePath();
-    g.fillPath();
-    
-    // Feet
-    g.fillStyle(0x404040, 1);
-    g.fillEllipse(-12, 18, 10, 6);
-    g.fillEllipse(12, 18, 10, 6);
-  }
-
-  private drawBoss(_isFlashing: boolean = false): void {
-    const g = this.bodyGraphics;
-    const bounce = Math.sin(this.bounceTime * 4) * 3;
-    const pulse = 1 + Math.sin(this.bounceTime * 6) * 0.05;
-    
-    // Ominous glow
-    g.fillStyle(0x800080, 0.2);
-    g.fillCircle(0, 0, 50 * pulse);
-    g.fillStyle(0x800080, 0.1);
-    g.fillCircle(0, 0, 60 * pulse);
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.4);
-    g.fillEllipse(0, 30, 50, 18);
-    
-    // Body (massive fluffy creature)
-    g.fillStyle(0x4B0082, 1); // Indigo
-    g.fillEllipse(0, 0 + bounce, 44 * pulse, 38 * pulse);
-    
-    // Fur pattern
-    g.fillStyle(0x6A0DAD, 1);
-    g.fillEllipse(-10, -10 + bounce, 16, 20);
-    g.fillEllipse(10, 5 + bounce, 18, 16);
-    g.fillStyle(0x8B008B, 1);
-    g.fillEllipse(0, -5 + bounce, 12, 14);
-    
-    // Face
-    g.fillStyle(0x9370DB, 1);
-    g.fillEllipse(18 * this.faceDirection, -5 + bounce, 18, 16);
-    
-    // Crown/horns
-    g.fillStyle(0xFFD700, 1);
-    g.beginPath();
-    g.moveTo(-8 * this.faceDirection, -35 + bounce);
-    g.lineTo(-4 * this.faceDirection, -45 + bounce);
-    g.lineTo(0, -35 + bounce);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(4 * this.faceDirection, -38 + bounce);
-    g.lineTo(10 * this.faceDirection, -50 + bounce);
-    g.lineTo(14 * this.faceDirection, -38 + bounce);
-    g.closePath();
-    g.fillPath();
-    
-    // Eyes (3 of them!)
-    g.fillStyle(0xFF0000, 1);
-    g.fillCircle(14 * this.faceDirection, -12 + bounce, 5);
-    g.fillCircle(24 * this.faceDirection, -8 + bounce, 4);
-    g.fillCircle(20 * this.faceDirection, 2 + bounce, 3);
-    // Eye shine
-    g.fillStyle(0xFFFFFF, 1);
-    g.fillCircle(12 * this.faceDirection, -14 + bounce, 2);
-    g.fillCircle(22 * this.faceDirection, -10 + bounce, 1.5);
-    
-    // Mouth
-    g.fillStyle(0x2F0040, 1);
-    g.fillEllipse(26 * this.faceDirection, 4 + bounce, 8, 6);
-    // Teeth
-    g.fillStyle(0xFFFFFF, 1);
-    g.fillRect(22 * this.faceDirection, 1 + bounce, 3, 4);
-    g.fillRect(27 * this.faceDirection, 2 + bounce, 3, 3);
-    
-    // Tiny arms
-    g.fillStyle(0x4B0082, 1);
-    g.fillEllipse(-25, 10 + bounce, 10, 8);
-    g.fillEllipse(25, 10 + bounce, 10, 8);
-    
-    // Feet
-    g.fillStyle(0x3A0066, 1);
-    g.fillEllipse(-15, 28, 12, 8);
-    g.fillEllipse(15, 28, 12, 8);
-  }
-
-  /**
-   * Draw Elite Jumper - athletic creature with spring legs
-   */
-  private drawJumper(isFlashing: boolean = false): void {
-    const g = this.bodyGraphics;
-    const bounce = this.isJumping ? -15 : Math.sin(this.bounceTime * 10) * 5;
-    const legSquat = this.isJumping ? 0.5 : 1;
-    
-    // Flash white when about to jump
-    const bodyColor = isFlashing ? 0xFFFFFF : 0x32CD32; // Lime green
-    const darkColor = isFlashing ? 0xDDDDDD : 0x228B22;
-    
-    // Shadow (smaller when jumping)
-    const shadowAlpha = this.isJumping ? 0.15 : 0.3;
-    g.fillStyle(0x000000, shadowAlpha);
-    g.fillEllipse(0, 20, 26, 10);
-    
-    // Spring legs
-    g.fillStyle(darkColor, 1);
-    g.fillEllipse(-8, 14 * legSquat, 6, 10 * legSquat);
-    g.fillEllipse(8, 14 * legSquat, 6, 10 * legSquat);
-    
-    // Body (athletic build)
-    g.fillStyle(bodyColor, 1);
-    g.fillEllipse(0, -4 + bounce, 20, 18);
-    
-    // Spots pattern
-    g.fillStyle(darkColor, 1);
-    g.fillCircle(-6, -8 + bounce, 4);
-    g.fillCircle(4, -2 + bounce, 5);
-    g.fillCircle(-3, 4 + bounce, 3);
-    
-    // Head
-    g.fillStyle(bodyColor, 1);
-    g.fillEllipse(10 * this.faceDirection, -8 + bounce, 12, 10);
-    
-    // Big springy ears
-    g.fillStyle(bodyColor, 1);
-    g.fillEllipse(0, -26 + bounce, 6, 16);
-    g.fillEllipse(8 * this.faceDirection, -24 + bounce, 5, 14);
-    g.fillStyle(0xFFB6C1, 0.7);
-    g.fillEllipse(0, -24 + bounce, 3, 10);
-    g.fillEllipse(8 * this.faceDirection, -22 + bounce, 2.5, 9);
-    
-    // Eyes (alert, energetic)
-    g.fillStyle(0x000000, 1);
-    g.fillCircle(14 * this.faceDirection, -10 + bounce, 4);
-    g.fillStyle(0xFFFFFF, 1);
-    g.fillCircle(12 * this.faceDirection, -12 + bounce, 2);
-    
-    // Nose
-    g.fillStyle(0xFF69B4, 1);
-    g.fillCircle(18 * this.faceDirection, -6 + bounce, 3);
-    
-    // Jump dust cloud effect
-    if (this.isJumping) {
-      g.fillStyle(0xDEB887, 0.5);
-      for (let i = 0; i < 5; i++) {
-        const angle = (i / 5) * Math.PI * 2;
-        const dist = 15 + Math.random() * 10;
-        g.fillCircle(Math.cos(angle) * dist, 20 + Math.random() * 5, 4 + Math.random() * 3);
-      }
-    }
-  }
-
-  /**
-   * Draw Elite Shielded - mystical creature with magical barrier
-   */
-  private drawShielded(_isFlashing: boolean = false): void {
-    const g = this.bodyGraphics;
-    const bounce = Math.sin(this.bounceTime * 7) * 3;
-    const shimmer = Math.sin(this.bounceTime * 15) * 0.1;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(0, 18, 28, 10);
-    
-    // Body (mystical purple-blue)
-    g.fillStyle(0x9400D3, 1); // Dark violet
-    g.fillEllipse(0, -3 + bounce, 22, 20);
-    
-    // Magical markings
-    g.fillStyle(0xE6E6FA, 0.6 + shimmer); // Lavender
-    g.fillCircle(-5, -8 + bounce, 3);
-    g.fillCircle(5, 0 + bounce, 4);
-    g.fillCircle(-2, 6 + bounce, 2);
-    // Rune-like pattern
-    g.lineStyle(2, 0xE6E6FA, 0.5);
-    g.beginPath();
-    g.moveTo(-8, -2 + bounce);
-    g.lineTo(0, -10 + bounce);
-    g.lineTo(8, -2 + bounce);
-    g.strokePath();
-    
-    // Head
-    g.fillStyle(0xBA55D3, 1); // Medium orchid
-    g.fillEllipse(10 * this.faceDirection, -5 + bounce, 12, 10);
-    
-    // Mystical gem on forehead
-    g.fillStyle(0x00FFFF, 0.8 + shimmer);
-    g.fillCircle(8 * this.faceDirection, -14 + bounce, 4);
-    g.fillStyle(0xFFFFFF, 0.9);
-    g.fillCircle(6 * this.faceDirection, -15 + bounce, 1.5);
-    
-    // Eyes (glowing)
-    g.fillStyle(0x00FFFF, 0.9);
-    g.fillCircle(14 * this.faceDirection, -7 + bounce, 4);
-    g.fillStyle(0xFFFFFF, 1);
-    g.fillCircle(13 * this.faceDirection, -8 + bounce, 2);
-    
-    // Ears (with magical tips)
-    g.fillStyle(0x9400D3, 1);
-    g.fillEllipse(0, -22 + bounce, 5, 12);
-    g.fillEllipse(6 * this.faceDirection, -20 + bounce, 4, 10);
-    g.fillStyle(0x00FFFF, 0.7);
-    g.fillCircle(0, -30 + bounce, 3);
-    g.fillCircle(6 * this.faceDirection, -27 + bounce, 2.5);
-    
-    // Feet
-    g.fillStyle(0x7B68EE, 1);
-    g.fillEllipse(-8, 15, 6, 4);
-    g.fillEllipse(8, 15, 6, 4);
+    CreepGraphics.drawCreep(
+      this.bodyGraphics,
+      this.config.type,
+      this.bounceTime,
+      this.faceDirection,
+      isFlashing,
+      this.isJumping
+    );
   }
 
   /**
    * Update the shield visual effect
    */
   private updateShieldVisual(): void {
-    this.shieldGraphics.clear();
-    
-    if (this.shieldHitsRemaining <= 0) return;
-    
-    const shimmer = Math.sin(this.bounceTime * 10) * 0.15;
-    const pulse = 1 + Math.sin(this.bounceTime * 5) * 0.05;
-    
-    // Outer glow
-    this.shieldGraphics.fillStyle(0x00BFFF, 0.15 + shimmer);
-    this.shieldGraphics.fillCircle(0, -5, 38 * pulse);
-    
-    // Main shield bubble
-    this.shieldGraphics.lineStyle(3, 0x00BFFF, 0.6 + shimmer);
-    this.shieldGraphics.strokeCircle(0, -5, 32 * pulse);
-    
-    // Inner shield
-    this.shieldGraphics.lineStyle(2, 0x87CEEB, 0.4);
-    this.shieldGraphics.strokeCircle(0, -5, 28 * pulse);
-    
-    // Shield hit indicators (small circles showing remaining hits)
-    const indicatorY = -42;
-    for (let i = 0; i < this.shieldHitsRemaining; i++) {
-      const indicatorX = (i - 1) * 10;
-      this.shieldGraphics.fillStyle(0x00FFFF, 0.9);
-      this.shieldGraphics.fillCircle(indicatorX, indicatorY, 4);
-      this.shieldGraphics.lineStyle(1, 0xFFFFFF, 1);
-      this.shieldGraphics.strokeCircle(indicatorX, indicatorY, 4);
-    }
+    CreepGraphics.drawShield(this.shieldGraphics, this.bounceTime, this.shieldHitsRemaining);
   }
 
   /**
@@ -1092,5 +708,12 @@ export class Creep extends Phaser.GameObjects.Container {
    */
   getCurrentHealth(): number {
     return this.currentHealth;
+  }
+
+  /**
+   * Get shield hits remaining
+   */
+  getShieldHitsRemaining(): number {
+    return this.shieldHitsRemaining;
   }
 }

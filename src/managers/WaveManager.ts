@@ -1,161 +1,8 @@
 import Phaser from 'phaser';
 import { CreepManager } from './CreepManager';
 import { Creep } from '../objects';
-
-export interface WaveCreepGroup {
-  type: string;
-  count: number;
-  intervalMs: number;
-  delayStart?: number;
-}
-
-export interface WaveDef {
-  waveNumber: number;
-  creeps: WaveCreepGroup[];
-}
-
-// Hardcoded wave configurations for all 25 waves
-export const WAVE_CONFIGS: WaveDef[] = [
-  // Wave 1: Introduction - easy furballs
-  { waveNumber: 1, creeps: [{ type: 'furball', count: 8, intervalMs: 1500 }] },
-  
-  // Wave 2: More furballs
-  { waveNumber: 2, creeps: [{ type: 'furball', count: 12, intervalMs: 1200 }] },
-  
-  // Wave 3: First runners
-  { waveNumber: 3, creeps: [
-    { type: 'furball', count: 6, intervalMs: 1500 },
-    { type: 'runner', count: 4, intervalMs: 800, delayStart: 3000 }
-  ]},
-  
-  // Wave 4: Runner focused
-  { waveNumber: 4, creeps: [{ type: 'runner', count: 10, intervalMs: 700 }] },
-  
-  // Wave 5: Mixed assault
-  { waveNumber: 5, creeps: [
-    { type: 'furball', count: 8, intervalMs: 1200 },
-    { type: 'runner', count: 8, intervalMs: 600, delayStart: 2000 }
-  ]},
-  
-  // Wave 6: First tanks
-  { waveNumber: 6, creeps: [
-    { type: 'furball', count: 10, intervalMs: 1000 },
-    { type: 'tank', count: 2, intervalMs: 3000, delayStart: 5000 }
-  ]},
-  
-  // Wave 7: Tank focus
-  { waveNumber: 7, creeps: [{ type: 'tank', count: 5, intervalMs: 2500 }] },
-  
-  // Wave 8: Speed and armor mix
-  { waveNumber: 8, creeps: [
-    { type: 'runner', count: 12, intervalMs: 500 },
-    { type: 'tank', count: 3, intervalMs: 2000, delayStart: 3000 }
-  ]},
-  
-  // Wave 9: Pre-boss buildup
-  { waveNumber: 9, creeps: [
-    { type: 'furball', count: 15, intervalMs: 800 },
-    { type: 'tank', count: 4, intervalMs: 2000, delayStart: 4000 }
-  ]},
-  
-  // Wave 10: FIRST BOSS
-  { waveNumber: 10, creeps: [
-    { type: 'furball', count: 10, intervalMs: 1000 },
-    { type: 'boss', count: 1, intervalMs: 1000, delayStart: 5000 }
-  ]},
-  
-  // Wave 11: Recovery wave
-  { waveNumber: 11, creeps: [{ type: 'furball', count: 15, intervalMs: 900 }] },
-  
-  // Wave 12: Runner swarm
-  { waveNumber: 12, creeps: [{ type: 'runner', count: 20, intervalMs: 400 }] },
-  
-  // Wave 13: Heavy tanks
-  { waveNumber: 13, creeps: [{ type: 'tank', count: 8, intervalMs: 2000 }] },
-  
-  // Wave 14: Mixed chaos
-  { waveNumber: 14, creeps: [
-    { type: 'furball', count: 10, intervalMs: 800 },
-    { type: 'runner', count: 10, intervalMs: 500, delayStart: 2000 },
-    { type: 'tank', count: 4, intervalMs: 2500, delayStart: 4000 }
-  ]},
-  
-  // Wave 15: Tank army
-  { waveNumber: 15, creeps: [
-    { type: 'tank', count: 10, intervalMs: 1800 },
-    { type: 'furball', count: 8, intervalMs: 1000, delayStart: 3000 }
-  ]},
-  
-  // Wave 16: Speed challenge
-  { waveNumber: 16, creeps: [
-    { type: 'runner', count: 25, intervalMs: 350 }
-  ]},
-  
-  // Wave 17: Heavy mixed
-  { waveNumber: 17, creeps: [
-    { type: 'tank', count: 6, intervalMs: 2000 },
-    { type: 'runner', count: 15, intervalMs: 400, delayStart: 3000 }
-  ]},
-  
-  // Wave 18: Endurance test
-  { waveNumber: 18, creeps: [
-    { type: 'furball', count: 20, intervalMs: 600 },
-    { type: 'tank', count: 5, intervalMs: 2500, delayStart: 2000 }
-  ]},
-  
-  // Wave 19: Pre-boss 2
-  { waveNumber: 19, creeps: [
-    { type: 'runner', count: 15, intervalMs: 500 },
-    { type: 'tank', count: 8, intervalMs: 1500, delayStart: 4000 }
-  ]},
-  
-  // Wave 20: DOUBLE BOSS
-  { waveNumber: 20, creeps: [
-    { type: 'tank', count: 5, intervalMs: 2000 },
-    { type: 'boss', count: 2, intervalMs: 8000, delayStart: 5000 }
-  ]},
-  
-  // Wave 21: Aftermath + first jumpers
-  { waveNumber: 21, creeps: [
-    { type: 'furball', count: 15, intervalMs: 600 },
-    { type: 'jumper', count: 3, intervalMs: 2500, delayStart: 3000 },
-    { type: 'runner', count: 10, intervalMs: 400, delayStart: 5000 }
-  ]},
-  
-  // Wave 22: First shielded enemies
-  { waveNumber: 22, creeps: [
-    { type: 'shielded', count: 4, intervalMs: 3000 },
-    { type: 'tank', count: 8, intervalMs: 1500, delayStart: 2000 },
-    { type: 'runner', count: 10, intervalMs: 600, delayStart: 5000 }
-  ]},
-  
-  // Wave 23: Elite mixed assault
-  { waveNumber: 23, creeps: [
-    { type: 'jumper', count: 5, intervalMs: 2000 },
-    { type: 'shielded', count: 5, intervalMs: 2000, delayStart: 3000 },
-    { type: 'tank', count: 6, intervalMs: 1500, delayStart: 5000 },
-    { type: 'boss', count: 1, intervalMs: 1000, delayStart: 10000 }
-  ]},
-  
-  // Wave 24: Penultimate chaos
-  { waveNumber: 24, creeps: [
-    { type: 'runner', count: 15, intervalMs: 350 },
-    { type: 'jumper', count: 6, intervalMs: 1800, delayStart: 2000 },
-    { type: 'shielded', count: 6, intervalMs: 1800, delayStart: 4000 },
-    { type: 'tank', count: 10, intervalMs: 1200, delayStart: 6000 },
-    { type: 'boss', count: 2, intervalMs: 6000, delayStart: 12000 }
-  ]},
-  
-  // Wave 25: FINAL WAVE - Everything!
-  { waveNumber: 25, creeps: [
-    { type: 'furball', count: 10, intervalMs: 500 },
-    { type: 'runner', count: 15, intervalMs: 350, delayStart: 2000 },
-    { type: 'jumper', count: 8, intervalMs: 1500, delayStart: 3000 },
-    { type: 'shielded', count: 8, intervalMs: 1500, delayStart: 4000 },
-    { type: 'tank', count: 10, intervalMs: 1000, delayStart: 6000 },
-    { type: 'boss', count: 3, intervalMs: 5000, delayStart: 10000 }
-  ]}
-];
+import { WAVE_CONFIGS } from '../data/WaveData';
+import type { WaveCreepGroup } from '../data/WaveData';
 
 /**
  * WaveManager controls wave progression and creep spawning.
@@ -183,9 +30,12 @@ export class WaveManager {
   public onWaveStart?: (waveNumber: number) => void;
   public onWaveComplete?: (waveNumber: number) => void;
   public onAllWavesComplete?: () => void;
-  public onCreepKilled?: (goldReward: number) => void;
+  public onCreepKilled?: (goldReward: number, deathX: number, deathY: number) => void;
   public onCreepLeaked?: () => void;
   public onWaveProgress?: (spawned: number, total: number) => void;
+  
+  // Game speed getter (provided by GameScene)
+  public getGameSpeed?: () => number;
 
   constructor(scene: Phaser.Scene, creepManager: CreepManager) {
     this.scene = scene;
@@ -258,7 +108,10 @@ export class WaveManager {
       this.onWaveProgress?.(this.creepsSpawned, this.creepsToSpawn);
       
       if (spawned < group.count) {
-        const timer = this.scene.time.delayedCall(group.intervalMs, spawnOne);
+        // Scale spawn interval by game speed
+        const gameSpeed = this.getGameSpeed?.() || 1;
+        const scaledInterval = group.intervalMs / gameSpeed;
+        const timer = this.scene.time.delayedCall(scaledInterval, spawnOne);
         this.spawnTimers.push(timer);
       }
     };
@@ -266,7 +119,10 @@ export class WaveManager {
     // Apply delay if specified, spawn immediately if no delay
     const delay = group.delayStart || 0;
     if (delay > 0) {
-      const timer = this.scene.time.delayedCall(delay, spawnOne);
+      // Scale initial delay by game speed
+      const gameSpeed = this.getGameSpeed?.() || 1;
+      const scaledDelay = delay / gameSpeed;
+      const timer = this.scene.time.delayedCall(scaledDelay, spawnOne);
       this.spawnTimers.push(timer);
     } else {
       // Spawn first one immediately, then schedule the rest
@@ -277,12 +133,12 @@ export class WaveManager {
   /**
    * Handle creep death
    */
-  private handleCreepDied(_creep: Creep, goldReward: number): void {
+  private handleCreepDied(_creep: Creep, goldReward: number, deathX: number, deathY: number): void {
     this.creepsKilled++;
     this.totalCreepsKilled++;
     this.totalGoldEarned += goldReward;
     
-    this.onCreepKilled?.(goldReward);
+    this.onCreepKilled?.(goldReward, deathX, deathY);
     this.checkWaveComplete();
   }
 
