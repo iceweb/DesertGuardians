@@ -324,19 +324,51 @@ This plan is designed to be executed sequentially.
 ### Step 9: Highscore & Persistence
 *   **Goal**: Save/Load scores, Scoring formula.
 *   **Actions**:
-    *   Implement `ScoreManager`: Track time and gold.
-    *   Implement `ResultsScene`: Calculate formula, input name, save to `localStorage`.
-    *   Update `MenuScene`: Render highscore table.
-*   **Deliverable**: Leaderboard and run tracking.
+    *   Add run statistics tracking to `GameScene`:
+        *   Track `gameStartTime` (real time when wave 1 starts).
+        *   Track `totalGoldEarned` (already in `WaveManager.getTotalStats()`).
+        *   Pass final stats to `ResultsScene` via `scene.start('ResultsScene', { stats })`.
+    *   Implement `ResultsScene` fully:
+        *   Receive stats from `GameScene` via `init(data)`.
+        *   Calculate score using the formula from Section 3 (BaseScore + GoldScore × multipliers).
+        *   Display final score breakdown (waves, gold, HP bonus, time bonus).
+        *   Add player name input field (max 10 chars).
+        *   Save to `localStorage` key `tower_defense_highscores` as JSON array.
+        *   Show "Play Again" and "Menu" buttons.
+    *   Update `MenuScene.showHighscores()`:
+        *   Load highscores from `localStorage`.
+        *   Render Top 10 table (Name, Score, Wave, Date).
+        *   Highlight player's personal best.
+        *   Add "Close" button to return to menu.
+    *   Update `HUDManager.showVictory()` and `showDefeat()`:
+        *   Transition to `ResultsScene` instead of showing inline overlay.
+        *   Pass all required stats (gold, HP, wave, time, totalGoldEarned).
+*   **Deliverable**: Leaderboard persistence and score calculation working.
 
 ### Step 10: Final Config, Audio & Polish
 *   **Goal**: The "Game" feel.
 *   **Actions**:
-    *   Populate `WaveConfig` with all 25 waves (balancing).
-    *   Integrate `Howler.js`: Play BGM, hook up SFX to events.
-    *   Add visual polish: Particle effects, camera shake on castle damage.
-    *   Final assets pass (ensure all placeholders replaced).
-*   **Deliverable**: Release candidate.
+    *   Create `src/managers/AudioManager.ts`:
+        *   Initialize Howler.js with BGM (`Desert_Theme.mp3`) and SFX sprite.
+        *   Expose `playBGM()`, `stopBGM()`, `playSFX(key)` methods.
+        *   SFX keys: `shoot_arrow`, `shoot_cannon`, `shoot_ice`, `shoot_poison`, `hit_flesh`, `hit_armor`, `build_thud`, `ui_click`, `wave_start`, `wave_complete`, `victory`, `defeat`.
+    *   Integrate `AudioManager` into existing managers via events:
+        *   `GameScene`: Initialize AudioManager, start BGM on game start.
+        *   `TowerManager.onTowerBuilt`: Play `build_thud`.
+        *   `ProjectileManager.fire()`: Play tower-specific shoot SFX.
+        *   `Creep.takeDamage()`: Play `hit_flesh` or `hit_armor` based on armor.
+        *   `WaveManager.onWaveStart`: Play `wave_start`.
+        *   `WaveManager.onWaveComplete`: Play `wave_complete`.
+        *   `HUDManager` button clicks: Play `ui_click`.
+    *   Add volume controls to `MenuScene` (BGM slider, SFX slider).
+    *   Balance pass on `WaveData.ts` (already has 25 waves, verify difficulty curve).
+    *   Visual polish (already implemented):
+        *   ✅ Camera shake on castle damage (in `GameScene.setupWaveCallbacks`).
+        *   ✅ Floating gold text (in `HUDManager.showFloatingText`).
+        *   ✅ Death/hit effects (in `Creep`, `Projectile` classes).
+        *   ✅ Status effect visuals (in `CreepGraphics`).
+    *   Add placeholder audio files to `public/assets/audio/`.
+*   **Deliverable**: Release candidate with audio and final polish.
 
 ---
 

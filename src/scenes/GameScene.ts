@@ -21,6 +21,10 @@ export class GameScene extends Phaser.Scene {
   
   // Virtual game time (advances faster at 2x speed)
   private virtualGameTime: number = 0;
+  
+  // Run statistics for scoring
+  private gameStartTime: number = 0;  // Real time when wave 1 starts
+  private hasGameStarted: boolean = false;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -31,6 +35,9 @@ export class GameScene extends Phaser.Scene {
     this.gold = 200;
     this.castleHP = 10;
     this.gameOver = false;
+    this.virtualGameTime = 0;
+    this.gameStartTime = 0;
+    this.hasGameStarted = false;
 
     // Initialize managers
     this.mapManager = new MapManager(this);
@@ -115,6 +122,12 @@ export class GameScene extends Phaser.Scene {
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
       
+      // Track game start time when wave 1 begins
+      if (waveNumber === 1 && !this.hasGameStarted) {
+        this.gameStartTime = Date.now();
+        this.hasGameStarted = true;
+      }
+      
       // Emit event to UIScene
       this.registry.events.emit('wave-started', waveNumber);
     };
@@ -145,7 +158,7 @@ export class GameScene extends Phaser.Scene {
     this.waveManager.onAllWavesComplete = () => {
       console.log('All waves complete! Victory!');
       this.gameOver = true;
-      this.hudManager.showVictory(this.gold, this.castleHP);
+      this.goToResults(true);
     };
 
     this.waveManager.onCreepKilled = (goldReward: number, deathX: number, deathY: number) => {
@@ -169,10 +182,35 @@ export class GameScene extends Phaser.Scene {
       
       if (this.castleHP <= 0 && !this.gameOver) {
         this.gameOver = true;
-        const stats = this.waveManager.getTotalStats();
-        this.hudManager.showDefeat(this.waveManager.getCurrentWave(), this.waveManager.getTotalWaves(), stats.killed);
+        this.goToResults(false);
       }
     };
+  }
+
+  /**
+   * Transition to results scene with all run statistics
+   */
+  private goToResults(isVictory: boolean): void {
+    const stats = this.waveManager.getTotalStats();
+    const runTimeSeconds = this.hasGameStarted 
+      ? Math.floor((Date.now() - this.gameStartTime) / 1000)
+      : 0;
+    
+    // Stop UIScene overlay
+    this.scene.stop('UIScene');
+    
+    // Start ResultsScene with all data
+    this.scene.start('ResultsScene', {
+      isVictory,
+      waveReached: this.waveManager.getCurrentWave(),
+      totalWaves: this.waveManager.getTotalWaves(),
+      castleHP: this.castleHP,
+      maxCastleHP: 10,
+      goldRemaining: this.gold,
+      totalGoldEarned: stats.goldEarned,
+      creepsKilled: stats.killed,
+      runTimeSeconds
+    });
   }
 
   /**
