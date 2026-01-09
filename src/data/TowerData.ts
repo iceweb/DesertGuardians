@@ -223,7 +223,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'icetower',
     level: 1,
-    upgradeCost: 100,
+    upgradeCost: 80,
     description: 'Slows enemies by 40% for 2s. Ignores armor.',
     stats: {
       range: 180,
@@ -239,7 +239,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'icetower',
     level: 2,
-    upgradeCost: 120,
+    upgradeCost: 100,
     description: 'Freezing cold. 50% slow for 2.5s.',
     stats: {
       range: 200,
@@ -255,7 +255,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'icetower',
     level: 3,
-    upgradeCost: 240,
+    upgradeCost: 200,
     description: 'Absolute zero. 60% slow for 3s.',
     stats: {
       range: 220,
@@ -273,7 +273,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'poison',
     level: 1,
-    upgradeCost: 100,
+    upgradeCost: 80,
     description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor.',
     stats: {
       range: 200,
@@ -289,7 +289,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'poison',
     level: 2,
-    upgradeCost: 120,
+    upgradeCost: 100,
     description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x.',
     stats: {
       range: 220,
@@ -305,7 +305,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'magic',
     branch: 'poison',
     level: 3,
-    upgradeCost: 240,
+    upgradeCost: 200,
     description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x.',
     stats: {
       range: 240,

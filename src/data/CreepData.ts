@@ -28,7 +28,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   runner: {
     type: 'runner',
-    maxHealth: 35,
+    maxHealth: 22,
     speed: 150,
     armor: 0,
     goldReward: 5

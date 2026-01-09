@@ -131,6 +131,10 @@ export class Creep extends Phaser.GameObjects.Container {
     this.statusEffects.reset();
     this.statusEffects.setOnPoisonDamage((damage: number) => {
       if (this.isActive) {
+        // Check immunity - burrowed diggers and ghost phase creeps are immune
+        if (this.abilities.isImmune()) {
+          return; // No damage while immune
+        }
         this.currentHealth -= damage;
         this.updateHealthBar();
         this.effects.showPoisonDamage(this.x, this.y, damage);

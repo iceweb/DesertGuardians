@@ -397,44 +397,40 @@ export class WaveManager {
     // Get color based on wave type
     const colors = this.getAnnouncementColors(waveType);
     
-    // Create background panel
-    const panelWidth = 400;
-    const panelHeight = 80;
-    const panel = this.scene.add.graphics();
-    panel.fillStyle(0x000000, 0.7);
-    panel.fillRoundedRect(centerX - panelWidth / 2, centerY - panelHeight / 2, panelWidth, panelHeight, 16);
-    panel.lineStyle(3, colors.border, 1);
-    panel.strokeRoundedRect(centerX - panelWidth / 2, centerY - panelHeight / 2, panelWidth, panelHeight, 16);
-    panel.setDepth(200);
-    panel.setScrollFactor(0);
+    console.log(`WaveManager: Showing announcement "${text}" at (${centerX}, ${centerY}) with color ${colors.text}`);
+    
+    // Create container for announcement
+    const container = this.scene.add.container(centerX, centerY);
+    container.setDepth(250);
+    container.setScrollFactor(0);
+    
+    // Create background panel using rectangle (better tween support than graphics)
+    const panelWidth = 420;
+    const panelHeight = 90;
+    const panelBg = this.scene.add.rectangle(0, 0, panelWidth, panelHeight, 0x000000, 0.85);
+    panelBg.setStrokeStyle(4, colors.border);
+    container.add(panelBg);
     
     // Create announcement text
-    const announcement = this.scene.add.text(centerX, centerY, text, {
-      fontSize: '28px',
+    const announcement = this.scene.add.text(0, 0, text, {
+      fontFamily: 'Arial Black',
+      fontSize: '36px',
       color: colors.text,
-      fontStyle: 'bold',
       stroke: '#000000',
-      strokeThickness: 4,
+      strokeThickness: 6,
       align: 'center'
     });
     announcement.setOrigin(0.5);
-    announcement.setDepth(201);
-    announcement.setScrollFactor(0);
+    container.add(announcement);
+    
+    // Start invisible and scaled down
+    container.setAlpha(0);
+    container.setScale(0.5);
     
     // Animate in
-    panel.setAlpha(0);
-    announcement.setAlpha(0);
-    announcement.setScale(0.5);
-    
     this.scene.tweens.add({
-      targets: [panel, announcement],
+      targets: container,
       alpha: 1,
-      duration: 300,
-      ease: 'Back.easeOut'
-    });
-    
-    this.scene.tweens.add({
-      targets: announcement,
       scale: 1,
       duration: 400,
       ease: 'Back.easeOut'
@@ -443,8 +439,8 @@ export class WaveManager {
     // Pulse effect for boss waves
     if (waveType === 'boss') {
       this.scene.tweens.add({
-        targets: announcement,
-        scale: 1.1,
+        targets: container,
+        scale: 1.08,
         duration: 500,
         yoyo: true,
         repeat: 2,
@@ -459,14 +455,14 @@ export class WaveManager {
     // Animate out and destroy
     this.scene.time.delayedCall(duration, () => {
       this.scene.tweens.add({
-        targets: [panel, announcement],
+        targets: container,
         alpha: 0,
-        y: centerY - 30,
+        y: centerY - 40,
+        scale: 0.8,
         duration: 400,
         ease: 'Cubic.easeIn',
         onComplete: () => {
-          panel.destroy();
-          announcement.destroy();
+          container.destroy();
         }
       });
     });
