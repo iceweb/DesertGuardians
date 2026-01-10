@@ -91,13 +91,13 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
   /**
    * Handle splash damage from Rock Cannon
    */
-  private handleSplash(x: number, y: number, radius: number, damage: number, isMagic: boolean): void {
+  private handleSplash(x: number, y: number, radius: number, damage: number, isMagic: boolean, towerBranch?: string): void {
     const creeps = this.creepManager.getActiveCreeps();
     
     for (const creep of creeps) {
       const distance = Phaser.Math.Distance.Between(x, y, creep.x, creep.y);
       if (distance <= radius) {
-        creep.takeDamage(damage, isMagic);
+        creep.takeDamage(damage, isMagic, towerBranch);
       }
     }
     

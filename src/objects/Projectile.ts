@@ -400,8 +400,8 @@ export class Projectile extends Phaser.GameObjects.Container {
     // Check if target was alive before damage
     const wasAlive = this.target.getIsActive();
     
-    // Apply damage
-    this.target.takeDamage(damage, this.config.isMagic);
+    // Apply damage (pass tower branch for elemental immunity check)
+    this.target.takeDamage(damage, this.config.isMagic, this.config.branch);
     
     // Check if we killed the target
     if (wasAlive && !this.target.getIsActive() && this.sourceTower) {
@@ -411,9 +411,9 @@ export class Projectile extends Phaser.GameObjects.Container {
     // Special effects
     this.applySpecialEffects();
     
-    // Splash damage for Rock Cannon
+    // Splash damage for Rock Cannon (pass branch for elemental immunity)
     if (this.config.branch === 'rockcannon' && stats.splashRadius) {
-      this.emit('splash', this.target.x, this.target.y, stats.splashRadius, damage * 0.5, this.config.isMagic);
+      this.emit('splash', this.target.x, this.target.y, stats.splashRadius, damage * 0.5, this.config.isMagic, this.config.branch);
     }
     
     this.deactivate();

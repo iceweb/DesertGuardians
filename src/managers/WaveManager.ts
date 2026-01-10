@@ -37,6 +37,11 @@ export class WaveManager {
   private spawnTimer: Phaser.Time.TimerEvent | null = null;  // Timer for current group
   private groupCreeps: Set<Creep> = new Set();  // Track creeps spawned by current group
   
+  // Parallel spawning state (for final wave)
+  private parallelGroups: GroupSpawnState[] = [];  // Groups spawning in parallel
+  private parallelTimers: Map<string, Phaser.Time.TimerEvent> = new Map();  // Timers for parallel groups
+  private isParallelMode: boolean = false;  // Whether current wave uses parallel spawning
+  
   // Wave tracking
   private creepsToSpawn: number = 0;
   private creepsSpawned: number = 0;
@@ -113,8 +118,11 @@ export class WaveManager {
       this.showWaveAnnouncement(waveDef.waveType, waveDef.announcement);
     }
     
-    // Queue all groups for sequential spawning
-    this.groupQueue = waveDef.creeps.map(group => ({
+    // Check if this wave uses parallel spawning (e.g., final wave)
+    this.isParallelMode = waveDef.parallelSpawn === true;
+    
+    // Create group states
+    const allGroups = waveDef.creeps.map(group => ({
       group,
       spawned: 0,
       finished: false,
@@ -122,10 +130,65 @@ export class WaveManager {
       lastSpawnedCreep: null
     }));
     
-    // Start spawning the first group immediately
-    this.startNextGroup();
+    if (this.isParallelMode) {
+      // PARALLEL MODE: All groups spawn simultaneously
+      console.log('WaveManager: Using PARALLEL spawning mode');
+      this.parallelGroups = allGroups;
+      this.groupQueue = [];
+      this.startParallelSpawning();
+    } else {
+      // SEQUENTIAL MODE: Groups spawn one after another
+      this.groupQueue = allGroups;
+      this.parallelGroups = [];
+      this.startNextGroup();
+    }
     
     return true;
+  }
+
+  /**
+   * Start parallel spawning - all groups spawn at the same time
+   */
+  private startParallelSpawning(): void {
+    console.log(`WaveManager: Starting ${this.parallelGroups.length} groups in parallel`);
+    
+    for (const group of this.parallelGroups) {
+      this.startParallelGroup(group);
+    }
+  }
+
+  /**
+   * Start spawning a single group in parallel mode
+   */
+  private startParallelGroup(groupState: GroupSpawnState): void {
+    const spawnNext = () => {
+      if (groupState.spawned >= groupState.group.count) {
+        groupState.finished = true;
+        console.log(`WaveManager: Parallel group ${groupState.creepType} finished (${groupState.spawned}/${groupState.group.count})`);
+        return;
+      }
+      
+      const creep = this.creepManager.spawn(groupState.group.type, this.currentWave);
+      groupState.spawned++;
+      this.creepsSpawned++;
+      
+      if (creep) {
+        groupState.lastSpawnedCreep = creep;
+      }
+      
+      this.onWaveProgress?.(this.creepsSpawned, this.creepsToSpawn);
+      
+      // Schedule next spawn for this group
+      if (groupState.spawned < groupState.group.count) {
+        const gameSpeed = this.getGameSpeed?.() || 1;
+        const scaledInterval = groupState.group.intervalMs / gameSpeed;
+        const timer = this.scene.time.delayedCall(scaledInterval, spawnNext);
+        this.parallelTimers.set(groupState.creepType, timer);
+      }
+    };
+    
+    // Start immediately
+    spawnNext();
   }
 
   /**
@@ -375,6 +438,14 @@ export class WaveManager {
       this.spawnTimer.destroy();
       this.spawnTimer = null;
     }
+    // Clear parallel timers
+    for (const timer of this.parallelTimers.values()) {
+      timer.destroy();
+    }
+    this.parallelTimers.clear();
+    this.parallelGroups = [];
+    this.isParallelMode = false;
+    
     this.groupQueue = [];
     this.currentGroup = null;
     this.groupCreeps.clear();
@@ -404,23 +475,24 @@ export class WaveManager {
     container.setDepth(250);
     container.setScrollFactor(0);
     
-    // Create background panel using rectangle (better tween support than graphics)
-    const panelWidth = 420;
-    const panelHeight = 90;
+    // Create announcement text first to measure it
+    const announcement = this.scene.add.text(0, 0, text, {
+      fontFamily: 'Arial Black',
+      fontSize: '32px',
+      color: colors.text,
+      stroke: '#000000',
+      strokeThickness: 5,
+      align: 'center',
+      wordWrap: { width: 500 }
+    });
+    announcement.setOrigin(0.5);
+    
+    // Create background panel sized to fit text
+    const panelWidth = Math.max(420, announcement.width + 40);
+    const panelHeight = Math.max(80, announcement.height + 30);
     const panelBg = this.scene.add.rectangle(0, 0, panelWidth, panelHeight, 0x000000, 0.85);
     panelBg.setStrokeStyle(4, colors.border);
     container.add(panelBg);
-    
-    // Create announcement text
-    const announcement = this.scene.add.text(0, 0, text, {
-      fontFamily: 'Arial Black',
-      fontSize: '36px',
-      color: colors.text,
-      stroke: '#000000',
-      strokeThickness: 6,
-      align: 'center'
-    });
-    announcement.setOrigin(0.5);
     container.add(announcement);
     
     // Start invisible and scaled down
@@ -485,6 +557,10 @@ export class WaveManager {
         return { text: '#32CD32', border: 0x228B22 };
       case 'chaos':
         return { text: '#FF6347', border: 0xFF4500 };
+      case 'flame':
+        return { text: '#FF6600', border: 0xFF4400 };
+      case 'plaguebearer':
+        return { text: '#00FF88', border: 0x00CC66 };
       default:
         return { text: '#FFFFFF', border: 0xFFFFFF };
     }

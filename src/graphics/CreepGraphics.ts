@@ -14,9 +14,16 @@ export class CreepGraphics {
     bounceTime: number,
     faceDirection: number,
     isFlashing: boolean = false,
-    isJumping: boolean = false
+    isJumping: boolean = false,
+    isBurrowed: boolean = false
   ): void {
     g.clear();
+    
+    // If burrowed, draw tunnel shadow instead of normal creep
+    if (isBurrowed) {
+      CreepGraphics.drawBurrowedTunnel(g, bounceTime, faceDirection);
+      return;
+    }
     
     switch (type) {
       case 'furball':
@@ -29,12 +36,22 @@ export class CreepGraphics {
         CreepGraphics.drawTank(g, bounceTime, faceDirection);
         break;
       case 'boss':
-      case 'boss_1':
-      case 'boss_2':
-      case 'boss_3':
-      case 'boss_4':
-      case 'boss_5':
         CreepGraphics.drawBoss(g, bounceTime, faceDirection);
+        break;
+      case 'boss_1':
+        CreepGraphics.drawBoss1(g, bounceTime, faceDirection);
+        break;
+      case 'boss_2':
+        CreepGraphics.drawBoss2(g, bounceTime, faceDirection);
+        break;
+      case 'boss_3':
+        CreepGraphics.drawBoss3(g, bounceTime, faceDirection);
+        break;
+      case 'boss_4':
+        CreepGraphics.drawBoss4(g, bounceTime, faceDirection);
+        break;
+      case 'boss_5':
+        CreepGraphics.drawBoss5(g, bounceTime, faceDirection);
         break;
       case 'jumper':
         CreepGraphics.drawJumper(g, bounceTime, faceDirection, isFlashing, isJumping);
@@ -56,6 +73,12 @@ export class CreepGraphics {
         break;
       case 'baby':
         CreepGraphics.drawBaby(g, bounceTime, faceDirection);
+        break;
+      case 'flame':
+        CreepGraphics.drawFlame(g, bounceTime, faceDirection);
+        break;
+      case 'plaguebearer':
+        CreepGraphics.drawPlaguebearer(g, bounceTime, faceDirection);
         break;
       default:
         CreepGraphics.drawFurball(g, bounceTime, faceDirection);
@@ -271,6 +294,489 @@ export class CreepGraphics {
     g.fillStyle(0x3A0066, 1);
     g.fillEllipse(-15, 28, 12, 8);
     g.fillEllipse(15, 28, 12, 8);
+  }
+
+  /**
+   * Boss 1: "Mini Boss" - Small but fierce, red goblin-like creature
+   */
+  static drawBoss1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const bounce = Math.sin(bounceTime * 5) * 2;
+    const rage = 1 + Math.sin(bounceTime * 10) * 0.05;
+    
+    // Rage aura
+    g.fillStyle(0xFF4444, 0.15);
+    g.fillCircle(0, 0, 35 * rage);
+    
+    // Shadow
+    g.fillStyle(0x000000, 0.35);
+    g.fillEllipse(0, 22, 32, 12);
+    
+    // Body - compact and muscular
+    g.fillStyle(0xCC2222, 1);
+    g.fillEllipse(0, 0 + bounce, 28, 24);
+    
+    // Muscle definition
+    g.fillStyle(0xDD4444, 1);
+    g.fillEllipse(-8, -4 + bounce, 10, 12);
+    g.fillEllipse(8, -4 + bounce, 10, 12);
+    
+    // Head
+    g.fillStyle(0xDD3333, 1);
+    g.fillEllipse(12 * faceDirection, -10 + bounce, 16, 14);
+    
+    // Angry eyebrows
+    g.fillStyle(0x660000, 1);
+    g.fillRect(6 * faceDirection, -18 + bounce, 12, 3);
+    
+    // Eyes - fierce yellow
+    g.fillStyle(0xFFFF00, 1);
+    g.fillCircle(10 * faceDirection, -12 + bounce, 4);
+    g.fillCircle(18 * faceDirection, -10 + bounce, 3);
+    g.fillStyle(0x000000, 1);
+    g.fillCircle(11 * faceDirection, -12 + bounce, 2);
+    g.fillCircle(19 * faceDirection, -10 + bounce, 1.5);
+    
+    // Horns (small)
+    g.fillStyle(0x333333, 1);
+    g.beginPath();
+    g.moveTo(4 * faceDirection, -22 + bounce);
+    g.lineTo(0, -30 + bounce);
+    g.lineTo(-2 * faceDirection, -22 + bounce);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(16 * faceDirection, -18 + bounce);
+    g.lineTo(20 * faceDirection, -26 + bounce);
+    g.lineTo(12 * faceDirection, -20 + bounce);
+    g.closePath();
+    g.fillPath();
+    
+    // Mouth with fangs
+    g.fillStyle(0x1a0000, 1);
+    g.fillEllipse(16 * faceDirection, 0 + bounce, 8, 5);
+    g.fillStyle(0xFFFFFF, 1);
+    g.fillRect(12 * faceDirection, -2 + bounce, 2, 4);
+    g.fillRect(18 * faceDirection, -1 + bounce, 2, 3);
+    
+    // Arms
+    g.fillStyle(0xCC2222, 1);
+    g.fillEllipse(-18, 6 + bounce, 8, 6);
+    g.fillEllipse(18, 6 + bounce, 8, 6);
+    
+    // Feet
+    g.fillStyle(0x991111, 1);
+    g.fillEllipse(-10, 20, 8, 5);
+    g.fillEllipse(10, 20, 8, 5);
+  }
+
+  /**
+   * Boss 2: "Warlord" - Armored knight-like boss with shield
+   */
+  static drawBoss2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const bounce = Math.sin(bounceTime * 4) * 2;
+    const pulse = 1 + Math.sin(bounceTime * 8) * 0.03;
+    
+    // Menacing aura
+    g.fillStyle(0x4444AA, 0.15);
+    g.fillCircle(0, 0, 45 * pulse);
+    
+    // Shadow
+    g.fillStyle(0x000000, 0.4);
+    g.fillEllipse(0, 28, 40, 14);
+    
+    // Body - heavily armored
+    g.fillStyle(0x555577, 1);
+    g.fillEllipse(0, 2 + bounce, 34, 28);
+    
+    // Armor plates
+    g.fillStyle(0x6666AA, 1);
+    g.fillRect(-14, -10 + bounce, 28, 20);
+    g.fillStyle(0x7777CC, 1);
+    g.fillRect(-10, -6 + bounce, 20, 4);
+    g.fillRect(-10, 2 + bounce, 20, 4);
+    
+    // Shoulder plates
+    g.fillStyle(0x5555AA, 1);
+    g.fillEllipse(-22, -2 + bounce, 12, 10);
+    g.fillEllipse(22, -2 + bounce, 12, 10);
+    g.fillStyle(0x7777DD, 1);
+    g.fillCircle(-22, -4 + bounce, 4);
+    g.fillCircle(22, -4 + bounce, 4);
+    
+    // Helmet
+    g.fillStyle(0x666699, 1);
+    g.fillEllipse(10 * faceDirection, -14 + bounce, 16, 18);
+    
+    // Helmet visor
+    g.fillStyle(0x222244, 1);
+    g.fillRect(4 * faceDirection, -16 + bounce, 14, 8);
+    
+    // Eyes glowing through visor
+    g.fillStyle(0xFF4444, 0.9);
+    g.fillCircle(8 * faceDirection, -12 + bounce, 2);
+    g.fillCircle(14 * faceDirection, -12 + bounce, 2);
+    
+    // Helmet crest
+    g.fillStyle(0xCC3333, 1);
+    g.beginPath();
+    g.moveTo(6 * faceDirection, -30 + bounce);
+    g.lineTo(10 * faceDirection, -35 + bounce);
+    g.lineTo(14 * faceDirection, -30 + bounce);
+    g.closePath();
+    g.fillPath();
+    
+    // Shield
+    g.fillStyle(0x444488, 1);
+    g.fillRect(-28 * faceDirection, -8 + bounce, 8, 24);
+    g.fillStyle(0x6666CC, 1);
+    g.fillRect(-26 * faceDirection, -4 + bounce, 4, 16);
+    
+    // Sword
+    g.fillStyle(0xAAAAAA, 1);
+    g.fillRect(28 * faceDirection, -20 + bounce, 3, 30);
+    g.fillStyle(0xDDDDDD, 1);
+    g.fillRect(26 * faceDirection, -22 + bounce, 7, 4);
+    
+    // Feet
+    g.fillStyle(0x444466, 1);
+    g.fillEllipse(-12, 24, 10, 6);
+    g.fillEllipse(12, 24, 10, 6);
+  }
+
+  /**
+   * Boss 3: "Necromancer" - Dark magical boss with floating runes
+   */
+  static drawBoss3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const float = Math.sin(bounceTime * 3) * 4;
+    const runeRotation = bounceTime * 2;
+    
+    // Dark magic aura
+    g.fillStyle(0x220044, 0.2);
+    g.fillCircle(0, -5 + float, 55);
+    g.fillStyle(0x440088, 0.15);
+    g.fillCircle(0, -5 + float, 45);
+    
+    // Floating runes around boss
+    for (let i = 0; i < 4; i++) {
+      const angle = runeRotation + (i * Math.PI / 2);
+      const runeX = Math.cos(angle) * 35;
+      const runeY = Math.sin(angle) * 20 - 5 + float;
+      const alpha = 0.6 + Math.sin(bounceTime * 4 + i) * 0.3;
+      
+      g.fillStyle(0x9900FF, alpha);
+      g.fillCircle(runeX, runeY, 5);
+      g.fillStyle(0xCC66FF, alpha * 0.8);
+      g.fillCircle(runeX, runeY, 3);
+    }
+    
+    // Shadow (faint, floating)
+    g.fillStyle(0x000000, 0.2);
+    g.fillEllipse(0, 30, 35, 10);
+    
+    // Robed body
+    g.fillStyle(0x220033, 1);
+    g.beginPath();
+    g.moveTo(-20, 5 + float);
+    g.lineTo(-25, 25 + float);
+    g.lineTo(25, 25 + float);
+    g.lineTo(20, 5 + float);
+    g.closePath();
+    g.fillPath();
+    
+    // Upper robe
+    g.fillStyle(0x330044, 1);
+    g.fillEllipse(0, -5 + float, 28, 22);
+    
+    // Robe details
+    g.fillStyle(0x550088, 0.6);
+    g.fillRect(-2, -10 + float, 4, 30);
+    
+    // Hood
+    g.fillStyle(0x220033, 1);
+    g.fillEllipse(8 * faceDirection, -20 + float, 18, 20);
+    
+    // Hood shadow (face hidden)
+    g.fillStyle(0x110022, 1);
+    g.fillEllipse(10 * faceDirection, -18 + float, 12, 14);
+    
+    // Glowing eyes from hood
+    g.fillStyle(0xFF00FF, 0.9);
+    g.fillCircle(6 * faceDirection, -20 + float, 3);
+    g.fillCircle(14 * faceDirection, -20 + float, 3);
+    g.fillStyle(0xFFAAFF, 1);
+    g.fillCircle(5 * faceDirection, -21 + float, 1);
+    g.fillCircle(13 * faceDirection, -21 + float, 1);
+    
+    // Staff
+    g.fillStyle(0x553311, 1);
+    g.fillRect(-25 * faceDirection, -35 + float, 4, 55);
+    
+    // Staff orb
+    g.fillStyle(0x9900FF, 0.8);
+    g.fillCircle(-23 * faceDirection, -40 + float, 8);
+    g.fillStyle(0xCC66FF, 1);
+    g.fillCircle(-25 * faceDirection, -42 + float, 3);
+    
+    // Skeletal hands
+    g.fillStyle(0xDDCCBB, 1);
+    g.fillCircle(-20 * faceDirection, 0 + float, 5);
+    g.fillCircle(24 * faceDirection, -5 + float, 4);
+  }
+
+  /**
+   * Boss 4: "Behemoth" - Massive beast with multiple limbs
+   */
+  static drawBoss4(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const bounce = Math.sin(bounceTime * 3) * 3;
+    const breathe = 1 + Math.sin(bounceTime * 4) * 0.04;
+    
+    // Ground shake effect
+    g.fillStyle(0x443322, 0.2);
+    g.fillCircle(0, 25, 55);
+    
+    // Large shadow
+    g.fillStyle(0x000000, 0.45);
+    g.fillEllipse(0, 32, 55, 18);
+    
+    // Back legs
+    g.fillStyle(0x554422, 1);
+    g.fillRect(-28, 10 + bounce, 10, 22);
+    g.fillRect(18, 10 + bounce, 10, 22);
+    
+    // Massive body
+    g.fillStyle(0x664433, 1);
+    g.fillEllipse(0, 0 + bounce, 48 * breathe, 36 * breathe);
+    
+    // Body texture
+    g.fillStyle(0x775544, 1);
+    g.fillEllipse(-12, -8 + bounce, 14, 16);
+    g.fillEllipse(10, 4 + bounce, 16, 14);
+    g.fillStyle(0x886655, 0.7);
+    g.fillCircle(-5, 10 + bounce, 8);
+    
+    // Spines on back
+    g.fillStyle(0x332211, 1);
+    for (let i = 0; i < 5; i++) {
+      const spineX = -16 + i * 8;
+      const spineHeight = 10 + Math.sin(bounceTime * 5 + i) * 2;
+      g.beginPath();
+      g.moveTo(spineX - 4, -20 + bounce);
+      g.lineTo(spineX, -20 - spineHeight + bounce);
+      g.lineTo(spineX + 4, -20 + bounce);
+      g.closePath();
+      g.fillPath();
+    }
+    
+    // Front legs (4 of them)
+    g.fillStyle(0x554422, 1);
+    g.fillRect(-35, -5 + bounce, 8, 32);
+    g.fillRect(-24, 0 + bounce, 6, 28);
+    g.fillRect(18, 0 + bounce, 6, 28);
+    g.fillRect(27, -5 + bounce, 8, 32);
+    
+    // Clawed feet
+    g.fillStyle(0x221100, 1);
+    g.fillEllipse(-31, 26, 8, 5);
+    g.fillEllipse(-21, 26, 6, 4);
+    g.fillEllipse(21, 26, 6, 4);
+    g.fillEllipse(31, 26, 8, 5);
+    
+    // Head
+    g.fillStyle(0x775544, 1);
+    g.fillEllipse(20 * faceDirection, -8 + bounce, 20, 18);
+    
+    // Massive jaw
+    g.fillStyle(0x664433, 1);
+    g.fillEllipse(28 * faceDirection, 2 + bounce, 14, 10);
+    
+    // Eyes - 4 small menacing eyes
+    g.fillStyle(0xFF6600, 1);
+    g.fillCircle(14 * faceDirection, -14 + bounce, 3);
+    g.fillCircle(20 * faceDirection, -16 + bounce, 2.5);
+    g.fillCircle(26 * faceDirection, -14 + bounce, 3);
+    g.fillCircle(20 * faceDirection, -10 + bounce, 2);
+    g.fillStyle(0x000000, 1);
+    g.fillCircle(15 * faceDirection, -14 + bounce, 1.5);
+    g.fillCircle(20 * faceDirection, -16 + bounce, 1);
+    g.fillCircle(27 * faceDirection, -14 + bounce, 1.5);
+    
+    // Tusks
+    g.fillStyle(0xFFFFEE, 1);
+    g.beginPath();
+    g.moveTo(22 * faceDirection, 4 + bounce);
+    g.lineTo(28 * faceDirection, 14 + bounce);
+    g.lineTo(24 * faceDirection, 6 + bounce);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(32 * faceDirection, 4 + bounce);
+    g.lineTo(38 * faceDirection, 12 + bounce);
+    g.lineTo(34 * faceDirection, 6 + bounce);
+    g.closePath();
+    g.fillPath();
+  }
+
+  /**
+   * Boss 5: "Overlord" - Ultimate boss with wings and crown, demonic appearance
+   */
+  static drawBoss5(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const hover = Math.sin(bounceTime * 2.5) * 4;
+    const wingFlap = Math.sin(bounceTime * 4) * 0.3;
+    const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
+    
+    // Massive dark aura
+    g.fillStyle(0x440000, 0.15);
+    g.fillCircle(0, -5 + hover, 70 * pulse);
+    g.fillStyle(0x880000, 0.1);
+    g.fillCircle(0, -5 + hover, 60 * pulse);
+    g.fillStyle(0xFF0000, 0.05);
+    g.fillCircle(0, -5 + hover, 50 * pulse);
+    
+    // Shadow (large, menacing)
+    g.fillStyle(0x000000, 0.5);
+    g.fillEllipse(0, 35, 60, 20);
+    
+    // Wings (massive, bat-like)
+    g.fillStyle(0x330011, 0.9);
+    // Left wing
+    g.beginPath();
+    g.moveTo(-18, -10 + hover);
+    g.lineTo(-50, -30 + hover + wingFlap * 30);
+    g.lineTo(-60, -15 + hover + wingFlap * 25);
+    g.lineTo(-55, 0 + hover + wingFlap * 20);
+    g.lineTo(-45, 10 + hover + wingFlap * 15);
+    g.lineTo(-25, 5 + hover);
+    g.closePath();
+    g.fillPath();
+    // Right wing
+    g.beginPath();
+    g.moveTo(18, -10 + hover);
+    g.lineTo(50, -30 + hover + wingFlap * 30);
+    g.lineTo(60, -15 + hover + wingFlap * 25);
+    g.lineTo(55, 0 + hover + wingFlap * 20);
+    g.lineTo(45, 10 + hover + wingFlap * 15);
+    g.lineTo(25, 5 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Wing membrane details
+    g.lineStyle(2, 0x550022, 0.8);
+    g.beginPath();
+    g.moveTo(-18, -10 + hover);
+    g.lineTo(-45, -20 + hover + wingFlap * 25);
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(-20, -5 + hover);
+    g.lineTo(-50, 0 + hover + wingFlap * 20);
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(18, -10 + hover);
+    g.lineTo(45, -20 + hover + wingFlap * 25);
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(20, -5 + hover);
+    g.lineTo(50, 0 + hover + wingFlap * 20);
+    g.strokePath();
+    
+    // Main body
+    g.fillStyle(0x551111, 1);
+    g.fillEllipse(0, 0 + hover, 38 * pulse, 32 * pulse);
+    
+    // Armor/scales
+    g.fillStyle(0x771122, 1);
+    g.fillEllipse(0, -8 + hover, 30, 18);
+    g.fillStyle(0x882233, 0.8);
+    g.fillEllipse(-10, 4 + hover, 12, 14);
+    g.fillEllipse(10, 4 + hover, 12, 14);
+    
+    // Demonic head
+    g.fillStyle(0x661111, 1);
+    g.fillEllipse(14 * faceDirection, -12 + hover, 18, 16);
+    
+    // Face details
+    g.fillStyle(0x882222, 1);
+    g.fillEllipse(18 * faceDirection, -10 + hover, 12, 10);
+    
+    // Grand crown with gems
+    g.fillStyle(0xFFD700, 1);
+    g.beginPath();
+    g.moveTo(-6 * faceDirection, -28 + hover);
+    g.lineTo(-4 * faceDirection, -40 + hover);
+    g.lineTo(0, -32 + hover);
+    g.lineTo(6 * faceDirection, -45 + hover);
+    g.lineTo(10 * faceDirection, -32 + hover);
+    g.lineTo(16 * faceDirection, -42 + hover);
+    g.lineTo(18 * faceDirection, -28 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Crown gems
+    g.fillStyle(0xFF0000, 1);
+    g.fillCircle(6 * faceDirection, -38 + hover, 4);
+    g.fillStyle(0x00FF00, 1);
+    g.fillCircle(-2 * faceDirection, -34 + hover, 3);
+    g.fillCircle(14 * faceDirection, -36 + hover, 3);
+    
+    // Massive horns
+    g.fillStyle(0x222222, 1);
+    g.beginPath();
+    g.moveTo(-2 * faceDirection, -26 + hover);
+    g.lineTo(-12 * faceDirection, -50 + hover);
+    g.lineTo(-8 * faceDirection, -48 + hover);
+    g.lineTo(-6 * faceDirection, -26 + hover);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(22 * faceDirection, -24 + hover);
+    g.lineTo(36 * faceDirection, -45 + hover);
+    g.lineTo(32 * faceDirection, -44 + hover);
+    g.lineTo(26 * faceDirection, -24 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Glowing demonic eyes
+    g.fillStyle(0xFF0000, 1);
+    g.fillCircle(12 * faceDirection, -16 + hover, 5);
+    g.fillCircle(22 * faceDirection, -14 + hover, 4);
+    g.fillStyle(0xFFFF00, 1);
+    g.fillCircle(10 * faceDirection, -18 + hover, 2);
+    g.fillCircle(20 * faceDirection, -16 + hover, 1.5);
+    
+    // Third eye (center)
+    g.fillStyle(0xFF00FF, 0.9);
+    g.fillCircle(16 * faceDirection, -6 + hover, 3);
+    g.fillStyle(0xFFFFFF, 1);
+    g.fillCircle(15 * faceDirection, -7 + hover, 1);
+    
+    // Fanged mouth
+    g.fillStyle(0x220000, 1);
+    g.fillEllipse(20 * faceDirection, 2 + hover, 10, 7);
+    g.fillStyle(0xFFFFFF, 1);
+    g.fillRect(14 * faceDirection, -1 + hover, 3, 5);
+    g.fillRect(20 * faceDirection, 0 + hover, 2, 4);
+    g.fillRect(24 * faceDirection, -1 + hover, 3, 5);
+    
+    // Clawed arms
+    g.fillStyle(0x551111, 1);
+    g.fillEllipse(-28, 8 + hover, 10, 8);
+    g.fillEllipse(28, 8 + hover, 10, 8);
+    
+    // Claws
+    g.fillStyle(0x222222, 1);
+    g.fillCircle(-32, 12 + hover, 4);
+    g.fillCircle(-36, 10 + hover, 3);
+    g.fillCircle(32, 12 + hover, 4);
+    g.fillCircle(36, 10 + hover, 3);
+    
+    // Feet with claws
+    g.fillStyle(0x441111, 1);
+    g.fillEllipse(-14, 28, 12, 8);
+    g.fillEllipse(14, 28, 12, 8);
+    g.fillStyle(0x222222, 1);
+    g.fillCircle(-18, 30, 3);
+    g.fillCircle(-10, 31, 2);
+    g.fillCircle(18, 30, 3);
+    g.fillCircle(10, 31, 2);
   }
 
   static drawJumper(
@@ -529,6 +1035,48 @@ export class CreepGraphics {
   }
 
   /**
+   * Draw burrowed tunnel shadow - moving dirt mound showing underground movement
+   */
+  static drawBurrowedTunnel(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const rumble = Math.sin(bounceTime * 15) * 1.5;
+    const pulse = 1 + Math.sin(bounceTime * 8) * 0.08;
+    
+    // Ground disturbance / tunnel shadow
+    g.fillStyle(0x3d2817, 0.7);
+    g.fillEllipse(0 + rumble, 12, 35 * pulse, 12 * pulse);
+    
+    // Darker center of tunnel
+    g.fillStyle(0x2a1a0f, 0.6);
+    g.fillEllipse(0 + rumble, 12, 22, 7);
+    
+    // Moving dirt mound on top
+    g.fillStyle(0x8B4513, 0.8);
+    g.fillEllipse(faceDirection * 6 + rumble, 8, 18 * pulse, 10 * pulse);
+    
+    // Lighter dirt highlights
+    g.fillStyle(0xA0522D, 0.6);
+    g.fillEllipse(faceDirection * 8 + rumble * 0.5, 5, 10, 6);
+    
+    // Small dirt particles erupting
+    for (let i = 0; i < 3; i++) {
+      const particleAngle = bounceTime * 6 + i * 2.1;
+      const particleX = Math.sin(particleAngle) * 8;
+      const particleY = 4 + Math.cos(particleAngle * 1.5) * 3;
+      const particleSize = 2 + Math.sin(particleAngle * 0.7) * 1;
+      const alpha = 0.4 + Math.sin(particleAngle) * 0.2;
+      
+      g.fillStyle(0x8B4513, alpha);
+      g.fillCircle(particleX + rumble, particleY, particleSize);
+    }
+    
+    // Direction indicator (claw tips emerging briefly)
+    if (Math.sin(bounceTime * 5) > 0.7) {
+      g.fillStyle(0x2F2F2F, 0.5);
+      g.fillCircle(faceDirection * 15 + rumble, 10, 3);
+      g.fillCircle(faceDirection * 12 + rumble, 8, 2);
+    }
+  }
+  /**
    * Draw ghost creep - ethereal and translucent
    */
   static drawGhost(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
@@ -710,6 +1258,140 @@ export class CreepGraphics {
   }
 
   /**
+   * Draw flame creep - burning elemental creature
+   */
+  static drawFlame(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const flicker = Math.sin(bounceTime * 15) * 2;
+    const pulse = 1 + Math.sin(bounceTime * 10) * 0.15;
+    
+    // Shadow (flickering)
+    g.fillStyle(0x000000, 0.2 + Math.sin(bounceTime * 20) * 0.1);
+    g.fillEllipse(0, 18, 22, 8);
+    
+    // Outer flame aura
+    g.fillStyle(0xFF4500, 0.4);
+    g.fillCircle(0, -5 + flicker, 22 * pulse);
+    
+    // Main body (fiery core)
+    g.fillStyle(0xFF6600, 1);
+    g.fillEllipse(0, -3 + flicker, 18 * pulse, 16 * pulse);
+    
+    // Inner hot core
+    g.fillStyle(0xFFAA00, 1);
+    g.fillEllipse(0, -5 + flicker, 12, 10);
+    
+    // Hot center
+    g.fillStyle(0xFFDD00, 1);
+    g.fillCircle(0, -6 + flicker, 6);
+    
+    // White hot center
+    g.fillStyle(0xFFFFAA, 0.9);
+    g.fillCircle(0, -7 + flicker, 3);
+    
+    // Animated flames (top)
+    const flameColors = [0xFF4500, 0xFF6600, 0xFFAA00];
+    for (let i = 0; i < 5; i++) {
+      const angle = (bounceTime * 8 + i * 1.2) % (Math.PI * 2);
+      const flameHeight = 8 + Math.sin(angle) * 6;
+      const x = (i - 2) * 4;
+      const color = flameColors[i % 3];
+      
+      g.fillStyle(color, 0.9);
+      g.beginPath();
+      g.moveTo(x - 3, -12 + flicker);
+      g.lineTo(x, -12 - flameHeight + flicker);
+      g.lineTo(x + 3, -12 + flicker);
+      g.closePath();
+      g.fill();
+    }
+    
+    // Eyes (glowing embers)
+    g.fillStyle(0xFFFFFF, 1);
+    g.fillCircle(-4 * faceDirection, -6 + flicker, 3);
+    g.fillCircle(4 * faceDirection, -6 + flicker, 3);
+    g.fillStyle(0xFF0000, 1);
+    g.fillCircle(-4 * faceDirection, -6 + flicker, 2);
+    g.fillCircle(4 * faceDirection, -6 + flicker, 2);
+  }
+
+  /**
+   * Draw plaguebearer - humanoid creature vulnerable to poison
+   */
+  static drawPlaguebearer(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const bounce = Math.sin(bounceTime * 6) * 2;
+    const sway = Math.sin(bounceTime * 4) * 0.1;
+    
+    // Shadow
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(0, 20, 20, 6);
+    
+    // Legs (humanoid, shambling)
+    const legPhase = Math.sin(bounceTime * 6);
+    g.fillStyle(0x556B2F, 1);
+    g.fillRect(-6 + legPhase * 2, 5, 4, 15);
+    g.fillRect(2 - legPhase * 2, 5, 4, 15);
+    
+    // Feet
+    g.fillStyle(0x3d4f2f, 1);
+    g.fillEllipse(-4 + legPhase * 2, 18, 5, 3);
+    g.fillEllipse(4 - legPhase * 2, 18, 5, 3);
+    
+    // Body (tattered robe)
+    g.fillStyle(0x4a5d23, 1);
+    g.beginPath();
+    g.moveTo(-10, 8);
+    g.lineTo(-12, -8 + bounce);
+    g.lineTo(0, -12 + bounce);
+    g.lineTo(12, -8 + bounce);
+    g.lineTo(10, 8);
+    g.closePath();
+    g.fill();
+    
+    // Robe detail
+    g.fillStyle(0x3d4f2f, 1);
+    g.fillRect(-2, -5 + bounce, 4, 12);
+    
+    // Arms (skeletal)
+    g.fillStyle(0xc8b896, 1);
+    g.fillRect(-14, -4 + bounce + sway * 10, 5, 3);
+    g.fillRect(9, -4 + bounce - sway * 10, 5, 3);
+    
+    // Hands
+    g.fillStyle(0xb8a886, 1);
+    g.fillCircle(-16, -3 + bounce + sway * 10, 3);
+    g.fillCircle(16, -3 + bounce - sway * 10, 3);
+    
+    // Head (hooded skull)
+    g.fillStyle(0x3d4f2f, 1);
+    g.fillCircle(0, -18 + bounce, 10);
+    
+    // Hood opening
+    g.fillStyle(0x1a1a1a, 1);
+    g.fillEllipse(2 * faceDirection, -17 + bounce, 7, 8);
+    
+    // Skull face inside hood
+    g.fillStyle(0xc8b896, 1);
+    g.fillCircle(2 * faceDirection, -17 + bounce, 5);
+    
+    // Eye sockets (glowing sickly green)
+    g.fillStyle(0x00FF88, 1);
+    g.fillCircle(-1 * faceDirection + 2 * faceDirection, -19 + bounce, 2);
+    g.fillCircle(3 * faceDirection + 2 * faceDirection, -19 + bounce, 2);
+    
+    // Sickly aura particles
+    for (let i = 0; i < 3; i++) {
+      const angle = (bounceTime * 3 + i * 2) % (Math.PI * 2);
+      const dist = 12 + Math.sin(angle) * 4;
+      const px = Math.cos(angle + bounceTime) * dist;
+      const py = Math.sin(angle + bounceTime) * dist * 0.5 - 5 + bounce;
+      const alpha = 0.3 + Math.sin(angle) * 0.2;
+      
+      g.fillStyle(0x00FF88, alpha);
+      g.fillCircle(px, py, 2);
+    }
+  }
+
+  /**
    * Draw shield visual effect
    */
   static drawShield(
@@ -855,6 +1537,8 @@ export class CreepGraphics {
       case 'ghost': baseColor = 0x9370DB; break;
       case 'broodmother': baseColor = 0x228B22; break;
       case 'baby': baseColor = 0x90EE90; break;
+      case 'flame': baseColor = 0xFF4500; break;
+      case 'plaguebearer': baseColor = 0x00FF88; break;
     }
     
     // Explosion particles

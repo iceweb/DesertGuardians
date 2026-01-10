@@ -63,7 +63,8 @@ export class Tower extends Phaser.GameObjects.Container {
     this.setInteractive({ useHandCursor: true });
     
     scene.add.existing(this);
-    this.setDepth(20);
+    // Depth based on y position for isometric sorting - towers higher on screen (lower y) should be behind
+    this.setDepth(20 + Math.floor(y / 10));
   }
 
   /**

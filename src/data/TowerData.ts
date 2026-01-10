@@ -127,9 +127,9 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 1,
     upgradeCost: 180,
-    description: 'Long range, high damage. 20% crit chance.',
+    description: 'Medium-long range, high damage. 20% crit chance.',
     stats: {
-      range: 450,
+      range: 350,
       fireRate: 2000,
       damage: 60,
       critChance: 0.2,
@@ -145,7 +145,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 200,
     description: 'Deadly precision. 25% crit chance.',
     stats: {
-      range: 500,
+      range: 380,
       fireRate: 1800,
       damage: 90,
       critChance: 0.25,
@@ -161,7 +161,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 420,  // Increased from 260 - late game investment
     description: 'Assassin elite. 30% crit with 2.5x damage.',
     stats: {
-      range: 550,
+      range: 420,
       fireRate: 1600,
       damage: 130,
       critChance: 0.30,

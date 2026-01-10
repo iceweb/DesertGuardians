@@ -10,11 +10,13 @@ export interface CreepConfig {
   isFlying?: boolean;      // Immune to ground-only towers (Rock Cannon, Poison)
   canDig?: boolean;        // Burrows underground for 2s every 5s (invulnerable)
   hasGhostPhase?: boolean; // Becomes invulnerable for 3s when dropping below 15% HP
+  canDispel?: boolean;     // Bosses periodically dispel slow/poison effects
   spawnOnDeath?: {         // Spawns creeps when killed
     type: string;
     count: number;
   };
   sizeScale?: number;      // Visual size multiplier (default 1.0)
+  onlyDamagedBy?: 'ice' | 'poison';  // Can only be damaged by this tower type
 }
 
 export const CREEP_TYPES: Record<string, CreepConfig> = {
@@ -35,14 +37,14 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   tank: {
     type: 'tank',
-    maxHealth: 240,
+    maxHealth: 280,  // Increased from 240
     speed: 50,
-    armor: 5,
+    armor: 6,  // Increased from 5
     goldReward: 15
   },
   jumper: {
     type: 'jumper',
-    maxHealth: 140,
+    maxHealth: 160,  // Increased from 140
     speed: 75,
     armor: 2,
     goldReward: 18,
@@ -50,106 +52,132 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   shielded: {
     type: 'shielded',
-    maxHealth: 120,
-    speed: 70,
-    armor: 1,
-    goldReward: 20,
-    hasShield: true
+    maxHealth: 200,
+    speed: 75,
+    armor: 3,
+    goldReward: 25,
+    hasShield: true  // Now blocks 5 hits
   },
 
   // === SPECIAL ABILITY CREEPS ===
   flying: {
     type: 'flying',
-    maxHealth: 80,
-    speed: 110,
+    maxHealth: 95,  // Increased from 80
+    speed: 115,  // Slightly faster
     armor: 0,
     goldReward: 10,
     isFlying: true
   },
   digger: {
     type: 'digger',
-    maxHealth: 70,
-    speed: 80,
-    armor: 1,
-    goldReward: 12,
-    canDig: true
+    maxHealth: 120,
+    speed: 90,
+    armor: 3,
+    goldReward: 15,
+    canDig: true  // Each digger digs its own tunnel
   },
   ghost: {
     type: 'ghost',
-    maxHealth: 100,
-    speed: 60,
+    maxHealth: 175,  // Increased from 150
+    speed: 75,  // Slightly faster
     armor: 0,
-    goldReward: 12,
+    goldReward: 14,
     hasGhostPhase: true
   },
   broodmother: {
     type: 'broodmother',
-    maxHealth: 200,
-    speed: 40,
-    armor: 2,
-    goldReward: 18,
-    sizeScale: 1.4,
+    maxHealth: 350,
+    speed: 35,
+    armor: 4,
+    goldReward: 22,
+    sizeScale: 1.5,  // Larger broodmother
     spawnOnDeath: {
       type: 'baby',
-      count: 4
+      count: 8  // More babies
     }
   },
   baby: {
     type: 'baby',
-    maxHealth: 15,
+    maxHealth: 18,  // Slightly more HP
     speed: 130,
     armor: 0,
     goldReward: 1,
-    sizeScale: 0.5
+    sizeScale: 0.7  // Larger babies (was 0.5)
+  },
+
+  // === ELEMENTAL CREEPS (require specific towers) ===
+  flame: {
+    type: 'flame',
+    maxHealth: 16,  // One-shot by ice tower (18 damage at level 3)
+    speed: 90,
+    armor: 0,
+    goldReward: 8,
+    onlyDamagedBy: 'ice'
+  },
+  plaguebearer: {
+    type: 'plaguebearer',
+    maxHealth: 55,  // Killed by poison DoT (12 dmg/sec * 5s = 60 damage)
+    speed: 65,
+    armor: 0,
+    goldReward: 10,
+    onlyDamagedBy: 'poison'
   },
 
   // === SCALED BOSSES ===
-  boss: {
-    type: 'boss',
-    maxHealth: 1200,
-    speed: 45,
-    armor: 3,
-    goldReward: 50,
-    sizeScale: 1.0
-  },
   boss_1: {
     type: 'boss_1',
-    maxHealth: 800,
+    maxHealth: 1200,
     speed: 50,
-    armor: 2,
-    goldReward: 50,
-    sizeScale: 1.0
+    armor: 3,
+    goldReward: 60,
+    sizeScale: 1.0,
+    canDispel: true
   },
   boss_2: {
     type: 'boss_2',
-    maxHealth: 1440,
-    speed: 50,
-    armor: 3,
-    goldReward: 90,
-    sizeScale: 1.15
+    maxHealth: 2200,
+    speed: 48,
+    armor: 4,
+    goldReward: 100,
+    sizeScale: 1.15,
+    canDispel: true
   },
   boss_3: {
     type: 'boss_3',
-    maxHealth: 2400,
+    maxHealth: 3600,
     speed: 40,
-    armor: 4,
-    goldReward: 140,
-    sizeScale: 1.3
+    armor: 5,
+    goldReward: 160,
+    sizeScale: 1.3,
+    canDispel: true
   },
   boss_4: {
     type: 'boss_4',
-    maxHealth: 4000,
+    maxHealth: 5500,
     speed: 35,
-    armor: 5,
-    goldReward: 200,
-    sizeScale: 1.5
+    armor: 6,
+    goldReward: 240,
+    sizeScale: 1.5,
+    canDispel: true
   },
   boss_5: {
     type: 'boss_5',
-    maxHealth: 6400,
+    maxHealth: 9000,
     speed: 30,
-    armor: 6,
-    goldReward: 300,
-    sizeScale: 1.7
+    armor: 7,
+    goldReward: 400,
+    sizeScale: 1.7,
+    canDispel: true
+  },
+
+  // === GENERIC BOSS (legacy) ===
+  boss: {
+    type: 'boss',
+    maxHealth: 1500,
+    speed: 45,
+    armor: 4,
+    goldReward: 60,
+    sizeScale: 1.1,
+    canDispel: true
   }
 };

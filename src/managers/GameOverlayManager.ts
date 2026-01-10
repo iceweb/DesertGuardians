@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { GAME_CONFIG } from '../data/GameConfig';
 
 /**
  * GameOverlayManager handles victory/defeat screens and wave bonus animations.
@@ -142,7 +143,7 @@ export class GameOverlayManager {
       strokeThickness: 6
     }).setOrigin(0.5).setDepth(301);
 
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 30, `Castle HP: ${castleHP}/10 | Gold: ${gold}`, {
+    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 30, `Castle HP: ${castleHP}/${GAME_CONFIG.MAX_CASTLE_HP} | Gold: ${gold}`, {
       fontFamily: 'Arial',
       fontSize: '24px',
       color: '#ffffff'

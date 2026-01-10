@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { PathSystem } from '../managers';
 import { CreepGraphics } from '../graphics';
 import type { CreepConfig } from '../data';
-import { CREEP_TYPES } from '../data';
+import { CREEP_TYPES, GAME_CONFIG } from '../data';
 import { StatusEffectHandler } from './StatusEffectHandler';
 import { CreepAbilities } from './CreepAbilities';
 import { CreepEffects } from './CreepEffects';
@@ -88,17 +88,29 @@ export class Creep extends Phaser.GameObjects.Container {
       },
       onBurrow: () => {
         this.effects.showBurrowEffect(this.x, this.y);
-        this.setAlpha(0.3);
+        // Hide the main body - we'll draw a shadow/mound in drawCreep
+        this.bodyGraphics.setAlpha(0);
+        this.healthBarBg.setAlpha(0);
+        this.healthBarFg.setAlpha(0);
       },
       onSurface: () => {
         this.effects.showSurfaceEffect(this.x, this.y);
-        this.setAlpha(1);
+        // Restore the main body
+        this.bodyGraphics.setAlpha(1);
+        this.healthBarBg.setAlpha(1);
+        this.healthBarFg.setAlpha(1);
       },
       onGhostPhaseStart: () => {
         this.effects.showGhostPhaseStart(this.x, this.y);
       },
       onGhostPhaseEnd: () => {
         this.setAlpha(1);
+      },
+      onDispel: () => {
+        // Dispel all status effects and show visual
+        if (this.statusEffects.dispelAll()) {
+          this.effects.showDispelEffect(this.x, this.y);
+        }
       }
     });
   }
@@ -110,8 +122,11 @@ export class Creep extends Phaser.GameObjects.Container {
     this.pathSystem = pathSystem;
     const baseConfig = CREEP_TYPES[creepType] || CREEP_TYPES.furball;
     
-    // Apply wave-based HP scaling: 8% per wave, capped at 2.5x
-    const hpMultiplier = Math.min(2.5, 1 + (waveNumber - 1) * 0.08);
+    // Apply wave-based HP scaling
+    const hpMultiplier = Math.min(
+      GAME_CONFIG.MAX_HP_MULTIPLIER,
+      1 + (waveNumber - 1) * GAME_CONFIG.WAVE_HP_SCALING
+    );
     const scaledMaxHealth = Math.floor(baseConfig.maxHealth * hpMultiplier);
     
     this.config = { ...baseConfig, maxHealth: scaledMaxHealth };
@@ -165,7 +180,8 @@ export class Creep extends Phaser.GameObjects.Container {
       this.bounceTime,
       this.faceDirection,
       state.jumpWarningTime > 0,
-      state.isJumping
+      state.isJumping,
+      state.isBurrowed
     );
   }
 
@@ -210,6 +226,7 @@ export class Creep extends Phaser.GameObjects.Container {
     this.abilities.updateJump(delta, this.config, this.pathSystem, this.distanceTraveled);
     this.abilities.updateDigger(delta, this.config);
     this.abilities.updateGhostPhase(delta, this.config, this.currentHealth, this.config.maxHealth);
+    this.abilities.updateDispel(delta);  // Boss dispel ability
     
     // Update ghost alpha
     if (state.isGhostPhase) {
@@ -260,8 +277,17 @@ export class Creep extends Phaser.GameObjects.Container {
   /**
    * Take damage
    */
-  takeDamage(amount: number, isMagic: boolean = false): number {
+  takeDamage(amount: number, isMagic: boolean = false, towerBranch?: string): number {
     if (!this.isActive) return 0;
+    
+    // Check for elemental immunity (flame/plaguebearer creeps)
+    if (this.config.onlyDamagedBy) {
+      const requiredBranch = this.config.onlyDamagedBy === 'ice' ? 'icetower' : 'poison';
+      if (towerBranch !== requiredBranch) {
+        this.effects.showImmuneText(this.x, this.y);
+        return 0;
+      }
+    }
     
     // Check immunity
     if (this.abilities.isImmune()) {
@@ -319,7 +345,8 @@ export class Creep extends Phaser.GameObjects.Container {
     
     // Spawn babies if broodmother
     if (this.config.spawnOnDeath) {
-      this.emit('spawnOnDeath', this, this.config.spawnOnDeath.type, this.config.spawnOnDeath.count, this.distanceTraveled);
+      // Pass x,y coordinates so babies spawn at exact death location
+      this.emit('spawnOnDeath', this, this.config.spawnOnDeath.type, this.config.spawnOnDeath.count, this.x, this.y, this.distanceTraveled);
       this.effects.showSpawnEffect(this.x, this.y, this.config.spawnOnDeath.count);
     }
     

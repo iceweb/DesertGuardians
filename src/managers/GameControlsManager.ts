@@ -46,7 +46,8 @@ export class GameControlsManager {
       this.speedButtonBg.clear();
       this.speedButtonBg.fillStyle(hover ? 0x6b4d30 : 0x4a3520, 1);
       this.speedButtonBg.fillRoundedRect(btnX - 45, btnY - 18, 90, 36, 6);
-      this.speedButtonBg.lineStyle(2, this.gameSpeed === 2 ? 0xffd700 : 0x8b6914, 1);
+      const borderColor = this.gameSpeed === 3 ? 0xff6600 : this.gameSpeed === 2 ? 0xffd700 : 0x8b6914;
+      this.speedButtonBg.lineStyle(2, borderColor, 1);
       this.speedButtonBg.strokeRoundedRect(btnX - 45, btnY - 18, 90, 36, 6);
     };
     
@@ -74,7 +75,7 @@ export class GameControlsManager {
   }
 
   /**
-   * Toggle game speed between 1x and 2x
+   * Toggle game speed between 1x, 2x, and 3x
    */
   private toggleGameSpeed(): void {
     const width = this.scene.cameras.main.width;
@@ -82,10 +83,15 @@ export class GameControlsManager {
     const btnX = width - 160;
     const btnY = height - 25;
     
+    // Cycle through 1 → 2 → 3 → 1
     if (this.gameSpeed === 1) {
       this.gameSpeed = 2;
       this.speedButton.setText('⏩ 2x');
       this.speedButton.setColor('#ffd700');
+    } else if (this.gameSpeed === 2) {
+      this.gameSpeed = 3;
+      this.speedButton.setText('⏩ 3x');
+      this.speedButton.setColor('#ff6600');
     } else {
       this.gameSpeed = 1;
       this.speedButton.setText('⏩ 1x');
@@ -96,7 +102,8 @@ export class GameControlsManager {
     this.speedButtonBg.clear();
     this.speedButtonBg.fillStyle(0x4a3520, 1);
     this.speedButtonBg.fillRoundedRect(btnX - 45, btnY - 18, 90, 36, 6);
-    this.speedButtonBg.lineStyle(2, this.gameSpeed === 2 ? 0xffd700 : 0x8b6914, 1);
+    const borderColor = this.gameSpeed === 3 ? 0xff6600 : this.gameSpeed === 2 ? 0xffd700 : 0x8b6914;
+    this.speedButtonBg.lineStyle(2, borderColor, 1);
     this.speedButtonBg.strokeRoundedRect(btnX - 45, btnY - 18, 90, 36, 6);
   }
 

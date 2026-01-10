@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GameControlsManager } from './GameControlsManager';
 import { GameOverlayManager } from './GameOverlayManager';
 import { CreepInfoPanel } from './CreepInfoPanel';
+import { GAME_CONFIG } from '../data/GameConfig';
 
 /**
  * HUDManager handles all HUD rendering and state display.
@@ -27,8 +28,8 @@ export class HUDManager {
   
   // Cached state
   private gold: number = 200;
-  private castleHP: number = 10;
-  private maxCastleHP: number = 10;
+  private castleHP: number = GAME_CONFIG.MAX_CASTLE_HP;
+  private maxCastleHP: number = GAME_CONFIG.MAX_CASTLE_HP;
   private currentWave: number = 0;
   private totalWaves: number = 0;
   private castlePosition: Phaser.Math.Vector2 | null = null;

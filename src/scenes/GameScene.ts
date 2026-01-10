@@ -3,6 +3,7 @@ import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, Projec
 import type { ProjectileConfig } from '../objects';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
+import { GAME_CONFIG } from '../data/GameConfig';
 
 export class GameScene extends Phaser.Scene {
   private mapManager!: MapManager;
@@ -16,8 +17,8 @@ export class GameScene extends Phaser.Scene {
   private audioManager!: AudioManager;
 
   // Game state
-  private gold: number = 220;
-  private castleHP: number = 10;
+  private gold: number = GAME_CONFIG.STARTING_GOLD;
+  private castleHP: number = GAME_CONFIG.MAX_CASTLE_HP;
   private gameOver: boolean = false;
   
   // Virtual game time (advances faster at 2x speed)
@@ -33,8 +34,8 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     // Reset game state
-    this.gold = 220;
-    this.castleHP = 10;
+    this.gold = GAME_CONFIG.STARTING_GOLD;
+    this.castleHP = GAME_CONFIG.MAX_CASTLE_HP;
     this.gameOver = false;
     this.virtualGameTime = 0;
     this.gameStartTime = 0;
@@ -242,7 +243,7 @@ export class GameScene extends Phaser.Scene {
       waveReached: this.waveManager.getCurrentWave(),
       totalWaves: this.waveManager.getTotalWaves(),
       castleHP: this.castleHP,
-      maxCastleHP: 10,
+      maxCastleHP: GAME_CONFIG.MAX_CASTLE_HP,
       goldRemaining: this.gold,
       totalGoldEarned: stats.goldEarned,
       creepsKilled: stats.killed,
@@ -440,6 +441,14 @@ export class GameScene extends Phaser.Scene {
       
       // Ground-only towers cannot target flying creeps
       if (isGroundOnly && creep.isFlying()) continue;
+      
+      // Check elemental immunity - only matching tower can damage these creeps
+      const creepConfig = creep.getConfig();
+      if (creepConfig.onlyDamagedBy) {
+        const requiredBranch = creepConfig.onlyDamagedBy === 'ice' ? 'icetower' : 'poison';
+        // Non-matching towers should not even target these creeps
+        if (branch !== requiredBranch) continue;
+      }
       
       let value: number;
       

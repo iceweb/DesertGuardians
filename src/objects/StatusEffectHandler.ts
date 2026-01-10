@@ -183,6 +183,18 @@ export class StatusEffectHandler {
   }
 
   /**
+   * Dispel all status effects (used by bosses)
+   * Returns true if any effects were dispelled
+   */
+  dispelAll(): boolean {
+    const hadEffects = this.isSlowed() || this.isPoisoned();
+    this.slowAmount = 0;
+    this.slowEndTime = 0;
+    this.poisonStacks = [];
+    return hadEffects;
+  }
+
+  /**
    * Clear graphics
    */
   clear(): void {

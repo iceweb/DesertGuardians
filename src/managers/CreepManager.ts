@@ -10,7 +10,7 @@ export class CreepManager {
   private pathSystem: PathSystem;
   private pool: Creep[] = [];
   private activeCreeps: Creep[] = [];
-  private readonly POOL_SIZE = 50;
+  private readonly POOL_SIZE = 120;  // Increased for late game waves with many babies
   private currentWaveNumber: number = 1;  // Track wave for baby spawning
   
   // Event callbacks
@@ -73,9 +73,9 @@ export class CreepManager {
   }
 
   /**
-   * Spawn a creep at a specific distance along the path (for baby creeps)
+   * Spawn a creep at a specific position (for baby creeps at mother's death location)
    */
-  private spawnAtDistance(creepType: string, distanceTraveled: number, waveNumber: number): Creep | null {
+  private spawnAtPosition(creepType: string, deathX: number, deathY: number, distanceTraveled: number, waveNumber: number): Creep | null {
     const creep = this.getFromPool();
     
     if (!creep) {
@@ -85,11 +85,13 @@ export class CreepManager {
     
     creep.spawn(this.pathSystem, creepType, waveNumber);
     
-    // Override position to spawn at parent's death location
-    // Add small random offset so babies spread out
-    const offset = (Math.random() - 0.5) * 30;
-    const pathData = this.pathSystem.getPositionAt(distanceTraveled + offset);
-    creep.setPosition(pathData.position.x, pathData.position.y);
+    // Spawn at mother's exact death position with small random spread
+    const offsetX = (Math.random() - 0.5) * 40;
+    const offsetY = (Math.random() - 0.5) * 30;
+    creep.setPosition(deathX + offsetX, deathY + offsetY);
+    
+    // Override distanceTraveled so babies continue from where mother died
+    (creep as any).distanceTraveled = distanceTraveled;
     
     this.activeCreeps.push(creep);
     
@@ -120,22 +122,19 @@ export class CreepManager {
   /**
    * Handle spawning babies when a broodmother dies
    */
-  private handleSpawnOnDeath(_parentCreep: Creep, babyType: string, count: number, distanceTraveled: number): void {
-    console.log(`CreepManager.handleSpawnOnDeath: Spawning ${count} ${babyType} at distance ${distanceTraveled}`);
+  private handleSpawnOnDeath(_parentCreep: Creep, babyType: string, count: number, deathX: number, deathY: number, distanceTraveled: number): void {
+    console.log(`CreepManager.handleSpawnOnDeath: Spawning ${count} ${babyType} at (${deathX}, ${deathY})`);
     
-    let spawned = 0;
     for (let i = 0; i < count; i++) {
       // Stagger baby spawns slightly
       this.scene.time.delayedCall(i * 100, () => {
-        const baby = this.spawnAtDistance(babyType, distanceTraveled, this.currentWaveNumber);
+        const baby = this.spawnAtPosition(babyType, deathX, deathY, distanceTraveled, this.currentWaveNumber);
         if (baby) {
-          spawned++;
+          // Only notify WaveManager for babies that ACTUALLY spawned
+          this.onBabySpawned?.(1);
         }
       });
     }
-    
-    // Notify WaveManager that extra creeps were added
-    this.onBabySpawned?.(count);
   }
 
   /**

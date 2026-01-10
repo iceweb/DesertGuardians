@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { GAME_CONFIG } from '../data/GameConfig';
 
 /**
  * UIScene - Overlay scene that runs parallel to GameScene
@@ -35,7 +36,7 @@ export class UIScene extends Phaser.Scene {
    */
   private onCastleDamaged(hpRemaining: number): void {
     // Red flash intensity based on remaining HP
-    const intensity = Math.min(0.5, 0.1 + (1 - hpRemaining / 10) * 0.4);
+    const intensity = Math.min(0.5, 0.1 + (1 - hpRemaining / GAME_CONFIG.MAX_CASTLE_HP) * 0.4);
     
     this.damageFlash.setAlpha(intensity);
     this.tweens.add({

@@ -22,6 +22,10 @@ export interface AbilityState {
   isGhostPhase: boolean;
   ghostPhaseTriggered: boolean;
   ghostPhaseTimer: number;
+  
+  // Dispel (for bosses)
+  dispelCooldown: number;
+  canDispel: boolean;
 }
 
 /**
@@ -34,6 +38,7 @@ export interface AbilityCallbacks {
   onSurface: () => void;
   onGhostPhaseStart: () => void;
   onGhostPhaseEnd: () => void;
+  onDispel: () => void;
 }
 
 /**
@@ -47,8 +52,9 @@ export class CreepAbilities {
   private readonly JUMP_WARNING_DURATION = 500;
   private readonly BURROW_DURATION = 2000;
   private readonly SURFACE_DURATION = 5000;
-  private readonly GHOST_PHASE_DURATION = 3000;
+  private readonly GHOST_PHASE_DURATION = 5000;  // Extended from 3s to 5s
   private readonly GHOST_PHASE_THRESHOLD = 0.15;
+  private readonly DISPEL_COOLDOWN = 6000;  // Bosses dispel every 6 seconds
 
   private scene: Phaser.Scene;
   private state: AbilityState;
@@ -72,7 +78,9 @@ export class CreepAbilities {
       burrowTimer: 0,
       isGhostPhase: false,
       ghostPhaseTriggered: false,
-      ghostPhaseTimer: 0
+      ghostPhaseTimer: 0,
+      dispelCooldown: 0,
+      canDispel: false
     };
   }
 
@@ -89,8 +97,8 @@ export class CreepAbilities {
   initialize(config: CreepConfig): void {
     this.state = this.createDefaultState();
     
-    // Shield
-    this.state.shieldHitsRemaining = config.hasShield ? 3 : 0;
+    // Shield - now blocks 5 hits
+    this.state.shieldHitsRemaining = config.hasShield ? 5 : 0;
     
     // Jump
     this.state.jumpCooldown = config.canJump ? this.JUMP_COOLDOWN : 0;
@@ -99,6 +107,10 @@ export class CreepAbilities {
     this.state.burrowTimer = config.canDig ? this.SURFACE_DURATION : 0;
     
     // Ghost - starts inactive, triggers at low HP
+    
+    // Dispel (for bosses)
+    this.state.canDispel = config.canDispel === true;
+    this.state.dispelCooldown = this.state.canDispel ? this.DISPEL_COOLDOWN : 0;
   }
 
   /**
@@ -106,6 +118,24 @@ export class CreepAbilities {
    */
   reset(): void {
     this.state = this.createDefaultState();
+  }
+
+  /**
+   * Update dispel ability (for bosses)
+   * Returns true if dispel should trigger
+   */
+  updateDispel(delta: number): boolean {
+    if (!this.state.canDispel) return false;
+    
+    this.state.dispelCooldown -= delta;
+    
+    if (this.state.dispelCooldown <= 0) {
+      this.state.dispelCooldown = this.DISPEL_COOLDOWN;
+      this.callbacks.onDispel?.();
+      return true;
+    }
+    
+    return false;
   }
 
   /**
