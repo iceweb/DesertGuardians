@@ -40,7 +40,7 @@ export class ArcherAnimator {
   private cheerArmAngle: number = 0;
   
   // Tower heights per level (Y position of archer from tower base at y=0)
-  private readonly ARCHER_Y = [-35, -42, -50];
+  private readonly ARCHER_Y = [-35, -42, -50, -58];  // Level 4 is taller
   
   // Bow position in local space (used for arrow spawn calculation)
   private readonly BOW_LOCAL_X = -20;

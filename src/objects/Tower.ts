@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { TowerGraphics, RapidFireAnimator, ArcherAnimator, CannonAnimator, SniperAnimator, IceAnimator, PoisonAnimator } from '../graphics';
+import { TowerGraphics, RapidFireAnimator, ArcherAnimator, CannonAnimator, SniperAnimator, IceAnimator, PoisonAnimator, AuraAnimator } from '../graphics';
 import type { TowerConfig, TowerBranch } from '../data';
 import { TOWER_CONFIGS, BRANCH_OPTIONS, GAME_CONFIG } from '../data';
 
@@ -31,6 +31,7 @@ const ANIMATOR_CONSTRUCTORS: Record<string, new (scene: Phaser.Scene, container:
   'sniper': SniperAnimator,
   'icetower': IceAnimator,
   'poison': PoisonAnimator,
+  'aura': AuraAnimator,
 };
 
 /**
@@ -40,12 +41,17 @@ export class Tower extends Phaser.GameObjects.Container {
   private config: TowerConfig;
   private graphics: Phaser.GameObjects.Graphics;
   private rangeGraphics: Phaser.GameObjects.Graphics;
+  private buffGlowGraphics: Phaser.GameObjects.Graphics;
   private totalInvested: number;
   private currentBranch: TowerBranch;
-  private currentLevel: 1 | 2 | 3;
+  private currentLevel: 1 | 2 | 3 | 4;
   
   // Combat state
   private lastFireTime: number = 0;
+  
+  // Aura buff state
+  private damageMultiplier: number = 1.0;
+  private buffGlowPhase: number = 0;
   
   // Single animator reference (replaces 6 separate nullable properties)
   private animator: TowerAnimator | null = null;
@@ -70,12 +76,13 @@ export class Tower extends Phaser.GameObjects.Container {
     // Create graphics
     this.graphics = scene.add.graphics();
     this.rangeGraphics = scene.add.graphics();
+    this.buffGlowGraphics = scene.add.graphics();
     this.rangeGraphics.setVisible(false);
     
     // Scale down tower graphics to 80% for tighter spacing
     this.graphics.setScale(0.8);
     
-    this.add([this.rangeGraphics, this.graphics]);
+    this.add([this.buffGlowGraphics, this.rangeGraphics, this.graphics]);
     
     // Draw the tower (or setup animator for rapidfire)
     this.drawTower();
@@ -98,6 +105,15 @@ export class Tower extends Phaser.GameObjects.Container {
         this.animator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
       }
       this.animator.update(delta);
+    }
+    
+    // Update buff glow animation if buffed
+    if (this.damageMultiplier > 1.0) {
+      this.buffGlowPhase += delta / 1000 * 3;
+      if (this.buffGlowPhase > Math.PI * 2) {
+        this.buffGlowPhase -= Math.PI * 2;
+      }
+      this.drawBuffGlow();
     }
   }
 
@@ -197,8 +213,69 @@ export class Tower extends Phaser.GameObjects.Container {
   /**
    * Get current level
    */
-  getLevel(): 1 | 2 | 3 {
+  getLevel(): 1 | 2 | 3 | 4 {
     return this.currentLevel;
+  }
+
+  /**
+   * Check if this is an aura (support) tower that doesn't attack
+   */
+  isAuraTower(): boolean {
+    return this.currentBranch === 'aura' || this.config.stats.fireRate === 0;
+  }
+
+  /**
+   * Get the aura damage multiplier buff (e.g., 0.20 for +20%)
+   */
+  getAuraMultiplier(): number {
+    return this.config.stats.auraDamageMultiplier || 0;
+  }
+
+  /**
+   * Set damage multiplier from aura buff
+   */
+  setDamageMultiplier(multiplier: number): void {
+    const wasBuffed = this.damageMultiplier > 1.0;
+    this.damageMultiplier = multiplier;
+    
+    // Clear glow if no longer buffed
+    if (wasBuffed && multiplier <= 1.0) {
+      this.buffGlowGraphics.clear();
+    }
+  }
+
+  /**
+   * Get current damage multiplier
+   */
+  getDamageMultiplier(): number {
+    return this.damageMultiplier;
+  }
+
+  /**
+   * Draw the red buff glow effect around this tower
+   */
+  private drawBuffGlow(): void {
+    const g = this.buffGlowGraphics;
+    g.clear();
+    
+    if (this.damageMultiplier <= 1.0) return;
+    
+    // Pulsing glow intensity based on buff strength
+    const buffStrength = this.damageMultiplier - 1.0; // 0.2, 0.3, or 0.4
+    const pulseIntensity = (Math.sin(this.buffGlowPhase) + 1) * 0.5;
+    const baseAlpha = 0.15 + pulseIntensity * 0.15 + buffStrength * 0.2;
+    
+    // Outer glow ring
+    g.fillStyle(0xff4444, baseAlpha * 0.4);
+    g.fillCircle(0, -20, 45);
+    
+    // Inner glow
+    g.fillStyle(0xff6666, baseAlpha * 0.6);
+    g.fillCircle(0, -20, 30);
+    
+    // Core shimmer
+    g.fillStyle(0xffaaaa, baseAlpha * 0.3);
+    g.fillCircle(0, -20, 18);
   }
 
   /**
@@ -212,7 +289,9 @@ export class Tower extends Phaser.GameObjects.Container {
    * Check if tower can upgrade to next level
    */
   canUpgradeLevel(): boolean {
-    return this.currentLevel < 3;
+    // Archer can go to level 4, others max at level 3
+    const maxLevel = this.currentBranch === 'archer' ? 4 : 3;
+    return this.currentLevel < maxLevel;
   }
 
   /**
@@ -227,7 +306,8 @@ export class Tower extends Phaser.GameObjects.Container {
       options.branches = BRANCH_OPTIONS;
     } else {
       // All other towers (including archer L2+) can only upgrade level
-      if (this.currentLevel < 3) {
+      const maxLevel = this.currentBranch === 'archer' ? 4 : 3;
+      if (this.currentLevel < maxLevel) {
         options.levelUp = `${this.currentBranch}_${this.currentLevel + 1}`;
       }
     }
@@ -266,7 +346,8 @@ export class Tower extends Phaser.GameObjects.Container {
       if (!validUpgrade) return false;
     } else {
       // From any other tower, can only go to same branch next level
-      if (newConfig.branch !== this.currentBranch || newConfig.level !== this.currentLevel + 1 || this.currentLevel >= 3) {
+      const maxLevel = this.currentBranch === 'archer' ? 4 : 3;
+      if (newConfig.branch !== this.currentBranch || newConfig.level !== this.currentLevel + 1 || this.currentLevel >= maxLevel) {
         return false;
       }
     }
@@ -303,10 +384,10 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Get tower's damage
+   * Get tower's damage (with aura buff applied)
    */
   getDamage(): number {
-    return this.config.stats.damage;
+    return Math.floor(this.config.stats.damage * this.damageMultiplier);
   }
 
   /**

@@ -10,4 +10,5 @@ export * from './CannonAnimator';
 export * from './SniperAnimator';
 export * from './IceAnimator';
 export * from './PoisonAnimator';
+export * from './AuraAnimator';
 export * from './GoldMineGraphics';

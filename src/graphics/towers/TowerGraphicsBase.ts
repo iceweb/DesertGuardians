@@ -57,5 +57,25 @@ export function drawLevelIndicator(
     drawStar(g, -12, -98, 5);
     drawStar(g, 0, -102, 6);
     drawStar(g, 12, -98, 5);
+  } else if (level === 4) {
+    // Four diamond stars with intense glow (legendary)
+    g.fillStyle(0xffd700, 0.5);
+    g.fillCircle(0, -102, 22);
+    g.fillStyle(0xffffff, 0.3);
+    g.fillCircle(0, -102, 18);
+    g.fillStyle(0xffd700, 1);
+    drawStar(g, -15, -96, 5);
+    drawStar(g, -5, -104, 6);
+    drawStar(g, 5, -104, 6);
+    drawStar(g, 15, -96, 5);
+    // Center diamond
+    g.fillStyle(0xff4444, 1);
+    g.beginPath();
+    g.moveTo(0, -114);
+    g.lineTo(4, -108);
+    g.lineTo(0, -102);
+    g.lineTo(-4, -108);
+    g.closePath();
+    g.fillPath();
   }
 }

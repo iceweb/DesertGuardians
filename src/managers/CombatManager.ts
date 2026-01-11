@@ -36,6 +36,12 @@ export class CombatManager {
     const creeps = this.creepManager.getActiveCreeps();
     
     for (const tower of towers) {
+      // Aura towers don't target creeps - skip combat logic but still update animations
+      if (tower.isAuraTower()) {
+        tower.update(delta);
+        continue;
+      }
+      
       // Find potential target for turret tracking (even if can't fire yet)
       const target = this.findTarget(tower, creeps);
       
@@ -58,6 +64,9 @@ export class CombatManager {
     const creeps = this.creepManager.getActiveCreeps();
     
     for (const tower of towers) {
+      // Skip aura towers - they don't attack
+      if (tower.isAuraTower()) continue;
+      
       // Check if tower can fire
       if (!tower.canFire(currentTime)) continue;
       

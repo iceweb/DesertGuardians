@@ -232,8 +232,10 @@ export class TowerUIManager {
     
     const hasBranches = upgradeOptions.branches && upgradeOptions.branches.length > 0;
     const hasLevelUp = !!upgradeOptions.levelUp;
-    const menuWidth = hasBranches ? 600 : 420;
-    const menuHeight = hasBranches ? 280 : 180;
+    const branchCount = upgradeOptions.branches?.length || 0;
+    const isBuffed = tower.getDamageMultiplier() > 1.0;
+    const menuWidth = hasBranches ? Math.max(600, branchCount * 95 + 40) : 420;
+    const menuHeight = (hasBranches ? 280 : 180) + (isBuffed ? 15 : 0);
     
     this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - (menuHeight / 2) - 40);
     this.upgradeMenuContainer.setDepth(200);
@@ -253,15 +255,44 @@ export class TowerUIManager {
     this.upgradeMenuContainer.add(title);
     
     const fireRateSec = (config.stats.fireRate / 1000).toFixed(1);
-    const dps = (config.stats.damage / (config.stats.fireRate / 1000)).toFixed(1);
-    const statsText = this.scene.add.text(0, -menuHeight / 2 + 45, `DMG: ${config.stats.damage}  |  Rate: ${fireRateSec}s  |  DPS: ${dps}  |  Range: ${config.stats.range}m`, {
+    const baseDamage = config.stats.damage;
+    const buffedDamage = tower.getDamage();
+    const damageMultiplier = tower.getDamageMultiplier();
+    
+    const baseDps = (baseDamage / (config.stats.fireRate / 1000)).toFixed(1);
+    const buffedDps = (buffedDamage / (config.stats.fireRate / 1000)).toFixed(1);
+    const bonusDps = (parseFloat(buffedDps) - parseFloat(baseDps)).toFixed(1);
+    
+    // Build stats string with optional buff indicator
+    let statsString = `DMG: ${baseDamage}`;
+    if (isBuffed) {
+      statsString += ` (+${buffedDamage - baseDamage})`;
+    }
+    statsString += `  |  Rate: ${fireRateSec}s  |  DPS: ${baseDps}`;
+    if (isBuffed) {
+      statsString += ` (+${bonusDps})`;
+    }
+    statsString += `  |  Range: ${config.stats.range}m`;
+    
+    const statsText = this.scene.add.text(0, -menuHeight / 2 + 45, statsString, {
       fontFamily: 'Arial',
       fontSize: '12px',
       color: '#cccccc'
     }).setOrigin(0.5);
     this.upgradeMenuContainer.add(statsText);
     
-    let yOffset = -menuHeight / 2 + 70;
+    // Add green buff indicator text on top of stats if buffed
+    if (isBuffed) {
+      const buffPercent = Math.round((damageMultiplier - 1) * 100);
+      const buffText = this.scene.add.text(0, -menuHeight / 2 + 58, `🔴 Aura Buff: +${buffPercent}% damage`, {
+        fontFamily: 'Arial',
+        fontSize: '10px',
+        color: '#ff6666'
+      }).setOrigin(0.5);
+      this.upgradeMenuContainer.add(buffText);
+    }
+    
+    let yOffset = -menuHeight / 2 + (isBuffed ? 80 : 70);
     
     if (hasBranches) {
       const branchLabel = this.scene.add.text(0, yOffset, 'Specialize Into:', {
@@ -278,7 +309,8 @@ export class TowerUIManager {
         sniper: 0x4169e1,
         rockcannon: 0xff6600,
         icetower: 0x87ceeb,
-        poison: 0x00ff00
+        poison: 0x00ff00,
+        aura: 0xff4444
       };
       
       const branchNames: Record<TowerBranch, string> = {
@@ -287,7 +319,8 @@ export class TowerUIManager {
         sniper: 'Sniper',
         rockcannon: 'Cannon',
         icetower: 'Ice',
-        poison: 'Poison'
+        poison: 'Poison',
+        aura: 'Aura'
       };
       
       const branches = upgradeOptions.branches!;
@@ -499,6 +532,24 @@ export class TowerUIManager {
         graphics.fillStyle(0x88ff88, alpha * 0.7);
         graphics.fillCircle(x - 2 * scale, y - 35 * scale, 2 * scale);
         graphics.fillCircle(x + 3 * scale, y - 30 * scale, 2 * scale);
+        break;
+        
+      case 'aura':
+        // Pedestal base
+        graphics.fillStyle(0x4a3a3a, alpha);
+        graphics.fillRect(x - 14 * scale, y + 5 * scale, 28 * scale, 15 * scale);
+        // Pillar
+        graphics.fillStyle(0x3a2a2a, alpha);
+        graphics.fillRect(x - 8 * scale, y - 30 * scale, 16 * scale, 40 * scale);
+        // Red glowing orb
+        graphics.fillStyle(0xff4444, alpha * 0.4);
+        graphics.fillCircle(x, y - 38 * scale, 14 * scale);
+        graphics.fillStyle(0xff6666, alpha * 0.6);
+        graphics.fillCircle(x, y - 38 * scale, 10 * scale);
+        graphics.fillStyle(0xffaaaa, alpha * 0.8);
+        graphics.fillCircle(x, y - 38 * scale, 6 * scale);
+        graphics.fillStyle(0xffffff, alpha);
+        graphics.fillCircle(x - 2 * scale, y - 40 * scale, 2 * scale);
         break;
         
       default: // archer

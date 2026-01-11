@@ -28,6 +28,7 @@ export class TowerManager {
   public onTowerBuilt?: (tower: Tower, cost: number) => void;
   public onTowerSold?: (tower: Tower, refund: number) => void;
   public onTowerUpgraded?: (tower: Tower, cost: number) => void;
+  public onAuraBuffsChanged?: () => void;  // Called when aura buffs are recalculated
   public getPlayerGold?: () => number;
   
   // Reference to gold mine manager to check for mine clicks
@@ -244,6 +245,9 @@ export class TowerManager {
     // Notify callback
     this.onTowerBuilt?.(tower, config.buildCost || 0);
     
+    // Recalculate aura buffs
+    this.updateAuraBuffs();
+    
     // Close menu
     this.uiManager.closeMenus();
     
@@ -288,6 +292,9 @@ export class TowerManager {
     // Notify callback
     this.onTowerUpgraded?.(tower, cost);
     
+    // Recalculate aura buffs (aura tower might have upgraded, or tower moved into/out of range)
+    this.updateAuraBuffs();
+    
     // Close menu and deselect
     this.uiManager.closeMenus();
     this.deselectTower();
@@ -313,6 +320,9 @@ export class TowerManager {
     
     // Destroy tower
     tower.destroy();
+    
+    // Recalculate aura buffs (in case an aura tower was sold)
+    this.updateAuraBuffs();
     
     // Close menu and deselect
     this.uiManager.closeMenus();
@@ -348,6 +358,62 @@ export class TowerManager {
    */
   setGoldMineManager(manager: GoldMineManager): void {
     this.goldMineManager = manager;
+  }
+
+  /**
+   * Recalculate all aura buffs for towers
+   * Called when towers are built, upgraded, or sold
+   */
+  updateAuraBuffs(): void {
+    // First, reset all tower damage multipliers
+    for (const tower of this.towers) {
+      tower.setDamageMultiplier(1.0);
+    }
+    
+    // Find all aura towers
+    const auraTowers = this.towers.filter(t => t.isAuraTower());
+    
+    // For each non-aura tower, find the best aura buff from nearby aura towers
+    for (const tower of this.towers) {
+      if (tower.isAuraTower()) continue;  // Aura towers don't buff themselves
+      
+      let bestMultiplier = 0;
+      
+      for (const auraTower of auraTowers) {
+        const distance = Phaser.Math.Distance.Between(
+          tower.x, tower.y,
+          auraTower.x, auraTower.y
+        );
+        
+        const auraRange = auraTower.getRange();  // Aura range is stored in the 'range' stat
+        
+        if (distance <= auraRange) {
+          const auraMultiplier = auraTower.getAuraMultiplier();
+          if (auraMultiplier > bestMultiplier) {
+            bestMultiplier = auraMultiplier;
+          }
+        }
+      }
+      
+      // Apply the best aura buff (only highest applies, no stacking)
+      if (bestMultiplier > 0) {
+        tower.setDamageMultiplier(1.0 + bestMultiplier);
+      }
+    }
+    
+    // Notify callback
+    this.onAuraBuffsChanged?.();
+  }
+
+  /**
+   * Get all towers within a specific range of a position
+   */
+  getTowersInRange(x: number, y: number, range: number, excludeAura: boolean = true): Tower[] {
+    return this.towers.filter(tower => {
+      if (excludeAura && tower.isAuraTower()) return false;
+      const distance = Phaser.Math.Distance.Between(x, y, tower.x, tower.y);
+      return distance <= range;
+    });
   }
 
   /**

@@ -5,3 +5,4 @@ export * from './CannonTowerGraphics';
 export * from './SniperTowerGraphics';
 export * from './IceTowerGraphics';
 export * from './PoisonTowerGraphics';
+export * from './AuraTowerGraphics';

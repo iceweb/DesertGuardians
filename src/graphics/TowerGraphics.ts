@@ -9,11 +9,12 @@ import {
   drawSniperTower,
   drawIceTower,
   drawPoisonTower,
+  drawAuraTower,
 } from './towers';
 
 /**
  * TowerGraphics facade - delegates to specialized tower graphics modules.
- * Supports levels 1-3 with progressively more sophisticated designs.
+ * Supports levels 1-4 (archer only goes to 4) with progressively more sophisticated designs.
  */
 export class TowerGraphics {
   /**
@@ -44,6 +45,9 @@ export class TowerGraphics {
         break;
       case 'poison':
         drawPoisonTower(g, level);
+        break;
+      case 'aura':
+        drawAuraTower(g, level);
         break;
       default:
         drawArcherTower(g, level);

@@ -1,6 +1,6 @@
 export interface TowerStats {
   range: number;
-  fireRate: number;      // ms between shots
+  fireRate: number;      // ms between shots (0 = non-attacking, e.g., aura tower)
   damage: number;
   splashRadius?: number; // for Rock Cannon
   slowPercent?: number;  // for Ice Tower
@@ -10,16 +10,17 @@ export interface TowerStats {
   dotDuration?: number;  // for Poison Tower
   critChance?: number;   // for Sniper
   critMultiplier?: number;
+  auraDamageMultiplier?: number; // for Aura Tower - damage buff for nearby towers
 }
 
-export type TowerBranch = 'archer' | 'rapidfire' | 'sniper' | 'rockcannon' | 'icetower' | 'poison';
+export type TowerBranch = 'archer' | 'rapidfire' | 'sniper' | 'rockcannon' | 'icetower' | 'poison' | 'aura';
 
 export interface TowerConfig {
   key: string;
   name: string;
-  type: 'physical' | 'magic';
+  type: 'physical' | 'magic' | 'support';
   branch: TowerBranch;
-  level: 1 | 2 | 3;
+  level: 1 | 2 | 3 | 4;
   buildCost?: number;        // Only for archer (the only buildable tower)
   upgradeCost: number;       // Cost to upgrade TO this config
   description: string;
@@ -27,7 +28,7 @@ export interface TowerConfig {
 }
 
 // Branch upgrade options from Archer (includes archer as upgrade path)
-export const BRANCH_OPTIONS: TowerBranch[] = ['archer', 'rapidfire', 'sniper', 'rockcannon', 'icetower', 'poison'];
+export const BRANCH_OPTIONS: TowerBranch[] = ['archer', 'rapidfire', 'sniper', 'rockcannon', 'icetower', 'poison', 'aura'];
 
 // All tower configurations keyed by "branch_level" (e.g., "archer_1", "sniper_2")
 export const TOWER_CONFIGS: Record<string, TowerConfig> = {
@@ -72,7 +73,21 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 250,
       fireRate: 700,
-      damage: 22
+      damage: 19  // Reduced from 22 for aura balance
+    }
+  },
+  archer_4: {
+    key: 'archer_4',
+    name: 'Elite Archer',
+    type: 'physical',
+    branch: 'archer',
+    level: 4,
+    upgradeCost: 800,
+    description: 'Legendary marksman. Endgame single-target devastation.',
+    stats: {
+      range: 280,
+      fireRate: 550,
+      damage: 45
     }
   },
 
@@ -102,7 +117,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 190,
       fireRate: 260,
-      damage: 13
+      damage: 11  // Reduced from 13 for aura balance
     }
   },
   rapidfire_3: {
@@ -116,7 +131,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 200,
       fireRate: 220,
-      damage: 18
+      damage: 15  // Reduced from 18 for aura balance
     }
   },
 
@@ -148,7 +163,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 330,
       fireRate: 2000,
-      damage: 90,
+      damage: 77,  // Reduced from 90 for aura balance
       critChance: 0.25,
       critMultiplier: 2
     }
@@ -164,7 +179,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 360,
       fireRate: 1800,
-      damage: 130,
+      damage: 110,  // Reduced from 130 for aura balance
       critChance: 0.30,
       critMultiplier: 2.5
     }
@@ -197,7 +212,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 240,
       fireRate: 1700,
-      damage: 38,
+      damage: 32,  // Reduced from 38 for aura balance
       splashRadius: 85
     }
   },
@@ -212,7 +227,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 260,
       fireRate: 1500,
-      damage: 55,
+      damage: 47,  // Reduced from 55 for aura balance
       splashRadius: 100
     }
   },
@@ -317,6 +332,53 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 12,
       dotDamage: 12,
       dotDuration: 6000
+    }
+  },
+
+  // === AURA TOWER (Support - buffs nearby towers) ===
+  aura_1: {
+    key: 'aura_1',
+    name: 'Aura Tower',
+    type: 'support',
+    branch: 'aura',
+    level: 1,
+    upgradeCost: 100,
+    description: 'Buffs nearby towers +20% damage. Does not attack.',
+    stats: {
+      range: 90,       // Aura radius - affects ~2-3 adjacent towers
+      fireRate: 0,     // 0 = non-attacking tower
+      damage: 0,
+      auraDamageMultiplier: 0.20
+    }
+  },
+  aura_2: {
+    key: 'aura_2',
+    name: 'Aura Tower II',
+    type: 'support',
+    branch: 'aura',
+    level: 2,
+    upgradeCost: 200,
+    description: 'Buffs nearby towers +30% damage. Wider aura.',
+    stats: {
+      range: 105,      // Larger aura radius
+      fireRate: 0,
+      damage: 0,
+      auraDamageMultiplier: 0.30
+    }
+  },
+  aura_3: {
+    key: 'aura_3',
+    name: 'Aura Tower III',
+    type: 'support',
+    branch: 'aura',
+    level: 3,
+    upgradeCost: 400,
+    description: 'Buffs nearby towers +40% damage. Maximum power.',
+    stats: {
+      range: 120,      // Maximum aura radius
+      fireRate: 0,
+      damage: 0,
+      auraDamageMultiplier: 0.40
     }
   }
 };
