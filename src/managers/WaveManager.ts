@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { CreepManager } from './CreepManager';
-import { PathSystem } from './PathSystem';
+import { PathSystem } from './MapPathSystem';
 import { Creep } from '../objects';
-import { WAVE_CONFIGS } from '../data/WaveData';
-import type { WaveCreepGroup, WaveType } from '../data/WaveData';
+import { WAVE_CONFIGS } from '../data/GameData';
+import type { WaveCreepGroup, WaveType } from '../data/GameData';
 
 /**
  * Event types emitted by WaveManager

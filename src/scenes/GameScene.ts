@@ -262,6 +262,9 @@ export class GameScene extends Phaser.Scene {
       this.hudManager.updateCastleHP(this.castleHP);
       this.audioManager.playSFX('creep_leak');
       
+      // Update castle damage visuals
+      this.environment.updateCastleDamage(this.castleHP);
+      
       // Camera shake for damage feedback
       this.cameras.main.shake(200, 0.01);
       
@@ -378,6 +381,9 @@ export class GameScene extends Phaser.Scene {
     // Update combat (tower animations, targeting, and firing)
     this.combatManager.updateTowers(scaledDelta);
     this.combatManager.updateCombat(this.virtualGameTime);
+    
+    // Update environment animations (flag waving, etc.)
+    this.environment.update(scaledDelta);
   }
 
   /**

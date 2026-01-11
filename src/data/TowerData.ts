@@ -380,5 +380,105 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 0,
       auraDamageMultiplier: 0.40
     }
+  },
+  aura_4: {
+    key: 'aura_4',
+    name: 'Aura Tower IV',
+    type: 'support',
+    branch: 'aura',
+    level: 4,
+    upgradeCost: 600,
+    description: 'Ultimate support. +50% damage buff. Special ability.',
+    stats: {
+      range: 140,
+      fireRate: 0,
+      damage: 0,
+      auraDamageMultiplier: 0.50
+    }
+  },
+
+  // === LEVEL 4 UPGRADES WITH SPECIAL ABILITIES ===
+  
+  rapidfire_4: {
+    key: 'rapidfire_4',
+    name: 'Rapid Fire IV',
+    type: 'physical',
+    branch: 'rapidfire',
+    level: 4,
+    upgradeCost: 650,
+    description: 'Ultimate rapid fire. Special ability unlocked.',
+    stats: {
+      range: 220,
+      fireRate: 200,
+      damage: 18
+    }
+  },
+  
+  sniper_4: {
+    key: 'sniper_4',
+    name: 'Sniper Tower IV',
+    type: 'physical',
+    branch: 'sniper',
+    level: 4,
+    upgradeCost: 750,
+    description: 'Elite assassin. 35% crit, 2.5x multiplier. Special ability.',
+    stats: {
+      range: 400,
+      fireRate: 1700,
+      damage: 140,
+      critChance: 0.35,
+      critMultiplier: 2.5
+    }
+  },
+  
+  rockcannon_4: {
+    key: 'rockcannon_4',
+    name: 'Rock Cannon IV',
+    type: 'physical',
+    branch: 'rockcannon',
+    level: 4,
+    upgradeCost: 700,
+    description: 'Siege weapon. 110px splash. Special ability.',
+    stats: {
+      range: 280,
+      fireRate: 1400,
+      damage: 58,
+      splashRadius: 110
+    }
+  },
+  
+  icetower_4: {
+    key: 'icetower_4',
+    name: 'Ice Tower IV',
+    type: 'magic',
+    branch: 'icetower',
+    level: 4,
+    upgradeCost: 500,
+    description: 'Absolute zero. 65% slow for 3.5s. Special ability.',
+    stats: {
+      range: 240,
+      fireRate: 850,
+      damage: 24,
+      slowPercent: 0.65,
+      slowDuration: 3500,
+      maxSlowTargets: 5
+    }
+  },
+  
+  poison_4: {
+    key: 'poison_4',
+    name: 'Poison Tower IV',
+    type: 'magic',
+    branch: 'poison',
+    level: 4,
+    upgradeCost: 500,
+    description: 'Plague master. 15 dmg/s for 6s. Special ability.',
+    stats: {
+      range: 260,
+      fireRate: 1100,
+      damage: 15,
+      dotDamage: 15,
+      dotDuration: 6000
+    }
   }
 };

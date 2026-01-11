@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { TowerGraphics, RapidFireAnimator, ArcherAnimator, CannonAnimator, SniperAnimator, IceAnimator, PoisonAnimator, AuraAnimator } from '../graphics';
 import type { TowerConfig, TowerBranch } from '../data';
 import { TOWER_CONFIGS, BRANCH_OPTIONS, GAME_CONFIG } from '../data';
+import { TowerAbilityHandler, TOWER_ABILITIES } from './TowerAbilities';
+import type { AbilityDefinition, AbilityContext, AbilityResult } from './TowerAbilities';
 
 // Re-export types for backwards compatibility
 export type { TowerStats, TowerConfig, TowerBranch } from '../data';
@@ -49,6 +51,11 @@ export class Tower extends Phaser.GameObjects.Container {
   // Combat state
   private lastFireTime: number = 0;
   
+  // Veteran system - kill tracking
+  private killCount: number = 0;
+  private veteranBadgeGraphics: Phaser.GameObjects.Graphics | null = null;
+  private currentVeteranRank: number = 0;
+  
   // Aura buff state
   private damageMultiplier: number = 1.0;
   private buffGlowPhase: number = 0;
@@ -59,6 +66,11 @@ export class Tower extends Phaser.GameObjects.Container {
   
   // Current target tracking (for animated turrets)
   private currentTarget: { x: number; y: number } | null = null;
+  
+  // Level 4 ability system
+  private abilityHandler: TowerAbilityHandler | null = null;
+  private selectedAbilityId: string | null = null;
+  private abilityIconGraphics: Phaser.GameObjects.Graphics | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string = 'archer_1') {
     super(scene, x, y);
@@ -156,6 +168,125 @@ export class Tower extends Phaser.GameObjects.Container {
    */
   onKill(): void {
     this.animator?.onKill();
+    
+    // Increment kill count and check for rank up
+    this.killCount++;
+    const newRank = this.getVeteranRank();
+    if (newRank !== this.currentVeteranRank) {
+      this.currentVeteranRank = newRank;
+      this.drawVeteranBadge();
+    }
+  }
+  
+  /**
+   * Get total kills by this tower
+   */
+  getKillCount(): number {
+    return this.killCount;
+  }
+  
+  /**
+   * Get veteran rank (0-3) based on kill count
+   */
+  getVeteranRank(): number {
+    const ranks = GAME_CONFIG.VETERAN_RANKS;
+    let rank = 0;
+    for (let i = ranks.length - 1; i >= 0; i--) {
+      if (this.killCount >= ranks[i].minKills) {
+        rank = i;
+        break;
+      }
+    }
+    return rank;
+  }
+  
+  /**
+   * Get veteran rank name
+   */
+  getVeteranRankName(): string {
+    return GAME_CONFIG.VETERAN_RANKS[this.getVeteranRank()].name;
+  }
+  
+  /**
+   * Get veteran damage multiplier (1.0, 1.05, 1.10, or 1.15)
+   */
+  getVeteranDamageMultiplier(): number {
+    return 1 + GAME_CONFIG.VETERAN_RANKS[this.getVeteranRank()].damageBonus;
+  }
+  
+  /**
+   * Get veteran damage bonus percentage (0, 5, 10, or 15)
+   */
+  getVeteranDamageBonus(): number {
+    return Math.round(GAME_CONFIG.VETERAN_RANKS[this.getVeteranRank()].damageBonus * 100);
+  }
+  
+  /**
+   * Draw veteran badge at bottom-right of tower
+   */
+  private drawVeteranBadge(): void {
+    const rank = this.currentVeteranRank;
+    
+    // Create graphics if needed
+    if (!this.veteranBadgeGraphics) {
+      this.veteranBadgeGraphics = this.scene.add.graphics();
+      this.add(this.veteranBadgeGraphics);
+    }
+    
+    const g = this.veteranBadgeGraphics;
+    g.clear();
+    
+    if (rank === 0) return; // No badge for Recruit
+    
+    // Badge position (bottom-right of tower)
+    const badgeX = 22;
+    const badgeY = 8;
+    const badgeWidth = 18;
+    const badgeHeight = 22;
+    
+    // Draw shield background
+    g.fillStyle(0x1a1a1a, 0.95);
+    g.beginPath();
+    g.moveTo(badgeX - badgeWidth/2, badgeY - badgeHeight/2);
+    g.lineTo(badgeX + badgeWidth/2, badgeY - badgeHeight/2);
+    g.lineTo(badgeX + badgeWidth/2, badgeY + badgeHeight/4);
+    g.lineTo(badgeX, badgeY + badgeHeight/2);
+    g.lineTo(badgeX - badgeWidth/2, badgeY + badgeHeight/4);
+    g.closePath();
+    g.fillPath();
+    
+    // Draw gold border
+    g.lineStyle(1.5, 0xd4a574, 1);
+    g.beginPath();
+    g.moveTo(badgeX - badgeWidth/2, badgeY - badgeHeight/2);
+    g.lineTo(badgeX + badgeWidth/2, badgeY - badgeHeight/2);
+    g.lineTo(badgeX + badgeWidth/2, badgeY + badgeHeight/4);
+    g.lineTo(badgeX, badgeY + badgeHeight/2);
+    g.lineTo(badgeX - badgeWidth/2, badgeY + badgeHeight/4);
+    g.closePath();
+    g.strokePath();
+    
+    // Draw chevrons based on rank
+    const chevronWidth = 10;
+    const chevronHeight = 4;
+    const chevronSpacing = 5;
+    const chevronsStartY = badgeY - (rank - 1) * chevronSpacing / 2;
+    
+    g.fillStyle(0xd4a574, 1);
+    
+    for (let i = 0; i < rank; i++) {
+      const cy = chevronsStartY + i * chevronSpacing - 2;
+      // Draw chevron (V shape pointing down)
+      g.beginPath();
+      g.moveTo(badgeX - chevronWidth/2, cy);
+      g.lineTo(badgeX, cy + chevronHeight);
+      g.lineTo(badgeX + chevronWidth/2, cy);
+      g.lineTo(badgeX + chevronWidth/2, cy + 2);
+      g.lineTo(badgeX, cy + chevronHeight + 2);
+      g.lineTo(badgeX - chevronWidth/2, cy + 2);
+      g.closePath();
+      g.fillPath();
+    }
   }
 
   /**
@@ -289,26 +420,28 @@ export class Tower extends Phaser.GameObjects.Container {
    * Check if tower can upgrade to next level
    */
   canUpgradeLevel(): boolean {
-    // Archer can go to level 4, others max at level 3
-    const maxLevel = this.currentBranch === 'archer' ? 4 : 3;
-    return this.currentLevel < maxLevel;
+    // All tower branches can now go to level 4
+    return this.currentLevel < 4;
   }
 
   /**
    * Get available upgrade options for this tower
-   * Returns: { branches?: TowerBranch[], levelUp?: string }
+   * Returns: { branches?: TowerBranch[], levelUp?: string, needsAbilitySelection?: boolean }
    */
-  getUpgradeOptions(): { branches?: TowerBranch[]; levelUp?: string } {
-    const options: { branches?: TowerBranch[]; levelUp?: string } = {};
+  getUpgradeOptions(): { branches?: TowerBranch[]; levelUp?: string; needsAbilitySelection?: boolean } {
+    const options: { branches?: TowerBranch[]; levelUp?: string; needsAbilitySelection?: boolean } = {};
     
     if (this.currentBranch === 'archer' && this.currentLevel === 1) {
       // Archer level 1 can branch to any specialization (including archer L2)
       options.branches = BRANCH_OPTIONS;
     } else {
-      // All other towers (including archer L2+) can only upgrade level
-      const maxLevel = this.currentBranch === 'archer' ? 4 : 3;
-      if (this.currentLevel < maxLevel) {
+      // All towers can upgrade to level 4
+      if (this.currentLevel < 4) {
         options.levelUp = `${this.currentBranch}_${this.currentLevel + 1}`;
+        // Level 4 upgrade requires ability selection
+        if (this.currentLevel === 3) {
+          options.needsAbilitySelection = true;
+        }
       }
     }
     
@@ -331,6 +464,7 @@ export class Tower extends Phaser.GameObjects.Container {
 
   /**
    * Upgrade the tower to a new config (branch or level up)
+   * For level 4 upgrades, call selectAbility() after this
    */
   upgrade(newKey: string): boolean {
     const newConfig = TOWER_CONFIGS[newKey];
@@ -346,8 +480,7 @@ export class Tower extends Phaser.GameObjects.Container {
       if (!validUpgrade) return false;
     } else {
       // From any other tower, can only go to same branch next level
-      const maxLevel = this.currentBranch === 'archer' ? 4 : 3;
-      if (newConfig.branch !== this.currentBranch || newConfig.level !== this.currentLevel + 1 || this.currentLevel >= maxLevel) {
+      if (newConfig.branch !== this.currentBranch || newConfig.level !== this.currentLevel + 1 || this.currentLevel >= 4) {
         return false;
       }
     }
@@ -358,7 +491,100 @@ export class Tower extends Phaser.GameObjects.Container {
     this.totalInvested += newConfig.upgradeCost;
     this.drawTower();
     
+    // Initialize ability handler for level 4
+    if (this.currentLevel === 4) {
+      this.abilityHandler = new TowerAbilityHandler(this.scene, this.currentBranch);
+    }
+    
     return true;
+  }
+  
+  /**
+   * Get available abilities for level 4 selection
+   */
+  getAvailableAbilities(): AbilityDefinition[] {
+    if (this.currentLevel !== 4) return [];
+    return TOWER_ABILITIES[this.currentBranch] || [];
+  }
+  
+  /**
+   * Select an ability for this level 4 tower
+   */
+  selectAbility(abilityId: string): boolean {
+    if (this.currentLevel !== 4 || !this.abilityHandler) return false;
+    
+    const success = this.abilityHandler.selectAbility(abilityId);
+    if (success) {
+      this.selectedAbilityId = abilityId;
+      this.drawAbilityIcon();
+    }
+    return success;
+  }
+  
+  /**
+   * Get selected ability ID
+   */
+  getSelectedAbilityId(): string | null {
+    return this.selectedAbilityId;
+  }
+  
+  /**
+   * Get ability handler
+   */
+  getAbilityHandler(): TowerAbilityHandler | null {
+    return this.abilityHandler;
+  }
+  
+  /**
+   * Check if this tower has an ability
+   */
+  hasAbility(): boolean {
+    return this.abilityHandler?.hasAbility() ?? false;
+  }
+  
+  /**
+   * Try to trigger ability on hit
+   */
+  tryTriggerAbility(context: AbilityContext): AbilityResult {
+    if (!this.abilityHandler) {
+      return { triggered: false };
+    }
+    return this.abilityHandler.rollForAbility(context);
+  }
+  
+  /**
+   * Draw ability icon badge on tower
+   */
+  private drawAbilityIcon(): void {
+    if (!this.selectedAbilityId || !this.abilityHandler) return;
+    
+    const ability = this.abilityHandler.getSelectedAbility();
+    if (!ability) return;
+    
+    if (!this.abilityIconGraphics) {
+      this.abilityIconGraphics = this.scene.add.graphics();
+      this.add(this.abilityIconGraphics);
+    }
+    
+    const g = this.abilityIconGraphics;
+    g.clear();
+    
+    // Draw small icon badge at tower base
+    const iconX = 20;
+    const iconY = 15;
+    const iconSize = 12;
+    
+    // Background circle
+    g.fillStyle(0x000000, 0.7);
+    g.fillCircle(iconX, iconY, iconSize + 2);
+    
+    // Colored icon circle
+    g.fillStyle(ability.icon.primaryColor, 0.9);
+    g.fillCircle(iconX, iconY, iconSize);
+    
+    // Inner highlight
+    g.fillStyle(ability.icon.secondaryColor, 0.6);
+    g.fillCircle(iconX - 2, iconY - 2, iconSize * 0.4);
   }
 
   /**
@@ -384,10 +610,18 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Get tower's damage (with aura buff applied)
+   * Get tower's damage (with aura buff and veteran bonus applied)
    */
   getDamage(): number {
-    return Math.floor(this.config.stats.damage * this.damageMultiplier);
+    const veteranMultiplier = this.getVeteranDamageMultiplier();
+    return Math.floor(this.config.stats.damage * this.damageMultiplier * veteranMultiplier);
+  }
+  
+  /**
+   * Get base damage without any multipliers
+   */
+  getBaseDamage(): number {
+    return this.config.stats.damage;
   }
 
   /**

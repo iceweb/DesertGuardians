@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Creep } from './Creep';
 import type { TowerBranch, TowerStats } from './Tower';
 import type { Tower } from './Tower';
+import type { AbilityContext, AbilityResult } from './TowerAbilities';
 
 export interface ProjectileConfig {
   speed: number;
@@ -381,8 +382,44 @@ export class Projectile extends Phaser.GameObjects.Container {
     
     const stats = this.config.stats;
     let damage = this.config.damage;
+    let isMagic = this.config.isMagic;
     
-    // Sniper crit chance
+    // Try to trigger tower ability
+    let abilityResult: AbilityResult = { triggered: false };
+    if (this.sourceTower?.getAbilityHandler()) {
+      const context: AbilityContext = {
+        scene: this.scene,
+        tower: this.sourceTower,
+        target: this.target,
+        hitPosition: { x: this.x, y: this.y },
+        damage: damage,
+        isMagic: isMagic,
+        allCreeps: [], // Will be populated by event listener
+        onSplash: (x: number, y: number, radius: number, splashDamage: number, splashMagic: boolean, branch: string) => {
+          this.emit('splash', x, y, radius, splashDamage, splashMagic, branch);
+        }
+      };
+      
+      // Request creep list via event
+      this.emit('getCreeps', context);
+      
+      abilityResult = this.sourceTower.tryTriggerAbility(context);
+      
+      // Apply ability effects
+      if (abilityResult.triggered) {
+        // Extra damage from ability
+        if (abilityResult.extraDamage) {
+          damage += abilityResult.extraDamage;
+        }
+        
+        // Armor pierce ability makes shot magic (ignores armor)
+        if (abilityResult.abilityId === 'sniper_pierce') {
+          isMagic = true;
+        }
+      }
+    }
+    
+    // Sniper crit chance (can stack with ability crit)
     if (this.config.branch === 'sniper' && stats.critChance) {
       if (Math.random() < stats.critChance) {
         damage *= stats.critMultiplier || 2;
@@ -401,11 +438,14 @@ export class Projectile extends Phaser.GameObjects.Container {
     const wasAlive = this.target.getIsActive();
     
     // Apply damage (pass tower branch for elemental immunity check)
-    this.target.takeDamage(damage, this.config.isMagic, this.config.branch);
+    this.target.takeDamage(damage, isMagic, this.config.branch);
     
     // Check if we killed the target
     if (wasAlive && !this.target.getIsActive() && this.sourceTower) {
       this.emit('kill', this.sourceTower);
+      
+      // Notify ability handler of death for plague spread etc
+      this.sourceTower.getAbilityHandler()?.onCreepDeath(this.target, []);
     }
     
     // Special effects

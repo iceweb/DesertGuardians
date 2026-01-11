@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { GoldMine } from '../objects/GoldMine';
-import { MINE_CONFIGS } from '../data/MineData';
+import { MINE_CONFIGS } from '../data/GameData';
 
 export interface MinePadData {
   id: number;

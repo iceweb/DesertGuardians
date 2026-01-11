@@ -1,5 +1,3 @@
-export * from './WaveData';
 export * from './TowerData';
-export * from './CreepData';
 export * from './GameConfig';
-export * from './MineData';
+export * from './GameData';

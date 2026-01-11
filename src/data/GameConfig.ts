@@ -111,6 +111,15 @@ export const GAME_CONFIG = {
   
   /** Waves between bonus increments */
   WAVE_GOLD_BONUS_INTERVAL: 5,
+  
+  // === VETERAN SYSTEM ===
+  /** Veteran ranks - towers earn ranks by accumulating kills */
+  VETERAN_RANKS: [
+    { name: 'Recruit', minKills: 0, damageBonus: 0 },
+    { name: 'Corporal', minKills: 25, damageBonus: 0.05 },
+    { name: 'Sergeant', minKills: 60, damageBonus: 0.10 },
+    { name: 'Captain', minKills: 120, damageBonus: 0.15 },
+  ],
 } as const;
 
 // Type for accessing config values

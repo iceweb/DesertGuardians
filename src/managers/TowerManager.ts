@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS, GAME_CONFIG } from '../data';
-import { PathSystem } from './PathSystem';
+import { PathSystem } from './MapPathSystem';
 import { TowerUIManager } from './TowerUIManager';
 import { GoldMineManager } from './GoldMineManager';
 

@@ -4,6 +4,7 @@ import type { ProjectileConfig } from '../objects/Projectile';
 import { Creep } from '../objects/Creep';
 import { CreepManager } from './CreepManager';
 import type { Tower } from '../objects/Tower';
+import type { AbilityContext } from '../objects/TowerAbilities';
 
 /**
  * ProjectileManager handles object pooling and lifecycle of all projectiles.
@@ -76,6 +77,9 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       // Listen for kill events to notify source tower
       projectile.on('kill', this.handleKill, this);
       
+      // Listen for creep list requests from abilities
+      projectile.on('getCreeps', this.handleGetCreeps, this);
+      
       this.pool.push(projectile);
     }
     
@@ -119,6 +123,13 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
    */
   private handleKill(tower: Tower): void {
     tower.onKill();
+  }
+  
+  /**
+   * Handle creep list request from abilities
+   */
+  private handleGetCreeps(context: AbilityContext): void {
+    context.allCreeps = this.creepManager.getActiveCreeps();
   }
 
   /**

@@ -1,11 +1,9 @@
-export { MapManager } from './MapManager';
-export type { BuildPadData, MapData, MinePadData } from './MapManager';
-export { PathSystem } from './PathSystem';
-export type { PathSegment } from './PathSystem';
+export { MapManager, PathSystem } from './MapPathSystem';
+export type { BuildPadData, MapData, MinePadData, PathSegment } from './MapPathSystem';
 export { CreepManager } from './CreepManager';
 export { WaveManager } from './WaveManager';
-export { WAVE_CONFIGS } from '../data/WaveData';
-export type { WaveDef, WaveCreepGroup } from '../data/WaveData';
+export { WAVE_CONFIGS } from '../data/GameData';
+export type { WaveDef, WaveCreepGroup } from '../data/GameData';
 export { TowerManager } from './TowerManager';
 export { TowerUIManager } from './TowerUIManager';
 export { ProjectileManager } from './ProjectileManager';

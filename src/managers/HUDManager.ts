@@ -122,7 +122,7 @@ export class HUDManager {
   }
 
   /**
-   * Create wave start button
+   * Create wave start button - Desert themed with hieroglyphic style
    */
   private createWaveControls(width: number, height: number): void {
     this.startWaveButtonBg = this.scene.add.graphics();
@@ -130,39 +130,62 @@ export class HUDManager {
     
     const btnX = width / 2;
     const btnY = height - 70;
-    const btnWidth = 220;
-    const btnHeight = 55;
+    const btnWidth = 180;
+    const btnHeight = 60;
     
-    const drawButton = (hover: boolean) => {
+    const drawButton = (hover: boolean, pressed: boolean = false) => {
       this.startWaveButtonBg.clear();
       
-      // Outer stone border
-      this.startWaveButtonBg.fillStyle(hover ? 0x8b6914 : 0x6b4914, 1);
-      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 - 4, btnY - btnHeight/2 - 4, btnWidth + 8, btnHeight + 8, 8);
+      // Outer glow when hovering
+      if (hover) {
+        this.startWaveButtonBg.fillStyle(0xffd700, 0.3);
+        this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 - 8, btnY - btnHeight/2 - 8, btnWidth + 16, btnHeight + 16, 14);
+      }
       
-      // Inner gradient-like fill
-      this.startWaveButtonBg.fillStyle(hover ? 0xd4a574 : 0xc9956c, 1);
-      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2, btnY - btnHeight/2, btnWidth, btnHeight, 6);
+      // Stone tablet shadow
+      this.startWaveButtonBg.fillStyle(0x1a0a00, 0.8);
+      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 + 4, btnY - btnHeight/2 + 4, btnWidth, btnHeight, 8);
+      
+      // Stone tablet base
+      const baseColor = pressed ? 0xa07840 : (hover ? 0xd4a574 : 0xc49564);
+      this.startWaveButtonBg.fillStyle(baseColor, 1);
+      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2, btnY - btnHeight/2, btnWidth, btnHeight, 8);
+      
+      // Carved border effect
+      this.startWaveButtonBg.lineStyle(3, 0x8b6914, 1);
+      this.startWaveButtonBg.strokeRoundedRect(btnX - btnWidth/2, btnY - btnHeight/2, btnWidth, btnHeight, 8);
+      this.startWaveButtonBg.lineStyle(2, 0x5a4010, 0.5);
+      this.startWaveButtonBg.strokeRoundedRect(btnX - btnWidth/2 + 4, btnY - btnHeight/2 + 4, btnWidth - 8, btnHeight - 8, 6);
+      
+      // Sandstone texture lines
+      this.startWaveButtonBg.lineStyle(1, 0xb08050, 0.3);
+      for (let i = 0; i < 4; i++) {
+        const ly = btnY - btnHeight/2 + 12 + i * 12;
+        this.startWaveButtonBg.lineBetween(btnX - btnWidth/2 + 10, ly, btnX + btnWidth/2 - 10, ly);
+      }
+      
+      // Egyptian-style corner decorations
+      this.startWaveButtonBg.fillStyle(0xffd700, hover ? 1 : 0.8);
+      // Top corners - ankh-inspired
+      this.startWaveButtonBg.fillCircle(btnX - btnWidth/2 + 12, btnY - btnHeight/2 + 12, 5);
+      this.startWaveButtonBg.fillCircle(btnX + btnWidth/2 - 12, btnY - btnHeight/2 + 12, 5);
+      // Bottom corners
+      this.startWaveButtonBg.fillCircle(btnX - btnWidth/2 + 12, btnY + btnHeight/2 - 12, 5);
+      this.startWaveButtonBg.fillCircle(btnX + btnWidth/2 - 12, btnY + btnHeight/2 - 12, 5);
       
       // Top highlight
-      this.startWaveButtonBg.fillStyle(hover ? 0xebc99a : 0xdbb88a, 1);
-      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 + 4, btnY - btnHeight/2 + 4, btnWidth - 8, btnHeight/2 - 4, 4);
-      
-      // Decorative corner accents
-      this.startWaveButtonBg.fillStyle(0x4a3520, 1);
-      this.startWaveButtonBg.fillTriangle(btnX - btnWidth/2, btnY - btnHeight/2, btnX - btnWidth/2 + 15, btnY - btnHeight/2, btnX - btnWidth/2, btnY - btnHeight/2 + 15);
-      this.startWaveButtonBg.fillTriangle(btnX + btnWidth/2, btnY - btnHeight/2, btnX + btnWidth/2 - 15, btnY - btnHeight/2, btnX + btnWidth/2, btnY - btnHeight/2 + 15);
-      this.startWaveButtonBg.fillTriangle(btnX - btnWidth/2, btnY + btnHeight/2, btnX - btnWidth/2 + 15, btnY + btnHeight/2, btnX - btnWidth/2, btnY + btnHeight/2 - 15);
-      this.startWaveButtonBg.fillTriangle(btnX + btnWidth/2, btnY + btnHeight/2, btnX + btnWidth/2 - 15, btnY + btnHeight/2, btnX + btnWidth/2, btnY + btnHeight/2 - 15);
+      this.startWaveButtonBg.fillStyle(hover ? 0xd4b070 : 0xc4a060, 0.4);
+      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 + 6, btnY - btnHeight/2 + 4, btnWidth - 12, 12, 4);
     };
     
     drawButton(false);
     
-    this.startWaveButton = this.scene.add.text(btnX, btnY, '⚔ Start Wave 1', {
-      fontFamily: 'Arial Black',
+    this.startWaveButton = this.scene.add.text(btnX, btnY, 'START', {
+      fontFamily: 'Georgia, Times New Roman, serif',
       fontSize: '22px',
       color: '#2a1a0a',
-      stroke: '#ffd700',
+      fontStyle: 'bold',
+      stroke: '#c49564',
       strokeThickness: 1
     }).setOrigin(0.5).setDepth(101);
 
@@ -174,24 +197,60 @@ export class HUDManager {
     this.startWaveHitArea.on('pointerout', () => drawButton(false));
     this.startWaveHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation();
+      drawButton(true, true);
       this.onStartWaveClicked?.();
     });
   }
 
   /**
-   * Create back to menu button
+   * Create back to menu button - Desert themed
    */
   private createBackButton(height: number): void {
-    const backButton = this.scene.add.text(25, height - 25, '← Menu', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#ffffff',
-      backgroundColor: '#4a3520',
-      padding: { x: 14, y: 8 }
-    }).setOrigin(0, 0.5).setDepth(101).setInteractive({ useHandCursor: true });
+    const btnX = 60;
+    const btnY = height - 30;
+    
+    // Create background graphics
+    const menuBg = this.scene.add.graphics();
+    menuBg.setDepth(100);
+    
+    const drawMenuButton = (hover: boolean) => {
+      menuBg.clear();
+      
+      // Shadow
+      menuBg.fillStyle(0x1a0a00, 0.6);
+      menuBg.fillRoundedRect(btnX - 45 + 2, btnY - 16 + 2, 90, 32, 6);
+      
+      // Stone background
+      menuBg.fillStyle(hover ? 0x8b6914 : 0x6b4914, 1);
+      menuBg.fillRoundedRect(btnX - 45, btnY - 16, 90, 32, 6);
+      
+      // Inner fill
+      menuBg.fillStyle(hover ? 0xc49564 : 0xa07840, 1);
+      menuBg.fillRoundedRect(btnX - 43, btnY - 14, 86, 28, 5);
+      
+      // Carved border
+      menuBg.lineStyle(2, 0xd4a574, 0.8);
+      menuBg.strokeRoundedRect(btnX - 45, btnY - 16, 90, 32, 6);
+      
+      // Small decorative dots
+      menuBg.fillStyle(0xffd700, 0.7);
+      menuBg.fillCircle(btnX - 38, btnY, 3);
+      menuBg.fillCircle(btnX + 38, btnY, 3);
+    };
+    
+    drawMenuButton(false);
+    
+    const backButton = this.scene.add.text(btnX, btnY, '◂ MENU', {
+      fontFamily: 'Georgia, Times New Roman, serif',
+      fontSize: '14px',
+      color: '#fff8dc',
+      fontStyle: 'bold',
+      stroke: '#4a3520',
+      strokeThickness: 2
+    }).setOrigin(0.5).setDepth(101).setInteractive({ useHandCursor: true });
 
-    backButton.on('pointerover', () => backButton.setStyle({ backgroundColor: '#6b4d30' }));
-    backButton.on('pointerout', () => backButton.setStyle({ backgroundColor: '#4a3520' }));
+    backButton.on('pointerover', () => drawMenuButton(true));
+    backButton.on('pointerout', () => drawMenuButton(false));
     backButton.on('pointerdown', () => {
       this.onMenuClicked?.();
     });
@@ -315,8 +374,8 @@ export class HUDManager {
   /**
    * Show start wave button
    */
-  showStartWaveButton(waveNumber: number): void {
-    this.startWaveButton.setText(`⚔ Start Wave ${waveNumber}`);
+  showStartWaveButton(_waveNumber: number): void {
+    this.startWaveButton.setText('START');
     this.startWaveButton.setVisible(true);
     this.startWaveButtonBg.setVisible(true);
     this.startWaveHitArea.setVisible(true);

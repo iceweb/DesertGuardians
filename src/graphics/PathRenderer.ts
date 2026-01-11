@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { PathSystem } from '../managers/PathSystem';
+import { PathSystem } from '../managers/MapPathSystem';
 
 /**
  * PathRenderer handles rendering the canyon path.

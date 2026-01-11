@@ -32,6 +32,26 @@ export class CreepEffects {
   }
 
   /**
+   * Show burn damage number (orange/red color)
+   */
+  showBurnDamage(x: number, y: number, damage: number): void {
+    const text = this.scene.add.text(x, y - 40, `-${damage}`, {
+      fontSize: '14px',
+      color: '#ff6600',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: text,
+      y: text.y - 30,
+      alpha: 0,
+      duration: 800,
+      onComplete: () => text.destroy()
+    });
+  }
+
+  /**
    * Show dispel effect - boss clears all status effects
    */
   showDispelEffect(x: number, y: number): void {

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Creep } from '../objects';
-import { PathSystem } from './PathSystem';
+import { PathSystem } from './MapPathSystem';
 
 /**
  * CreepManager handles object pooling and lifecycle of all creeps.

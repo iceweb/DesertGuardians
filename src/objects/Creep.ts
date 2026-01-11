@@ -164,6 +164,18 @@ export class Creep extends Phaser.GameObjects.Container {
         if (this.currentHealth <= 0) this.die();
       }
     });
+    this.statusEffects.setOnBurnDamage((damage: number) => {
+      if (this.isActive) {
+        // Check immunity
+        if (this.abilities.isImmune()) {
+          return;
+        }
+        this.currentHealth -= damage;
+        this.updateHealthBar();
+        this.effects.showBurnDamage(this.x, this.y, damage);
+        if (this.currentHealth <= 0) this.die();
+      }
+    });
     
     // Set initial position
     const startPos = pathSystem.getStartPoint();
@@ -317,6 +329,55 @@ export class Creep extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Apply freeze effect (100% movement stop)
+   */
+  applyFreeze(durationMs: number): void {
+    this.statusEffects.applyFreeze(durationMs);
+  }
+
+  /**
+   * Apply burn effect
+   */
+  applyBurn(damagePerSecond: number, durationMs: number): void {
+    this.statusEffects.applyBurn(damagePerSecond, durationMs);
+  }
+
+  /**
+   * Apply armor reduction
+   */
+  applyArmorReduction(amount: number): void {
+    this.statusEffects.applyArmorReduction(amount);
+  }
+
+  /**
+   * Clear slow effect (used by Shatter ability)
+   */
+  clearSlow(): void {
+    this.statusEffects.clearSlow();
+  }
+
+  /**
+   * Get number of active poison stacks
+   */
+  getPoisonStackCount(): number {
+    return this.statusEffects.getPoisonStackCount();
+  }
+
+  /**
+   * Check if creep is frozen
+   */
+  isFrozen(): boolean {
+    return this.statusEffects.isFrozen();
+  }
+
+  /**
+   * Check if creep is slowed
+   */
+  isSlowed(): boolean {
+    return this.statusEffects.isSlowed();
+  }
+
+  /**
    * Take damage
    */
   takeDamage(amount: number, isMagic: boolean = false, towerBranch?: string): number {
@@ -350,8 +411,9 @@ export class Creep extends Phaser.GameObjects.Container {
       return 0;
     }
     
-    // Apply armor
-    const actualDamage = isMagic ? amount : Math.max(1, amount - this.config.armor);
+    // Apply armor (reduced by armor reduction from Corrosive Acid)
+    const effectiveArmor = Math.max(0, this.config.armor - this.statusEffects.getArmorReduction());
+    const actualDamage = isMagic ? amount : Math.max(1, amount - effectiveArmor);
     this.currentHealth -= actualDamage;
     
     this.updateHealthBar();
@@ -428,7 +490,6 @@ export class Creep extends Phaser.GameObjects.Container {
   getCurrentHealth(): number { return this.currentHealth; }
   getShieldHitsRemaining(): number { return this.abilities.getState().shieldHitsRemaining; }
   isFlying(): boolean { return this.config.isFlying === true; }
-  isSlowed(): boolean { return this.statusEffects.isSlowed(); }
   getIsBurrowed(): boolean { return this.abilities.getState().isBurrowed; }
   getIsGhostPhase(): boolean { return this.abilities.getState().isGhostPhase; }
   getDiggerPhase(): 'walking' | 'stopping' | 'burrowed' | 'resurfacing' { return this.abilities.getState().diggerPhase; }

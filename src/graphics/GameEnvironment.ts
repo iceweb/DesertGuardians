@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import { PathSystem } from '../managers/PathSystem';
+import { PathSystem } from '../managers/MapPathSystem';
 import { EnvironmentDecorations } from './EnvironmentDecorations';
 import { PathRenderer } from './PathRenderer';
+import { GAME_CONFIG } from '../data';
 
 /**
  * GameEnvironment handles all environmental/decorative rendering.
@@ -12,6 +13,13 @@ export class GameEnvironment {
   private pathSystem: PathSystem;
   private pathRenderer: PathRenderer;
   private castlePosition: Phaser.Math.Vector2 | null = null;
+  
+  // Castle graphics for damage states
+  private castleContainer: Phaser.GameObjects.Container | null = null;
+  private castleDamageGraphics: Phaser.GameObjects.Graphics | null = null;
+  private flagGraphics: Phaser.GameObjects.Graphics | null = null;
+  private flagPhase: number = 0;
+  private currentDamageState: number = 0; // 0 = healthy, 1 = 50%, 2 = 25%
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
@@ -32,6 +40,37 @@ export class GameEnvironment {
 
   getCastlePosition(): Phaser.Math.Vector2 | null {
     return this.castlePosition;
+  }
+  
+  /**
+   * Update castle flag animation
+   */
+  update(delta: number): void {
+    if (this.flagGraphics && this.castlePosition) {
+      this.flagPhase += delta / 1000 * 1.5; // Slow steady animation
+      if (this.flagPhase > Math.PI * 2) this.flagPhase -= Math.PI * 2;
+      this.drawFlag(this.castlePosition.x, this.castlePosition.y);
+    }
+  }
+  
+  /**
+   * Update castle damage state based on HP
+   */
+  updateCastleDamage(currentHP: number): void {
+    const maxHP = GAME_CONFIG.MAX_CASTLE_HP;
+    const hpPercent = currentHP / maxHP;
+    
+    let newState = 0;
+    if (hpPercent <= 0.25) {
+      newState = 2; // Heavy damage
+    } else if (hpPercent <= 0.5) {
+      newState = 1; // Medium damage
+    }
+    
+    if (newState !== this.currentDamageState && this.castlePosition) {
+      this.currentDamageState = newState;
+      this.drawCastleDamage(this.castlePosition.x, this.castlePosition.y);
+    }
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -151,7 +190,9 @@ export class GameEnvironment {
     const isValidDecoPosition = (x: number, y: number): boolean => {
       if (y < HUD_MARGIN) return false;
       if (x < 30 || x > width - 30) return false;
-      return !this.isNearPath(x, y, DECO_PATH_MARGIN);
+      if (this.isNearPath(x, y, DECO_PATH_MARGIN)) return false;
+      if (this.isInsidePathLoop(x, y)) return false;
+      return true;
     };
     
     // Palm trees
@@ -283,6 +324,79 @@ export class GameEnvironment {
     return false;
   }
 
+  /**
+   * Check if a point is inside any of the path's enclosed loop regions.
+   * These are the hollow areas formed when the path curves back on itself.
+   */
+  private isInsidePathLoop(x: number, y: number): boolean {
+    // Define the loop regions based on the level1 path layout
+    // These are polygons representing the hollow interior of each loop
+    
+    // Loop 1: Top-right area (the first figure-8 loop interior)
+    // Path goes: (770,320) -> (770,220) -> (840,160) -> (1080,160) -> (1180,230) -> (1180,420) -> (1080,490) -> (880,490) -> back
+    const loop1 = [
+      { x: 820, y: 210 },
+      { x: 1100, y: 210 },
+      { x: 1130, y: 260 },
+      { x: 1130, y: 400 },
+      { x: 1050, y: 450 },
+      { x: 900, y: 450 },
+      { x: 820, y: 380 },
+      { x: 820, y: 260 }
+    ];
+    
+    // Loop 2: Middle area (second interior)
+    // Path goes around: (810,560) -> (810,720) -> (880,790) -> (1080,790) -> (1150,720) -> (1150,580) -> back
+    const loop2 = [
+      { x: 860, y: 590 },
+      { x: 860, y: 700 },
+      { x: 910, y: 750 },
+      { x: 1050, y: 750 },
+      { x: 1100, y: 700 },
+      { x: 1100, y: 600 },
+      { x: 1050, y: 550 },
+      { x: 910, y: 550 }
+    ];
+    
+    // Loop 3: Right area near castle
+    // Path goes: (1220,510) -> (1420,510) -> (1490,580) -> (1490,740) -> (1560,810) -> ... 
+    const loop3 = [
+      { x: 1270, y: 550 },
+      { x: 1400, y: 550 },
+      { x: 1440, y: 600 },
+      { x: 1440, y: 720 },
+      { x: 1380, y: 770 },
+      { x: 1270, y: 770 },
+      { x: 1220, y: 720 },
+      { x: 1220, y: 600 }
+    ];
+    
+    return this.isPointInPolygon(x, y, loop1) || 
+           this.isPointInPolygon(x, y, loop2) || 
+           this.isPointInPolygon(x, y, loop3);
+  }
+
+  /**
+   * Check if a point is inside a polygon using ray casting algorithm
+   */
+  private isPointInPolygon(x: number, y: number, polygon: { x: number; y: number }[]): boolean {
+    let inside = false;
+    const n = polygon.length;
+    
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = polygon[i].x;
+      const yi = polygon[i].y;
+      const xj = polygon[j].x;
+      const yj = polygon[j].y;
+      
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    
+    return inside;
+  }
+
   private pointToSegmentDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
     const dx = x2 - x1;
     const dy = y2 - y1;
@@ -341,88 +455,497 @@ export class GameEnvironment {
       spawnGraphics.strokeCircle(rx, ry, 5);
     }
     
-    // ===== CASTLE =====
+    // ===== IMPRESSIVE 3D CASTLE =====
+    this.drawCastle(goal.x, goal.y);
+  }
+  
+  /**
+   * Draw the main castle structure - gate faces top-left toward incoming path
+   */
+  private drawCastle(x: number, y: number): void {
+    // Create container for castle elements
+    this.castleContainer = this.scene.add.container(0, 0);
+    this.castleContainer.setDepth(15);
+    
     const castle = this.scene.add.graphics();
-    castle.setDepth(15);
+    this.castleContainer.add(castle);
     
+    // Castle center - positioned so entrance faces the path coming from the left
+    const cx = x - 20;
+    const cy = y - 80;
+    
+    // ===== SHADOW =====
     castle.fillStyle(0x000000, 0.3);
-    castle.fillRect(goal.x - 65, goal.y - 70, 140, 110);
+    castle.fillEllipse(cx, cy + 95, 160, 40);
     
-    castle.fillStyle(0xc9a86c, 1);
-    castle.fillRect(goal.x - 55, goal.y - 75, 110, 95);
+    // ===== TRAPEZOID STAIRCASE TO GATE (10 steps) =====
+    const stairBaseY = cy + 160;  // Bottom of stairs
+    const stairTopY = cy + 60;    // Top of stairs (at gate)
+    const stairHeight = stairBaseY - stairTopY;
+    const numSteps = 10;
+    const stepHeight = stairHeight / numSteps;
     
-    castle.fillStyle(0xb99a5c, 1);
-    castle.fillRect(goal.x - 50, goal.y - 70, 100, 85);
+    // Base width at bottom, narrows toward top (trapezoid)
+    const baseWidthHalf = 100;  // Half-width at bottom
+    const topWidthHalf = 40;    // Half-width at top
     
-    // Left tower
-    castle.fillStyle(0xd9b87c, 1);
-    castle.fillRect(goal.x - 65, goal.y - 110, 35, 130);
-    castle.fillStyle(0xc9a86c, 1);
-    castle.fillRect(goal.x - 60, goal.y - 105, 25, 120);
-    castle.fillStyle(0x8b4513, 1);
-    castle.fillTriangle(goal.x - 65, goal.y - 110, goal.x - 47, goal.y - 145, goal.x - 30, goal.y - 110);
-    castle.fillStyle(0xa0522d, 1);
-    castle.fillTriangle(goal.x - 60, goal.y - 110, goal.x - 47, goal.y - 135, goal.x - 35, goal.y - 110);
-    
-    // Right tower
-    castle.fillStyle(0xd9b87c, 1);
-    castle.fillRect(goal.x + 30, goal.y - 110, 35, 130);
-    castle.fillStyle(0xc9a86c, 1);
-    castle.fillRect(goal.x + 35, goal.y - 105, 25, 120);
-    castle.fillStyle(0x8b4513, 1);
-    castle.fillTriangle(goal.x + 30, goal.y - 110, goal.x + 47, goal.y - 145, goal.x + 65, goal.y - 110);
-    castle.fillStyle(0xa0522d, 1);
-    castle.fillTriangle(goal.x + 35, goal.y - 110, goal.x + 47, goal.y - 135, goal.x + 60, goal.y - 110);
-    
-    // Center tower
-    castle.fillStyle(0xe9c88c, 1);
-    castle.fillRect(goal.x - 20, goal.y - 120, 40, 80);
-    castle.fillStyle(0xd9b87c, 1);
-    castle.fillRect(goal.x - 15, goal.y - 115, 30, 70);
-    castle.fillStyle(0x8b4513, 1);
-    castle.fillTriangle(goal.x - 25, goal.y - 120, goal.x, goal.y - 160, goal.x + 25, goal.y - 120);
-    castle.fillStyle(0xa0522d, 1);
-    castle.fillTriangle(goal.x - 18, goal.y - 120, goal.x, goal.y - 150, goal.x + 18, goal.y - 120);
-    
-    // Flag
-    castle.fillStyle(0x4a4a4a, 1);
-    castle.fillRect(goal.x - 2, goal.y - 180, 4, 35);
-    castle.fillStyle(0xff0000, 1);
-    castle.fillTriangle(goal.x + 2, goal.y - 180, goal.x + 2, goal.y - 160, goal.x + 30, goal.y - 170);
-    
-    // Battlements
-    castle.fillStyle(0xd9b87c, 1);
-    for (let i = -45; i <= 40; i += 18) {
-      castle.fillRect(goal.x + i, goal.y - 85, 12, 18);
+    // Draw each step from bottom to top
+    for (let i = 0; i < numSteps; i++) {
+      const stepY = stairBaseY - i * stepHeight;
+      const nextY = stepY - stepHeight;
+      
+      // Calculate width at this step (linear interpolation)
+      const progress = i / numSteps;
+      const widthHalf = baseWidthHalf - (baseWidthHalf - topWidthHalf) * progress;
+      const nextWidthHalf = baseWidthHalf - (baseWidthHalf - topWidthHalf) * ((i + 1) / numSteps);
+      
+      // Step top surface (lighter)
+      const topColor = 0xd8ccb8 + (i * 0x010101);  // Slightly lighter toward top
+      castle.fillStyle(Math.min(topColor, 0xe8dcd0), 1);
+      castle.beginPath();
+      castle.moveTo(cx - widthHalf, stepY - stepHeight + 2);
+      castle.lineTo(cx + widthHalf, stepY - stepHeight + 2);
+      castle.lineTo(cx + nextWidthHalf, nextY + 2);
+      castle.lineTo(cx - nextWidthHalf, nextY + 2);
+      castle.closePath();
+      castle.fillPath();
+      
+      // Step front face (vertical part)
+      castle.fillStyle(0xc4b8a4, 1);
+      castle.fillRect(cx - widthHalf, stepY - stepHeight + 2, widthHalf * 2, stepHeight - 2);
+      
+      // Step edge shadow line
+      castle.lineStyle(1, 0xa89888, 1);
+      castle.lineBetween(cx - widthHalf, stepY - stepHeight + 2, cx + widthHalf, stepY - stepHeight + 2);
+      
+      // Step highlight on top edge
+      castle.lineStyle(1, 0xe8dcd0, 0.6);
+      castle.lineBetween(cx - widthHalf + 2, stepY - stepHeight + 3, cx + widthHalf - 2, stepY - stepHeight + 3);
     }
     
-    // Gate
-    castle.fillStyle(0x3a2a1a, 1);
-    castle.fillRect(goal.x - 20, goal.y - 50, 40, 70);
-    castle.fillStyle(0x2a1a0a, 1);
-    castle.fillRect(goal.x - 15, goal.y - 45, 30, 60);
+    // Left side wall (trapezoid shape)
+    castle.fillStyle(0xa89878, 1);
+    castle.beginPath();
+    castle.moveTo(cx - baseWidthHalf, stairBaseY);
+    castle.lineTo(cx - baseWidthHalf - 8, stairBaseY);
+    castle.lineTo(cx - topWidthHalf - 8, stairTopY);
+    castle.lineTo(cx - topWidthHalf, stairTopY);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Right side wall (trapezoid shape)
+    castle.fillStyle(0x988868, 1);
+    castle.beginPath();
+    castle.moveTo(cx + baseWidthHalf, stairBaseY);
+    castle.lineTo(cx + baseWidthHalf + 8, stairBaseY);
+    castle.lineTo(cx + topWidthHalf + 8, stairTopY);
+    castle.lineTo(cx + topWidthHalf, stairTopY);
+    castle.closePath();
+    castle.fillPath();
+    
+    // ===== 3D FOUNDATION/PLATFORM =====
+    // Front face of platform
+    castle.fillStyle(0x9a8a70, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 75, cy + 85);
+    castle.lineTo(cx + 75, cy + 85);
+    castle.lineTo(cx + 85, cy + 70);
+    castle.lineTo(cx - 65, cy + 70);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Top of platform
+    castle.fillStyle(0xb8a890, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 65, cy + 70);
+    castle.lineTo(cx + 85, cy + 70);
+    castle.lineTo(cx + 75, cy + 60);
+    castle.lineTo(cx - 75, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Right side of platform (3D depth)
+    castle.fillStyle(0x7a6a50, 1);
+    castle.beginPath();
+    castle.moveTo(cx + 75, cy + 85);
+    castle.lineTo(cx + 85, cy + 70);
+    castle.lineTo(cx + 85, cy + 60);
+    castle.lineTo(cx + 75, cy + 75);
+    castle.closePath();
+    castle.fillPath();
+    
+    // ===== MAIN CASTLE BODY =====
+    // Front wall (light beige)
+    castle.fillStyle(0xe8dcc8, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 60, cy + 60);
+    castle.lineTo(cx - 60, cy - 35);
+    castle.lineTo(cx + 60, cy - 35);
+    castle.lineTo(cx + 60, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Right wall (slightly darker for 3D)
+    castle.fillStyle(0xd4c8b4, 1);
+    castle.beginPath();
+    castle.moveTo(cx + 60, cy + 60);
+    castle.lineTo(cx + 60, cy - 35);
+    castle.lineTo(cx + 75, cy - 25);
+    castle.lineTo(cx + 75, cy + 70);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Stone texture lines on front wall
+    castle.lineStyle(1, 0xc8bca8, 0.5);
+    for (let row = 0; row < 5; row++) {
+      const rowY = cy + 50 - row * 18;
+      castle.lineBetween(cx - 58, rowY, cx + 58, rowY);
+      // Vertical lines (offset each row)
+      const offset = (row % 2) * 20;
+      for (let col = 0; col < 6; col++) {
+        const colX = cx - 50 + offset + col * 22;
+        if (colX < cx + 55) {
+          castle.lineBetween(colX, rowY, colX, rowY - 18);
+        }
+      }
+    }
+    
+    // ===== LEFT TOWER =====
+    // Tower body
+    castle.fillStyle(0xe8dcc8, 1);
+    castle.fillRect(cx - 75, cy - 70, 40, 130);
+    
+    // Tower right side (3D)
+    castle.fillStyle(0xd4c8b4, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 35, cy - 70);
+    castle.lineTo(cx - 25, cy - 62);
+    castle.lineTo(cx - 25, cy + 60);
+    castle.lineTo(cx - 35, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Tower roof (conical, terracotta)
+    castle.fillStyle(0xa0522d, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 80, cy - 70);
+    castle.lineTo(cx - 55, cy - 130);
+    castle.lineTo(cx - 30, cy - 70);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Roof highlight
+    castle.fillStyle(0xb86b3d, 0.7);
+    castle.beginPath();
+    castle.moveTo(cx - 75, cy - 70);
+    castle.lineTo(cx - 55, cy - 120);
+    castle.lineTo(cx - 55, cy - 130);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Roof edge shadow
+    castle.lineStyle(2, 0x703010, 1);
+    castle.lineBetween(cx - 55, cy - 130, cx - 30, cy - 70);
+    
+    // Tower window
+    castle.fillStyle(0x3a3020, 1);
+    castle.fillRect(cx - 62, cy - 40, 14, 22);
+    castle.lineStyle(2, 0x5a4a38, 1);
+    castle.strokeRect(cx - 62, cy - 40, 14, 22);
+    // Window cross
+    castle.lineStyle(2, 0x5a4a38, 1);
+    castle.lineBetween(cx - 55, cy - 40, cx - 55, cy - 18);
+    castle.lineBetween(cx - 62, cy - 29, cx - 48, cy - 29);
+    
+    // ===== RIGHT TOWER =====
+    // Tower body
+    castle.fillStyle(0xe8dcc8, 1);
+    castle.fillRect(cx + 35, cy - 55, 40, 115);
+    
+    // Tower right side (3D)
+    castle.fillStyle(0xd4c8b4, 1);
+    castle.beginPath();
+    castle.moveTo(cx + 75, cy - 55);
+    castle.lineTo(cx + 88, cy - 45);
+    castle.lineTo(cx + 88, cy + 60);
+    castle.lineTo(cx + 75, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Tower roof (conical, terracotta)
+    castle.fillStyle(0xa0522d, 1);
+    castle.beginPath();
+    castle.moveTo(cx + 30, cy - 55);
+    castle.lineTo(cx + 55, cy - 115);
+    castle.lineTo(cx + 80, cy - 55);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Roof highlight
+    castle.fillStyle(0xb86b3d, 0.7);
+    castle.beginPath();
+    castle.moveTo(cx + 35, cy - 55);
+    castle.lineTo(cx + 55, cy - 105);
+    castle.lineTo(cx + 55, cy - 115);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Roof edge shadow
+    castle.lineStyle(2, 0x703010, 1);
+    castle.lineBetween(cx + 55, cy - 115, cx + 80, cy - 55);
+    
+    // Tower window
+    castle.fillStyle(0x3a3020, 1);
+    castle.fillRect(cx + 48, cy - 28, 14, 22);
+    castle.lineStyle(2, 0x5a4a38, 1);
+    castle.strokeRect(cx + 48, cy - 28, 14, 22);
+    // Window cross
+    castle.lineStyle(2, 0x5a4a38, 1);
+    castle.lineBetween(cx + 55, cy - 28, cx + 55, cy - 6);
+    castle.lineBetween(cx + 48, cy - 17, cx + 62, cy - 17);
+    
+    // ===== MAIN ENTRANCE GATE =====
+    // Gate arch - dark interior
+    castle.fillStyle(0x1a0a00, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 25, cy + 60);
+    castle.lineTo(cx - 25, cy + 10);
+    castle.arc(cx, cy + 10, 25, Math.PI, 0, false);
+    castle.lineTo(cx + 25, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Decorative sun/fan pattern above gate
+    castle.fillStyle(0xd4a574, 1);
+    castle.beginPath();
+    castle.arc(cx, cy + 10, 20, Math.PI, 0, false);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Sun rays
+    castle.lineStyle(2, 0xb08050, 1);
+    for (let i = 0; i < 9; i++) {
+      const angle = Math.PI + (i * Math.PI / 8);
+      const innerR = 8;
+      const outerR = 18;
+      castle.lineBetween(
+        cx + Math.cos(angle) * innerR,
+        cy + 10 + Math.sin(angle) * innerR,
+        cx + Math.cos(angle) * outerR,
+        cy + 10 + Math.sin(angle) * outerR
+      );
+    }
+    
+    // Inner dark arch
+    castle.fillStyle(0x0a0500, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 18, cy + 60);
+    castle.lineTo(cx - 18, cy + 15);
+    castle.arc(cx, cy + 15, 18, Math.PI, 0, false);
+    castle.lineTo(cx + 18, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+    
+    // Gate frame - 3D stone arch
+    castle.lineStyle(4, 0x8a7a68, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 28, cy + 62);
+    castle.lineTo(cx - 28, cy + 10);
+    castle.arc(cx, cy + 10, 28, Math.PI, 0, false);
+    castle.lineTo(cx + 28, cy + 62);
+    castle.strokePath();
+    
+    // Inner arch highlight
+    castle.lineStyle(2, 0xc8b8a8, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 25, cy + 60);
+    castle.lineTo(cx - 25, cy + 10);
+    castle.arc(cx, cy + 10, 25, Math.PI, 0, false);
+    castle.lineTo(cx + 25, cy + 60);
+    castle.strokePath();
+    
+    // ===== LANTERNS =====
+    // Left lantern bracket
     castle.fillStyle(0x4a3a2a, 1);
-    castle.fillCircle(goal.x, goal.y - 50, 20);
-    castle.fillStyle(0x2a1a0a, 1);
-    castle.fillCircle(goal.x, goal.y - 50, 15);
-    castle.lineStyle(2, 0x5a4a3a, 1);
-    for (let i = -12; i <= 12; i += 6) {
-      castle.lineBetween(goal.x + i, goal.y - 45, goal.x + i, goal.y + 15);
+    castle.fillRect(cx - 42, cy + 25, 6, 3);
+    castle.fillRect(cx - 40, cy + 28, 4, 12);
+    // Lantern glow
+    castle.fillStyle(0xff8800, 0.4);
+    castle.fillCircle(cx - 38, cy + 38, 12);
+    // Lantern body
+    castle.fillStyle(0xd4a030, 1);
+    castle.fillRoundedRect(cx - 44, cy + 35, 12, 14, 3);
+    castle.fillStyle(0xffcc44, 0.9);
+    castle.fillRoundedRect(cx - 42, cy + 37, 8, 10, 2);
+    
+    // Right lantern bracket
+    castle.fillStyle(0x4a3a2a, 1);
+    castle.fillRect(cx + 36, cy + 25, 6, 3);
+    castle.fillRect(cx + 36, cy + 28, 4, 12);
+    // Lantern glow
+    castle.fillStyle(0xff8800, 0.4);
+    castle.fillCircle(cx + 38, cy + 38, 12);
+    // Lantern body
+    castle.fillStyle(0xd4a030, 1);
+    castle.fillRoundedRect(cx + 32, cy + 35, 12, 14, 3);
+    castle.fillStyle(0xffcc44, 0.9);
+    castle.fillRoundedRect(cx + 34, cy + 37, 8, 10, 2);
+    
+    // ===== ROOF DETAIL BETWEEN TOWERS =====
+    castle.fillStyle(0x8b6914, 1);
+    castle.beginPath();
+    castle.moveTo(cx - 35, cy - 35);
+    castle.lineTo(cx - 30, cy - 45);
+    castle.lineTo(cx + 30, cy - 45);
+    castle.lineTo(cx + 35, cy - 35);
+    castle.closePath();
+    castle.fillPath();
+    
+    // ===== FLAG POLE (on top of left tower roof) =====
+    // Left tower roof peak is at cx - 55, cy - 130
+    castle.fillStyle(0x3a3a3a, 1);
+    castle.fillRect(cx - 57, cy - 175, 4, 50);
+    
+    // Create separate graphics for animated flag
+    this.flagGraphics = this.scene.add.graphics();
+    this.flagGraphics.setDepth(16);
+    this.castleContainer.add(this.flagGraphics);
+    this.drawFlag(cx, cy);
+    
+    // Create damage overlay graphics
+    this.castleDamageGraphics = this.scene.add.graphics();
+    this.castleDamageGraphics.setDepth(17);
+    this.castleContainer.add(this.castleDamageGraphics);
+  }
+  
+  /**
+   * Draw animated flag
+   */
+  private drawFlag(x: number, y: number): void {
+    if (!this.flagGraphics) return;
+    
+    this.flagGraphics.clear();
+    
+    // Flag position (on top of left tower flagpole)
+    const flagX = x - 73;
+    const flagY = y - 253;
+    const flagWidth = 30;
+    const flagHeight = 18;
+    
+    // Calculate wave offsets for animation
+    const wave1 = Math.sin(this.flagPhase) * 2;
+    const wave2 = Math.sin(this.flagPhase + 1) * 3;
+    const wave3 = Math.sin(this.flagPhase + 2) * 2;
+    
+    // Draw flag with wave
+    this.flagGraphics.fillStyle(0xcc0000, 1);
+    this.flagGraphics.beginPath();
+    this.flagGraphics.moveTo(flagX, flagY);
+    this.flagGraphics.lineTo(flagX + flagWidth * 0.33, flagY + wave1);
+    this.flagGraphics.lineTo(flagX + flagWidth * 0.66, flagY + wave2);
+    this.flagGraphics.lineTo(flagX + flagWidth, flagY + wave3);
+    this.flagGraphics.lineTo(flagX + flagWidth, flagY + flagHeight + wave3);
+    this.flagGraphics.lineTo(flagX + flagWidth * 0.66, flagY + flagHeight + wave2);
+    this.flagGraphics.lineTo(flagX + flagWidth * 0.33, flagY + flagHeight + wave1);
+    this.flagGraphics.lineTo(flagX, flagY + flagHeight);
+    this.flagGraphics.closePath();
+    this.flagGraphics.fillPath();
+    
+    // Flag highlight
+    this.flagGraphics.fillStyle(0xff2222, 0.6);
+    this.flagGraphics.beginPath();
+    this.flagGraphics.moveTo(flagX, flagY + 2);
+    this.flagGraphics.lineTo(flagX + flagWidth * 0.4, flagY + 2 + wave1 * 0.8);
+    this.flagGraphics.lineTo(flagX + flagWidth * 0.4, flagY + 7 + wave1 * 0.8);
+    this.flagGraphics.lineTo(flagX, flagY + 7);
+    this.flagGraphics.closePath();
+    this.flagGraphics.fillPath();
+    
+    // Flag emblem (simple dot)
+    this.flagGraphics.fillStyle(0xffd700, 0.9);
+    const emblX = flagX + flagWidth * 0.5;
+    const emblY = flagY + flagHeight * 0.5 + wave2 * 0.5;
+    this.flagGraphics.fillCircle(emblX, emblY, 4);
+  }
+  
+  /**
+   * Draw castle damage overlay
+   */
+  private drawCastleDamage(x: number, y: number): void {
+    if (!this.castleDamageGraphics) return;
+    
+    this.castleDamageGraphics.clear();
+    
+    if (this.currentDamageState === 0) return; // No damage
+    
+    // Adjust for new castle position
+    const cx = x - 20;
+    const cy = y - 80;
+    
+    // Crack color
+    const crackColor = 0x2a1a0a;
+    
+    if (this.currentDamageState >= 1) {
+      // Medium damage - some cracks and missing stones
+      this.castleDamageGraphics.lineStyle(3, crackColor, 0.8);
+      
+      // Crack on front wall
+      this.castleDamageGraphics.beginPath();
+      this.castleDamageGraphics.moveTo(cx - 40, cy + 20);
+      this.castleDamageGraphics.lineTo(cx - 35, cy + 35);
+      this.castleDamageGraphics.lineTo(cx - 45, cy + 50);
+      this.castleDamageGraphics.strokePath();
+      
+      // Crack on left tower
+      this.castleDamageGraphics.beginPath();
+      this.castleDamageGraphics.moveTo(cx - 55, cy - 30);
+      this.castleDamageGraphics.lineTo(cx - 50, cy - 15);
+      this.castleDamageGraphics.lineTo(cx - 60, cy);
+      this.castleDamageGraphics.strokePath();
+      
+      // Scorch marks
+      this.castleDamageGraphics.fillStyle(0x3a3a3a, 0.4);
+      this.castleDamageGraphics.fillCircle(cx + 20, cy + 30, 10);
+      this.castleDamageGraphics.fillCircle(cx - 30, cy - 10, 8);
     }
     
-    // Windows
-    castle.fillStyle(0xffeeaa, 0.9);
-    castle.fillRect(goal.x - 50, goal.y - 60, 12, 18);
-    castle.fillRect(goal.x + 38, goal.y - 60, 12, 18);
-    castle.fillRect(goal.x - 8, goal.y - 100, 16, 22);
-    castle.lineStyle(2, 0x3a2a1a, 1);
-    castle.strokeRect(goal.x - 50, goal.y - 60, 12, 18);
-    castle.strokeRect(goal.x + 38, goal.y - 60, 12, 18);
-    castle.strokeRect(goal.x - 8, goal.y - 100, 16, 22);
-    
-    // Tower windows
-    castle.fillStyle(0xffeeaa, 0.7);
-    castle.fillRect(goal.x - 55, goal.y - 80, 10, 14);
-    castle.fillRect(goal.x + 45, goal.y - 80, 10, 14);
+    if (this.currentDamageState >= 2) {
+      // Heavy damage - more cracks, rubble, smoke
+      this.castleDamageGraphics.lineStyle(4, crackColor, 0.9);
+      
+      // Large crack on right tower
+      this.castleDamageGraphics.beginPath();
+      this.castleDamageGraphics.moveTo(cx + 50, cy - 40);
+      this.castleDamageGraphics.lineTo(cx + 55, cy - 20);
+      this.castleDamageGraphics.lineTo(cx + 45, cy);
+      this.castleDamageGraphics.lineTo(cx + 52, cy + 20);
+      this.castleDamageGraphics.strokePath();
+      
+      // Crack on main body
+      this.castleDamageGraphics.beginPath();
+      this.castleDamageGraphics.moveTo(cx + 10, cy - 20);
+      this.castleDamageGraphics.lineTo(cx + 5, cy);
+      this.castleDamageGraphics.lineTo(cx + 15, cy + 20);
+      this.castleDamageGraphics.strokePath();
+      
+      // Rubble at base
+      this.castleDamageGraphics.fillStyle(0x9a8a7a, 0.9);
+      this.castleDamageGraphics.fillCircle(cx - 70, cy + 75, 8);
+      this.castleDamageGraphics.fillCircle(cx - 55, cy + 80, 6);
+      this.castleDamageGraphics.fillCircle(cx + 75, cy + 75, 7);
+      this.castleDamageGraphics.fillCircle(cx + 65, cy + 82, 5);
+      
+      // More scorch marks
+      this.castleDamageGraphics.fillStyle(0x2a2a2a, 0.5);
+      this.castleDamageGraphics.fillCircle(cx - 45, cy - 50, 12);
+      this.castleDamageGraphics.fillCircle(cx + 45, cy - 25, 10);
+      this.castleDamageGraphics.fillCircle(cx, cy + 10, 14);
+      
+      // Smoke wisps
+      this.castleDamageGraphics.fillStyle(0x4a4a4a, 0.3);
+      this.castleDamageGraphics.fillCircle(cx - 55, cy - 140, 8);
+      this.castleDamageGraphics.fillCircle(cx - 50, cy - 150, 6);
+      this.castleDamageGraphics.fillCircle(cx + 55, cy - 120, 7);
+    }
   }
 }

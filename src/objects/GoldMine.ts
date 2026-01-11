@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GoldMineGraphics } from '../graphics/GoldMineGraphics';
-import { MINE_CONFIGS } from '../data/MineData';
-import type { MineConfig } from '../data/MineData';
+import { MINE_CONFIGS } from '../data/GameData';
+import type { MineConfig } from '../data/GameData';
 
 /**
  * Gold Mine game object.
