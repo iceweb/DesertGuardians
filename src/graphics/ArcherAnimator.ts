@@ -180,7 +180,7 @@ export class ArcherAnimator {
     this.drawBow();
     this.drawArrowRelease();
     
-    return this.getArrowSpawnOffset();
+    return this.getProjectileSpawnOffset();
   }
   
   /**
@@ -188,7 +188,7 @@ export class ArcherAnimator {
    * The bow is at (BOW_LOCAL_X, BOW_LOCAL_Y) in local archer space, pointing LEFT
    * After rotation, we need to transform this to tower-relative coordinates
    */
-  getArrowSpawnOffset(): { x: number; y: number } {
+  getProjectileSpawnOffset(): { x: number; y: number } {
     // Bow position in archer-local space
     const bowLocalX = this.BOW_LOCAL_X;
     const bowLocalY = this.BOW_LOCAL_Y;

@@ -9,6 +9,7 @@ export type { WaveDef, WaveCreepGroup } from '../data/WaveData';
 export { TowerManager } from './TowerManager';
 export { TowerUIManager } from './TowerUIManager';
 export { ProjectileManager } from './ProjectileManager';
+export { CombatManager } from './CombatManager';
 export { HUDManager } from './HUDManager';
 export { GameControlsManager } from './GameControlsManager';
 export { GameOverlayManager } from './GameOverlayManager';

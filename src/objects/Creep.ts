@@ -86,12 +86,20 @@ export class Creep extends Phaser.GameObjects.Container {
       onJumpComplete: (newDistance) => {
         this.distanceTraveled = newDistance;
       },
+      onDiggerStop: () => {
+        // Brief pause before digging - visual shake
+        this.effects.showDiggerPrepare(this.x, this.y);
+      },
       onBurrow: () => {
         this.effects.showBurrowEffect(this.x, this.y);
         // Hide the main body - we'll draw a shadow/mound in drawCreep
         this.bodyGraphics.setAlpha(0);
         this.healthBarBg.setAlpha(0);
         this.healthBarFg.setAlpha(0);
+      },
+      onResurfaceStart: () => {
+        // Start resurfacing animation - show dirt eruption
+        this.effects.showResurfaceStart(this.x, this.y);
       },
       onSurface: () => {
         this.effects.showSurfaceEffect(this.x, this.y);
@@ -164,21 +172,26 @@ export class Creep extends Phaser.GameObjects.Container {
     this.setActive(true);
     this.setVisible(true);
     
-    this.drawCreep();
+    // Initial static draw (perf optimization: don't redraw every frame)
+    this.redraw();
     this.updateHealthBar();
     this.updateShieldVisual();
   }
 
   /**
-   * Draw the creep
+   * Draw the creep once (static pose)
+   * The update loop will handle transform animations (bounce/squash/scale)
    */
-  private drawCreep(): void {
+  private redraw(): void {
     const state = this.abilities.getState();
+    
+    // Draw in neutral pose (bounceTime=0, faceDirection=1)
+    // We will handle facing via container/graphics scaleX
     CreepGraphics.drawCreep(
       this.bodyGraphics,
       this.config.type,
-      this.bounceTime,
-      this.faceDirection,
+      0, // Force 0 bounce time for static draw
+      1, // Force facing right
       state.jumpWarningTime > 0,
       state.isJumping,
       state.isBurrowed
@@ -200,7 +213,10 @@ export class Creep extends Phaser.GameObjects.Container {
     this.healthBarBg.clear();
     this.healthBarFg.clear();
     
-    if (this.currentHealth >= this.config.maxHealth) return;
+    if (this.currentHealth >= this.config.maxHealth) {
+        // Clear if health is full (and was previously drawn)
+        return; 
+    }
     
     const barWidth = 30, barHeight = 4, yOffset = -35;
     
@@ -220,7 +236,8 @@ export class Creep extends Phaser.GameObjects.Container {
     if (!this.isActive) return;
     
     const state = this.abilities.getState();
-    
+    const wasBurrowed = state.isBurrowed;
+
     // Update handlers
     this.statusEffects.update(delta);
     this.abilities.updateJump(delta, this.config, this.pathSystem, this.distanceTraveled);
@@ -228,6 +245,11 @@ export class Creep extends Phaser.GameObjects.Container {
     this.abilities.updateGhostPhase(delta, this.config, this.currentHealth, this.config.maxHealth);
     this.abilities.updateDispel(delta);  // Boss dispel ability
     
+    // If burrow state changed, we must redraw the graphic entirely
+    if (state.isBurrowed !== wasBurrowed) {
+        this.redraw();
+    }
+
     // Update ghost alpha
     if (state.isGhostPhase) {
       this.setAlpha(this.abilities.getGhostFlickerAlpha());
@@ -249,8 +271,28 @@ export class Creep extends Phaser.GameObjects.Container {
       this.setPosition(pathData.position.x, pathData.position.y);
     }
     
-    // Redraw
-    this.drawCreep();
+    // OPTIMIZATION: Transform-based animation instead of redraw
+    // Calculate simple bounce/squash
+    // Speed: 8 for small, 4 for big/bosses
+    const isBoss = this.config.type.startsWith('boss');
+    const animSpeed = isBoss ? 4 : 8;
+    const bounceAmp = isBoss ? 3 : 4;
+    
+    const bounceSine = Math.sin(this.bounceTime * animSpeed);
+    const bounceAmount = Math.abs(bounceSine) * bounceAmp; // Always bounce UP from origin
+    
+    // Apply transform to body graphics
+    // Note: We use -bounceAmount because Y is down in Phaser
+    this.bodyGraphics.y = -bounceAmount; 
+    
+    // Simple squash/stretch
+    const squash = 1 + (bounceSine * 0.05);
+    this.bodyGraphics.scaleY = squash;
+    // Scale X handles both facing direction AND squash preservation (inverse of Y)
+    // If facing right (1), scaleX = 1/squash. If facing left (-1), scaleX = -1/squash.
+    this.bodyGraphics.scaleX = (this.faceDirection) * (1 / squash);
+
+    // Update visual components that still use immediate mode (masks, simple bars)
     if (state.shieldHitsRemaining > 0) this.updateShieldVisual();
     this.statusEffects.draw(this.scene.time.now);
     
@@ -388,5 +430,6 @@ export class Creep extends Phaser.GameObjects.Container {
   isFlying(): boolean { return this.config.isFlying === true; }
   getIsBurrowed(): boolean { return this.abilities.getState().isBurrowed; }
   getIsGhostPhase(): boolean { return this.abilities.getState().isGhostPhase; }
+  getDiggerPhase(): 'walking' | 'stopping' | 'burrowed' | 'resurfacing' { return this.abilities.getState().diggerPhase; }
   canBeTargeted(): boolean { return this.isActive && this.abilities.canBeTargeted(); }
 }

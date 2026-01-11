@@ -196,7 +196,7 @@ export class RapidFireAnimator {
   /**
    * Get current barrel tip offset (for projectile spawning)
    */
-  getBarrelTipOffset(): { x: number; y: number } {
+  getProjectileSpawnOffset(): { x: number; y: number } {
     const barrelLength = this.BARREL_LENGTH[this.level - 1];
     const turretY = this.TURRET_Y[this.level - 1];
     

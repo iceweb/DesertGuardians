@@ -86,23 +86,23 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   broodmother: {
     type: 'broodmother',
-    maxHealth: 350,
+    maxHealth: 450,
     speed: 35,
-    armor: 4,
-    goldReward: 22,
-    sizeScale: 1.5,  // Larger broodmother
+    armor: 5,
+    goldReward: 25,
+    sizeScale: 1.5,
     spawnOnDeath: {
       type: 'baby',
-      count: 8  // More babies
+      count: 8
     }
   },
   baby: {
     type: 'baby',
-    maxHealth: 18,  // Slightly more HP
-    speed: 130,
+    maxHealth: 28,
+    speed: 125,
     armor: 0,
-    goldReward: 1,
-    sizeScale: 0.7  // Larger babies (was 0.5)
+    goldReward: 2,
+    sizeScale: 0.8
   },
 
   // === ELEMENTAL CREEPS (require specific towers) ===
@@ -168,6 +168,17 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     goldReward: 400,
     sizeScale: 1.7,
     canDispel: true
+  },
+
+  // === BOSS GUARDS (accompany last 3 bosses) ===
+  boss_guard: {
+    type: 'boss_guard',
+    maxHealth: 800,
+    speed: 38,
+    armor: 5,
+    goldReward: 40,
+    sizeScale: 1.2,
+    hasShield: true
   },
 
   // === GENERIC BOSS (legacy) ===

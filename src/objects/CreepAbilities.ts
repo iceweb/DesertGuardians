@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { PathSystem } from '../managers';
 import type { CreepConfig } from '../data';
+import { GAME_CONFIG } from '../data';
 
 /**
  * Ability state for a creep
@@ -14,9 +15,11 @@ export interface AbilityState {
   isJumping: boolean;
   jumpWarningTime: number;
   
-  // Digger
-  isBurrowed: boolean;
-  burrowTimer: number;
+  // Digger - multi-phase: walking -> stopping -> burrowed -> resurfacing
+  diggerPhase: 'walking' | 'stopping' | 'burrowed' | 'resurfacing';
+  diggerTimer: number;
+  isBurrowed: boolean;  // Legacy compatibility
+  burrowTimer: number;  // Legacy compatibility
   
   // Ghost
   isGhostPhase: boolean;
@@ -34,7 +37,9 @@ export interface AbilityState {
 export interface AbilityCallbacks {
   onJumpStart: (targetX: number, targetY: number, duration: number) => void;
   onJumpComplete: (newDistance: number) => void;
+  onDiggerStop: () => void;
   onBurrow: () => void;
+  onResurfaceStart: () => void;
   onSurface: () => void;
   onGhostPhaseStart: () => void;
   onGhostPhaseEnd: () => void;
@@ -46,15 +51,18 @@ export interface AbilityCallbacks {
  * Extracted from Creep.ts to reduce file size.
  */
 export class CreepAbilities {
-  // Constants
-  private readonly JUMP_COOLDOWN = 4000;
-  private readonly JUMP_DISTANCE = 150;
-  private readonly JUMP_WARNING_DURATION = 500;
-  private readonly BURROW_DURATION = 2000;
-  private readonly SURFACE_DURATION = 5000;
-  private readonly GHOST_PHASE_DURATION = 5000;  // Extended from 3s to 5s
-  private readonly GHOST_PHASE_THRESHOLD = 0.15;
-  private readonly DISPEL_COOLDOWN = 6000;  // Bosses dispel every 6 seconds
+  // Constants from centralized config
+  private readonly JUMP_COOLDOWN = GAME_CONFIG.JUMP_COOLDOWN;
+  private readonly JUMP_DISTANCE = GAME_CONFIG.JUMP_DISTANCE;
+  private readonly JUMP_WARNING_DURATION = GAME_CONFIG.JUMP_WARNING_DURATION;
+  private readonly DIGGER_WALK_DURATION = GAME_CONFIG.DIGGER_WALK_DURATION;
+  private readonly DIGGER_STOP_DURATION = GAME_CONFIG.DIGGER_STOP_DURATION;
+  private readonly BURROW_DURATION = GAME_CONFIG.BURROW_DURATION;
+  private readonly DIGGER_RESURFACE_DURATION = GAME_CONFIG.DIGGER_RESURFACE_DURATION;
+  private readonly SURFACE_DURATION = GAME_CONFIG.SURFACE_DURATION;
+  private readonly GHOST_PHASE_DURATION = GAME_CONFIG.GHOST_PHASE_DURATION;
+  private readonly GHOST_PHASE_THRESHOLD = GAME_CONFIG.GHOST_PHASE_THRESHOLD;
+  private readonly DISPEL_COOLDOWN = GAME_CONFIG.DISPEL_COOLDOWN;
 
   private scene: Phaser.Scene;
   private state: AbilityState;
@@ -74,6 +82,8 @@ export class CreepAbilities {
       jumpCooldown: 0,
       isJumping: false,
       jumpWarningTime: 0,
+      diggerPhase: 'walking',
+      diggerTimer: 0,
       isBurrowed: false,
       burrowTimer: 0,
       isGhostPhase: false,
@@ -103,8 +113,12 @@ export class CreepAbilities {
     // Jump
     this.state.jumpCooldown = config.canJump ? this.JUMP_COOLDOWN : 0;
     
-    // Digger
-    this.state.burrowTimer = config.canDig ? this.SURFACE_DURATION : 0;
+    // Digger - starts walking, timer set
+    if (config.canDig) {
+      this.state.diggerPhase = 'walking';
+      this.state.diggerTimer = this.DIGGER_WALK_DURATION;
+      this.state.burrowTimer = this.SURFACE_DURATION; // Legacy compatibility
+    }
     
     // Ghost - starts inactive, triggers at low HP
     
@@ -193,26 +207,49 @@ export class CreepAbilities {
   }
 
   /**
-   * Update digger ability
+   * Update digger ability - multi-phase: walking -> stopping -> burrowed -> resurfacing -> walking
    */
   updateDigger(delta: number, config: CreepConfig): void {
     if (!config.canDig) return;
     
-    this.state.burrowTimer -= delta;
+    this.state.diggerTimer -= delta;
     
-    if (this.state.burrowTimer <= 0) {
-      if (this.state.isBurrowed) {
-        // Surface
-        this.state.isBurrowed = false;
-        this.state.burrowTimer = this.SURFACE_DURATION;
-        this.callbacks.onSurface?.();
-      } else {
-        // Burrow
-        this.state.isBurrowed = true;
-        this.state.burrowTimer = this.BURROW_DURATION;
-        this.callbacks.onBurrow?.();
+    if (this.state.diggerTimer <= 0) {
+      switch (this.state.diggerPhase) {
+        case 'walking':
+          // Stop briefly before burrowing
+          this.state.diggerPhase = 'stopping';
+          this.state.diggerTimer = this.DIGGER_STOP_DURATION;
+          this.callbacks.onDiggerStop?.();
+          break;
+          
+        case 'stopping':
+          // Start burrowing
+          this.state.diggerPhase = 'burrowed';
+          this.state.diggerTimer = this.BURROW_DURATION;
+          this.state.isBurrowed = true;
+          this.callbacks.onBurrow?.();
+          break;
+          
+        case 'burrowed':
+          // Start resurfacing animation
+          this.state.diggerPhase = 'resurfacing';
+          this.state.diggerTimer = this.DIGGER_RESURFACE_DURATION;
+          this.callbacks.onResurfaceStart?.();
+          break;
+          
+        case 'resurfacing':
+          // Fully surfaced, back to walking
+          this.state.diggerPhase = 'walking';
+          this.state.diggerTimer = this.DIGGER_WALK_DURATION;
+          this.state.isBurrowed = false;
+          this.callbacks.onSurface?.();
+          break;
       }
     }
+    
+    // Update legacy burrowTimer for compatibility
+    this.state.burrowTimer = this.state.diggerTimer;
   }
 
   /**

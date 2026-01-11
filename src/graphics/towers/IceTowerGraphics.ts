@@ -2,278 +2,402 @@ import Phaser from 'phaser';
 
 /**
  * Draws the Ice Tower at the specified level.
- * Level 1: Simple ice shard
- * Level 2: Crystal cluster with floating shards
- * Level 3: Massive frozen citadel with aurora effect
+ * Top-down view of a frost mage on a frozen platform with ice crystals.
+ * Level 1: Simple ice platform with small crystals
+ * Level 2: Larger platform with crystal ring
+ * Level 3: Grand frozen citadel platform with swirling ice
  */
 export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): void {
   // Frost aura - dramatically larger at higher levels
   if (level === 1) {
     g.fillStyle(0x87ceeb, 0.1);
-    g.fillCircle(0, -30, 45);
+    g.fillCircle(0, 0, 42);
   } else if (level === 2) {
     g.fillStyle(0x87ceeb, 0.12);
-    g.fillCircle(0, -35, 60);
+    g.fillCircle(0, 0, 55);
     g.fillStyle(0xaaddff, 0.08);
-    g.fillCircle(0, -35, 75);
+    g.fillCircle(0, 0, 70);
   } else {
     g.fillStyle(0x87ceeb, 0.15);
-    g.fillCircle(0, -40, 80);
+    g.fillCircle(0, 0, 70);
     g.fillStyle(0xaaddff, 0.1);
-    g.fillCircle(0, -40, 100);
+    g.fillCircle(0, 0, 90);
     g.fillStyle(0xccffff, 0.05);
-    g.fillCircle(0, -40, 120);
+    g.fillCircle(0, 0, 110);
   }
   
-  // Shadow (with blue tint) - consistent size for all levels
+  // Shadow beneath platform
   g.fillStyle(0x4a6080, 0.3);
-  g.fillEllipse(0, 25, 48, 18);
-  
-  // Level 1: Simple ice shard
-  // Level 2: Crystal cluster with floating shards  
-  // Level 3: Massive frozen citadel with aurora effect
-  
-  const baseWidth = 28;
-  const spireHeight = 58;
+  g.fillEllipse(0, 4, 50 + level * 6, 20 + level * 2);
   
   if (level === 1) {
-    // Simple frozen base
-    g.fillStyle(0xa0d0e8, 1);
-    g.fillRect(-baseWidth, 5, baseWidth * 2, 20);
-    g.fillStyle(0xb0e0f0, 1);
-    g.fillRect(-baseWidth + 4, 8, (baseWidth - 4) * 2, 14);
-    // Simple frost pattern
-    g.lineStyle(1, 0xffffff, 0.3);
-    g.lineBetween(-18, 12, -10, 18);
-    g.lineBetween(18, 12, 10, 18);
+    // === LEVEL 1: Simple frozen platform with ice mage ===
     
-    // Simple crystal spire
-    g.fillStyle(0xb0e0e6, 0.9);
+    // Frozen platform base (octagonal)
+    g.fillStyle(0x88c8e8, 1);
     g.beginPath();
-    g.moveTo(-18, 8);
-    g.lineTo(0, -spireHeight);
-    g.lineTo(18, 8);
-    g.closePath();
-    g.fillPath();
-    // Inner highlight
-    g.fillStyle(0xd0f0f5, 0.8);
-    g.beginPath();
-    g.moveTo(-10, 0);
-    g.lineTo(0, -spireHeight + 15);
-    g.lineTo(10, 0);
-    g.closePath();
-    g.fillPath();
-    // Few sparkles
-    g.fillStyle(0xffffff, 0.9);
-    g.fillCircle(-5, -35, 2);
-    g.fillCircle(3, -50, 2);
-    g.fillCircle(-2, -65, 2);
-  } else if (level === 2) {
-    // Reinforced ice base with pattern
-    g.fillStyle(0xa8d8f0, 1);
-    g.fillRect(-baseWidth, 3, baseWidth * 2, 24);
-    g.fillStyle(0xb8e8ff, 1);
-    g.fillRect(-baseWidth + 4, 7, (baseWidth - 4) * 2, 17);
-    // Snowflake pattern on base
-    g.lineStyle(1, 0xffffff, 0.5);
-    for (let i = 0; i < 3; i++) {
-      const cx = -18 + i * 18;
-      g.lineBetween(cx, 10, cx, 22);
-      g.lineBetween(cx - 4, 13, cx + 4, 19);
-      g.lineBetween(cx - 4, 19, cx + 4, 13);
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI * 2) / 8 - Math.PI / 8;
+      const x = Math.cos(angle) * 28;
+      const y = Math.sin(angle) * 24;
+      if (i === 0) g.moveTo(x, y);
+      else g.lineTo(x, y);
     }
-    
-    // Multi-crystal formation
-    g.fillStyle(0xb0e0e6, 0.9);
-    g.beginPath();
-    g.moveTo(-24, 8);
-    g.lineTo(0, -spireHeight);
-    g.lineTo(24, 8);
-    g.closePath();
-    g.fillPath();
-    // Side crystals
-    g.fillStyle(0xa0d0d8, 0.8);
-    g.beginPath();
-    g.moveTo(-30, 15);
-    g.lineTo(-18, -spireHeight + 30);
-    g.lineTo(-12, 10);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(30, 15);
-    g.lineTo(18, -spireHeight + 30);
-    g.lineTo(12, 10);
-    g.closePath();
-    g.fillPath();
-    // Inner glow
-    g.fillStyle(0xd0f0f5, 0.85);
-    g.beginPath();
-    g.moveTo(-14, 0);
-    g.lineTo(0, -spireHeight + 15);
-    g.lineTo(14, 0);
-    g.closePath();
-    g.fillPath();
-    // Crystal facets
-    g.lineStyle(1, 0xffffff, 0.5);
-    g.lineBetween(0, -spireHeight, -10, -30);
-    g.lineBetween(0, -spireHeight, 10, -30);
-    g.lineBetween(0, -spireHeight, 0, 0);
-    // Floating ice shards
-    g.fillStyle(0xc0e8ff, 0.7);
-    g.beginPath();
-    g.moveTo(-35, -25);
-    g.lineTo(-30, -50);
-    g.lineTo(-25, -22);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(35, -30);
-    g.lineTo(28, -55);
-    g.lineTo(23, -27);
-    g.closePath();
-    g.fillPath();
-    // More sparkles
-    g.fillStyle(0xffffff, 0.95);
-    g.fillCircle(-6, -40, 3);
-    g.fillCircle(4, -55, 2.5);
-    g.fillCircle(-3, -70, 2);
-    g.fillCircle(5, -25, 2);
-    g.fillCircle(-8, -80, 2);
-  } else {
-    // GRAND ICE CITADEL BASE
-    g.fillStyle(0xb0e0f8, 1);
-    g.fillRect(-baseWidth, 0, baseWidth * 2, 28);
-    g.fillStyle(0xc0f0ff, 1);
-    g.fillRect(-baseWidth + 5, 5, (baseWidth - 5) * 2, 20);
-    // Ornate ice patterns
-    g.lineStyle(2, 0xffffff, 0.6);
-    for (let i = 0; i < 5; i++) {
-      const cx = -28 + i * 14;
-      g.lineBetween(cx, 8, cx, 23);
-      g.lineBetween(cx - 5, 11, cx + 5, 20);
-      g.lineBetween(cx - 5, 20, cx + 5, 11);
-    }
-    // Corner pillars
-    g.fillStyle(0x90c8e0, 1);
-    g.fillRect(-baseWidth - 6, 0, 10, 26);
-    g.fillRect(baseWidth - 4, 0, 10, 26);
-    
-    // MASSIVE CRYSTAL SPIRE with multiple formations
-    // Main spire
-    g.fillStyle(0xb0e0e6, 0.95);
-    g.beginPath();
-    g.moveTo(-30, 8);
-    g.lineTo(0, -spireHeight);
-    g.lineTo(30, 8);
-    g.closePath();
-    g.fillPath();
-    // Secondary spires
-    g.fillStyle(0xa0d0d8, 0.85);
-    g.beginPath();
-    g.moveTo(-38, 20);
-    g.lineTo(-22, -spireHeight + 35);
-    g.lineTo(-14, 15);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(38, 20);
-    g.lineTo(22, -spireHeight + 35);
-    g.lineTo(14, 15);
-    g.closePath();
-    g.fillPath();
-    // Tertiary spires
-    g.fillStyle(0x90c0d0, 0.75);
-    g.beginPath();
-    g.moveTo(-48, 25);
-    g.lineTo(-35, -spireHeight + 60);
-    g.lineTo(-30, 22);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(48, 25);
-    g.lineTo(35, -spireHeight + 60);
-    g.lineTo(30, 22);
     g.closePath();
     g.fillPath();
     
-    // Inner glowing core
-    g.fillStyle(0xd0f0f5, 0.9);
+    // Platform inner surface
+    g.fillStyle(0xa8e0f8, 1);
+    g.fillCircle(0, 0, 22);
+    
+    // Ice cracks on platform
+    g.lineStyle(1, 0xffffff, 0.4);
+    g.lineBetween(-15, -8, 10, 5);
+    g.lineBetween(-8, 10, 5, -12);
+    g.lineBetween(8, -5, -5, 8);
+    
+    // Frost mage body (top-down: hooded robe)
+    g.fillStyle(0x6090c0, 1);
+    g.fillCircle(0, 0, 12); // Robe circle
+    
+    // Hood
+    g.fillStyle(0x5080b0, 1);
+    g.fillCircle(0, -4, 8);
+    
+    // Face shadow under hood
+    g.fillStyle(0x304060, 1);
+    g.fillCircle(0, -2, 5);
+    
+    // Glowing eyes
+    g.fillStyle(0x66ddff, 1);
+    g.fillCircle(-2, -3, 1.5);
+    g.fillCircle(2, -3, 1.5);
+    
+    // Ice staff (held in front)
+    g.fillStyle(0x99ccdd, 1);
+    g.fillRect(-2, 6, 4, 18);
+    
+    // Staff crystal tip
+    g.fillStyle(0xaaeeff, 1);
     g.beginPath();
-    g.moveTo(-18, 0);
-    g.lineTo(0, -spireHeight + 15);
-    g.lineTo(18, 0);
+    g.moveTo(0, 24);
+    g.lineTo(-4, 28);
+    g.lineTo(0, 34);
+    g.lineTo(4, 28);
     g.closePath();
     g.fillPath();
-    // Power core
-    g.fillStyle(0xe8ffff, 0.9);
-    g.fillCircle(0, -spireHeight + 40, 12);
-    g.fillStyle(0xffffff, 0.95);
-    g.fillCircle(0, -spireHeight + 40, 8);
     g.fillStyle(0xccffff, 1);
-    g.fillCircle(0, -spireHeight + 40, 4);
+    g.fillCircle(0, 28, 3);
     
-    // Multiple floating ice platforms
-    g.fillStyle(0xc0e8ff, 0.6);
+    // Small ice crystals around platform
+    g.fillStyle(0xb0e8ff, 0.8);
     g.beginPath();
-    g.moveTo(-50, -30);
-    g.lineTo(-42, -65);
-    g.lineTo(-35, -28);
+    g.moveTo(-24, -10);
+    g.lineTo(-22, -18);
+    g.lineTo(-20, -10);
     g.closePath();
     g.fillPath();
     g.beginPath();
-    g.moveTo(50, -35);
-    g.lineTo(40, -70);
-    g.lineTo(32, -32);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(-55, -55);
-    g.lineTo(-45, -85);
-    g.lineTo(-40, -52);
-    g.closePath();
-    g.fillPath();
-    g.beginPath();
-    g.moveTo(55, -50);
-    g.lineTo(48, -80);
-    g.lineTo(42, -47);
+    g.moveTo(22, -6);
+    g.lineTo(25, -14);
+    g.lineTo(28, -6);
     g.closePath();
     g.fillPath();
     
-    // Crystal facet lines
-    g.lineStyle(1, 0xffffff, 0.6);
-    g.lineBetween(0, -spireHeight, -15, -40);
-    g.lineBetween(0, -spireHeight, 15, -40);
-    g.lineBetween(0, -spireHeight, -8, -60);
-    g.lineBetween(0, -spireHeight, 8, -60);
-    g.lineBetween(0, -spireHeight, 0, 0);
+  } else if (level === 2) {
+    // === LEVEL 2: Crystal ring platform with frost mage ===
     
-    // MANY sparkles for magical effect
+    // Outer crystal ring
+    g.fillStyle(0x70b8d8, 1);
+    g.beginPath();
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * Math.PI * 2) / 12;
+      const outerR = 36 + (i % 2) * 6;
+      const x = Math.cos(angle) * outerR;
+      const y = Math.sin(angle) * (outerR * 0.85);
+      if (i === 0) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.closePath();
+    g.fillPath();
+    
+    // Inner platform
+    g.fillStyle(0x98d0f0, 1);
+    g.fillCircle(0, 0, 28);
+    
+    // Platform surface details
+    g.fillStyle(0xb8e8ff, 1);
+    g.fillCircle(0, 0, 22);
+    
+    // Snowflake pattern
+    g.lineStyle(1, 0xffffff, 0.5);
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3;
+      const x1 = Math.cos(angle) * 8;
+      const y1 = Math.sin(angle) * 8;
+      const x2 = Math.cos(angle) * 20;
+      const y2 = Math.sin(angle) * 20;
+      g.lineBetween(x1, y1, x2, y2);
+    }
+    
+    // Crystal pillars on ring
+    g.fillStyle(0xaae0ff, 0.9);
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI * 2) / 6 + Math.PI / 6;
+      const x = Math.cos(angle) * 32;
+      const y = Math.sin(angle) * 28;
+      g.beginPath();
+      g.moveTo(x - 4, y + 3);
+      g.lineTo(x, y - 10);
+      g.lineTo(x + 4, y + 3);
+      g.closePath();
+      g.fillPath();
+    }
+    
+    // Frost mage (larger, more detailed)
+    g.fillStyle(0x5888b8, 1);
+    g.fillCircle(0, 0, 14);
+    
+    // Ornate hood
+    g.fillStyle(0x4878a8, 1);
+    g.fillCircle(0, -5, 10);
+    
+    // Face shadow
+    g.fillStyle(0x284060, 1);
+    g.fillCircle(0, -3, 6);
+    
+    // Glowing eyes (brighter)
+    g.fillStyle(0x44ddff, 1);
+    g.fillCircle(-2.5, -4, 2);
+    g.fillCircle(2.5, -4, 2);
     g.fillStyle(0xffffff, 1);
-    const sparklePositions = [
-      [-8, -40], [6, -50], [-4, -70], [8, -30], [-10, -85],
-      [10, -95], [-15, -55], [12, -65], [0, -105], [-6, -90]
+    g.fillCircle(-2.5, -4, 0.8);
+    g.fillCircle(2.5, -4, 0.8);
+    
+    // Shoulders with frost crystals
+    g.fillStyle(0x6090c0, 1);
+    g.fillCircle(-10, 2, 5);
+    g.fillCircle(10, 2, 5);
+    g.fillStyle(0x88ccee, 1);
+    g.fillCircle(-10, 0, 3);
+    g.fillCircle(10, 0, 3);
+    
+    // Staff held forward
+    g.fillStyle(0x88bbcc, 1);
+    g.fillRect(-2.5, 8, 5, 22);
+    
+    // Staff ornate crystal head
+    g.fillStyle(0x99ddff, 1);
+    g.beginPath();
+    g.moveTo(0, 30);
+    g.lineTo(-6, 36);
+    g.lineTo(0, 46);
+    g.lineTo(6, 36);
+    g.closePath();
+    g.fillPath();
+    g.fillStyle(0xccffff, 1);
+    g.fillCircle(0, 36, 4);
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(0, 35, 2);
+    
+    // Floating ice particles
+    g.fillStyle(0xccffff, 0.8);
+    g.fillCircle(-18, -18, 3);
+    g.fillCircle(20, -15, 2.5);
+    g.fillCircle(-22, 12, 2);
+    g.fillCircle(18, 18, 2.5);
+    
+  } else {
+    // === LEVEL 3: Grand frozen citadel with archmage ===
+    
+    // Outer ice wall ring
+    g.fillStyle(0x5898c8, 1);
+    g.beginPath();
+    for (let i = 0; i < 16; i++) {
+      const angle = (i * Math.PI * 2) / 16;
+      const outerR = 48 + (i % 2) * 8;
+      const x = Math.cos(angle) * outerR;
+      const y = Math.sin(angle) * (outerR * 0.85);
+      if (i === 0) g.moveTo(x, y);
+      else g.lineTo(x, y);
+    }
+    g.closePath();
+    g.fillPath();
+    
+    // Ice wall inner ring
+    g.fillStyle(0x78b8e0, 1);
+    g.fillCircle(0, 0, 42);
+    
+    // Platform surface
+    g.fillStyle(0x98d8f8, 1);
+    g.fillCircle(0, 0, 36);
+    
+    // Grand snowflake pattern
+    g.lineStyle(2, 0xffffff, 0.5);
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI) / 4;
+      const x1 = Math.cos(angle) * 10;
+      const y1 = Math.sin(angle) * 10;
+      const x2 = Math.cos(angle) * 32;
+      const y2 = Math.sin(angle) * 32;
+      g.lineBetween(x1, y1, x2, y2);
+      // Branch details
+      const midX = Math.cos(angle) * 22;
+      const midY = Math.sin(angle) * 22;
+      const perpAngle = angle + Math.PI / 2;
+      g.lineBetween(midX, midY, midX + Math.cos(perpAngle) * 6, midY + Math.sin(perpAngle) * 6);
+      g.lineBetween(midX, midY, midX - Math.cos(perpAngle) * 6, midY - Math.sin(perpAngle) * 6);
+    }
+    
+    // Ice spire pillars on outer ring
+    g.fillStyle(0x99ddff, 0.95);
+    for (let i = 0; i < 8; i++) {
+      const angle = (i * Math.PI * 2) / 8;
+      const x = Math.cos(angle) * 44;
+      const y = Math.sin(angle) * 38;
+      g.beginPath();
+      g.moveTo(x - 5, y + 4);
+      g.lineTo(x, y - 16);
+      g.lineTo(x + 5, y + 4);
+      g.closePath();
+      g.fillPath();
+      // Spire glow
+      g.fillStyle(0xccffff, 0.7);
+      g.fillCircle(x, y - 8, 3);
+      g.fillStyle(0x99ddff, 0.95);
+    }
+    
+    // Ice Archmage (grand, powerful)
+    // Ornate robe from above
+    g.fillStyle(0x4070a0, 1);
+    g.fillCircle(0, 0, 18);
+    
+    // Cape/robe flow
+    g.fillStyle(0x3868a0, 0.9);
+    g.beginPath();
+    g.moveTo(-12, 8);
+    g.lineTo(-18, 22);
+    g.lineTo(0, 16);
+    g.lineTo(18, 22);
+    g.lineTo(12, 8);
+    g.closePath();
+    g.fillPath();
+    
+    // Grand hood with frost crown
+    g.fillStyle(0x3860a0, 1);
+    g.fillCircle(0, -6, 12);
+    
+    // Frost crown
+    g.fillStyle(0xaaeeff, 1);
+    g.beginPath();
+    g.moveTo(-8, -14);
+    g.lineTo(-6, -20);
+    g.lineTo(-3, -14);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(-2, -16);
+    g.lineTo(0, -24);
+    g.lineTo(2, -16);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(3, -14);
+    g.lineTo(6, -20);
+    g.lineTo(8, -14);
+    g.closePath();
+    g.fillPath();
+    
+    // Face shadow
+    g.fillStyle(0x203850, 1);
+    g.fillCircle(0, -4, 7);
+    
+    // Powerful glowing eyes
+    g.fillStyle(0x22ccff, 1);
+    g.fillCircle(-3, -5, 2.5);
+    g.fillCircle(3, -5, 2.5);
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(-3, -5, 1);
+    g.fillCircle(3, -5, 1);
+    
+    // Shoulder armor with ice crystals
+    g.fillStyle(0x5088b8, 1);
+    g.fillCircle(-14, 2, 7);
+    g.fillCircle(14, 2, 7);
+    g.fillStyle(0x88ccee, 1);
+    g.fillCircle(-14, 0, 4);
+    g.fillCircle(14, 0, 4);
+    // Shoulder crystals
+    g.fillStyle(0xaaeeff, 1);
+    g.beginPath();
+    g.moveTo(-16, -4);
+    g.lineTo(-14, -12);
+    g.lineTo(-12, -4);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(12, -4);
+    g.lineTo(14, -12);
+    g.lineTo(16, -4);
+    g.closePath();
+    g.fillPath();
+    
+    // Grand staff
+    g.fillStyle(0x77aacc, 1);
+    g.fillRect(-3, 10, 6, 28);
+    
+    // Staff frost runes
+    g.fillStyle(0xaaddff, 0.8);
+    g.fillCircle(0, 18, 3);
+    g.fillCircle(0, 28, 3);
+    
+    // Staff massive crystal head
+    g.fillStyle(0x88ddff, 1);
+    g.beginPath();
+    g.moveTo(0, 38);
+    g.lineTo(-10, 48);
+    g.lineTo(0, 64);
+    g.lineTo(10, 48);
+    g.closePath();
+    g.fillPath();
+    // Inner crystal glow
+    g.fillStyle(0xbbffff, 1);
+    g.beginPath();
+    g.moveTo(0, 42);
+    g.lineTo(-5, 48);
+    g.lineTo(0, 58);
+    g.lineTo(5, 48);
+    g.closePath();
+    g.fillPath();
+    // Crystal core
+    g.fillStyle(0xffffff, 1);
+    g.fillCircle(0, 50, 4);
+    
+    // Many floating ice particles
+    g.fillStyle(0xccffff, 0.9);
+    const particles = [
+      [-28, -26, 4], [30, -22, 3.5], [-32, 8, 3], [28, 14, 3],
+      [-20, 26, 2.5], [24, 28, 2.5], [-36, -10, 2], [38, -8, 2],
+      [-8, -32, 3], [10, -30, 2.5]
     ];
-    sparklePositions.forEach(([sx, sy], i) => {
-      const size = 2 + (i % 3);
-      g.fillCircle(sx as number, sy as number, size);
+    particles.forEach(([px, py, size]) => {
+      g.fillCircle(px as number, py as number, size as number);
     });
     
-    // Aurora/magical energy lines
-    g.lineStyle(2, 0x88ddff, 0.3);
+    // Aurora energy lines around
+    g.lineStyle(2, 0x66ddff, 0.25);
     g.beginPath();
-    g.moveTo(-40, -80);
-    g.lineTo(-20, -100);
-    g.lineTo(0, -95);
-    g.lineTo(20, -105);
-    g.lineTo(40, -85);
+    g.arc(0, 0, 55, 0, Math.PI * 0.4);
     g.strokePath();
-    g.lineStyle(1, 0xaaeeff, 0.2);
     g.beginPath();
-    g.moveTo(-45, -70);
-    g.lineTo(-25, -95);
-    g.lineTo(0, -88);
-    g.lineTo(25, -98);
-    g.lineTo(45, -75);
+    g.arc(0, 0, 55, Math.PI, Math.PI * 1.3);
+    g.strokePath();
+    g.lineStyle(1, 0xaaeeff, 0.15);
+    g.beginPath();
+    g.arc(0, 0, 62, Math.PI * 0.5, Math.PI * 0.9);
+    g.strokePath();
+    g.beginPath();
+    g.arc(0, 0, 62, Math.PI * 1.4, Math.PI * 1.8);
     g.strokePath();
   }
 }

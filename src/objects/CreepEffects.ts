@@ -93,6 +93,129 @@ export class CreepEffects {
   }
 
   /**
+   * Show digger prepare effect - digger stops and prepares to burrow
+   */
+  showDiggerPrepare(x: number, y: number): void {
+    // Create ground crack/tremor effect
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const crack = this.scene.add.graphics();
+      crack.setPosition(x, y + 10);
+      crack.lineStyle(2, 0x5c4033, 0.8);
+      crack.beginPath();
+      crack.moveTo(0, 0);
+      const length = 8 + Math.random() * 8;
+      crack.lineTo(Math.cos(angle) * length, Math.sin(angle) * length * 0.6);
+      crack.strokePath();
+      crack.setDepth(24);
+      crack.setScale(0.5);
+      
+      this.scene.tweens.add({
+        targets: crack,
+        scale: 1.2,
+        alpha: 0,
+        duration: 350,
+        ease: 'Quad.easeOut',
+        onComplete: () => crack.destroy()
+      });
+    }
+    
+    // Small dust puff around feet
+    for (let i = 0; i < 4; i++) {
+      const dust = this.scene.add.graphics();
+      dust.fillStyle(0xCCBBAA, 0.6);
+      dust.fillCircle(0, 0, 3 + Math.random() * 3);
+      dust.setPosition(x + (Math.random() - 0.5) * 15, y + 10);
+      dust.setDepth(25);
+      
+      this.scene.tweens.add({
+        targets: dust,
+        y: dust.y - 10,
+        alpha: 0,
+        scale: 1.5,
+        duration: 300,
+        onComplete: () => dust.destroy()
+      });
+    }
+  }
+
+  /**
+   * Show resurface start effect - ground cracks before digger emerges
+   */
+  showResurfaceStart(x: number, y: number): void {
+    // Ground bulge effect (before full surface)
+    const bulge = this.scene.add.graphics();
+    bulge.fillStyle(0x6B4423, 0.7);
+    bulge.fillEllipse(0, 0, 20, 10);
+    bulge.setPosition(x, y + 12);
+    bulge.setDepth(24);
+    bulge.setScale(0.5);
+    
+    this.scene.tweens.add({
+      targets: bulge,
+      scaleX: 1.5,
+      scaleY: 1,
+      alpha: 0,
+      duration: 400,
+      ease: 'Cubic.easeOut',
+      onComplete: () => bulge.destroy()
+    });
+    
+    // Cracks spreading from center
+    for (let i = 0; i < 5; i++) {
+      const angle = (i / 5) * Math.PI * 2 + Math.random() * 0.3;
+      const crack = this.scene.add.graphics();
+      crack.setPosition(x, y + 12);
+      crack.lineStyle(2, 0x3d2817, 1);
+      crack.beginPath();
+      crack.moveTo(0, 0);
+      const length = 12 + Math.random() * 10;
+      crack.lineTo(Math.cos(angle) * length, Math.sin(angle) * length * 0.5);
+      crack.strokePath();
+      crack.setDepth(24);
+      crack.setAlpha(0);
+      
+      this.scene.tweens.add({
+        targets: crack,
+        alpha: 1,
+        duration: 150,
+        delay: i * 50,
+        onComplete: () => {
+          this.scene.tweens.add({
+            targets: crack,
+            alpha: 0,
+            duration: 300,
+            delay: 200,
+            onComplete: () => crack.destroy()
+          });
+        }
+      });
+    }
+    
+    // Small dirt particles rising
+    for (let i = 0; i < 6; i++) {
+      const delay = Math.random() * 200;
+      this.scene.time.delayedCall(delay, () => {
+        const dirt = this.scene.add.graphics();
+        dirt.fillStyle(0x8B4513, 0.7);
+        dirt.fillCircle(0, 0, 2 + Math.random() * 3);
+        dirt.setPosition(x + (Math.random() - 0.5) * 20, y + 12);
+        dirt.setDepth(35);
+        
+        this.scene.tweens.add({
+          targets: dirt,
+          y: dirt.y - 20 - Math.random() * 15,
+          x: dirt.x + (Math.random() - 0.5) * 15,
+          alpha: 0,
+          duration: 400,
+          ease: 'Quad.easeOut',
+          onComplete: () => dirt.destroy()
+        });
+      });
+    }
+  }
+
+  /**
    * Show burrow effect - digging down animation with dirt flying
    */
   showBurrowEffect(x: number, y: number): void {

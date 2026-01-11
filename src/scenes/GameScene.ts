@@ -1,6 +1,5 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, HUDManager, AudioManager } from '../managers';
-import type { ProjectileConfig } from '../objects';
+import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager } from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -12,6 +11,7 @@ export class GameScene extends Phaser.Scene {
   private waveManager!: WaveManager;
   private towerManager!: TowerManager;
   private projectileManager!: ProjectileManager;
+  private combatManager!: CombatManager;
   private environment!: GameEnvironment;
   private hudManager!: HUDManager;
   private audioManager!: AudioManager;
@@ -65,6 +65,10 @@ export class GameScene extends Phaser.Scene {
     // Initialize projectile manager
     this.projectileManager = new ProjectileManager(this, this.creepManager);
     this.setupProjectileCallbacks();
+
+    // Initialize combat manager
+    this.combatManager = new CombatManager(this, this.towerManager, this.creepManager, this.projectileManager);
+    this.setupCombatCallbacks();
 
     // Initialize and draw environment
     this.environment = new GameEnvironment(this, this.pathSystem);
@@ -148,7 +152,7 @@ export class GameScene extends Phaser.Scene {
     // Provide game speed getter for spawn timing
     this.waveManager.getGameSpeed = () => this.hudManager.getGameSpeed();
     
-    this.waveManager.onWaveStart = (waveNumber: number) => {
+    this.waveManager.on('waveStart', (waveNumber: number) => {
       console.log(`Wave ${waveNumber} started!`);
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
@@ -162,15 +166,16 @@ export class GameScene extends Phaser.Scene {
       
       // Emit event to UIScene
       this.registry.events.emit('wave-started', waveNumber);
-    };
+    });
 
-    this.waveManager.onWaveComplete = (waveNumber: number) => {
+    this.waveManager.on('waveComplete', (waveNumber: number) => {
       console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
       this.audioManager.playSFX('wave_complete');
       
-      // Calculate wave bonus: starts at 25, increases by 14 every 5 waves
+      // Calculate wave bonus using centralized config
       // Waves 1-5: 25g, Waves 6-10: 39g, Waves 11-15: 53g, Waves 16-20: 67g, Waves 21-25: 81g
-      const waveBonus = 25 + Math.floor((waveNumber - 1) / 5) * 14;
+      const waveBonus = GAME_CONFIG.WAVE_GOLD_BONUS_BASE + 
+        Math.floor((waveNumber - 1) / GAME_CONFIG.WAVE_GOLD_BONUS_INTERVAL) * GAME_CONFIG.WAVE_GOLD_BONUS_INCREMENT;
       
       // Show wave bonus animation, then proceed to next wave
       this.hudManager.showWaveBonus(waveNumber, waveBonus, () => {
@@ -187,16 +192,16 @@ export class GameScene extends Phaser.Scene {
           });
         }
       });
-    };
+    });
 
-    this.waveManager.onAllWavesComplete = () => {
+    this.waveManager.on('allWavesComplete', () => {
       console.log('All waves complete! Victory!');
       this.gameOver = true;
       this.audioManager.playSFX('victory');
       this.goToResults(true);
-    };
+    });
 
-    this.waveManager.onCreepKilled = (goldReward: number, deathX: number, deathY: number) => {
+    this.waveManager.on('creepKilled', (goldReward: number, deathX: number, deathY: number) => {
       this.gold += goldReward;
       this.hudManager.showFloatingText(`+${goldReward}`, deathX, deathY, 0xffd700);
       this.hudManager.updateGold(this.gold);
@@ -204,9 +209,9 @@ export class GameScene extends Phaser.Scene {
       
       // Emit event to UIScene
       this.registry.events.emit('creep-killed', goldReward);
-    };
+    });
 
-    this.waveManager.onCreepLeaked = () => {
+    this.waveManager.on('creepLeaked', () => {
       this.castleHP--;
       this.hudManager.updateCastleHP(this.castleHP);
       this.audioManager.playSFX('creep_leak');
@@ -222,7 +227,7 @@ export class GameScene extends Phaser.Scene {
         this.audioManager.playSFX('defeat');
         this.goToResults(false);
       }
-    };
+    });
   }
 
   /**
@@ -298,9 +303,13 @@ export class GameScene extends Phaser.Scene {
     if (this.gameOver) return;
     if (this.hudManager.isPausedState()) return;
     
+    // Cap delta time to prevent spiral of death when tab is backgrounded
+    // Max 50ms per frame (min 20fps)
+    const cappedDelta = Math.min(delta, 50);
+
     // Get game speed multiplier from HUD
     const gameSpeed = this.hudManager.getGameSpeed();
-    const scaledDelta = delta * gameSpeed;
+    const scaledDelta = cappedDelta * gameSpeed;
     
     // Update virtual game time (for tower firing)
     this.virtualGameTime += scaledDelta;
@@ -317,80 +326,18 @@ export class GameScene extends Phaser.Scene {
     // Update tower manager (for UI refresh on gold change)
     this.towerManager.update();
     
-    // Update all towers (for animations)
-    this.updateTowers(scaledDelta);
-    
-    // Tower combat - find targets and fire (uses virtual time)
-    this.updateTowerCombat();
+    // Update combat (tower animations, targeting, and firing)
+    this.combatManager.updateTowers(scaledDelta);
+    this.combatManager.updateCombat(this.virtualGameTime);
   }
 
   /**
-   * Update all towers (for animations like rapidfire turret rotation)
+   * Setup combat manager callback for tower fire sounds
    */
-  private updateTowers(delta: number): void {
-    const towers = this.towerManager.getTowers();
-    const creeps = this.creepManager.getActiveCreeps();
-    
-    for (const tower of towers) {
-      // Find potential target for turret tracking (even if can't fire yet)
-      const target = this.findTarget(tower, creeps);
-      
-      if (target) {
-        tower.setCurrentTarget({ x: target.x, y: target.y });
-      } else {
-        tower.setCurrentTarget(null);
-      }
-      
-      // Update tower animations
-      tower.update(delta);
-    }
-  }
-
-  /**
-   * Update tower combat - targeting and firing
-   */
-  private updateTowerCombat(): void {
-    // Use virtual game time so tower firing rate is affected by game speed
-    const currentTime = this.virtualGameTime;
-    const towers = this.towerManager.getTowers();
-    const creeps = this.creepManager.getActiveCreeps();
-    
-    for (const tower of towers) {
-      // Check if tower can fire
-      if (!tower.canFire(currentTime)) continue;
-      
-      // Find target based on tower priority
-      const target = this.findTarget(tower, creeps);
-      
-      if (target) {
-        // Trigger tower's fire animation FIRST (for animated towers like rapidfire)
-        // This also calculates barrel tip position for projectile spawn
-        tower.onFire();
-        
-        // Get projectile spawn position (barrel tip for rapidfire, default offset for others)
-        const spawnOffset = tower.getProjectileSpawnOffset();
-        const spawnX = tower.x + spawnOffset.x;
-        const spawnY = tower.y + spawnOffset.y;
-        
-        // Fire projectile
-        const config: ProjectileConfig = {
-          speed: 400,
-          damage: tower.getDamage(),
-          isMagic: tower.isMagic(),
-          branch: tower.getBranch(),
-          stats: tower.getConfig().stats,
-          level: tower.getLevel()
-        };
-        
-        const projectile = this.projectileManager.fire(spawnX, spawnY, target, config, tower);
-        if (!projectile) continue;
-        
-        tower.recordFire(currentTime);
-        
-        // Play tower-specific shooting sound
-        this.playTowerShootSound(tower.getBranch());
-      }
-    }
+  private setupCombatCallbacks(): void {
+    this.combatManager.onTowerFire = (branch: string) => {
+      this.playTowerShootSound(branch);
+    };
   }
 
   /**
@@ -417,62 +364,6 @@ export class GameScene extends Phaser.Scene {
         this.audioManager.playSFX('shoot_poison');
         break;
     }
-  }
-
-  /**
-   * Find the best target for a tower
-   */
-  private findTarget(tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string; getBranch?: () => string }, creeps: Creep[]): Creep | null {
-    const priority = tower.getTargetPriority();
-    const branch = tower.getBranch?.() || '';
-    
-    // Ground-only towers cannot target flying creeps
-    const isGroundOnly = branch === 'rockcannon' || branch === 'poison';
-    
-    let bestTarget: Creep | null = null;
-    let bestValue = -Infinity;
-    
-    for (const creep of creeps) {
-      if (!creep.getIsActive()) continue;
-      if (!tower.isInRange(creep.x, creep.y)) continue;
-      
-      // Check if creep can be targeted (not burrowed, not in ghost phase)
-      if (!creep.canBeTargeted()) continue;
-      
-      // Ground-only towers cannot target flying creeps
-      if (isGroundOnly && creep.isFlying()) continue;
-      
-      // Check elemental immunity - only matching tower can damage these creeps
-      const creepConfig = creep.getConfig();
-      if (creepConfig.onlyDamagedBy) {
-        const requiredBranch = creepConfig.onlyDamagedBy === 'ice' ? 'icetower' : 'poison';
-        // Non-matching towers should not even target these creeps
-        if (branch !== requiredBranch) continue;
-      }
-      
-      let value: number;
-      
-      switch (priority) {
-        case 'highestHP':
-          value = creep.getCurrentHealth();
-          break;
-        case 'furthestAlongPath':
-          value = creep.getDistanceTraveled();
-          break;
-        case 'closest':
-        default:
-          // For closest, we want minimum distance, so negate
-          value = -Phaser.Math.Distance.Between(tower.x, tower.y, creep.x, creep.y);
-          break;
-      }
-      
-      if (value > bestValue) {
-        bestValue = value;
-        bestTarget = creep;
-      }
-    }
-    
-    return bestTarget;
   }
 
   getPathSystem(): PathSystem {

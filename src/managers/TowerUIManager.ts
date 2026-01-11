@@ -356,23 +356,47 @@ export class TowerUIManager {
         const nextLevel = levelUpConfig.level;
         const levelLabel = nextLevel === 2 ? 'Level 2' : 'Level 3';
         
-        const lvlBtn = this.scene.add.text(-105, yOffset + 15, `⬆ Upgrade to ${levelLabel} - ${cost}g`, {
+        // Draw button background box
+        const lvlBtnBg = this.scene.add.graphics();
+        const lvlBtnX = -105;
+        const lvlBtnY = yOffset + 15;
+        const lvlBtnW = 180;
+        const lvlBtnH = 36;
+        lvlBtnBg.fillStyle(canAfford ? 0x2a4a2a : 0x2a2a2a, 1);
+        lvlBtnBg.fillRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
+        lvlBtnBg.lineStyle(2, canAfford ? 0x00ff00 : 0x444444, 1);
+        lvlBtnBg.strokeRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
+        this.upgradeMenuContainer.add(lvlBtnBg);
+        
+        const lvlBtn = this.scene.add.text(lvlBtnX, lvlBtnY, `⬆ Upgrade to ${levelLabel} - ${cost}g`, {
           fontFamily: 'Arial Black',
           fontSize: '14px',
-          color: canAfford ? '#00ff00' : '#666666',
-          backgroundColor: canAfford ? '#2a4a2a' : '#2a2a2a',
-          padding: { x: 12, y: 10 }
-        }).setOrigin(0.5).setInteractive({ useHandCursor: canAfford });
+          color: canAfford ? '#00ff00' : '#666666'
+        }).setOrigin(0.5);
+        this.upgradeMenuContainer.add(lvlBtn);
         
         if (canAfford) {
-          lvlBtn.on('pointerdown', () => {
+          const lvlHitArea = this.scene.add.rectangle(lvlBtnX, lvlBtnY, lvlBtnW, lvlBtnH, 0xffffff, 0);
+          lvlHitArea.setInteractive({ useHandCursor: true });
+          lvlHitArea.on('pointerdown', () => {
             this.onUpgradeRequested?.(tower, upgradeOptions.levelUp!);
           });
-          lvlBtn.on('pointerover', () => lvlBtn.setStyle({ backgroundColor: '#3a6a3a' }));
-          lvlBtn.on('pointerout', () => lvlBtn.setStyle({ backgroundColor: '#2a4a2a' }));
+          lvlHitArea.on('pointerover', () => {
+            lvlBtnBg.clear();
+            lvlBtnBg.fillStyle(0x3a6a3a, 1);
+            lvlBtnBg.fillRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
+            lvlBtnBg.lineStyle(2, 0x00ff00, 1);
+            lvlBtnBg.strokeRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
+          });
+          lvlHitArea.on('pointerout', () => {
+            lvlBtnBg.clear();
+            lvlBtnBg.fillStyle(0x2a4a2a, 1);
+            lvlBtnBg.fillRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
+            lvlBtnBg.lineStyle(2, 0x00ff00, 1);
+            lvlBtnBg.strokeRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
+          });
+          this.upgradeMenuContainer.add(lvlHitArea);
         }
-        
-        this.upgradeMenuContainer.add(lvlBtn);
       }
     } else if (!hasBranches) {
       const maxText = this.scene.add.text(-105, yOffset + 15, '★ MAX LEVEL ★', {
@@ -386,17 +410,44 @@ export class TowerUIManager {
     }
     
     const sellValue = tower.getSellValue();
-    const sellBtn = this.scene.add.text(105, yOffset + 15, `Sell: ${sellValue}g`, {
+    const sellBtnX = 105;
+    const sellBtnY = yOffset + 15;
+    const sellBtnW = 100;
+    const sellBtnH = 36;
+    
+    // Draw sell button background box
+    const sellBtnBg = this.scene.add.graphics();
+    sellBtnBg.fillStyle(0x4a2a2a, 1);
+    sellBtnBg.fillRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+    sellBtnBg.lineStyle(2, 0xff6666, 1);
+    sellBtnBg.strokeRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+    this.upgradeMenuContainer.add(sellBtnBg);
+    
+    const sellBtn = this.scene.add.text(sellBtnX, sellBtnY, `Sell: ${sellValue}g`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
-      color: '#ff6666',
-      backgroundColor: '#4a2a2a',
-      padding: { x: 12, y: 10 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    sellBtn.on('pointerdown', () => this.onSellRequested?.(tower));
-    sellBtn.on('pointerover', () => sellBtn.setStyle({ backgroundColor: '#6a3a3a' }));
-    sellBtn.on('pointerout', () => sellBtn.setStyle({ backgroundColor: '#4a2a2a' }));
+      color: '#ff6666'
+    }).setOrigin(0.5);
     this.upgradeMenuContainer.add(sellBtn);
+    
+    const sellHitArea = this.scene.add.rectangle(sellBtnX, sellBtnY, sellBtnW, sellBtnH, 0xffffff, 0);
+    sellHitArea.setInteractive({ useHandCursor: true });
+    sellHitArea.on('pointerdown', () => this.onSellRequested?.(tower));
+    sellHitArea.on('pointerover', () => {
+      sellBtnBg.clear();
+      sellBtnBg.fillStyle(0x6a3a3a, 1);
+      sellBtnBg.fillRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+      sellBtnBg.lineStyle(2, 0xff6666, 1);
+      sellBtnBg.strokeRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+    });
+    sellHitArea.on('pointerout', () => {
+      sellBtnBg.clear();
+      sellBtnBg.fillStyle(0x4a2a2a, 1);
+      sellBtnBg.fillRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+      sellBtnBg.lineStyle(2, 0xff6666, 1);
+      sellBtnBg.strokeRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+    });
+    this.upgradeMenuContainer.add(sellHitArea);
     
     const closeBtn = this.scene.add.text(menuWidth / 2 - 20, -menuHeight / 2 + 18, '✕', {
       fontFamily: 'Arial',

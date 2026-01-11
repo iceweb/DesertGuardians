@@ -14,6 +14,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
   private creepManager: CreepManager;
   private pool: Projectile[] = [];
   private activeProjectiles: Projectile[] = [];
+  private effectPool: Phaser.GameObjects.Graphics[] = []; // Pool for visual effects
   private readonly POOL_SIZE = 100;
 
   constructor(scene: Phaser.Scene, creepManager: CreepManager) {
@@ -25,6 +26,38 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
     this.initializePool();
     
     console.log('ProjectileManager: Initialized');
+  }
+
+  /**
+   * Get a graphics object from the effect pool or create a new one
+   */
+  private getEffectGraphic(x: number, y: number, depth: number): Phaser.GameObjects.Graphics {
+    let g: Phaser.GameObjects.Graphics;
+    
+    if (this.effectPool.length > 0) {
+      g = this.effectPool.pop()!;
+      g.setVisible(true);
+      g.setAlpha(1);
+      g.setScale(1);
+      g.rotation = 0;
+      g.clear();
+      // Ensure no leftover tweens are manipulating this object
+      this.scene.tweens.killTweensOf(g);
+    } else {
+      g = this.scene.add.graphics();
+    }
+    
+    g.setPosition(x, y);
+    g.setDepth(depth);
+    return g;
+  }
+
+  /**
+   * Return a graphics object to the effect pool
+   */
+  private releaseEffectGraphic(g: Phaser.GameObjects.Graphics): void {
+    g.setVisible(false);
+    this.effectPool.push(g);
   }
 
   /**
@@ -109,12 +142,10 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
    * Show visual splash effect - explosion animation where cannonball lands
    */
   private showSplashEffect(x: number, y: number, radius: number): void {
-    // Create main explosion flash - draw at origin and position the graphics
-    const explosionFlash = this.scene.add.graphics();
-    explosionFlash.setPosition(x, y);
+    // Create main explosion flash
+    const explosionFlash = this.getEffectGraphic(x, y, 26);
     explosionFlash.fillStyle(0xffaa00, 0.9);
     explosionFlash.fillCircle(0, 0, radius * 0.3);
-    explosionFlash.setDepth(26);
     
     this.scene.tweens.add({
       targets: explosionFlash,
@@ -122,15 +153,13 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       scaleX: 3,
       scaleY: 3,
       duration: 150,
-      onComplete: () => explosionFlash.destroy()
+      onComplete: () => this.releaseEffectGraphic(explosionFlash)
     });
     
-    // Create explosion ring - draw at origin and position the graphics
-    const explosionRing = this.scene.add.graphics();
-    explosionRing.setPosition(x, y);
+    // Create explosion ring
+    const explosionRing = this.getEffectGraphic(x, y, 25);
     explosionRing.lineStyle(4, 0xff6600, 1);
     explosionRing.strokeCircle(0, 0, radius * 0.2);
-    explosionRing.setDepth(25);
     
     this.scene.tweens.add({
       targets: explosionRing,
@@ -138,7 +167,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       scaleX: 4,
       scaleY: 4,
       duration: 300,
-      onComplete: () => explosionRing.destroy()
+      onComplete: () => this.releaseEffectGraphic(explosionRing)
     });
     
     // Create debris particles flying outward
@@ -146,8 +175,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
     for (let i = 0; i < numDebris; i++) {
       const angle = (i / numDebris) * Math.PI * 2 + Math.random() * 0.5;
       const speed = 80 + Math.random() * 60;
-      const debris = this.scene.add.graphics();
-      debris.setPosition(x, y);
+      const debris = this.getEffectGraphic(x, y, 24);
       
       // Random debris color (brown/grey rocks)
       const colors = [0x8b4513, 0x696969, 0xa0522d, 0x808080];
@@ -156,7 +184,6 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       
       debris.fillStyle(color, 1);
       debris.fillCircle(0, 0, size);
-      debris.setDepth(24);
       
       const targetX = x + Math.cos(angle) * speed;
       const targetY = y + Math.sin(angle) * speed;
@@ -169,16 +196,14 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
         alpha: 0,
         duration: 400 + Math.random() * 200,
         ease: 'Power2',
-        onComplete: () => debris.destroy()
+        onComplete: () => this.releaseEffectGraphic(debris)
       });
     }
     
-    // Create dust cloud - draw at origin and position the graphics
-    const dustCloud = this.scene.add.graphics();
-    dustCloud.setPosition(x, y);
+    // Create dust cloud
+    const dustCloud = this.getEffectGraphic(x, y, 23);
     dustCloud.fillStyle(0xdeb887, 0.5);
     dustCloud.fillCircle(0, 0, radius * 0.5);
-    dustCloud.setDepth(23);
     
     this.scene.tweens.add({
       targets: dustCloud,
@@ -187,7 +212,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       scaleY: 1.5,
       y: y - 20,
       duration: 500,
-      onComplete: () => dustCloud.destroy()
+      onComplete: () => this.releaseEffectGraphic(dustCloud)
     });
     
     // Create smaller secondary explosions
@@ -196,11 +221,9 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       const offsetY = (Math.random() - 0.5) * radius * 0.6;
       
       this.scene.time.delayedCall(50 + i * 40, () => {
-        const spark = this.scene.add.graphics();
-        spark.setPosition(x + offsetX, y + offsetY);
+        const spark = this.getEffectGraphic(x + offsetX, y + offsetY, 25);
         spark.fillStyle(0xffcc00, 0.8);
         spark.fillCircle(0, 0, 8);
-        spark.setDepth(25);
         
         this.scene.tweens.add({
           targets: spark,
@@ -208,7 +231,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
           scaleX: 2,
           scaleY: 2,
           duration: 200,
-          onComplete: () => spark.destroy()
+          onComplete: () => this.releaseEffectGraphic(spark)
         });
       });
     }

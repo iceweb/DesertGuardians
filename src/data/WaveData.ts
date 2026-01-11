@@ -62,11 +62,11 @@ export const WAVE_CONFIGS: WaveDef[] = [
   // Wave 6: First tanks (furball: 13*800=10400ms + 500ms gap)
   { waveNumber: 6, creeps: [
     { type: 'furball', count: 14, intervalMs: 800 },
-    { type: 'tank', count: 4, intervalMs: 2200, delayStart: 11000 }
+    { type: 'tank', count: 3, intervalMs: 2500, delayStart: 11000 }
   ]},
   
   // Wave 7: BOSS WAVE (furball: 9*800=7200 + 500 = 7700, runner: 7*500=3500 + 500 = 11700)
-  { waveNumber: 7, waveType: 'boss', announcement: '💀 BOSS INCOMING!', creeps: [
+  { waveNumber: 7, waveType: 'boss', announcement: '🦎 GIANT GECKO APPROACHES!', creeps: [
     { type: 'furball', count: 10, intervalMs: 800 },
     { type: 'runner', count: 8, intervalMs: 500, delayStart: 7700 },
     { type: 'boss_1', count: 1, intervalMs: 1000, delayStart: 11700 }
@@ -84,18 +84,18 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'furball', count: 8, intervalMs: 900, delayStart: 9500 }
   ]},
   
-  // Wave 10: Tank focus (tank: 7*1600=11200 + 500 = 11700)
+  // Wave 10: Tank focus (tank: 5*1600=8000 + 500 = 8500)
   { waveNumber: 10, creeps: [
-    { type: 'tank', count: 8, intervalMs: 1600 },
-    { type: 'runner', count: 12, intervalMs: 400, delayStart: 11700 }
+    { type: 'tank', count: 6, intervalMs: 1600 },
+    { type: 'runner', count: 12, intervalMs: 400, delayStart: 8500 }
   ]},
   
   // === MID GAME: Waves 11-17 ===
   
-  // Wave 11: GHOST WAVE (ghost: 7*1400=9800 + 500 = 10300)
+  // Wave 11: GHOST WAVE (ghost: 9*1400=12600 + 500 = 13100)
   { waveNumber: 11, waveType: 'ghost', announcement: '👻 GHOST WAVE!\nThey phase when low HP!', creeps: [
-    { type: 'ghost', count: 8, intervalMs: 1400 },
-    { type: 'furball', count: 10, intervalMs: 700, delayStart: 10300 }
+    { type: 'ghost', count: 10, intervalMs: 1200 },
+    { type: 'furball', count: 12, intervalMs: 700, delayStart: 13100 }
   ]},
   
   // Wave 12: Mixed standard (furball: 15*650=9750+500=10250, tank: 5*1600=8000+500=18750)
@@ -105,14 +105,14 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'jumper', count: 6, intervalMs: 1600, delayStart: 18750 }
   ]},
   
-  // Wave 13: DIGGER WAVE (digger: 9*1200=10800 + 500 = 11300)
+  // Wave 13: DIGGER WAVE (digger: 11*1100=12100 + 500 = 12600)
   { waveNumber: 13, waveType: 'digger', announcement: '🕳️ DIGGER WAVE!\nThey burrow underground!', creeps: [
-    { type: 'digger', count: 10, intervalMs: 1200 },
-    { type: 'runner', count: 10, intervalMs: 500, delayStart: 11300 }
+    { type: 'digger', count: 12, intervalMs: 1100 },
+    { type: 'runner', count: 12, intervalMs: 500, delayStart: 12600 }
   ]},
   
   // Wave 14: BOSS WAVE (runner: 11*500=5500+500=6000, tank: 4*1800=7200+500=13700)
-  { waveNumber: 14, waveType: 'boss', announcement: '💀 STRONGER BOSS APPROACHES!', creeps: [
+  { waveNumber: 14, waveType: 'boss', announcement: '🦎 KOMODO WARLORD APPROACHES!', creeps: [
     { type: 'runner', count: 12, intervalMs: 500 },
     { type: 'tank', count: 5, intervalMs: 1800, delayStart: 6000 },
     { type: 'boss_2', count: 1, intervalMs: 1000, delayStart: 13700 }
@@ -158,12 +158,14 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'digger', count: 10, intervalMs: 1200, delayStart: 11300 }
   ]},
   
-  // Wave 21: BOSS WAVE (tank: 7*1400=9800+500=10300, shielded: 4*1800=7200+500=18000, jumper: 7*1400=9800+500=28300)
-  { waveNumber: 21, waveType: 'boss', announcement: '💀 MASSIVE BOSS APPROACHES!', creeps: [
+  // Wave 21: BOSS WAVE with guards (tank: 7*1400=9800+500=10300, shielded: 4*1800=7200+500=18000, jumper: 7*1400=9800+500=28300)
+  { waveNumber: 21, waveType: 'boss', announcement: '� DRAKE CHAMPION APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
     { type: 'tank', count: 12, intervalMs: 1200 },
     { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
     { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
-    { type: 'boss_3', count: 1, intervalMs: 1000, delayStart: 28300 }
+    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 28000 },
+    { type: 'boss_3', count: 1, intervalMs: 1000, delayStart: 28500 },
+    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 29000 }
   ]},
   
   // Wave 22: BROODMOTHER (tank: 5*1400=7000 + 500 = 7500)
@@ -205,12 +207,14 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'broodmother', count: 6, intervalMs: 2500, delayStart: 7500 }
   ]},
   
-  // Wave 28: BOSS WAVE (shielded: 7*1400=9800+500=10300, jumper: 9*1200=10800+500=21600, tank: 7*1600=11200+500=33300)
-  { waveNumber: 28, waveType: 'boss', announcement: '💀 GIANT BOSS APPROACHES!', creeps: [
+  // Wave 28: BOSS WAVE with guards (shielded: 7*1400=9800+500=10300, jumper: 9*1200=10800+500=21600, tank: 7*1600=11200+500=33300)
+  { waveNumber: 28, waveType: 'boss', announcement: '� YOUNG DRAGON APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
     { type: 'shielded', count: 12, intervalMs: 1100 },
     { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
     { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },
-    { type: 'boss_4', count: 1, intervalMs: 1000, delayStart: 33300 }
+    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 33000 },
+    { type: 'boss_4', count: 1, intervalMs: 1000, delayStart: 33500 },
+    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 34000 }
   ]},
   
   // Wave 29: ELITE GHOSTS (ghost: 13*1000=13000 + 500 = 13500)
@@ -225,47 +229,49 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'tank', count: 12, intervalMs: 1200, delayStart: 14500 }
   ]},
   
-  // === ENDGAME: Waves 31-35 ===
+  // === ENDGAME: Waves 31-35 (all have parallelSpawn for harder gameplay) ===
   
-  // Wave 31: NIGHTMARE (ghost: 9*1100=9900+500=10400, brood: 3*3000=9000+500=19900)
-  { waveNumber: 31, waveType: 'broodmother', announcement: '🕷️ NIGHTMARE WAVE!\nGhosts + Broodmothers!', creeps: [
-    { type: 'ghost', count: 16, intervalMs: 900 },
-    { type: 'broodmother', count: 5, intervalMs: 2500, delayStart: 10400 },
+  // Wave 31: NIGHTMARE - 2 types spawn together (ghost + broodmother parallel)
+  { waveNumber: 31, waveType: 'broodmother', announcement: '🕷️ NIGHTMARE WAVE!\nGhosts + Broodmothers!', parallelSpawn: true, creeps: [
+    { type: 'ghost', count: 18, intervalMs: 850 },
+    { type: 'broodmother', count: 5, intervalMs: 2500 },
     { type: 'jumper', count: 16, intervalMs: 900, delayStart: 19900 }
   ]},
   
-  // Wave 32: Everything standard (furball: 19*500=9500+500=10000, runner: 24*300=7200+500=17700, tank: 14*1100=15400+500=33600, shielded: 11*1200=13200+500=47300)
-  { waveNumber: 32, creeps: [
+  // Wave 32: Everything standard - 2 types parallel (furball + runner)
+  { waveNumber: 32, parallelSpawn: true, creeps: [
     { type: 'furball', count: 30, intervalMs: 400 },
-    { type: 'runner', count: 35, intervalMs: 250, delayStart: 10000 },
+    { type: 'runner', count: 35, intervalMs: 250 },
     { type: 'tank', count: 20, intervalMs: 900, delayStart: 17700 },
     { type: 'shielded', count: 16, intervalMs: 1000, delayStart: 33600 },
     { type: 'jumper', count: 18, intervalMs: 900, delayStart: 47300 }
   ]},
   
-  // Wave 33: DIGGER MASS (digger: 19*850=16150 + 500 = 16650)
-  { waveNumber: 33, waveType: 'digger', announcement: '🕳️ DIGGER MASS ASSAULT!\n25 underground burrowers!', creeps: [
+  // Wave 33: DIGGER MASS - 2 types parallel (digger + tank)
+  { waveNumber: 33, waveType: 'digger', announcement: '🕳️ DIGGER MASS ASSAULT!\n25 underground burrowers!', parallelSpawn: true, creeps: [
     { type: 'digger', count: 25, intervalMs: 700 },
-    { type: 'tank', count: 14, intervalMs: 1000, delayStart: 16650 }
+    { type: 'tank', count: 16, intervalMs: 950 }
   ]},
   
-  // Wave 34: CHAOS (flying: 11*900=9900+500=10400, digger: 9*1000=9000+500=19900, ghost: 9*1000=9000+500=29400, brood: 3*2800=8400+500=38300)
-  { waveNumber: 34, waveType: 'chaos', announcement: '⚠️ CHAOS WAVE!\nAll special creep types!', creeps: [
+  // Wave 34: CHAOS - 2 types parallel (flying + digger)
+  { waveNumber: 34, waveType: 'chaos', announcement: '⚠️ CHAOS WAVE!\nAll special creep types!', parallelSpawn: true, creeps: [
     { type: 'flying', count: 18, intervalMs: 700 },
-    { type: 'digger', count: 14, intervalMs: 800, delayStart: 10400 },
+    { type: 'digger', count: 14, intervalMs: 800 },
     { type: 'ghost', count: 14, intervalMs: 800, delayStart: 19900 },
     { type: 'broodmother', count: 5, intervalMs: 2400, delayStart: 29400 },
     { type: 'tank', count: 16, intervalMs: 900, delayStart: 38300 }
   ]},
   
-  // Wave 35: FINAL BOSS - Multiple groups spawn in parallel for maximum chaos
-  { waveNumber: 35, waveType: 'boss', announcement: '💀 FINAL BOSS!\nSURVIVE THE ONSLAUGHT!', parallelSpawn: true, creeps: [
+  // Wave 35: FINAL BOSS - Multiple groups spawn in parallel with guards
+  { waveNumber: 35, waveType: 'boss', announcement: '🐉 ELDER DRAGON LORD!\nTHE FINAL CHALLENGE!', parallelSpawn: true, creeps: [
     { type: 'runner', count: 30, intervalMs: 300 },
     { type: 'flying', count: 18, intervalMs: 650 },
     { type: 'ghost', count: 14, intervalMs: 850 },
     { type: 'shielded', count: 16, intervalMs: 900 },
     { type: 'tank', count: 18, intervalMs: 850 },
     { type: 'broodmother', count: 5, intervalMs: 2400 },
-    { type: 'boss_5', count: 1, intervalMs: 1000 }
+    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 25000 },
+    { type: 'boss_5', count: 1, intervalMs: 1000, delayStart: 25500 },
+    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 26000 }
   ]}
 ];

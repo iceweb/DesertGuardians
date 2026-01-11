@@ -6,6 +6,18 @@ import { WAVE_CONFIGS } from '../data/WaveData';
 import type { WaveCreepGroup, WaveType } from '../data/WaveData';
 
 /**
+ * Event types emitted by WaveManager
+ */
+export type WaveManagerEvents = {
+  waveStart: [waveNumber: number];
+  waveComplete: [waveNumber: number];
+  waveProgress: [spawned: number, total: number];
+  allWavesComplete: [];
+  creepKilled: [goldReward: number, deathX: number, deathY: number];
+  creepLeaked: [];
+};
+
+/**
  * Tracks state for a single creep group being spawned
  */
 interface GroupSpawnState {
@@ -21,8 +33,10 @@ interface GroupSpawnState {
  * Groups spawn sequentially - next group starts when:
  * 1. All creeps of current group are dead/leaked, OR
  * 2. Last spawned creep of current group has traveled 50% of the path
+ * 
+ * Emits events: waveStart, waveComplete, waveProgress, allWavesComplete, creepKilled, creepLeaked
  */
-export class WaveManager {
+export class WaveManager extends Phaser.Events.EventEmitter {
   private scene: Phaser.Scene;
   private creepManager: CreepManager;
   private pathSystem!: PathSystem;
@@ -52,18 +66,11 @@ export class WaveManager {
   private totalCreepsKilled: number = 0;
   private totalGoldEarned: number = 0;
   
-  // Event callbacks
-  public onWaveStart?: (waveNumber: number) => void;
-  public onWaveComplete?: (waveNumber: number) => void;
-  public onAllWavesComplete?: () => void;
-  public onCreepKilled?: (goldReward: number, deathX: number, deathY: number) => void;
-  public onCreepLeaked?: () => void;
-  public onWaveProgress?: (spawned: number, total: number) => void;
-  
   // Game speed getter (provided by GameScene)
   public getGameSpeed?: () => number;
 
   constructor(scene: Phaser.Scene, creepManager: CreepManager) {
+    super(); // Initialize EventEmitter
     this.scene = scene;
     this.creepManager = creepManager;
     
@@ -93,7 +100,7 @@ export class WaveManager {
     
     if (this.currentWave >= WAVE_CONFIGS.length) {
       console.log('WaveManager: All waves completed!');
-      this.onAllWavesComplete?.();
+      this.emit('allWavesComplete');
       return false;
     }
     
@@ -111,7 +118,7 @@ export class WaveManager {
     
     console.log(`WaveManager: Starting Wave ${this.currentWave} with ${this.creepsToSpawn} creeps in ${waveDef.creeps.length} groups`);
     
-    this.onWaveStart?.(this.currentWave);
+    this.emit('waveStart', this.currentWave);
     
     // Show special wave announcement if applicable
     if (waveDef.waveType && waveDef.announcement) {
@@ -147,13 +154,37 @@ export class WaveManager {
   }
 
   /**
-   * Start parallel spawning - all groups spawn at the same time
+   * Start parallel spawning - groups without delayStart spawn immediately,
+   * groups with delayStart spawn after their delay (but still in parallel with each other)
    */
   private startParallelSpawning(): void {
-    console.log(`WaveManager: Starting ${this.parallelGroups.length} groups in parallel`);
+    // Separate groups into immediate and delayed
+    const immediateGroups = this.parallelGroups.filter(g => !g.group.delayStart || g.group.delayStart === 0);
+    const delayedGroups = this.parallelGroups.filter(g => g.group.delayStart && g.group.delayStart > 0);
     
-    for (const group of this.parallelGroups) {
+    console.log(`WaveManager: Starting ${immediateGroups.length} groups immediately, ${delayedGroups.length} groups delayed`);
+    
+    // Ensure at least 2 groups spawn immediately for endgame waves
+    // If only 1 immediate group, also start the first delayed group immediately
+    if (immediateGroups.length < 2 && delayedGroups.length > 0) {
+      const firstDelayed = delayedGroups.shift()!;
+      immediateGroups.push(firstDelayed);
+      console.log(`WaveManager: Moved ${firstDelayed.creepType} to immediate spawn to ensure 2+ parallel groups`);
+    }
+    
+    // Start immediate groups now
+    for (const group of immediateGroups) {
       this.startParallelGroup(group);
+    }
+    
+    // Schedule delayed groups
+    for (const group of delayedGroups) {
+      const gameSpeed = this.getGameSpeed?.() || 1;
+      const scaledDelay = group.group.delayStart! / gameSpeed;
+      this.scene.time.delayedCall(scaledDelay, () => {
+        console.log(`WaveManager: Starting delayed group ${group.creepType} after ${group.group.delayStart}ms`);
+        this.startParallelGroup(group);
+      });
     }
   }
 
@@ -176,7 +207,7 @@ export class WaveManager {
         groupState.lastSpawnedCreep = creep;
       }
       
-      this.onWaveProgress?.(this.creepsSpawned, this.creepsToSpawn);
+      this.emit('waveProgress', this.creepsSpawned, this.creepsToSpawn);
       
       // Schedule next spawn for this group
       if (groupState.spawned < groupState.group.count) {
@@ -237,7 +268,7 @@ export class WaveManager {
     
     console.log(`WaveManager: Spawned ${group.creepType} #${group.spawned}/${group.group.count}, total: ${this.creepsSpawned}/${this.creepsToSpawn}`);
     
-    this.onWaveProgress?.(this.creepsSpawned, this.creepsToSpawn);
+    this.emit('waveProgress', this.creepsSpawned, this.creepsToSpawn);
     
     // Schedule next spawn if more creeps in this group
     if (group.spawned < group.group.count) {
@@ -257,6 +288,17 @@ export class WaveManager {
    */
   update(): void {
     if (!this.waveInProgress) return;
+    if (this.isParallelMode) return; // Parallel mode doesn't need update checks
+    
+    this.checkNextGroupStart();
+  }
+
+  /**
+   * Check and start next group immediately if conditions are met
+   */
+  private checkNextGroupStart(): void {
+    if (!this.waveInProgress) return;
+    if (this.isParallelMode) return;
     if (!this.currentGroup) return;
     if (!this.currentGroup.finished) return;  // Still spawning current group
     if (this.groupQueue.length === 0) return;  // No more groups to spawn
@@ -322,7 +364,11 @@ export class WaveManager {
     this.totalCreepsKilled++;
     this.totalGoldEarned += goldReward;
     
-    this.onCreepKilled?.(goldReward, deathX, deathY);
+    this.emit('creepKilled', goldReward, deathX, deathY);
+    
+    // Immediately check if next group should start (no frame delay)
+    this.checkNextGroupStart();
+    
     this.checkWaveComplete();
   }
 
@@ -333,7 +379,11 @@ export class WaveManager {
     console.log(`WaveManager.handleCreepReachedEnd called, creepsLeaked before: ${this.creepsLeaked}`);
     this.creepsLeaked++;
     
-    this.onCreepLeaked?.();
+    this.emit('creepLeaked');
+    
+    // Immediately check if next group should start (no frame delay)
+    this.checkNextGroupStart();
+    
     this.checkWaveComplete();
   }
 
@@ -365,11 +415,11 @@ export class WaveManager {
       
       console.log(`WaveManager: Wave ${this.currentWave} complete! Killed: ${this.creepsKilled}, Leaked: ${this.creepsLeaked}`);
       
-      this.onWaveComplete?.(this.currentWave);
+      this.emit('waveComplete', this.currentWave);
       
       // Check if all waves done
       if (this.currentWave >= WAVE_CONFIGS.length) {
-        this.onAllWavesComplete?.();
+        this.emit('allWavesComplete');
       }
     } else {
       console.log(`WaveManager.checkWaveComplete: Wave not complete yet - need ${this.creepsToSpawn - totalHandled} more creeps handled or ${activeCount} active creeps to die`);

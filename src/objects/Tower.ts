@@ -1,11 +1,37 @@
 import Phaser from 'phaser';
 import { TowerGraphics, RapidFireAnimator, ArcherAnimator, CannonAnimator, SniperAnimator, IceAnimator, PoisonAnimator } from '../graphics';
 import type { TowerConfig, TowerBranch } from '../data';
-import { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
+import { TOWER_CONFIGS, BRANCH_OPTIONS, GAME_CONFIG } from '../data';
 
 // Re-export types for backwards compatibility
 export type { TowerStats, TowerConfig, TowerBranch } from '../data';
 export { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
+
+/**
+ * Common interface for all tower animators
+ */
+interface TowerAnimator {
+  update(delta: number): void;
+  setTarget(targetX: number, targetY: number, towerX: number, towerY: number): void;
+  clearTarget(): void;
+  onFire(): { x: number; y: number };
+  onKill(): void;
+  setLevel(level: number): void;
+  getProjectileSpawnOffset(): { x: number; y: number };
+  destroy(): void;
+}
+
+/**
+ * Animator factory map - maps branch names to animator constructors
+ */
+const ANIMATOR_CONSTRUCTORS: Record<string, new (scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) => TowerAnimator> = {
+  'rapidfire': RapidFireAnimator,
+  'archer': ArcherAnimator,
+  'rockcannon': CannonAnimator,
+  'sniper': SniperAnimator,
+  'icetower': IceAnimator,
+  'poison': PoisonAnimator,
+};
 
 /**
  * Tower game object that can target and shoot creeps.
@@ -21,13 +47,9 @@ export class Tower extends Phaser.GameObjects.Container {
   // Combat state
   private lastFireTime: number = 0;
   
-  // Animated tower components
-  private rapidFireAnimator: RapidFireAnimator | null = null;
-  private archerAnimator: ArcherAnimator | null = null;
-  private cannonAnimator: CannonAnimator | null = null;
-  private sniperAnimator: SniperAnimator | null = null;
-  private iceAnimator: IceAnimator | null = null;
-  private poisonAnimator: PoisonAnimator | null = null;
+  // Single animator reference (replaces 6 separate nullable properties)
+  private animator: TowerAnimator | null = null;
+  private animatorBranch: TowerBranch | null = null;
   
   // Current target tracking (for animated turrets)
   private currentTarget: { x: number; y: number } | null = null;
@@ -71,52 +93,11 @@ export class Tower extends Phaser.GameObjects.Container {
    * Update tower each frame (for animations)
    */
   update(delta: number): void {
-    // Update rapidfire animator if present
-    if (this.rapidFireAnimator) {
+    if (this.animator) {
       if (this.currentTarget) {
-        this.rapidFireAnimator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
+        this.animator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
       }
-      this.rapidFireAnimator.update(delta);
-    }
-    
-    // Update archer animator if present
-    if (this.archerAnimator) {
-      if (this.currentTarget) {
-        this.archerAnimator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
-      }
-      this.archerAnimator.update(delta);
-    }
-    
-    // Update cannon animator if present
-    if (this.cannonAnimator) {
-      if (this.currentTarget) {
-        this.cannonAnimator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
-      }
-      this.cannonAnimator.update(delta);
-    }
-    
-    // Update sniper animator if present
-    if (this.sniperAnimator) {
-      if (this.currentTarget) {
-        this.sniperAnimator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
-      }
-      this.sniperAnimator.update(delta);
-    }
-    
-    // Update ice animator if present
-    if (this.iceAnimator) {
-      if (this.currentTarget) {
-        this.iceAnimator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
-      }
-      this.iceAnimator.update(delta);
-    }
-    
-    // Update poison animator if present
-    if (this.poisonAnimator) {
-      if (this.currentTarget) {
-        this.poisonAnimator.setTarget(this.currentTarget.x, this.currentTarget.y, this.x, this.y);
-      }
-      this.poisonAnimator.update(delta);
+      this.animator.update(delta);
     }
   }
 
@@ -127,24 +108,7 @@ export class Tower extends Phaser.GameObjects.Container {
     this.currentTarget = target;
     
     if (!target) {
-      if (this.rapidFireAnimator) {
-        this.rapidFireAnimator.clearTarget();
-      }
-      if (this.archerAnimator) {
-        this.archerAnimator.clearTarget();
-      }
-      if (this.cannonAnimator) {
-        this.cannonAnimator.clearTarget();
-      }
-      if (this.sniperAnimator) {
-        this.sniperAnimator.clearTarget();
-      }
-      if (this.iceAnimator) {
-        this.iceAnimator.clearTarget();
-      }
-      if (this.poisonAnimator) {
-        this.poisonAnimator.clearTarget();
-      }
+      this.animator?.clearTarget();
     }
   }
 
@@ -159,25 +123,7 @@ export class Tower extends Phaser.GameObjects.Container {
    * Called when tower fires - triggers animations and returns projectile spawn offset
    */
   onFire(): { x: number; y: number } | null {
-    if (this.rapidFireAnimator) {
-      return this.rapidFireAnimator.onFire();
-    }
-    if (this.archerAnimator) {
-      return this.archerAnimator.onFire();
-    }
-    if (this.cannonAnimator) {
-      return this.cannonAnimator.onFire();
-    }
-    if (this.sniperAnimator) {
-      return this.sniperAnimator.onFire();
-    }
-    if (this.iceAnimator) {
-      return this.iceAnimator.onFire();
-    }
-    if (this.poisonAnimator) {
-      return this.poisonAnimator.onFire();
-    }
-    return null;
+    return this.animator?.onFire() ?? null;
   }
 
   /**
@@ -186,124 +132,41 @@ export class Tower extends Phaser.GameObjects.Container {
    * For other towers, returns a default offset
    */
   getProjectileSpawnOffset(): { x: number; y: number } {
-    if (this.rapidFireAnimator) {
-      return this.rapidFireAnimator.getBarrelTipOffset();
-    }
-    if (this.archerAnimator) {
-      return this.archerAnimator.getArrowSpawnOffset();
-    }
-    if (this.cannonAnimator) {
-      return this.cannonAnimator.getProjectileSpawnOffset();
-    }
-    if (this.sniperAnimator) {
-      return this.sniperAnimator.getProjectileSpawnOffset();
-    }
-    if (this.iceAnimator) {
-      return this.iceAnimator.getProjectileSpawnOffset();
-    }
-    if (this.poisonAnimator) {
-      return this.poisonAnimator.getProjectileSpawnOffset();
-    }
-    // Default offset for other tower types (above tower)
-    return { x: 0, y: -40 };
+    return this.animator?.getProjectileSpawnOffset() ?? GAME_CONFIG.DEFAULT_PROJECTILE_OFFSET;
   }
 
   /**
    * Called when this tower kills a creep - triggers cheering animation
    */
   onKill(): void {
-    if (this.rapidFireAnimator) {
-      this.rapidFireAnimator.onKill();
-    }
-    if (this.archerAnimator) {
-      this.archerAnimator.onKill();
-    }
-    if (this.cannonAnimator) {
-      this.cannonAnimator.onKill();
-    }
-    if (this.sniperAnimator) {
-      this.sniperAnimator.onKill();
-    }
-    if (this.iceAnimator) {
-      this.iceAnimator.onKill();
-    }
-    if (this.poisonAnimator) {
-      this.poisonAnimator.onKill();
-    }
+    this.animator?.onKill();
   }
 
   /**
    * Draw tower based on its branch type
    */
   private drawTower(): void {
-    // Clean up existing animators if switching branch
-    if (this.rapidFireAnimator && this.currentBranch !== 'rapidfire') {
-      this.rapidFireAnimator.destroy();
-      this.rapidFireAnimator = null;
-    }
-    if (this.archerAnimator && this.currentBranch !== 'archer') {
-      this.archerAnimator.destroy();
-      this.archerAnimator = null;
-    }
-    if (this.cannonAnimator && this.currentBranch !== 'rockcannon') {
-      this.cannonAnimator.destroy();
-      this.cannonAnimator = null;
-    }
-    if (this.sniperAnimator && this.currentBranch !== 'sniper') {
-      this.sniperAnimator.destroy();
-      this.sniperAnimator = null;
-    }
-    if (this.iceAnimator && this.currentBranch !== 'icetower') {
-      this.iceAnimator.destroy();
-      this.iceAnimator = null;
-    }
-    if (this.poisonAnimator && this.currentBranch !== 'poison') {
-      this.poisonAnimator.destroy();
-      this.poisonAnimator = null;
-    }
+    // Check if we need to create a new animator (branch changed or first time)
+    const AnimatorClass = ANIMATOR_CONSTRUCTORS[this.currentBranch];
     
-    // For animated tower types, use their respective animator
-    if (this.currentBranch === 'rapidfire') {
-      this.graphics.clear();
-      if (!this.rapidFireAnimator) {
-        this.rapidFireAnimator = new RapidFireAnimator(this.scene, this, this.currentLevel);
-      } else {
-        this.rapidFireAnimator.setLevel(this.currentLevel);
+    if (AnimatorClass) {
+      // This branch uses an animator
+      if (this.animatorBranch !== this.currentBranch) {
+        // Branch changed - destroy old animator and create new one
+        this.animator?.destroy();
+        this.graphics.clear();
+        this.animator = new AnimatorClass(this.scene, this, this.currentLevel);
+        this.animatorBranch = this.currentBranch;
+      } else if (this.animator) {
+        // Same branch - just update level
+        this.animator.setLevel(this.currentLevel);
       }
-    } else if (this.currentBranch === 'archer') {
-      this.graphics.clear();
-      if (!this.archerAnimator) {
-        this.archerAnimator = new ArcherAnimator(this.scene, this, this.currentLevel);
-      } else {
-        this.archerAnimator.setLevel(this.currentLevel);
-      }
-    } else if (this.currentBranch === 'rockcannon') {
-      this.graphics.clear();
-      if (!this.cannonAnimator) {
-        this.cannonAnimator = new CannonAnimator(this.scene, this, this.currentLevel);
-      } else {
-        this.cannonAnimator.setLevel(this.currentLevel);
-      }
-    } else if (this.currentBranch === 'sniper') {
-      this.graphics.clear();
-      if (!this.sniperAnimator) {
-        this.sniperAnimator = new SniperAnimator(this.scene, this, this.currentLevel);
-      } else {
-        this.sniperAnimator.setLevel(this.currentLevel);
-      }
-    } else if (this.currentBranch === 'icetower') {
-      this.graphics.clear();
-      if (!this.iceAnimator) {
-        this.iceAnimator = new IceAnimator(this.scene, this, this.currentLevel);
-      } else {
-        this.iceAnimator.setLevel(this.currentLevel);
-      }
-    } else if (this.currentBranch === 'poison') {
-      this.graphics.clear();
-      if (!this.poisonAnimator) {
-        this.poisonAnimator = new PoisonAnimator(this.scene, this, this.currentLevel);
-      } else {
-        this.poisonAnimator.setLevel(this.currentLevel);
+    } else {
+      // This branch doesn't use an animator - clean up if we had one
+      if (this.animator) {
+        this.animator.destroy();
+        this.animator = null;
+        this.animatorBranch = null;
       }
     }
     
@@ -461,11 +324,10 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
-   * Get targeting priority - prioritize leading creep (furthest along path)
-   * Sniper targets highest HP instead
+   * Get targeting priority - all towers prioritize leading creep (furthest along path)
    */
   getTargetPriority(): 'closest' | 'highestHP' | 'furthestAlongPath' {
-    return this.currentBranch === 'sniper' ? 'highestHP' : 'furthestAlongPath';
+    return 'furthestAlongPath';
   }
 
   /**

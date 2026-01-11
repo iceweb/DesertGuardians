@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
-import { TOWER_CONFIGS } from '../data';
+import { TOWER_CONFIGS, GAME_CONFIG } from '../data';
 import { PathSystem } from './PathSystem';
 import { TowerUIManager } from './TowerUIManager';
 
@@ -17,11 +17,11 @@ export class TowerManager {
   // UI Manager
   private uiManager: TowerUIManager;
   
-  // Settings
-  private readonly PATH_BUFFER = 40;
-  private readonly TOWER_RADIUS = 25;
-  private readonly TOWER_SPACING = 20; // Minimum gap between towers
-  private readonly HUD_HEIGHT = 60;
+  // Settings (from centralized config)
+  private readonly PATH_BUFFER = GAME_CONFIG.TOWER_PATH_BUFFER;
+  private readonly TOWER_RADIUS = GAME_CONFIG.TOWER_RADIUS;
+  private readonly TOWER_SPACING = GAME_CONFIG.TOWER_SPACING;
+  private readonly HUD_HEIGHT = 60; // UI-specific, keep local
   
   // Callbacks
   public onTowerBuilt?: (tower: Tower, cost: number) => void;
