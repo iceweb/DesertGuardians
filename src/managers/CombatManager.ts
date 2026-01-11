@@ -99,7 +99,7 @@ export class CombatManager {
    * Find the best target for a tower based on priority and constraints
    */
   private findTarget(
-    tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string; getBranch?: () => string },
+    tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string; getBranch?: () => string; getConfig?: () => { stats: { maxSlowTargets?: number } } },
     creeps: Creep[]
   ): Creep | null {
     const priority = tower.getTargetPriority();
@@ -108,8 +108,12 @@ export class CombatManager {
     // Ground-only towers cannot target flying creeps
     const isGroundOnly = branch === 'rockcannon' || branch === 'poison';
     
+    // Ice tower special handling: prefer unslowed targets
+    const isIceTower = branch === 'icetower';
+    
     let bestTarget: Creep | null = null;
     let bestValue = -Infinity;
+    let bestIsSlowed = true; // Assume slowed, prefer unslowed
     
     for (const creep of creeps) {
       if (!creep.getIsActive()) continue;
@@ -129,6 +133,9 @@ export class CombatManager {
         if (branch !== requiredBranch) continue;
       }
       
+      // Ice tower: check slow status
+      const creepIsSlowed = isIceTower ? creep.isSlowed() : false;
+      
       let value: number;
       
       switch (priority) {
@@ -145,9 +152,25 @@ export class CombatManager {
           break;
       }
       
+      // Ice tower targeting priority: unslowed > slowed
+      // Only pick a slowed creep if no unslowed creep is better
+      if (isIceTower) {
+        // If current best is unslowed and this one is slowed, skip
+        if (!bestIsSlowed && creepIsSlowed) continue;
+        
+        // If current best is slowed and this one is unslowed, take it
+        if (bestIsSlowed && !creepIsSlowed) {
+          bestValue = value;
+          bestTarget = creep;
+          bestIsSlowed = creepIsSlowed;
+          continue;
+        }
+      }
+      
       if (value > bestValue) {
         bestValue = value;
         bestTarget = creep;
+        bestIsSlowed = creepIsSlowed;
       }
     }
     

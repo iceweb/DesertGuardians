@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager } from '../managers';
+import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager, GoldMineManager, GoldMineUIManager } from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -15,6 +15,8 @@ export class GameScene extends Phaser.Scene {
   private environment!: GameEnvironment;
   private hudManager!: HUDManager;
   private audioManager!: AudioManager;
+  private goldMineManager!: GoldMineManager;
+  private goldMineUIManager!: GoldMineUIManager;
 
   // Game state
   private gold: number = GAME_CONFIG.STARTING_GOLD;
@@ -74,6 +76,17 @@ export class GameScene extends Phaser.Scene {
     this.environment = new GameEnvironment(this, this.pathSystem);
     this.environment.drawAll(mapData.spawn, mapData.goal);
 
+    // Initialize gold mine system
+    this.goldMineManager = new GoldMineManager(this);
+    this.goldMineManager.initializeFromPads(mapData.minePads);
+    this.setupGoldMineCallbacks();
+    
+    // Connect gold mine manager to tower manager (to prevent tower menu on mine clicks)
+    this.towerManager.setGoldMineManager(this.goldMineManager);
+    
+    this.goldMineUIManager = new GoldMineUIManager(this, this.goldMineManager);
+    this.goldMineUIManager.getPlayerGold = () => this.gold;
+
     // Initialize HUD manager
     this.hudManager = new HUDManager(this);
     this.hudManager.create(this.waveManager.getTotalWaves());
@@ -92,6 +105,30 @@ export class GameScene extends Phaser.Scene {
     this.setupCreepClickHandler();
 
     console.log('GameScene: Desert Guardians initialized - Click anywhere to place towers!');
+  }
+
+  /**
+   * Setup gold mine manager callbacks
+   */
+  private setupGoldMineCallbacks(): void {
+    // Provide gold getter
+    this.goldMineManager.getPlayerGold = () => this.gold;
+
+    // Handle mine built
+    this.goldMineManager.onMineBuild = (_mine, cost) => {
+      this.gold -= cost;
+      this.hudManager.updateGold(this.gold);
+      this.audioManager.playSFX('build_thud');
+      console.log(`Gold mine built! Cost: ${cost}g, Remaining gold: ${this.gold}`);
+    };
+
+    // Handle mine upgraded
+    this.goldMineManager.onMineUpgraded = (_mine, cost) => {
+      this.gold -= cost;
+      this.hudManager.updateGold(this.gold);
+      this.audioManager.playSFX('upgrade_tower');
+      console.log(`Gold mine upgraded! Cost: ${cost}g, Remaining gold: ${this.gold}`);
+    };
   }
 
   /**
@@ -168,30 +205,39 @@ export class GameScene extends Phaser.Scene {
       this.registry.events.emit('wave-started', waveNumber);
     });
 
-    this.waveManager.on('waveComplete', (waveNumber: number) => {
+    this.waveManager.on('waveComplete', async (waveNumber: number) => {
       console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
       this.audioManager.playSFX('wave_complete');
       
       // Calculate wave bonus using centralized config
-      // Waves 1-5: 25g, Waves 6-10: 39g, Waves 11-15: 53g, Waves 16-20: 67g, Waves 21-25: 81g
+      // Waves 1-5: 10g, Waves 6-10: 15g, etc.
       const waveBonus = GAME_CONFIG.WAVE_GOLD_BONUS_BASE + 
         Math.floor((waveNumber - 1) / GAME_CONFIG.WAVE_GOLD_BONUS_INTERVAL) * GAME_CONFIG.WAVE_GOLD_BONUS_INCREMENT;
       
-      // Show wave bonus animation, then proceed to next wave
-      this.hudManager.showWaveBonus(waveNumber, waveBonus, () => {
-        this.gold += waveBonus;
+      // Silently add wave bonus gold (no animation - keep UI clean)
+      this.gold += waveBonus;
+      this.hudManager.updateGold(this.gold);
+      
+      // Small delay before showing mine income animation
+      await new Promise<void>(resolve => this.time.delayedCall(300, () => resolve()));
+      
+      // Collect mine income with animation (this is the main visual feedback)
+      const mineIncome = await this.goldMineManager.collectIncomeWithAnimation();
+      if (mineIncome > 0) {
+        this.gold += mineIncome;
         this.hudManager.updateGold(this.gold);
-        
-        // Automatically start next wave after a countdown (unless all waves done)
-        if (waveNumber < this.waveManager.getTotalWaves()) {
-          console.log(`GameScene.onWaveComplete: Showing countdown for wave ${waveNumber + 1}`);
-          this.hudManager.showCountdown(waveNumber + 1, () => {
-            if (!this.gameOver) {
-              this.waveManager.startWave();
-            }
-          });
-        }
-      });
+        console.log(`GameScene: Collected ${mineIncome}g from gold mines`);
+      }
+      
+      // Automatically start next wave after a countdown (unless all waves done)
+      if (waveNumber < this.waveManager.getTotalWaves()) {
+        console.log(`GameScene.onWaveComplete: Showing countdown for wave ${waveNumber + 1}`);
+        this.hudManager.showCountdown(waveNumber + 1, () => {
+          if (!this.gameOver) {
+            this.waveManager.startWave();
+          }
+        });
+      }
     });
 
     this.waveManager.on('allWavesComplete', () => {
@@ -325,6 +371,9 @@ export class GameScene extends Phaser.Scene {
     
     // Update tower manager (for UI refresh on gold change)
     this.towerManager.update();
+    
+    // Update gold mine UI manager (for UI refresh on gold change)
+    this.goldMineUIManager.update();
     
     // Update combat (tower animations, targeting, and firing)
     this.combatManager.updateTowers(scaledDelta);

@@ -3,6 +3,7 @@ import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS, GAME_CONFIG } from '../data';
 import { PathSystem } from './PathSystem';
 import { TowerUIManager } from './TowerUIManager';
+import { GoldMineManager } from './GoldMineManager';
 
 /**
  * TowerManager handles tower placement, selection, and management.
@@ -28,6 +29,9 @@ export class TowerManager {
   public onTowerSold?: (tower: Tower, refund: number) => void;
   public onTowerUpgraded?: (tower: Tower, cost: number) => void;
   public getPlayerGold?: () => number;
+  
+  // Reference to gold mine manager to check for mine clicks
+  private goldMineManager: GoldMineManager | null = null;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
@@ -52,6 +56,11 @@ export class TowerManager {
     
     // Provide placement check
     this.uiManager.canPlaceAt = (x: number, y: number) => this.canPlaceAt(x, y);
+    
+    // Provide mine check (to hide placement preview over mines)
+    this.uiManager.isOverMine = (x: number, y: number) => {
+      return this.goldMineManager?.getMineAtPosition(x, y) !== null;
+    };
     
     // Handle build request
     this.uiManager.onBuildRequested = (x: number, y: number, towerKey: string) => {
@@ -99,6 +108,11 @@ export class TowerManager {
     
     if (clickedTower) {
       this.selectTower(clickedTower);
+      return;
+    }
+    
+    // Check if clicking on a gold mine - don't open tower menu
+    if (this.goldMineManager?.getMineAtPosition(x, y)) {
       return;
     }
     
@@ -327,6 +341,13 @@ export class TowerManager {
    */
   getTowerCount(): number {
     return this.towers.length;
+  }
+
+  /**
+   * Set reference to gold mine manager for click detection
+   */
+  setGoldMineManager(manager: GoldMineManager): void {
+    this.goldMineManager = manager;
   }
 
   /**

@@ -9,11 +9,21 @@ export interface BuildPadData {
   occupied: boolean;
 }
 
+export interface MinePadData {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  occupied: boolean;
+}
+
 export interface MapData {
   spawn: Phaser.Math.Vector2;
   goal: Phaser.Math.Vector2;
   pathPoints: Phaser.Math.Vector2[];
   buildPads: BuildPadData[];
+  minePads: MinePadData[];
 }
 
 /**
@@ -42,6 +52,7 @@ export class MapManager {
     const goal = new Phaser.Math.Vector2(0, 0);
     const pathPoints: Phaser.Math.Vector2[] = [];
     const buildPads: BuildPadData[] = [];
+    const minePads: MinePadData[] = [];
 
     // Parse object layers
     for (const layer of jsonData.layers) {
@@ -80,17 +91,30 @@ export class MapManager {
               occupied: false
             });
           }
+          
+          // Parse mine pads
+          if (obj.type === 'minepad') {
+            minePads.push({
+              id: minePads.length + 1,
+              x: obj.x,
+              y: obj.y,
+              width: obj.width || 60,
+              height: obj.height || 60,
+              occupied: false
+            });
+          }
         }
       }
     }
 
-    this.mapData = { spawn, goal, pathPoints, buildPads };
+    this.mapData = { spawn, goal, pathPoints, buildPads, minePads };
     
     console.log('MapManager: Map loaded', {
       spawn: `(${spawn.x}, ${spawn.y})`,
       goal: `(${goal.x}, ${goal.y})`,
       pathPoints: pathPoints.length,
-      buildPads: buildPads.length
+      buildPads: buildPads.length,
+      minePads: minePads.length
     });
 
     return this.mapData;
@@ -126,5 +150,12 @@ export class MapManager {
     if (pad) {
       pad.occupied = occupied;
     }
+  }
+
+  /**
+   * Get all mine pad slots
+   */
+  getMinePadSlots(): MinePadData[] {
+    return this.mapData?.minePads ?? [];
   }
 }

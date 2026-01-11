@@ -6,20 +6,20 @@
 export const GAME_CONFIG = {
   // === PLAYER RESOURCES ===
   /** Starting gold at the beginning of a new game */
-  STARTING_GOLD: 220,
+  STARTING_GOLD: 250,
   
   /** Maximum castle HP (lives) */
   MAX_CASTLE_HP: 25,
   
   // === SCORING ===
-  /** Points awarded per wave completed */
+  /** Points awarded per wave completed (35 waves × 100 = 3500) */
   WAVE_BONUS_POINTS: 100,
   
-  /** Points awarded per remaining gold */
-  GOLD_BONUS_MULTIPLIER: 1,
+  /** Points multiplier for gold earned (15000g × 0.2 = 3000) */
+  GOLD_BONUS_MULTIPLIER: 0.2,
   
-  /** Points awarded per remaining HP */
-  HP_BONUS_POINTS: 500,
+  /** Points awarded per remaining HP (25 HP × 100 = 2500) */
+  HP_BONUS_POINTS: 100,
   
   // === WAVE TIMING ===
   /** Countdown duration before each wave (seconds) */
@@ -37,17 +37,17 @@ export const GAME_CONFIG = {
   
   // === TOWER COSTS ===
   /** Base cost to build an archer tower */
-  ARCHER_BUILD_COST: 70,
+  ARCHER_BUILD_COST: 50,
   
   // === GAME SPEED ===
-  /** Normal game speed multiplier */
-  NORMAL_SPEED: 1,
+  /** Normal game speed multiplier (1.4 = 40% faster base speed) */
+  NORMAL_SPEED: 1.4,
   
   /** Fast forward game speed multiplier */
-  FAST_SPEED: 2,
+  FAST_SPEED: 2.8,
   
   /** Turbo game speed multiplier */
-  TURBO_SPEED: 3,
+  TURBO_SPEED: 4.2,
   
   // === TOWER PLACEMENT ===
   /** Buffer distance from path for tower placement */
@@ -97,14 +97,17 @@ export const GAME_CONFIG = {
   GHOST_PHASE_THRESHOLD: 0.15,
   
   /** Cooldown between boss dispel abilities (ms) */
-  DISPEL_COOLDOWN: 6000,
+  DISPEL_COOLDOWN: 12000,
+  
+  /** Duration of immunity to slow/poison after dispelling (ms) */
+  DISPEL_IMMUNITY_DURATION: 2000,
   
   // === WAVE BONUSES ===
   /** Base gold bonus for completing a wave */
-  WAVE_GOLD_BONUS_BASE: 25,
+  WAVE_GOLD_BONUS_BASE: 15,
   
   /** Additional gold bonus increment */
-  WAVE_GOLD_BONUS_INCREMENT: 14,
+  WAVE_GOLD_BONUS_INCREMENT: 5,
   
   /** Waves between bonus increments */
   WAVE_GOLD_BONUS_INTERVAL: 5,

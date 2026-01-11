@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS } from '../data';
 import type { TowerBranch } from '../objects/Tower';
+import { UIHelper } from './UIHelper';
 
 /**
  * TowerUIManager handles tower build/upgrade menus and placement preview.
@@ -9,6 +10,7 @@ import type { TowerBranch } from '../objects/Tower';
  */
 export class TowerUIManager {
   private scene: Phaser.Scene;
+  private uiHelper: UIHelper;
   
   // Placement state
   private placementGraphics: Phaser.GameObjects.Graphics;
@@ -33,9 +35,11 @@ export class TowerUIManager {
   public onSellRequested?: (tower: Tower) => void;
   public getPlayerGold?: () => number;
   public canPlaceAt?: (x: number, y: number) => boolean;
+  public isOverMine?: (x: number, y: number) => boolean;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
+    this.uiHelper = new UIHelper(scene);
     
     this.placementGraphics = scene.add.graphics();
     this.placementGraphics.setDepth(50);
@@ -51,6 +55,9 @@ export class TowerUIManager {
     if (towerAt) return;
     if (y < 80) return;
     if (y > this.scene.cameras.main.height - 100) return;
+    
+    // Don't show placement preview over mine slots
+    if (this.isOverMine?.(x, y)) return;
     
     const canPlace = this.canPlaceAt?.(x, y) ?? false;
     const config = TOWER_CONFIGS['archer_1'];
@@ -124,8 +131,9 @@ export class TowerUIManager {
     
     const stats = archerConfig.stats;
     const fireRateSec = (stats.fireRate / 1000).toFixed(1);
+    const dps = (stats.damage / (stats.fireRate / 1000)).toFixed(1);
     const descText = this.scene.add.text(20, 18, 
-      `DMG: ${stats.damage}  |  Range: ${stats.range}m\nRate: ${fireRateSec}s  |  Single target`, {
+      `DMG: ${stats.damage}  |  Rate: ${fireRateSec}s  |  DPS: ${dps}\nRange: ${stats.range}m  |  Single target`, {
       fontFamily: 'Arial',
       fontSize: '10px',
       color: canAfford ? '#cccccc' : '#555555',
@@ -176,6 +184,9 @@ export class TowerUIManager {
       this.closeMenus();
     });
     this.buildMenuContainer.add(closeBtn);
+    
+    // Clamp popup to screen bounds (menu is 260x140)
+    this.uiHelper.clampToScreen(this.buildMenuContainer, 260, 140, 0.5, 0.5);
   }
 
   /**
@@ -222,7 +233,7 @@ export class TowerUIManager {
     const hasBranches = upgradeOptions.branches && upgradeOptions.branches.length > 0;
     const hasLevelUp = !!upgradeOptions.levelUp;
     const menuWidth = hasBranches ? 600 : 420;
-    const menuHeight = hasBranches ? 280 : 200;
+    const menuHeight = hasBranches ? 280 : 180;
     
     this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - (menuHeight / 2) - 40);
     this.upgradeMenuContainer.setDepth(200);
@@ -234,22 +245,23 @@ export class TowerUIManager {
     bg.strokeRoundedRect(-menuWidth / 2, -menuHeight / 2, menuWidth, menuHeight, 12);
     this.upgradeMenuContainer.add(bg);
     
-    const title = this.scene.add.text(0, -menuHeight / 2 + 22, config.name, {
+    const title = this.scene.add.text(0, -menuHeight / 2 + 20, config.name, {
       fontFamily: 'Arial Black',
-      fontSize: '20px',
+      fontSize: '18px',
       color: '#ffd700'
     }).setOrigin(0.5);
     this.upgradeMenuContainer.add(title);
     
     const fireRateSec = (config.stats.fireRate / 1000).toFixed(1);
-    const stats = this.scene.add.text(0, -menuHeight / 2 + 48, `DMG: ${config.stats.damage}  |  Range: ${config.stats.range}m  |  Rate: ${fireRateSec}s`, {
+    const dps = (config.stats.damage / (config.stats.fireRate / 1000)).toFixed(1);
+    const statsText = this.scene.add.text(0, -menuHeight / 2 + 45, `DMG: ${config.stats.damage}  |  Rate: ${fireRateSec}s  |  DPS: ${dps}  |  Range: ${config.stats.range}m`, {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '12px',
       color: '#cccccc'
     }).setOrigin(0.5);
-    this.upgradeMenuContainer.add(stats);
+    this.upgradeMenuContainer.add(statsText);
     
-    let yOffset = -menuHeight / 2 + 95;
+    let yOffset = -menuHeight / 2 + 70;
     
     if (hasBranches) {
       const branchLabel = this.scene.add.text(0, yOffset, 'Specialize Into:', {
@@ -355,99 +367,60 @@ export class TowerUIManager {
         const canAfford = playerGold >= cost;
         const nextLevel = levelUpConfig.level;
         const levelLabel = nextLevel === 2 ? 'Level 2' : 'Level 3';
+        const lvlBtnText = `⬆ Upgrade to ${levelLabel} - ${cost}g`;
         
-        // Draw button background box
-        const lvlBtnBg = this.scene.add.graphics();
-        const lvlBtnX = -105;
-        const lvlBtnY = yOffset + 15;
-        const lvlBtnW = 180;
-        const lvlBtnH = 36;
-        lvlBtnBg.fillStyle(canAfford ? 0x2a4a2a : 0x2a2a2a, 1);
-        lvlBtnBg.fillRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
-        lvlBtnBg.lineStyle(2, canAfford ? 0x00ff00 : 0x444444, 1);
-        lvlBtnBg.strokeRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
-        this.upgradeMenuContainer.add(lvlBtnBg);
-        
-        const lvlBtn = this.scene.add.text(lvlBtnX, lvlBtnY, `⬆ Upgrade to ${levelLabel} - ${cost}g`, {
-          fontFamily: 'Arial Black',
-          fontSize: '14px',
-          color: canAfford ? '#00ff00' : '#666666'
-        }).setOrigin(0.5);
-        this.upgradeMenuContainer.add(lvlBtn);
-        
-        if (canAfford) {
-          const lvlHitArea = this.scene.add.rectangle(lvlBtnX, lvlBtnY, lvlBtnW, lvlBtnH, 0xffffff, 0);
-          lvlHitArea.setInteractive({ useHandCursor: true });
-          lvlHitArea.on('pointerdown', () => {
+        // Use UIHelper to create auto-sized button
+        const lvlButton = this.uiHelper.createButton({
+          text: lvlBtnText,
+          x: -95,
+          y: yOffset + 10,
+          fontSize: 13,
+          textColor: '#00ff00',
+          disabledTextColor: '#666666',
+          bgColor: 0x2a4a2a,
+          hoverBgColor: 0x3a6a3a,
+          disabledBgColor: 0x2a2a2a,
+          borderColor: 0x00ff00,
+          disabledBorderColor: 0x444444,
+          paddingX: 10,
+          paddingY: 8,
+          enabled: canAfford,
+          onClick: canAfford ? () => {
             this.onUpgradeRequested?.(tower, upgradeOptions.levelUp!);
-          });
-          lvlHitArea.on('pointerover', () => {
-            lvlBtnBg.clear();
-            lvlBtnBg.fillStyle(0x3a6a3a, 1);
-            lvlBtnBg.fillRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
-            lvlBtnBg.lineStyle(2, 0x00ff00, 1);
-            lvlBtnBg.strokeRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
-          });
-          lvlHitArea.on('pointerout', () => {
-            lvlBtnBg.clear();
-            lvlBtnBg.fillStyle(0x2a4a2a, 1);
-            lvlBtnBg.fillRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
-            lvlBtnBg.lineStyle(2, 0x00ff00, 1);
-            lvlBtnBg.strokeRoundedRect(lvlBtnX - lvlBtnW / 2, lvlBtnY - lvlBtnH / 2, lvlBtnW, lvlBtnH, 6);
-          });
-          this.upgradeMenuContainer.add(lvlHitArea);
-        }
+          } : undefined
+        });
+        this.upgradeMenuContainer.add(lvlButton.container);
       }
     } else if (!hasBranches) {
-      const maxText = this.scene.add.text(-105, yOffset + 15, '★ MAX LEVEL ★', {
+      const maxText = this.scene.add.text(-95, yOffset + 10, '★ MAX LEVEL ★', {
         fontFamily: 'Arial Black',
-        fontSize: '14px',
+        fontSize: '13px',
         color: '#ffd700',
         backgroundColor: '#3a3a2a',
-        padding: { x: 12, y: 10 }
+        padding: { x: 10, y: 8 }
       }).setOrigin(0.5);
       this.upgradeMenuContainer.add(maxText);
     }
     
     const sellValue = tower.getSellValue();
-    const sellBtnX = 105;
-    const sellBtnY = yOffset + 15;
-    const sellBtnW = 100;
-    const sellBtnH = 36;
+    const sellBtnText = `Sell: ${sellValue}g`;
     
-    // Draw sell button background box
-    const sellBtnBg = this.scene.add.graphics();
-    sellBtnBg.fillStyle(0x4a2a2a, 1);
-    sellBtnBg.fillRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
-    sellBtnBg.lineStyle(2, 0xff6666, 1);
-    sellBtnBg.strokeRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
-    this.upgradeMenuContainer.add(sellBtnBg);
-    
-    const sellBtn = this.scene.add.text(sellBtnX, sellBtnY, `Sell: ${sellValue}g`, {
-      fontFamily: 'Arial Black',
-      fontSize: '14px',
-      color: '#ff6666'
-    }).setOrigin(0.5);
-    this.upgradeMenuContainer.add(sellBtn);
-    
-    const sellHitArea = this.scene.add.rectangle(sellBtnX, sellBtnY, sellBtnW, sellBtnH, 0xffffff, 0);
-    sellHitArea.setInteractive({ useHandCursor: true });
-    sellHitArea.on('pointerdown', () => this.onSellRequested?.(tower));
-    sellHitArea.on('pointerover', () => {
-      sellBtnBg.clear();
-      sellBtnBg.fillStyle(0x6a3a3a, 1);
-      sellBtnBg.fillRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
-      sellBtnBg.lineStyle(2, 0xff6666, 1);
-      sellBtnBg.strokeRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
+    // Use UIHelper to create auto-sized sell button
+    const sellButton = this.uiHelper.createButton({
+      text: sellBtnText,
+      x: 95,
+      y: yOffset + 10,
+      fontSize: 13,
+      textColor: '#ff6666',
+      bgColor: 0x4a2a2a,
+      hoverBgColor: 0x6a3a3a,
+      borderColor: 0xff6666,
+      paddingX: 10,
+      paddingY: 8,
+      enabled: true,
+      onClick: () => this.onSellRequested?.(tower)
     });
-    sellHitArea.on('pointerout', () => {
-      sellBtnBg.clear();
-      sellBtnBg.fillStyle(0x4a2a2a, 1);
-      sellBtnBg.fillRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
-      sellBtnBg.lineStyle(2, 0xff6666, 1);
-      sellBtnBg.strokeRoundedRect(sellBtnX - sellBtnW / 2, sellBtnY - sellBtnH / 2, sellBtnW, sellBtnH, 6);
-    });
-    this.upgradeMenuContainer.add(sellHitArea);
+    this.upgradeMenuContainer.add(sellButton.container);
     
     const closeBtn = this.scene.add.text(menuWidth / 2 - 20, -menuHeight / 2 + 18, '✕', {
       fontFamily: 'Arial',
@@ -456,6 +429,9 @@ export class TowerUIManager {
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     closeBtn.on('pointerdown', () => this.closeMenus());
     this.upgradeMenuContainer.add(closeBtn);
+    
+    // Clamp popup to screen bounds
+    this.uiHelper.clampToScreen(this.upgradeMenuContainer, menuWidth, menuHeight, 0.5, 0.5);
   }
 
   /**

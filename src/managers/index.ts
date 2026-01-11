@@ -1,5 +1,5 @@
 export { MapManager } from './MapManager';
-export type { BuildPadData, MapData } from './MapManager';
+export type { BuildPadData, MapData, MinePadData } from './MapManager';
 export { PathSystem } from './PathSystem';
 export type { PathSegment } from './PathSystem';
 export { CreepManager } from './CreepManager';
@@ -16,3 +16,5 @@ export { GameOverlayManager } from './GameOverlayManager';
 export { CreepInfoPanel } from './CreepInfoPanel';
 export { AudioManager } from './AudioManager';
 export type { SFXKey } from './AudioManager';
+export { GoldMineManager } from './GoldMineManager';
+export { GoldMineUIManager } from './GoldMineUIManager';

@@ -159,13 +159,13 @@ export const WAVE_CONFIGS: WaveDef[] = [
   ]},
   
   // Wave 21: BOSS WAVE with guards (tank: 7*1400=9800+500=10300, shielded: 4*1800=7200+500=18000, jumper: 7*1400=9800+500=28300)
-  { waveNumber: 21, waveType: 'boss', announcement: '� DRAKE CHAMPION APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
+  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
     { type: 'tank', count: 12, intervalMs: 1200 },
     { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
     { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
-    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 28000 },
-    { type: 'boss_3', count: 1, intervalMs: 1000, delayStart: 28500 },
-    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 29000 }
+    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 28000 },
+    { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 28000 },
+    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 28000 }
   ]},
   
   // Wave 22: BROODMOTHER (tank: 5*1400=7000 + 500 = 7500)
@@ -208,13 +208,13 @@ export const WAVE_CONFIGS: WaveDef[] = [
   ]},
   
   // Wave 28: BOSS WAVE with guards (shielded: 7*1400=9800+500=10300, jumper: 9*1200=10800+500=21600, tank: 7*1600=11200+500=33300)
-  { waveNumber: 28, waveType: 'boss', announcement: '� YOUNG DRAGON APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
+  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
     { type: 'shielded', count: 12, intervalMs: 1100 },
     { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
     { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },
-    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 33000 },
-    { type: 'boss_4', count: 1, intervalMs: 1000, delayStart: 33500 },
-    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 34000 }
+    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 33000 },
+    { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 33000 },
+    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 33000 }
   ]},
   
   // Wave 29: ELITE GHOSTS (ghost: 13*1000=13000 + 500 = 13500)
@@ -270,8 +270,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 16, intervalMs: 900 },
     { type: 'tank', count: 18, intervalMs: 850 },
     { type: 'broodmother', count: 5, intervalMs: 2400 },
-    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 25000 },
-    { type: 'boss_5', count: 1, intervalMs: 1000, delayStart: 25500 },
-    { type: 'boss_guard', count: 1, intervalMs: 1000, delayStart: 26000 }
+    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 25000 },
+    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 25000 },
+    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 25000 }
   ]}
 ];

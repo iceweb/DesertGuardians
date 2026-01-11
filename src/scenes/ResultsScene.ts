@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { AudioManager } from '../managers';
+import { GAME_CONFIG } from '../data/GameConfig';
 
 /**
  * Data passed from GameScene to ResultsScene
@@ -23,6 +24,7 @@ export interface Highscore {
   playerName: string;
   score: number;
   waveReached: number;
+  totalWaves: number;
   date: number;
   runStats: {
     hpLeft: number;
@@ -68,14 +70,14 @@ export class ResultsScene extends Phaser.Scene {
   private calculateScore(): void {
     const data = this.resultData;
     
-    // Wave Score: 1000 points per wave completed
-    const waveScore = data.waveReached * 1000;
+    // Wave Score: points per wave completed
+    const waveScore = data.waveReached * GAME_CONFIG.WAVE_BONUS_POINTS;
     
-    // Gold Score: Total gold earned × 10
-    const goldScore = data.totalGoldEarned * 10;
+    // Gold Score: Total gold earned × multiplier
+    const goldScore = Math.floor(data.totalGoldEarned * GAME_CONFIG.GOLD_BONUS_MULTIPLIER);
     
-    // HP Bonus: 500 points per HP remaining (max 5000 for 10 HP)
-    const hpBonus = data.castleHP * 500;
+    // HP Bonus: points per HP remaining
+    const hpBonus = data.castleHP * GAME_CONFIG.HP_BONUS_POINTS;
     
     // Time Multiplier:
     // Target = 900 seconds (15 min)
@@ -222,9 +224,9 @@ export class ResultsScene extends Phaser.Scene {
     }).setOrigin(0.5);
     
     const breakdown = [
-      { label: 'Wave Bonus', value: `${this.resultData.waveReached} × 1000 = ${this.scoreBreakdown.waveScore}` },
-      { label: 'Gold Bonus', value: `${this.resultData.totalGoldEarned} × 10 = ${this.scoreBreakdown.goldScore}` },
-      { label: 'HP Bonus', value: `${this.resultData.castleHP} × 500 = ${this.scoreBreakdown.hpBonus}` },
+      { label: 'Wave Bonus', value: `${this.resultData.waveReached} × ${GAME_CONFIG.WAVE_BONUS_POINTS} = ${this.scoreBreakdown.waveScore}` },
+      { label: 'Gold Bonus', value: `${this.resultData.totalGoldEarned} × ${GAME_CONFIG.GOLD_BONUS_MULTIPLIER} = ${this.scoreBreakdown.goldScore}` },
+      { label: 'HP Bonus', value: `${this.resultData.castleHP} × ${GAME_CONFIG.HP_BONUS_POINTS} = ${this.scoreBreakdown.hpBonus}` },
       { label: 'Time Multiplier', value: `× ${this.scoreBreakdown.timeMultiplier.toFixed(2)}` }
     ];
     
@@ -397,6 +399,7 @@ export class ResultsScene extends Phaser.Scene {
       playerName: name,
       score: this.finalScore,
       waveReached: this.resultData.waveReached,
+      totalWaves: this.resultData.totalWaves,
       date: Date.now(),
       runStats: {
         hpLeft: this.resultData.castleHP,

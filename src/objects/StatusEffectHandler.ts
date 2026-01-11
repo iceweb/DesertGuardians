@@ -24,6 +24,9 @@ export class StatusEffectHandler {
   private poisonStacks: PoisonStack[] = [];
   private poisonTickTimer: number = 0;
   
+  // Immunity (after boss dispel)
+  private immunityEndTime: number = 0;
+  
   // Callback for poison damage
   private onPoisonDamage?: (damage: number) => void;
 
@@ -43,6 +46,9 @@ export class StatusEffectHandler {
    * Apply slow effect (doesn't stack, refreshes duration)
    */
   applySlow(percent: number, durationMs: number): void {
+    // Check immunity
+    if (this.isImmune()) return;
+    
     const currentTime = this.scene.time.now;
     this.slowAmount = percent;
     this.slowEndTime = currentTime + durationMs;
@@ -52,6 +58,9 @@ export class StatusEffectHandler {
    * Apply poison effect (stacks up to 3 times)
    */
   applyPoison(damagePerSecond: number, durationMs: number): void {
+    // Check immunity
+    if (this.isImmune()) return;
+    
     const currentTime = this.scene.time.now;
     
     // Max 3 stacks
@@ -180,18 +189,33 @@ export class StatusEffectHandler {
     this.slowEndTime = 0;
     this.poisonStacks = [];
     this.poisonTickTimer = 0;
+    this.immunityEndTime = 0;
   }
 
   /**
    * Dispel all status effects (used by bosses)
    * Returns true if any effects were dispelled
+   * @param immunityDurationMs - duration of immunity after dispelling (0 = no immunity)
    */
-  dispelAll(): boolean {
+  dispelAll(immunityDurationMs: number = 0): boolean {
     const hadEffects = this.isSlowed() || this.isPoisoned();
     this.slowAmount = 0;
     this.slowEndTime = 0;
     this.poisonStacks = [];
+    
+    // Grant immunity after dispel
+    if (immunityDurationMs > 0) {
+      this.immunityEndTime = this.scene.time.now + immunityDurationMs;
+    }
+    
     return hadEffects;
+  }
+
+  /**
+   * Check if currently immune to status effects
+   */
+  isImmune(): boolean {
+    return this.immunityEndTime > this.scene.time.now;
   }
 
   /**

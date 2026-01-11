@@ -5,6 +5,7 @@ export interface TowerStats {
   splashRadius?: number; // for Rock Cannon
   slowPercent?: number;  // for Ice Tower
   slowDuration?: number; // for Ice Tower
+  maxSlowTargets?: number; // for Ice Tower - max creeps this tower can have slowed at once
   dotDamage?: number;    // for Poison Tower
   dotDuration?: number;  // for Poison Tower
   critChance?: number;   // for Sniper
@@ -37,7 +38,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'archer',
     level: 1,
-    buildCost: 70,
+    buildCost: 50,
     upgradeCost: 0,
     description: 'Basic single target tower. Can branch into specialized towers.',
     stats: {
@@ -177,12 +178,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 1,
     upgradeCost: 130,
-    description: 'Splash damage in 100px radius.',
+    description: 'Splash damage in 70px radius.',
     stats: {
       range: 220,
       fireRate: 1800,
       damage: 25,
-      splashRadius: 100
+      splashRadius: 70
     }
   },
   rockcannon_2: {
@@ -192,12 +193,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 2,
     upgradeCost: 230,
-    description: 'Bigger explosions. 120px splash radius.',
+    description: 'Bigger explosions. 85px splash radius.',
     stats: {
       range: 240,
       fireRate: 1700,
       damage: 38,
-      splashRadius: 120
+      splashRadius: 85
     }
   },
   rockcannon_3: {
@@ -207,12 +208,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 3,
     upgradeCost: 460,
-    description: 'Devastation. 150px splash radius.',
+    description: 'Devastation. 100px splash radius.',
     stats: {
       range: 260,
       fireRate: 1500,
       damage: 55,
-      splashRadius: 150
+      splashRadius: 100
     }
   },
 
@@ -224,13 +225,14 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 1,
     upgradeCost: 65,
-    description: 'Slows enemies by 40% for 2s. Ignores armor.',
+    description: 'Slows enemies by 40% for 2s. Max 2 targets.',
     stats: {
       range: 180,
       fireRate: 1100,
       damage: 8,
       slowPercent: 0.4,
-      slowDuration: 2000
+      slowDuration: 2000,
+      maxSlowTargets: 2
     }
   },
   icetower_2: {
@@ -240,13 +242,14 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 2,
     upgradeCost: 130,
-    description: 'Freezing cold. 50% slow for 2.5s.',
+    description: 'Freezing cold. 50% slow for 2.5s. Max 3 targets.',
     stats: {
       range: 200,
       fireRate: 1000,
       damage: 12,
       slowPercent: 0.5,
-      slowDuration: 2500
+      slowDuration: 2500,
+      maxSlowTargets: 3
     }
   },
   icetower_3: {
@@ -256,13 +259,14 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 3,
     upgradeCost: 240,
-    description: 'Absolute zero. 60% slow for 3s.',
+    description: 'Absolute zero. 60% slow for 3s. Max 4 targets.',
     stats: {
       range: 220,
       fireRate: 900,
       damage: 18,
       slowPercent: 0.6,
-      slowDuration: 3000
+      slowDuration: 3000,
+      maxSlowTargets: 4
     }
   },
 

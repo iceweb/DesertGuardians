@@ -115,8 +115,8 @@ export class Creep extends Phaser.GameObjects.Container {
         this.setAlpha(1);
       },
       onDispel: () => {
-        // Dispel all status effects and show visual
-        if (this.statusEffects.dispelAll()) {
+        // Dispel all status effects with immunity and show visual
+        if (this.statusEffects.dispelAll(GAME_CONFIG.DISPEL_IMMUNITY_DURATION)) {
           this.effects.showDispelEffect(this.x, this.y);
         }
       }
@@ -428,6 +428,7 @@ export class Creep extends Phaser.GameObjects.Container {
   getCurrentHealth(): number { return this.currentHealth; }
   getShieldHitsRemaining(): number { return this.abilities.getState().shieldHitsRemaining; }
   isFlying(): boolean { return this.config.isFlying === true; }
+  isSlowed(): boolean { return this.statusEffects.isSlowed(); }
   getIsBurrowed(): boolean { return this.abilities.getState().isBurrowed; }
   getIsGhostPhase(): boolean { return this.abilities.getState().isGhostPhase; }
   getDiggerPhase(): 'walking' | 'stopping' | 'burrowed' | 'resurfacing' { return this.abilities.getState().diggerPhase; }
