@@ -1,5 +1,6 @@
 export * from './GameEnvironment';
 export * from './CreepGraphics';
+export * from './CreepIconGenerator';
 export * from './TowerGraphics';
 export * from './EnvironmentDecorations';
 export * from './AnimatorBase';

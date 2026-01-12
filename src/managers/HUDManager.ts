@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { GameControlsManager } from './GameControlsManager';
 import { GameOverlayManager } from './GameOverlayManager';
 import { CreepInfoPanel } from './CreepInfoPanel';
+import { NextWavePanel } from './NextWavePanel';
 import { GAME_CONFIG } from '../data/GameConfig';
+import type { WaveType } from '../data/GameData';
 
 /**
  * HUDManager handles all HUD rendering and state display.
@@ -15,6 +17,7 @@ export class HUDManager {
   private gameControls: GameControlsManager;
   private overlayManager: GameOverlayManager;
   private creepInfoPanel: CreepInfoPanel;
+  private nextWavePanel: NextWavePanel;
   
   // HUD elements
   private goldText!: Phaser.GameObjects.Text;
@@ -50,6 +53,7 @@ export class HUDManager {
     this.gameControls = new GameControlsManager(scene);
     this.overlayManager = new GameOverlayManager(scene);
     this.creepInfoPanel = new CreepInfoPanel(scene);
+    this.nextWavePanel = new NextWavePanel(scene);
   }
 
   /**
@@ -465,5 +469,19 @@ export class HUDManager {
    */
   hideCreepStats(): void {
     this.creepInfoPanel.hide();
+  }
+
+  /**
+   * Show next wave preview panel
+   */
+  showNextWavePreview(waveNumber: number, creepTypes: Array<{ type: string; description: string }>, waveType?: WaveType): void {
+    this.nextWavePanel.show(waveNumber, creepTypes, waveType);
+  }
+
+  /**
+   * Hide next wave preview panel
+   */
+  hideNextWavePreview(): void {
+    this.nextWavePanel.hide();
   }
 }

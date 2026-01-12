@@ -195,7 +195,7 @@ export class GoldMineUIManager {
     const canAffordUpgrade = canUpgrade && playerGold >= upgradeCost;
     
     const menuWidth = 280;
-    const menuHeight = canUpgrade ? 180 : 140;
+    const menuHeight = canUpgrade ? 180 : 160;
     const x = mine.x;
     const y = mine.y - menuHeight / 2 - 40;
     
@@ -293,7 +293,7 @@ export class GoldMineUIManager {
       }
     } else {
       // Max level indicator
-      const maxText = this.scene.add.text(0, 15, '★ MAX LEVEL ★', {
+      const maxText = this.scene.add.text(0, 35, '★ MAX LEVEL ★', {
         fontFamily: 'Arial Black',
         fontSize: '14px',
         color: '#ffd700',
@@ -357,7 +357,7 @@ export class GoldMineUIManager {
     }
     
     this.menuClosedThisFrame = true;
-    this.scene.time.delayedCall(50, () => {
+    this.scene.time.delayedCall(150, () => {
       this.menuClosedThisFrame = false;
     });
   }

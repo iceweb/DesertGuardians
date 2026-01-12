@@ -47,8 +47,8 @@ export class PoisonAnimator {
   private cheerTimer: number = 0;
   private cheerArmAngle: number = 0;
   
-  // Tower heights per level
-  private readonly ALCHEMIST_Y = [-28, -35, -42];
+  // Tower heights per level (level 4 uses same as level 3)
+  private readonly ALCHEMIST_Y = [-28, -35, -42, -42];
   
   // Weapon positions in local space
   // Level 1-2: Throwing arm (points LEFT like archer)
@@ -340,8 +340,9 @@ export class PoisonAnimator {
       g.fillCircle(baseWidth / 2, 20, 6);
     }
     
-    // Tower body - alchemist's tower
-    if (level === 1) {
+    // Tower body - alchemist's tower (level 4 uses level 3 graphics)
+    const bodyLevel = Math.min(level, 3);
+    if (bodyLevel === 1) {
       g.fillStyle(0x7b6a54, 1);
       g.beginPath();
       g.moveTo(-20, 10);
@@ -602,7 +603,9 @@ export class PoisonAnimator {
     
     const bodyY = 10;
     
-    if (this.level < 3) {
+    // Level 4 uses level 3 graphics (sprayer)
+    const gfxLevel = Math.min(this.level, 3);
+    if (gfxLevel < 3) {
       // === THROWING VIAL ===
       const throwOffset = this.isThrowingActive ? this.throwProgress * 10 : 0;
       const vialX = this.THROW_ARM_LOCAL_X - throwOffset;

@@ -420,11 +420,24 @@ export class Projectile extends Phaser.GameObjects.Container {
     }
     
     // Sniper crit chance (can stack with ability crit)
+    let didCrit = false;
     if (this.config.branch === 'sniper' && stats.critChance) {
       if (Math.random() < stats.critChance) {
         damage *= stats.critMultiplier || 2;
+        didCrit = true;
         // Show crit effect
-        this.showCritEffect();
+        this.showCritEffect(false);
+      }
+    }
+    
+    // Aura crit bonus - applies to ALL tower types (from Critical Aura ability)
+    if (!didCrit && this.sourceTower) {
+      const auraCritBonus = this.sourceTower.getAuraCritBonus();
+      if (auraCritBonus > 0 && Math.random() < auraCritBonus) {
+        damage *= 2;  // Aura crit deals double damage
+        didCrit = true;
+        // Show special aura crit effect (orange/gold instead of red)
+        this.showCritEffect(true);
       }
     }
     
@@ -480,12 +493,21 @@ export class Projectile extends Phaser.GameObjects.Container {
 
   /**
    * Show crit effect
+   * @param isAuraCrit - If true, shows orange/gold effect for aura crit; otherwise red for sniper crit
    */
-  private showCritEffect(): void {
+  private showCritEffect(isAuraCrit: boolean): void {
+    const x = this.x;
+    const y = this.y;
+    
+    // Colors based on crit type
+    const primaryColor = isAuraCrit ? 0xffa500 : 0xff0000;
+    const secondaryColor = isAuraCrit ? 0xffd700 : 0xff4444;
+    const textColor = isAuraCrit ? '#ffa500' : '#ff0000';
+    
     // Create a brief flash at the impact point
     const flash = this.scene.add.graphics();
-    flash.fillStyle(0xff0000, 0.8);
-    flash.fillCircle(this.x, this.y, 15);
+    flash.fillStyle(primaryColor, 0.8);
+    flash.fillCircle(x, y, 15);
     flash.setDepth(30);
     
     this.scene.tweens.add({
@@ -496,6 +518,46 @@ export class Projectile extends Phaser.GameObjects.Container {
       duration: 200,
       onComplete: () => flash.destroy()
     });
+    
+    // Show floating "CRIT!" text
+    const critText = this.scene.add.text(x, y - 20, isAuraCrit ? '⚡CRIT!' : 'CRIT!', {
+      fontFamily: 'Arial Black',
+      fontSize: '16px',
+      color: textColor,
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: critText,
+      y: y - 50,
+      alpha: 0,
+      scale: 1.3,
+      duration: 600,
+      onComplete: () => critText.destroy()
+    });
+    
+    // Spark particles for aura crit
+    if (isAuraCrit) {
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const spark = this.scene.add.graphics();
+        spark.setPosition(x, y);
+        spark.setDepth(31);
+        spark.fillStyle(secondaryColor, 1);
+        spark.fillCircle(0, 0, 4);
+        
+        this.scene.tweens.add({
+          targets: spark,
+          x: x + Math.cos(angle) * 30,
+          y: y + Math.sin(angle) * 30,
+          alpha: 0,
+          scale: 0.5,
+          duration: 250,
+          onComplete: () => spark.destroy()
+        });
+      }
+    }
   }
 
   /**

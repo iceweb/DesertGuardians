@@ -13,6 +13,7 @@ export interface CreepConfig {
   speed: number;        // pixels per second
   armor: number;
   goldReward: number;
+  description?: string;    // Tooltip description for UI
   // Special abilities
   hasShield?: boolean;     // Blocks first 3 hits completely
   canJump?: boolean;       // Leaps forward 150px every 4 seconds
@@ -35,21 +36,24 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     maxHealth: 55,
     speed: 85,
     armor: 0,
-    goldReward: 7
+    goldReward: 7,
+    description: 'A fluffy critter. No special abilities.'
   },
   runner: {
     type: 'runner',
     maxHealth: 22,
     speed: 150,
     armor: 0,
-    goldReward: 5
+    goldReward: 5,
+    description: 'Very fast but fragile. Rushes through defenses.'
   },
   tank: {
     type: 'tank',
     maxHealth: 280,
     speed: 50,
     armor: 6,
-    goldReward: 15
+    goldReward: 15,
+    description: 'Heavily armored. Slow but extremely tough.'
   },
   jumper: {
     type: 'jumper',
@@ -57,7 +61,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 75,
     armor: 2,
     goldReward: 18,
-    canJump: true
+    canJump: true,
+    description: 'Leaps forward 150px every 4 seconds, bypassing towers.'
   },
   shielded: {
     type: 'shielded',
@@ -65,7 +70,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 75,
     armor: 3,
     goldReward: 25,
-    hasShield: true
+    hasShield: true,
+    description: 'Energy shield blocks the first 3 hits completely.'
   },
 
   // === SPECIAL ABILITY CREEPS ===
@@ -75,7 +81,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 115,
     armor: 0,
     goldReward: 10,
-    isFlying: true
+    isFlying: true,
+    description: 'Flies over ground. Immune to Cannon and Poison towers.'
   },
   digger: {
     type: 'digger',
@@ -83,7 +90,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 90,
     armor: 3,
     goldReward: 15,
-    canDig: true
+    canDig: true,
+    description: 'Burrows underground for 2s every 5s, becoming invulnerable.'
   },
   ghost: {
     type: 'ghost',
@@ -91,7 +99,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 75,
     armor: 0,
     goldReward: 14,
-    hasGhostPhase: true
+    hasGhostPhase: true,
+    description: 'Phases out for 3s when HP drops below 15%. Kill fast!'
   },
   broodmother: {
     type: 'broodmother',
@@ -103,7 +112,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     spawnOnDeath: {
       type: 'baby',
       count: 8
-    }
+    },
+    description: 'Spawns 8 baby creeps on death. Large and slow.'
   },
   baby: {
     type: 'baby',
@@ -111,7 +121,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 125,
     armor: 0,
     goldReward: 2,
-    sizeScale: 0.8
+    sizeScale: 0.8,
+    description: 'Tiny offspring of Broodmother. Fast but weak.'
   },
 
   // === ELEMENTAL CREEPS (require specific towers) ===
@@ -121,7 +132,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 90,
     armor: 0,
     goldReward: 8,
-    onlyDamagedBy: 'ice'
+    onlyDamagedBy: 'ice',
+    description: '🔥 Only damaged by Ice Towers! Immune to other damage.'
   },
   plaguebearer: {
     type: 'plaguebearer',
@@ -129,21 +141,24 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     speed: 65,
     armor: 0,
     goldReward: 10,
-    onlyDamagedBy: 'poison'
+    onlyDamagedBy: 'poison',
+    description: '☠️ Only damaged by Poison Towers! Immune to other damage.'
   },
 
   // === SCALED BOSSES ===
-  boss_1: { type: 'boss_1', maxHealth: 1200, speed: 50, armor: 3, goldReward: 60, sizeScale: 1.0, canDispel: true },
-  boss_2: { type: 'boss_2', maxHealth: 2200, speed: 48, armor: 4, goldReward: 100, sizeScale: 1.15, canDispel: true },
-  boss_3: { type: 'boss_3', maxHealth: 3600, speed: 40, armor: 5, goldReward: 160, sizeScale: 1.3, canDispel: true },
-  boss_4: { type: 'boss_4', maxHealth: 5500, speed: 35, armor: 6, goldReward: 240, sizeScale: 1.5, canDispel: true },
-  boss_5: { type: 'boss_5', maxHealth: 9000, speed: 30, armor: 7, goldReward: 400, sizeScale: 1.7, canDispel: true },
+  boss_1: { type: 'boss_1', maxHealth: 1200, speed: 50, armor: 3, goldReward: 60, sizeScale: 1.0, canDispel: true, description: '🦎 Giant Gecko. Periodically dispels slow and poison effects.' },
+  boss_2: { type: 'boss_2', maxHealth: 2200, speed: 48, armor: 4, goldReward: 100, sizeScale: 1.15, canDispel: true, description: '🦎 Komodo Warlord. Dispels debuffs. High HP and armor.' },
+  boss_3: { type: 'boss_3', maxHealth: 3600, speed: 40, armor: 5, goldReward: 160, sizeScale: 1.3, canDispel: true, description: '🐉 Drake Champion. Massive HP. Dispels all negative effects.' },
+  boss_4: { type: 'boss_4', maxHealth: 5500, speed: 35, armor: 6, goldReward: 240, sizeScale: 1.5, canDispel: true, description: '🐉 Young Dragon. Extremely tanky. Focus fire required.' },
+  boss_5: { type: 'boss_5', maxHealth: 9000, speed: 30, armor: 7, goldReward: 400, sizeScale: 1.7, canDispel: true, description: '🐉 Elder Dragon Lord. The final challenge!' },
 
   // === BOSS GUARDS ===
-  boss_guard: { type: 'boss_guard', maxHealth: 800, speed: 38, armor: 5, goldReward: 40, sizeScale: 1.2, hasShield: true },
+  boss_guard_1: { type: 'boss_guard_1', maxHealth: 800, speed: 38, armor: 5, goldReward: 40, sizeScale: 1.2, hasShield: true, description: 'Drake Knight. Armored guard with shield escorting Drake Champion.' },
+  boss_guard_2: { type: 'boss_guard_2', maxHealth: 1200, speed: 36, armor: 6, goldReward: 60, sizeScale: 1.3, hasShield: true, description: 'Dragon Knight. Elite armored warrior with heavy shield.' },
+  boss_guard_3: { type: 'boss_guard_3', maxHealth: 1800, speed: 34, armor: 7, goldReward: 80, sizeScale: 1.4, hasShield: true, description: 'Flame Knight. Master warrior with flaming swords.' },
 
   // === GENERIC BOSS (legacy) ===
-  boss: { type: 'boss', maxHealth: 1500, speed: 45, armor: 4, goldReward: 60, sizeScale: 1.1, canDispel: true }
+  boss: { type: 'boss', maxHealth: 1500, speed: 45, armor: 4, goldReward: 60, sizeScale: 1.1, canDispel: true, description: 'Legacy Boss. High HP with dispel ability.' }
 };
 
 // ============================================================================
@@ -254,13 +269,12 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'ghost', count: 14, intervalMs: 1000 },
     { type: 'digger', count: 10, intervalMs: 1200, delayStart: 11300 }
   ]},
-  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
+  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Knight Escorts!', creeps: [
     { type: 'tank', count: 12, intervalMs: 1200 },
     { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
     { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
-    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 28000 },
-    { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 28000 },
-    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 28000 }
+    { type: 'boss_guard_1', count: 2, intervalMs: 1000, delayStart: 28000 },
+    { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 29000 }
   ]},
   { waveNumber: 22, waveType: 'broodmother', announcement: '🕷️ BROODMOTHER WAVE!\nKill fast, expect babies!', creeps: [
     { type: 'tank', count: 10, intervalMs: 1200 },
@@ -289,13 +303,12 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 10, intervalMs: 1200 },
     { type: 'broodmother', count: 6, intervalMs: 2500, delayStart: 7500 }
   ]},
-  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Drake Warrior Escorts!', creeps: [
+  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Dragon Knight Escorts!', creeps: [
     { type: 'shielded', count: 12, intervalMs: 1100 },
     { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
     { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },
-    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 33000 },
-    { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 33000 },
-    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 33000 }
+    { type: 'boss_guard_2', count: 2, intervalMs: 1000, delayStart: 33000 },
+    { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 34000 }
   ]},
   { waveNumber: 29, waveType: 'ghost', announcement: '👻 ELITE GHOSTS!\n5 sec immunity at 15% HP!', creeps: [
     { type: 'ghost', count: 20, intervalMs: 800 },
@@ -337,9 +350,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 16, intervalMs: 900 },
     { type: 'tank', count: 18, intervalMs: 850 },
     { type: 'broodmother', count: 5, intervalMs: 2400 },
-    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 25000 },
-    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 25000 },
-    { type: 'boss_guard', count: 1, intervalMs: 500, delayStart: 25000 }
+    { type: 'boss_guard_3', count: 2, intervalMs: 1000, delayStart: 25000 },
+    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 26000 }
   ]}
 ];
 

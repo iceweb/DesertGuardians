@@ -44,11 +44,16 @@ export interface PathSegment {
 /**
  * PathSystem handles creep movement along the path polyline.
  * It provides methods for getting positions along the path and calculating distances.
+ * Also provides buildable zone detection for tower placement.
  */
 export class PathSystem {
   private points: Phaser.Math.Vector2[] = [];
   private segments: PathSegment[] = [];
   private totalLength: number = 0;
+  
+  // Buildable zone settings
+  private readonly BUILD_ZONE_MIN_DISTANCE = 65;  // Minimum distance from path (PATH_BUFFER + TOWER_RADIUS)
+  private readonly BUILD_ZONE_MAX_DISTANCE = 180; // Maximum distance from path for building
 
   constructor(pathPoints: Phaser.Math.Vector2[]) {
     this.setPath(pathPoints);
@@ -227,6 +232,125 @@ export class PathSystem {
       graphics.fillStyle(0xff0000, 1);
       graphics.fillCircle(this.points[this.points.length - 1].x, this.points[this.points.length - 1].y, 16);
     }
+  }
+
+  /**
+   * Check if a position is within the buildable zone around the path.
+   * The buildable zone is the area between BUILD_ZONE_MIN_DISTANCE and BUILD_ZONE_MAX_DISTANCE
+   * from the path, OR within any enclosed loop formed by the path.
+   * 
+   * @param x X coordinate to check
+   * @param y Y coordinate to check
+   * @returns true if the position is in a valid buildable zone
+   */
+  isInBuildableZone(x: number, y: number): boolean {
+    // First check if within the band around the path
+    const distanceToPath = this.getDistanceToPath(x, y);
+    
+    // Must be at least MIN distance from path (can't build on path)
+    // and within MAX distance (can't build too far from path)
+    if (distanceToPath >= this.BUILD_ZONE_MIN_DISTANCE && 
+        distanceToPath <= this.BUILD_ZONE_MAX_DISTANCE) {
+      return true;
+    }
+    
+    // Also check if inside any enclosed loop formed by the path
+    if (this.isInsidePathLoop(x, y)) {
+      // Still must respect minimum distance from path itself
+      return distanceToPath >= this.BUILD_ZONE_MIN_DISTANCE;
+    }
+    
+    return false;
+  }
+
+  /**
+   * Get the minimum distance from a point to any path segment
+   */
+  getDistanceToPath(x: number, y: number): number {
+    if (this.segments.length === 0) return Infinity;
+    
+    let minDistance = Infinity;
+    
+    for (const segment of this.segments) {
+      const dist = this.pointToSegmentDistance(
+        x, y,
+        segment.start.x, segment.start.y,
+        segment.end.x, segment.end.y
+      );
+      if (dist < minDistance) {
+        minDistance = dist;
+      }
+    }
+    
+    return minDistance;
+  }
+
+  /**
+   * Calculate distance from point to line segment
+   */
+  private pointToSegmentDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const lengthSquared = dx * dx + dy * dy;
+    
+    if (lengthSquared === 0) {
+      return Math.sqrt((px - x1) ** 2 + (py - y1) ** 2);
+    }
+    
+    let t = ((px - x1) * dx + (py - y1) * dy) / lengthSquared;
+    t = Math.max(0, Math.min(1, t));
+    
+    const nearestX = x1 + t * dx;
+    const nearestY = y1 + t * dy;
+    
+    return Math.sqrt((px - nearestX) ** 2 + (py - nearestY) ** 2);
+  }
+
+  /**
+   * Check if a point is inside any loop/polygon formed by the path
+   * Uses ray casting algorithm (point-in-polygon test)
+   */
+  private isInsidePathLoop(x: number, y: number): boolean {
+    // Need at least 3 points to form a polygon
+    if (this.points.length < 3) return false;
+    
+    // Check if path forms a closed loop (start near end)
+    const firstPoint = this.points[0];
+    const lastPoint = this.points[this.points.length - 1];
+    const loopDistance = Math.sqrt(
+      (lastPoint.x - firstPoint.x) ** 2 + 
+      (lastPoint.y - firstPoint.y) ** 2
+    );
+    
+    // If the path doesn't form a closed loop, use convex hull approach
+    // or check against path polygon
+    // For now, we'll use a simpler approach: ray casting with the path points
+    
+    let inside = false;
+    const n = this.points.length;
+    
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = this.points[i].x;
+      const yi = this.points[i].y;
+      const xj = this.points[j].x;
+      const yj = this.points[j].y;
+      
+      if (((yi > y) !== (yj > y)) &&
+          (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    
+    // If path forms a reasonably closed loop (within 100px), return ray cast result
+    if (loopDistance < 100) {
+      return inside;
+    }
+    
+    // For open paths, we need a different approach
+    // Consider the area bounded by the path as buildable
+    // Use a simpler heuristic: check if point is within the bounding box
+    // and the winding number indicates we're in an enclosed area
+    return inside;
   }
 }
 

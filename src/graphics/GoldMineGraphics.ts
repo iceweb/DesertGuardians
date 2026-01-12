@@ -146,7 +146,7 @@ export class GoldMineGraphics {
   }
 
   /**
-   * Draw level 1 mine - simple wooden entrance
+   * Draw level 1 mine - sophisticated wooden mine entrance with details
    */
   private static drawLevel1(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
     const cx = 0;
@@ -154,33 +154,94 @@ export class GoldMineGraphics {
     const hw = width / 2;
     const hh = height / 2;
     
-    // Rocky base
-    g.fillStyle(0x4a4035, 1);
-    g.fillRoundedRect(cx - hw, cy - hh, width, height, 8);
+    // Ground/dirt mound behind mine
+    g.fillStyle(0x5c4a38, 1);
+    g.beginPath();
+    g.moveTo(cx - hw - 10, cy + hh);
+    g.lineTo(cx - hw + 5, cy - 5);
+    g.lineTo(cx - 15, cy - hh + 5);
+    g.lineTo(cx + 15, cy - hh + 5);
+    g.lineTo(cx + hw - 5, cy - 5);
+    g.lineTo(cx + hw + 10, cy + hh);
+    g.closePath();
+    g.fill();
+    
+    // Rocky texture on mound
+    g.fillStyle(0x4a3a2a, 0.7);
+    g.fillCircle(cx - 20, cy - 10, 6);
+    g.fillCircle(cx + 22, cy - 8, 5);
+    g.fillCircle(cx - 25, cy + 5, 4);
+    g.fillCircle(cx + 28, cy + 8, 5);
+    g.fillCircle(cx, cy - 20, 7);
     
     // Mine entrance (dark cave opening)
-    g.fillStyle(0x1a1510, 1);
-    g.fillRoundedRect(cx - 18, cy - 10, 36, 30, 4);
+    g.fillStyle(0x0a0805, 1);
+    g.fillRoundedRect(cx - 18, cy - 8, 36, 32, 4);
     
-    // Wooden frame
+    // Darkness gradient effect inside mine
+    g.fillStyle(0x1a1510, 0.5);
+    g.fillRect(cx - 14, cy - 4, 28, 24);
+    
+    // Wooden frame - main posts
     g.fillStyle(0x8b5a2b, 1);
-    g.fillRect(cx - 22, cy - 14, 6, 38);  // Left post
-    g.fillRect(cx + 16, cy - 14, 6, 38);  // Right post
-    g.fillRect(cx - 24, cy - 18, 48, 8);  // Top beam
+    g.fillRect(cx - 22, cy - 12, 7, 40);  // Left post
+    g.fillRect(cx + 15, cy - 12, 7, 40);  // Right post
     
-    // Wood grain detail
-    g.lineStyle(1, 0x654321, 0.5);
-    g.lineBetween(cx - 19, cy - 5, cx - 19, cy + 15);
-    g.lineBetween(cx + 19, cy - 5, cx + 19, cy + 15);
+    // Top beam with overhang
+    g.fillRect(cx - 26, cy - 18, 52, 10);
+    
+    // Wood grain detail on posts
+    g.lineStyle(1, 0x654321, 0.6);
+    g.lineBetween(cx - 19, cy - 8, cx - 19, cy + 20);
+    g.lineBetween(cx - 17, cy - 6, cx - 17, cy + 18);
+    g.lineBetween(cx + 18, cy - 8, cx + 18, cy + 20);
+    g.lineBetween(cx + 20, cy - 6, cx + 20, cy + 18);
+    
+    // Wood grain on top beam
+    g.lineBetween(cx - 22, cy - 14, cx + 22, cy - 14);
+    g.lineBetween(cx - 20, cy - 12, cx + 20, cy - 12);
+    
+    // Nails/bolts on frame
+    g.fillStyle(0x4a4a4a, 1);
+    g.fillCircle(cx - 19, cy - 4, 1.5);
+    g.fillCircle(cx - 19, cy + 12, 1.5);
+    g.fillCircle(cx + 19, cy - 4, 1.5);
+    g.fillCircle(cx + 19, cy + 12, 1.5);
+    
+    // Rails coming out of entrance
+    g.fillStyle(0x5a5a5a, 1);
+    g.fillRect(cx - 10, cy + 24, 3, 14);
+    g.fillRect(cx + 7, cy + 24, 3, 14);
+    
+    // Rail ties (wooden)
+    g.fillStyle(0x6b4423, 1);
+    g.fillRect(cx - 14, cy + 27, 28, 3);
+    g.fillRect(cx - 14, cy + 33, 28, 3);
     
     // Small gold nuggets near entrance
-    g.fillStyle(0xffd700, 0.8);
-    g.fillCircle(cx - 8, cy + 18, 3);
-    g.fillCircle(cx + 6, cy + 16, 2);
+    g.fillStyle(0xffd700, 0.9);
+    g.fillCircle(cx - 7, cy + 20, 4);
+    g.fillCircle(cx + 5, cy + 18, 3);
+    g.fillCircle(cx - 2, cy + 22, 2.5);
+    
+    // Subtle gold shine
+    g.fillStyle(0xffec8b, 0.7);
+    g.fillCircle(cx - 6, cy + 18, 1.5);
+    
+    // Hanging lantern on left post
+    g.fillStyle(0x3a3a3a, 1);
+    g.fillRect(cx - 28, cy - 2, 4, 8);
+    g.fillStyle(0xffaa00, 0.8);
+    g.fillCircle(cx - 26, cy + 2, 3);
+    g.fillStyle(0xffdd44, 0.5);
+    g.fillCircle(cx - 26, cy + 2, 5);
+    
+    // Level indicator
+    this.drawLevelIndicator(g, 1);
   }
 
   /**
-   * Draw level 2 mine - add minecart and rails
+   * Draw level 2 mine - reinforced mine with minecart and better infrastructure
    */
   private static drawLevel2(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
     const cx = 0;
@@ -188,54 +249,106 @@ export class GoldMineGraphics {
     const hw = width / 2;
     const hh = height / 2;
     
-    // Rocky base with more refined look
-    g.fillStyle(0x5a5045, 1);
-    g.fillRoundedRect(cx - hw, cy - hh, width, height, 8);
+    // Larger dirt/rock mound
+    g.fillStyle(0x5c4a38, 1);
+    g.beginPath();
+    g.moveTo(cx - hw - 15, cy + hh + 5);
+    g.lineTo(cx - hw, cy - 10);
+    g.lineTo(cx - 20, cy - hh);
+    g.lineTo(cx + 20, cy - hh);
+    g.lineTo(cx + hw, cy - 10);
+    g.lineTo(cx + hw + 15, cy + hh + 5);
+    g.closePath();
+    g.fill();
     
-    // Mine entrance (larger)
-    g.fillStyle(0x1a1510, 1);
-    g.fillRoundedRect(cx - 20, cy - 12, 40, 32, 4);
+    // Rocky texture layers
+    g.fillStyle(0x4a3a2a, 0.8);
+    g.fillCircle(cx - 25, cy - 12, 8);
+    g.fillCircle(cx + 26, cy - 10, 7);
+    g.fillCircle(cx, cy - 22, 9);
+    g.fillCircle(cx - 30, cy + 8, 6);
+    g.fillCircle(cx + 32, cy + 10, 6);
     
-    // Reinforced wooden frame
-    g.fillStyle(0x8b5a2b, 1);
-    g.fillRect(cx - 24, cy - 16, 8, 42);  // Left post
-    g.fillRect(cx + 16, cy - 16, 8, 42);  // Right post
-    g.fillRect(cx - 26, cy - 20, 52, 10); // Top beam
+    // Stone reinforcement around entrance
+    g.fillStyle(0x6a6055, 1);
+    g.fillRoundedRect(cx - 28, cy - 18, 56, 48, 6);
     
-    // Metal reinforcements
-    g.fillStyle(0x6a6a6a, 1);
-    g.fillRect(cx - 25, cy - 10, 4, 8);
-    g.fillRect(cx + 21, cy - 10, 4, 8);
-    g.fillRect(cx - 25, cy + 10, 4, 8);
-    g.fillRect(cx + 21, cy + 10, 4, 8);
+    // Mine entrance (larger, darker)
+    g.fillStyle(0x050403, 1);
+    g.fillRoundedRect(cx - 20, cy - 10, 40, 34, 5);
     
-    // Rails coming out
+    // Depth effect inside
+    g.fillStyle(0x1a1510, 0.4);
+    g.fillRect(cx - 16, cy - 6, 32, 26);
+    
+    // Reinforced wooden frame with metal brackets
+    g.fillStyle(0x7a4a1b, 1);
+    g.fillRect(cx - 24, cy - 14, 9, 44);  // Left post
+    g.fillRect(cx + 15, cy - 14, 9, 44);  // Right post
+    g.fillRect(cx - 28, cy - 20, 56, 12); // Top beam
+    
+    // Metal corner brackets
+    g.fillStyle(0x707070, 1);
+    // Top left bracket
+    g.fillRect(cx - 28, cy - 20, 10, 4);
+    g.fillRect(cx - 28, cy - 20, 4, 10);
+    // Top right bracket
+    g.fillRect(cx + 18, cy - 20, 10, 4);
+    g.fillRect(cx + 24, cy - 20, 4, 10);
+    // Bottom left bracket
+    g.fillRect(cx - 28, cy + 22, 10, 4);
+    g.fillRect(cx - 28, cy + 18, 4, 8);
+    // Bottom right bracket
+    g.fillRect(cx + 18, cy + 22, 10, 4);
+    g.fillRect(cx + 24, cy + 18, 4, 8);
+    
+    // Metal reinforcement strips
+    g.fillStyle(0x5a5a5a, 1);
+    g.fillRect(cx - 25, cy - 2, 5, 12);
+    g.fillRect(cx + 20, cy - 2, 5, 12);
+    
+    // Rivets
+    g.fillStyle(0x8a8a8a, 1);
+    g.fillCircle(cx - 22, cy, 2);
+    g.fillCircle(cx - 22, cy + 8, 2);
+    g.fillCircle(cx + 22, cy, 2);
+    g.fillCircle(cx + 22, cy + 8, 2);
+    
+    // Rails - more detailed
     g.fillStyle(0x4a4a4a, 1);
-    g.fillRect(cx - 12, cy + 20, 4, 12);
-    g.fillRect(cx + 8, cy + 20, 4, 12);
+    g.fillRect(cx - 12, cy + 24, 4, 16);
+    g.fillRect(cx + 8, cy + 24, 4, 16);
     
-    // Minecart
-    g.fillStyle(0x5a4a3a, 1);
-    g.fillRect(cx - 10, cy + 8, 20, 12);
-    g.fillStyle(0x6a5a4a, 1);
-    g.fillRect(cx - 8, cy + 6, 16, 4);
+    // Rail ties
+    g.fillStyle(0x5a3a1a, 1);
+    g.fillRect(cx - 16, cy + 26, 32, 4);
+    g.fillRect(cx - 16, cy + 34, 32, 4);
     
-    // Gold in cart
-    g.fillStyle(0xffd700, 0.9);
-    g.fillCircle(cx - 3, cy + 8, 4);
-    g.fillCircle(cx + 4, cy + 9, 3);
+    // Minecart - more detailed
+    this.drawMinecart(g, cx, cy + 12, 1.0, true);
     
-    // Wheels
+    // Hanging lanterns on both sides
     g.fillStyle(0x3a3a3a, 1);
-    g.fillCircle(cx - 8, cy + 22, 3);
-    g.fillCircle(cx + 8, cy + 22, 3);
+    g.fillRect(cx - 32, cy - 4, 5, 10);
+    g.fillRect(cx + 27, cy - 4, 5, 10);
+    g.fillStyle(0xffaa00, 0.9);
+    g.fillCircle(cx - 30, cy + 2, 4);
+    g.fillCircle(cx + 30, cy + 2, 4);
+    g.fillStyle(0xffdd44, 0.4);
+    g.fillCircle(cx - 30, cy + 2, 7);
+    g.fillCircle(cx + 30, cy + 2, 7);
+    
+    // Support beams on sides
+    g.fillStyle(0x6a4a2a, 1);
+    g.fillRect(cx - 35, cy + 15, 6, 25);
+    g.fillRect(cx + 29, cy + 15, 6, 25);
     
     // Level indicator - 2 silver stars
     this.drawLevelIndicator(g, 2);
   }
 
   /**
-   * Draw level 3 mine - gold-trimmed vault with glow
+   * Draw level 3 mine - gold-trimmed vault with glow effects
    */
   private static drawLevel3(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
     const cx = 0;
@@ -243,55 +356,229 @@ export class GoldMineGraphics {
     const hw = width / 2;
     const hh = height / 2;
     
-    // Glow effect underneath
-    g.fillStyle(0xffd700, 0.2);
-    g.fillCircle(cx, cy, hw + 5);
-    
-    // Polished stone base
-    g.fillStyle(0x6a6055, 1);
-    g.fillRoundedRect(cx - hw, cy - hh, width, height, 10);
-    
-    // Inner glow
+    // Outer glow effect
     g.fillStyle(0xffd700, 0.15);
-    g.fillRoundedRect(cx - hw + 4, cy - hh + 4, width - 8, height - 8, 8);
+    g.fillCircle(cx, cy, hw + 20);
+    g.fillStyle(0xffd700, 0.1);
+    g.fillCircle(cx, cy, hw + 30);
     
-    // Vault entrance
-    g.fillStyle(0x1a1510, 1);
-    g.fillRoundedRect(cx - 18, cy - 10, 36, 30, 6);
+    // Grand rock formation
+    g.fillStyle(0x5c4a38, 1);
+    g.beginPath();
+    g.moveTo(cx - hw - 20, cy + hh + 10);
+    g.lineTo(cx - hw - 5, cy - 15);
+    g.lineTo(cx - 25, cy - hh - 5);
+    g.lineTo(cx + 25, cy - hh - 5);
+    g.lineTo(cx + hw + 5, cy - 15);
+    g.lineTo(cx + hw + 20, cy + hh + 10);
+    g.closePath();
+    g.fill();
     
-    // Golden vault frame
+    // Polished stone facade
+    g.fillStyle(0x7a7065, 1);
+    g.fillRoundedRect(cx - 32, cy - 22, 64, 56, 8);
+    
+    // Gold inlay border
+    g.lineStyle(3, 0xdaa520, 1);
+    g.strokeRoundedRect(cx - 32, cy - 22, 64, 56, 8);
+    
+    // Inner glow around entrance
+    g.fillStyle(0xffd700, 0.2);
+    g.fillRoundedRect(cx - 26, cy - 16, 52, 46, 6);
+    
+    // Grand vault entrance
+    g.fillStyle(0x030201, 1);
+    g.fillRoundedRect(cx - 20, cy - 8, 40, 34, 6);
+    
+    // Warm glow from inside
+    g.fillStyle(0xffa500, 0.15);
+    g.fillRoundedRect(cx - 16, cy - 4, 32, 26, 4);
+    
+    // Ornate golden frame
     g.fillStyle(0xdaa520, 1);
-    g.fillRect(cx - 22, cy - 14, 8, 40);  // Left post
-    g.fillRect(cx + 14, cy - 14, 8, 40);  // Right post
-    g.fillRect(cx - 24, cy - 18, 48, 10); // Top beam
-    
-    // Gold trim details
+    // Left pillar with detail
+    g.fillRect(cx - 24, cy - 12, 8, 42);
     g.fillStyle(0xffd700, 1);
-    g.fillRect(cx - 24, cy - 20, 48, 3);  // Top edge
-    g.fillRect(cx - 24, cy + 23, 48, 3);  // Bottom edge
+    g.fillRect(cx - 23, cy - 10, 2, 38);
+    // Right pillar with detail
+    g.fillStyle(0xdaa520, 1);
+    g.fillRect(cx + 16, cy - 12, 8, 42);
+    g.fillStyle(0xffd700, 1);
+    g.fillRect(cx + 21, cy - 10, 2, 38);
     
-    // Decorative gold rivets
+    // Ornate top beam with arch detail
+    g.fillStyle(0xdaa520, 1);
+    g.fillRect(cx - 28, cy - 18, 56, 12);
+    // Gold trim on top
+    g.fillStyle(0xffd700, 1);
+    g.fillRect(cx - 28, cy - 20, 56, 4);
+    g.fillRect(cx - 28, cy - 10, 56, 3);
+    
+    // Decorative gold gems/rivets
     g.fillStyle(0xffec8b, 1);
-    g.fillCircle(cx - 18, cy - 8, 2);
-    g.fillCircle(cx + 18, cy - 8, 2);
-    g.fillCircle(cx - 18, cy + 8, 2);
-    g.fillCircle(cx + 18, cy + 8, 2);
+    g.fillCircle(cx - 20, cy - 6, 3);
+    g.fillCircle(cx + 20, cy - 6, 3);
+    g.fillCircle(cx - 20, cy + 10, 3);
+    g.fillCircle(cx + 20, cy + 10, 3);
+    // Center gem on top
+    g.fillStyle(0xff6b6b, 1);
+    g.fillCircle(cx, cy - 14, 4);
+    g.fillStyle(0xff9999, 0.8);
+    g.fillCircle(cx - 1, cy - 15, 2);
     
-    // Gold pile at entrance
+    // Luxurious rails - golden trim
+    g.fillStyle(0x4a4a4a, 1);
+    g.fillRect(cx - 12, cy + 26, 4, 16);
+    g.fillRect(cx + 8, cy + 26, 4, 16);
+    g.fillStyle(0xdaa520, 1);
+    g.fillRect(cx - 11, cy + 26, 2, 16);
+    g.fillRect(cx + 11, cy + 26, 2, 16);
+    
+    // Golden rail ties
+    g.fillStyle(0x8b6914, 1);
+    g.fillRect(cx - 16, cy + 28, 32, 4);
+    g.fillRect(cx - 16, cy + 36, 32, 4);
+    
+    // Lavish gold pile at entrance
     g.fillStyle(0xffd700, 1);
-    g.fillCircle(cx - 6, cy + 16, 5);
-    g.fillCircle(cx + 5, cy + 14, 4);
-    g.fillCircle(cx, cy + 12, 4);
-    g.fillCircle(cx - 2, cy + 18, 3);
-    g.fillCircle(cx + 7, cy + 18, 3);
+    g.fillCircle(cx - 8, cy + 18, 6);
+    g.fillCircle(cx + 6, cy + 16, 5);
+    g.fillCircle(cx - 2, cy + 14, 5);
+    g.fillCircle(cx + 10, cy + 20, 4);
+    g.fillCircle(cx - 10, cy + 22, 4);
+    g.fillCircle(cx, cy + 20, 4);
+    g.fillCircle(cx + 4, cy + 22, 3);
+    
+    // Gold bars stacked
+    g.fillStyle(0xffc107, 1);
+    g.fillRect(cx - 6, cy + 10, 12, 4);
+    g.fillRect(cx - 4, cy + 7, 8, 3);
     
     // Sparkle effects
-    g.fillStyle(0xffffff, 0.8);
-    g.fillCircle(cx - 4, cy + 10, 2);
-    g.fillCircle(cx + 6, cy + 15, 1.5);
+    g.fillStyle(0xffffff, 0.9);
+    g.fillCircle(cx - 5, cy + 12, 2);
+    g.fillCircle(cx + 7, cy + 14, 1.5);
+    g.fillCircle(cx - 8, cy + 16, 1.5);
+    g.fillCircle(cx + 3, cy + 18, 1);
     
-    // Level indicator - 3 gold stars
+    // Ornate lanterns
+    g.fillStyle(0xdaa520, 1);
+    g.fillRect(cx - 38, cy - 8, 8, 14);
+    g.fillRect(cx + 30, cy - 8, 8, 14);
+    g.fillStyle(0xffcc00, 1);
+    g.fillCircle(cx - 34, cy, 5);
+    g.fillCircle(cx + 34, cy, 5);
+    g.fillStyle(0xffee88, 0.5);
+    g.fillCircle(cx - 34, cy, 10);
+    g.fillCircle(cx + 34, cy, 10);
+    
+    // Level indicator - 3 gold stars with glow
     this.drawLevelIndicator(g, 3);
+  }
+  
+  /**
+   * Draw a detailed minecart
+   */
+  static drawMinecart(g: Phaser.GameObjects.Graphics, x: number, y: number, scale: number = 1, hasGold: boolean = true): void {
+    const s = scale;
+    
+    // Cart body - trapezoidal shape
+    g.fillStyle(0x5a4535, 1);
+    g.beginPath();
+    g.moveTo(x - 14 * s, y + 8 * s);
+    g.lineTo(x - 10 * s, y - 6 * s);
+    g.lineTo(x + 10 * s, y - 6 * s);
+    g.lineTo(x + 14 * s, y + 8 * s);
+    g.closePath();
+    g.fill();
+    
+    // Cart rim
+    g.fillStyle(0x6a5545, 1);
+    g.fillRect(x - 12 * s, y - 8 * s, 24 * s, 4 * s);
+    
+    // Metal bands on cart
+    g.fillStyle(0x4a4a4a, 1);
+    g.fillRect(x - 12 * s, y - 2 * s, 24 * s, 2 * s);
+    g.fillRect(x - 13 * s, y + 4 * s, 26 * s, 2 * s);
+    
+    // Rivets on bands
+    g.fillStyle(0x6a6a6a, 1);
+    g.fillCircle(x - 10 * s, y - 1 * s, 1.5 * s);
+    g.fillCircle(x + 10 * s, y - 1 * s, 1.5 * s);
+    g.fillCircle(x - 11 * s, y + 5 * s, 1.5 * s);
+    g.fillCircle(x + 11 * s, y + 5 * s, 1.5 * s);
+    
+    if (hasGold) {
+      // Gold pile in cart
+      g.fillStyle(0xffd700, 1);
+      g.fillCircle(x - 4 * s, y - 4 * s, 5 * s);
+      g.fillCircle(x + 4 * s, y - 3 * s, 4 * s);
+      g.fillCircle(x, y - 6 * s, 4 * s);
+      g.fillCircle(x - 6 * s, y - 2 * s, 3 * s);
+      g.fillCircle(x + 6 * s, y - 1 * s, 3 * s);
+      
+      // Gold shine
+      g.fillStyle(0xffec8b, 0.8);
+      g.fillCircle(x - 3 * s, y - 6 * s, 2 * s);
+      g.fillCircle(x + 5 * s, y - 4 * s, 1.5 * s);
+    }
+    
+    // Wheel axle
+    g.fillStyle(0x3a3a3a, 1);
+    g.fillRect(x - 16 * s, y + 8 * s, 32 * s, 3 * s);
+    
+    // Wheels - detailed
+    g.fillStyle(0x2a2a2a, 1);
+    g.fillCircle(x - 12 * s, y + 12 * s, 5 * s);
+    g.fillCircle(x + 12 * s, y + 12 * s, 5 * s);
+    // Wheel hubs
+    g.fillStyle(0x4a4a4a, 1);
+    g.fillCircle(x - 12 * s, y + 12 * s, 2 * s);
+    g.fillCircle(x + 12 * s, y + 12 * s, 2 * s);
+    // Wheel spokes
+    g.lineStyle(1.5 * s, 0x3a3a3a, 1);
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2;
+      g.lineBetween(
+        x - 12 * s + Math.cos(angle) * 2 * s,
+        y + 12 * s + Math.sin(angle) * 2 * s,
+        x - 12 * s + Math.cos(angle) * 5 * s,
+        y + 12 * s + Math.sin(angle) * 5 * s
+      );
+      g.lineBetween(
+        x + 12 * s + Math.cos(angle) * 2 * s,
+        y + 12 * s + Math.sin(angle) * 2 * s,
+        x + 12 * s + Math.cos(angle) * 5 * s,
+        y + 12 * s + Math.sin(angle) * 5 * s
+      );
+    }
+  }
+  
+  /**
+   * Draw a mine wagon for the collection animation
+   */
+  static drawWagon(graphics: Phaser.GameObjects.Graphics, goldAmount: number = 1): void {
+    graphics.clear();
+    
+    const scale = 1.2;
+    
+    // Draw the minecart
+    this.drawMinecart(graphics, 0, 0, scale, goldAmount > 0);
+    
+    // Add extra gold piles based on amount (for higher level mines)
+    if (goldAmount >= 2) {
+      graphics.fillStyle(0xffd700, 1);
+      graphics.fillCircle(-8 * scale, -8 * scale, 3 * scale);
+      graphics.fillCircle(8 * scale, -7 * scale, 3 * scale);
+    }
+    if (goldAmount >= 3) {
+      graphics.fillStyle(0xffec8b, 1);
+      graphics.fillCircle(0, -10 * scale, 4 * scale);
+      // Extra sparkles
+      graphics.fillStyle(0xffffff, 0.9);
+      graphics.fillCircle(-2 * scale, -9 * scale, 1.5 * scale);
+      graphics.fillCircle(4 * scale, -8 * scale, 1 * scale);
+    }
   }
 
   /**

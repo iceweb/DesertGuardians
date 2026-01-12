@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager, GoldMineManager, GoldMineUIManager } from '../managers';
+import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager, GoldMineManager, GoldMineUIManager, UIHitDetector } from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -22,6 +22,7 @@ export class GameScene extends Phaser.Scene {
   private audioManager!: AudioManager;
   private goldMineManager!: GoldMineManager;
   private goldMineUIManager!: GoldMineUIManager;
+  private uiHitDetector!: UIHitDetector;
 
   // Game state
   private gold: number = GAME_CONFIG.STARTING_GOLD;
@@ -36,7 +37,6 @@ export class GameScene extends Phaser.Scene {
   private hasGameStarted: boolean = false;
   
   // Review mode (after game over, player can review tower placement)
-  private isReviewMode: boolean = false;
   private isDefeatReview: boolean = false;
   private reviewModeUI: Phaser.GameObjects.Container | null = null;
   
@@ -73,7 +73,6 @@ export class GameScene extends Phaser.Scene {
     this.reviewModeUI = null;
     this.resultsPopup = null;
     this.resultData = null;
-    this.isReviewMode = false;
     this.isDefeatReview = false;
     this.playerName = '';
     this.hasSubmitted = false;
@@ -128,6 +127,10 @@ export class GameScene extends Phaser.Scene {
     this.hudManager.setCastlePosition(this.environment.getCastlePosition());
     this.setupHUDCallbacks();
 
+    // Initialize UI hit detector for centralized UI bounds checking
+    this.uiHitDetector = new UIHitDetector(this);
+    this.setupUIHitDetector();
+
     // Initialize audio manager and start BGM
     this.audioManager = AudioManager.getInstance();
     this.audioManager.initialize();
@@ -138,6 +141,9 @@ export class GameScene extends Phaser.Scene {
 
     // Setup creep click handler
     this.setupCreepClickHandler();
+
+    // Show initial next wave preview (wave 1)
+    this.updateNextWavePreview();
 
     console.log('GameScene: Desert Guardians initialized - Click anywhere to place towers!');
   }
@@ -228,6 +234,8 @@ export class GameScene extends Phaser.Scene {
       console.log(`Wave ${waveNumber} started!`);
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
+      // Update preview to show the NEXT wave (waveNumber + 1)
+      this.updateNextWavePreview();
       this.audioManager.playSFX('wave_start');
       
       // Track game start time when wave 1 begins
@@ -252,6 +260,9 @@ export class GameScene extends Phaser.Scene {
       // Silently add wave bonus gold (no animation - keep UI clean)
       this.gold += waveBonus;
       this.hudManager.updateGold(this.gold);
+      
+      // Show next wave preview (if there is a next wave)
+      this.updateNextWavePreview();
       
       // Small delay before showing mine income animation
       await new Promise<void>(resolve => this.time.delayedCall(300, () => resolve()));
@@ -347,7 +358,6 @@ export class GameScene extends Phaser.Scene {
     this.calculateScore();
     
     // Set review mode flags
-    this.isReviewMode = true;
     this.isDefeatReview = !isVictory;
     
     // Enable review mode on tower manager and gold mine UI (hide upgrade/sell buttons)
@@ -383,6 +393,28 @@ export class GameScene extends Phaser.Scene {
   }
 
   /**
+   * Setup UI hit detector with callbacks for dynamic elements
+   */
+  private setupUIHitDetector(): void {
+    // Connect to tower manager (for tower and menu detection)
+    this.towerManager.setUIHitDetector(this.uiHitDetector);
+    
+    // Set mine callback for mine detection
+    this.uiHitDetector.setMineCallback((x, y) => this.goldMineManager.getMineAtPosition(x, y));
+    
+    // Register static UI bounds for NextWavePanel area (bottom-left)
+    // The panel dynamically shows/hides but always occupies this general area
+    this.uiHitDetector.registerBounds('nextWavePanel', 10, this.cameras.main.height - 200, 180, 120);
+    
+    // Register menu button area (bottom-left corner)
+    this.uiHitDetector.registerBounds('menuButton', 15, this.cameras.main.height - 50, 100, 40);
+    
+    // Register start wave button area (bottom-center)
+    const width = this.cameras.main.width;
+    this.uiHitDetector.registerBounds('startWaveButton', width / 2 - 100, this.cameras.main.height - 100, 200, 70);
+  }
+
+  /**
    * Setup creep click handler for showing stats
    */
   private setupCreepClickHandler(): void {
@@ -407,6 +439,22 @@ export class GameScene extends Phaser.Scene {
         );
       }
     });
+  }
+
+  /**
+   * Update the next wave preview panel with upcoming wave info
+   */
+  private updateNextWavePreview(): void {
+    const nextWaveInfo = this.waveManager.getNextWaveInfo();
+    if (nextWaveInfo) {
+      this.hudManager.showNextWavePreview(
+        nextWaveInfo.waveNumber,
+        nextWaveInfo.types,
+        nextWaveInfo.waveType
+      );
+    } else {
+      this.hudManager.hideNextWavePreview();
+    }
   }
 
   update(_time: number, delta: number): void {

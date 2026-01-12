@@ -302,7 +302,7 @@ export class MenuScene extends Phaser.Scene {
   /**
    * Draw stars
    */
-  private drawStars(g: Phaser.GameObjects.Graphics, width: number, maxY: number): void {
+  private drawStars(g: Phaser.GameObjects.Graphics, width: number, _maxY: number): void {
     const starPositions = [
       { x: 100, y: 100 }, { x: 200, y: 80 }, { x: 350, y: 110 },
       { x: 500, y: 90 }, { x: 650, y: 105 }, { x: 800, y: 85 },
@@ -431,9 +431,9 @@ export class MenuScene extends Phaser.Scene {
   /**
    * Create the title with oriental/Egyptian styling
    */
-  private createTitle(width: number, height: number): void {
+  private createTitle(width: number, _height: number): void {
     // Title shadow
-    const titleShadow = this.add.text(width / 2 + 4, 165, 'Desert Guardians', {
+    this.add.text(width / 2 + 4, 165, 'Desert Guardians', {
       fontFamily: 'Papyrus, Copperplate, Georgia, serif',
       fontSize: '80px',
       color: '#000000'
@@ -479,7 +479,7 @@ export class MenuScene extends Phaser.Scene {
     titleDeco.lineBetween(width / 2 - 150, 225, width / 2 + 150, 225);
 
     // Subtitle
-    const subtitle = this.add.text(width / 2, 255, '~ Tower Defense ~', {
+    this.add.text(width / 2, 255, '~ Tower Defense ~', {
       fontFamily: 'Georgia, serif',
       fontSize: '26px',
       color: '#c9a86c',

@@ -4,6 +4,7 @@ import { TOWER_CONFIGS } from '../data';
 import type { TowerBranch } from '../objects/Tower';
 import type { AbilityDefinition } from '../objects/TowerAbilities';
 import { UIHelper } from './UIHelper';
+import type { UIHitDetector } from './UIHitDetector';
 
 /**
  * TowerUIManager handles tower build/upgrade menus and placement preview.
@@ -34,6 +35,9 @@ export class TowerUIManager {
   // Review mode - only show stats, no action buttons
   private reviewMode: boolean = false;
   
+  // UI Hit Detector for centralized UI bounds checking
+  private uiHitDetector: UIHitDetector | null = null;
+  
   // Callbacks
   public onBuildRequested?: (x: number, y: number, towerKey: string) => void;
   public onUpgradeRequested?: (tower: Tower, newKey: string) => void;
@@ -42,6 +46,7 @@ export class TowerUIManager {
   public getPlayerGold?: () => number;
   public canPlaceAt?: (x: number, y: number) => boolean;
   public isOverMine?: (x: number, y: number) => boolean;
+  public isInBuildableZone?: (x: number, y: number) => boolean;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -49,6 +54,13 @@ export class TowerUIManager {
     
     this.placementGraphics = scene.add.graphics();
     this.placementGraphics.setDepth(50);
+  }
+
+  /**
+   * Set the UI hit detector for centralized UI bounds checking
+   */
+  setUIHitDetector(detector: UIHitDetector): void {
+    this.uiHitDetector = detector;
   }
 
   /**
@@ -60,18 +72,27 @@ export class TowerUIManager {
 
   /**
    * Update placement preview ghost
+   * Only shows the green building circle when:
+   * 1. Not over any UI element (menus, buttons, panels)
+   * 2. Within the buildable zone (near the path or inside path loops)
+   * 3. Position is valid for tower placement (not on path, not overlapping towers)
    */
   updatePlacementPreview(x: number, y: number, towerAt: Tower | null): void {
     this.placementGraphics.clear();
     
-    if (this.buildMenuContainer || this.upgradeMenuContainer) return;
+    // Don't show if any menu is open
+    if (this.buildMenuContainer || this.upgradeMenuContainer || this.abilityMenuContainer) return;
+    
+    // Don't show if hovering over an existing tower
     if (towerAt) return;
-    if (y < 80) return;
-    if (y > this.scene.cameras.main.height - 100) return;
     
-    // Don't show placement preview over mine slots
-    if (this.isOverMine?.(x, y)) return;
+    // Use UIHitDetector for centralized UI bounds checking
+    if (this.uiHitDetector?.isOverUI(x, y)) return;
     
+    // Don't show if not in the buildable zone (near path or in path loop)
+    if (this.isInBuildableZone && !this.isInBuildableZone(x, y)) return;
+    
+    // Check if this is a valid placement position
     const canPlace = this.canPlaceAt?.(x, y) ?? false;
     const config = TOWER_CONFIGS['archer_1'];
     const TOWER_RADIUS = 25;
@@ -385,21 +406,29 @@ export class TowerUIManager {
     const hasBranches = upgradeOptions.branches && upgradeOptions.branches.length > 0;
     const hasLevelUp = !!upgradeOptions.levelUp;
     const branchCount = upgradeOptions.branches?.length || 0;
-    const isBuffed = tower.getDamageMultiplier() > 1.0;
+    const hasDamageBuff = tower.getDamageMultiplier() > 1.0;
+    const hasCritBuff = tower.getAuraCritBonus() > 0;
     const veteranRank = tower.getVeteranRank();
     const veteranName = tower.getVeteranRankName();
     const killCount = tower.getKillCount();
     
     // Calculate menu dimensions based on content
     const menuWidth = hasBranches && !this.reviewMode ? Math.max(680, branchCount * 105 + 60) : 420;
-    let menuHeight = 140; // Base height for title, stats, and veteran info
-    if (isBuffed) menuHeight += 16;
+    let menuHeight = 170; // Base height for title, stats (now multi-line), and veteran info
+    if (hasDamageBuff) menuHeight += 18;
+    if (hasCritBuff) menuHeight += 18;
     if (this.reviewMode) {
       // Review mode: just stats, no action buttons
       menuHeight += 20;
     } else if (hasBranches) menuHeight += 170; // Space for branch cards
     else if (hasLevelUp) menuHeight += 130; // Space for upgrade preview with larger stats
-    else menuHeight += 40; // Max level indicator
+    else {
+      // Max level - check if there's ability info to show
+      menuHeight += 40; // Base max level indicator
+      if (tower.getSelectedAbility()) {
+        menuHeight += 54; // Additional space for ability name, trigger chance, description
+      }
+    }
     if (!this.reviewMode) menuHeight += 45; // Space for sell button at bottom
     
     this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - (menuHeight / 2) - 40);
@@ -434,7 +463,7 @@ export class TowerUIManager {
     
     let yOffset = -menuHeight / 2 + 52;
     
-    // === CURRENT STATS with colors ===
+    // === CURRENT STATS with colors - Multi-line layout for readability ===
     const fireRateSec = config.stats.fireRate > 0 ? (config.stats.fireRate / 1000).toFixed(1) : '0.0';
     const baseDamage = config.stats.damage;
     const buffedDamage = tower.getDamage();
@@ -444,9 +473,11 @@ export class TowerUIManager {
     const baseDps = config.stats.fireRate > 0 ? (baseDamage / (config.stats.fireRate / 1000)).toFixed(1) : '0';
     const buffedDps = config.stats.fireRate > 0 ? (buffedDamage / (config.stats.fireRate / 1000)).toFixed(1) : '0';
     
-    // Stats row with colored values
+    // Stats in two rows for better readability
     const statsStartX = -menuWidth / 2 + 40;
+    const statLineHeight = 20;
     
+    // Row 1: DMG and Rate
     // DMG
     const dmgLabel = this.scene.add.text(statsStartX, yOffset, 'DMG:', {
       fontFamily: 'Arial',
@@ -462,42 +493,43 @@ export class TowerUIManager {
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(dmgValue);
     
-    let dmgEndX = statsStartX + 45 + dmgValue.width;
     if (hasBonus) {
       const bonusDmg = buffedDamage - baseDamage;
-      const dmgBonus = this.scene.add.text(dmgEndX + 3, yOffset, `(+${bonusDmg})`, {
+      const dmgBonus = this.scene.add.text(statsStartX + 45 + dmgValue.width + 3, yOffset, `(+${bonusDmg})`, {
         fontFamily: 'Arial',
         fontSize: '12px',
         color: '#88ff88'
       }).setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(dmgBonus);
-      dmgEndX += dmgBonus.width + 8;
     }
     
-    // Rate
-    const rateLabel = this.scene.add.text(statsStartX + 100, yOffset, 'Rate:', {
+    // Rate (right side of row 1)
+    const rateLabel = this.scene.add.text(statsStartX + 150, yOffset, 'Rate:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rateLabel);
     
-    const rateValue = this.scene.add.text(statsStartX + 145, yOffset, `${fireRateSec}s`, {
+    const rateValue = this.scene.add.text(statsStartX + 195, yOffset, `${fireRateSec}s`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: '#66ccff'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rateValue);
     
+    yOffset += statLineHeight;
+    
+    // Row 2: DPS and Range
     // DPS
-    const dpsLabel = this.scene.add.text(statsStartX + 200, yOffset, 'DPS:', {
+    const dpsLabel = this.scene.add.text(statsStartX, yOffset, 'DPS:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(dpsLabel);
     
-    const dpsValue = this.scene.add.text(statsStartX + 245, yOffset, `${baseDps}`, {
+    const dpsValue = this.scene.add.text(statsStartX + 45, yOffset, `${baseDps}`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: '#ffcc44'
@@ -506,7 +538,7 @@ export class TowerUIManager {
     
     if (hasBonus) {
       const bonusDps = (parseFloat(buffedDps) - parseFloat(baseDps)).toFixed(1);
-      const dpsBonus = this.scene.add.text(statsStartX + 245 + dpsValue.width + 3, yOffset, `(+${bonusDps})`, {
+      const dpsBonus = this.scene.add.text(statsStartX + 45 + dpsValue.width + 3, yOffset, `(+${bonusDps})`, {
         fontFamily: 'Arial',
         fontSize: '12px',
         color: '#88ff88'
@@ -514,22 +546,22 @@ export class TowerUIManager {
       this.upgradeMenuContainer.add(dpsBonus);
     }
     
-    // Range
-    const rangeLabel = this.scene.add.text(statsStartX + 275, yOffset, 'Range:', {
+    // Range (right side of row 2)
+    const rangeLabel = this.scene.add.text(statsStartX + 150, yOffset, 'Range:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rangeLabel);
     
-    const rangeValue = this.scene.add.text(statsStartX + 335, yOffset, `${config.stats.range}`, {
+    const rangeValue = this.scene.add.text(statsStartX + 205, yOffset, `${config.stats.range}`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: '#66ff66'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rangeValue);
     
-    yOffset += 22;
+    yOffset += statLineHeight + 2;
     
     // === VETERAN RANK & KILLS - Always visible ===
     const rankColors: Record<number, string> = {
@@ -583,15 +615,26 @@ export class TowerUIManager {
     
     yOffset += 20;
     
-    // Buff indicator if buffed
-    if (isBuffed) {
+    // Buff indicators - show each active buff
+    if (hasDamageBuff) {
       const buffPercent = Math.round((damageMultiplier - 1) * 100);
-      const buffText = this.scene.add.text(0, yOffset, `🔴 Aura Buff Active: +${buffPercent}% damage`, {
+      const buffText = this.scene.add.text(0, yOffset, `🔴 Aura Buff: +${buffPercent}% damage`, {
         fontFamily: 'Arial',
         fontSize: '13px',
         color: '#ff6666'
       }).setOrigin(0.5);
       this.upgradeMenuContainer.add(buffText);
+      yOffset += 16;
+    }
+    
+    if (hasCritBuff) {
+      const critPercent = Math.round(tower.getAuraCritBonus() * 100);
+      const critText = this.scene.add.text(0, yOffset, `⚡ Critical Aura: +${critPercent}% crit chance`, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: '#ffa500'
+      }).setOrigin(0.5);
+      this.upgradeMenuContainer.add(critText);
       yOffset += 16;
     }
     
@@ -927,6 +970,7 @@ export class TowerUIManager {
           onClick: () => this.showAbilitySelectionForExisting(tower)
         });
         this.upgradeMenuContainer.add(selectBtn.container);
+        yOffset += 35;
       } else {
         const maxText = this.scene.add.text(0, yOffset + 10, '★ MAX LEVEL ★', {
           fontFamily: 'Arial Black',
@@ -934,8 +978,41 @@ export class TowerUIManager {
           color: '#ffd700'
         }).setOrigin(0.5);
         this.upgradeMenuContainer.add(maxText);
+        yOffset += 25;
+        
+        // Show selected ability info if tower has one
+        const selectedAbility = tower.getSelectedAbility();
+        if (selectedAbility) {
+          const abilityColor = `#${selectedAbility.icon.primaryColor.toString(16).padStart(6, '0')}`;
+          
+          // Ability name with icon indicator
+          const abilityName = this.scene.add.text(0, yOffset + 10, `⚡ ${selectedAbility.name}`, {
+            fontFamily: 'Arial Black',
+            fontSize: '13px',
+            color: abilityColor
+          }).setOrigin(0.5);
+          this.upgradeMenuContainer.add(abilityName);
+          yOffset += 18;
+          
+          // Trigger chance
+          const triggerText = this.scene.add.text(0, yOffset + 10, `${Math.round(selectedAbility.triggerChance * 100)}% trigger chance`, {
+            fontFamily: 'Arial',
+            fontSize: '11px',
+            color: '#aaaaaa'
+          }).setOrigin(0.5);
+          this.upgradeMenuContainer.add(triggerText);
+          yOffset += 16;
+          
+          // Description
+          const descText = this.scene.add.text(0, yOffset + 10, selectedAbility.description, {
+            fontFamily: 'Arial',
+            fontSize: '11px',
+            color: '#888888'
+          }).setOrigin(0.5);
+          this.upgradeMenuContainer.add(descText);
+          yOffset += 20;
+        }
       }
-      yOffset += 35;
     }
     
     // === SELL BUTTON (always bottom right) - hide in review mode ===

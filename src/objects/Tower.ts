@@ -58,6 +58,7 @@ export class Tower extends Phaser.GameObjects.Container {
   
   // Aura buff state
   private damageMultiplier: number = 1.0;
+  private auraCritBonus: number = 0;  // Crit chance bonus from aura (0.15 = +15%)
   private buffGlowPhase: number = 0;
   
   // Single animator reference (replaces 6 separate nullable properties)
@@ -70,7 +71,6 @@ export class Tower extends Phaser.GameObjects.Container {
   // Level 4 ability system
   private abilityHandler: TowerAbilityHandler | null = null;
   private selectedAbilityId: string | null = null;
-  private abilityIconGraphics: Phaser.GameObjects.Graphics | null = null;
 
   constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string = 'archer_1') {
     super(scene, x, y);
@@ -366,11 +366,11 @@ export class Tower extends Phaser.GameObjects.Container {
    * Set damage multiplier from aura buff
    */
   setDamageMultiplier(multiplier: number): void {
-    const wasBuffed = this.damageMultiplier > 1.0;
+    const wasBuffed = this.damageMultiplier > 1.0 || this.auraCritBonus > 0;
     this.damageMultiplier = multiplier;
     
     // Clear glow if no longer buffed
-    if (wasBuffed && multiplier <= 1.0) {
+    if (wasBuffed && multiplier <= 1.0 && this.auraCritBonus <= 0) {
       this.buffGlowGraphics.clear();
     }
   }
@@ -383,16 +383,37 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Set crit bonus from aura buff (e.g., 0.15 for +15% crit chance)
+   */
+  setAuraCritBonus(bonus: number): void {
+    this.auraCritBonus = bonus;
+  }
+
+  /**
+   * Get crit bonus from aura
+   */
+  getAuraCritBonus(): number {
+    return this.auraCritBonus;
+  }
+
+  /**
+   * Check if tower has any aura buffs (damage or crit)
+   */
+  hasAuraBuff(): boolean {
+    return this.damageMultiplier > 1.0 || this.auraCritBonus > 0;
+  }
+
+  /**
    * Draw the red buff glow effect around this tower
    */
   private drawBuffGlow(): void {
     const g = this.buffGlowGraphics;
     g.clear();
     
-    if (this.damageMultiplier <= 1.0) return;
+    if (this.damageMultiplier <= 1.0 && this.auraCritBonus <= 0) return;
     
     // Pulsing glow intensity based on buff strength
-    const buffStrength = this.damageMultiplier - 1.0; // 0.2, 0.3, or 0.4
+    const buffStrength = (this.damageMultiplier - 1.0) + this.auraCritBonus; // Combined buff strength
     const pulseIntensity = (Math.sin(this.buffGlowPhase) + 1) * 0.5;
     const baseAlpha = 0.15 + pulseIntensity * 0.15 + buffStrength * 0.2;
     
@@ -516,7 +537,6 @@ export class Tower extends Phaser.GameObjects.Container {
     const success = this.abilityHandler.selectAbility(abilityId);
     if (success) {
       this.selectedAbilityId = abilityId;
-      this.drawAbilityIcon();
     }
     return success;
   }
@@ -553,38 +573,10 @@ export class Tower extends Phaser.GameObjects.Container {
   }
   
   /**
-   * Draw ability icon badge on tower
+   * Get the selected ability definition (for UI display)
    */
-  private drawAbilityIcon(): void {
-    if (!this.selectedAbilityId || !this.abilityHandler) return;
-    
-    const ability = this.abilityHandler.getSelectedAbility();
-    if (!ability) return;
-    
-    if (!this.abilityIconGraphics) {
-      this.abilityIconGraphics = this.scene.add.graphics();
-      this.add(this.abilityIconGraphics);
-    }
-    
-    const g = this.abilityIconGraphics;
-    g.clear();
-    
-    // Draw small icon badge at tower base
-    const iconX = 20;
-    const iconY = 15;
-    const iconSize = 12;
-    
-    // Background circle
-    g.fillStyle(0x000000, 0.7);
-    g.fillCircle(iconX, iconY, iconSize + 2);
-    
-    // Colored icon circle
-    g.fillStyle(ability.icon.primaryColor, 0.9);
-    g.fillCircle(iconX, iconY, iconSize);
-    
-    // Inner highlight
-    g.fillStyle(ability.icon.secondaryColor, 0.6);
-    g.fillCircle(iconX - 2, iconY - 2, iconSize * 0.4);
+  getSelectedAbility(): AbilityDefinition | null {
+    return this.abilityHandler?.getSelectedAbility() ?? null;
   }
 
   /**

@@ -38,11 +38,11 @@ export class CannonAnimator {
   private cheerTimer: number = 0;
   private cheerArmAngle: number = 0;
   
-  // Tower heights per level (Y position of operator from tower base at y=0)
-  private readonly OPERATOR_Y = [-30, -38, -45];
+  // Tower heights per level (Y position of operator from tower base at y=0, level 4 uses same as level 3)
+  private readonly OPERATOR_Y = [-30, -38, -45, -45];
   
   // Cannon barrel length for projectile spawn
-  private readonly BARREL_LENGTH = [25, 32, 42];
+  private readonly BARREL_LENGTH = [25, 32, 42, 42];
   
   constructor(scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) {
     this.container = container;
@@ -524,8 +524,8 @@ export class CannonAnimator {
       g.fillRect(-barrelWidth / 2 - 1, bodyY - 8, barrelWidth + 2, 3);
     }
     
-    // Level 3: Add decorative elements
-    if (this.level === 3) {
+    // Level 3+: Add decorative elements
+    if (this.level >= 3) {
       // Sight on top of barrel
       g.fillStyle(0x1a1a1a, 1);
       g.fillRect(-2, bodyY - barrelLength / 2 - 4 + recoilOffset, 4, 8);

@@ -624,8 +624,8 @@ export class ArcherAnimator {
     g.fillStyle(cloakColor, 1);  // Cut out bottom half
     g.fillRect(-bowLength - 2, bowY, bowLength * 2 + 4, 6);
     
-    // Bow tips
-    if (this.level === 3) {
+    // Bow tips (level 3+)
+    if (this.level >= 3) {
       g.fillStyle(0xffd700, 1);
       g.fillCircle(-bowLength, bowY, 3);
       g.fillCircle(bowLength, bowY, 3);
@@ -703,7 +703,7 @@ export class ArcherAnimator {
                     this.level === 2 ? 0x654321 : 0x4a3728;
     const bowLight = this.level === 1 ? 0xa05a23 :
                      this.level === 2 ? 0x755331 : 0x5a4738;
-    const stringColor = this.level === 3 ? 0xffd700 : 0xcccccc;
+    const stringColor = this.level >= 3 ? 0xffd700 : 0xcccccc;
     
     // Bow curve (side view from top - appears as curved line)
     const bowLength = 18 + this.level * 4;
@@ -754,8 +754,8 @@ export class ArcherAnimator {
       g.fillPath();
     }
     
-    // Level 3: Add decorative elements to bow
-    if (this.level === 3) {
+    // Level 3+: Add decorative elements to bow
+    if (this.level >= 3) {
       g.fillStyle(0xffd700, 1);
       g.fillCircle(bowX, bodyY - bowLength, 3);
       g.fillCircle(bowX, bodyY + bowLength, 3);

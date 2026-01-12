@@ -79,7 +79,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       description: 'Ground zone dealing damage for 3s',
       triggerChance: 0.20,
       icon: { type: AbilityIconType.EARTHQUAKE, primaryColor: 0x8b4513, secondaryColor: 0x5c4033 },
-      effectParams: { radius: 120, duration: 3000, damage: 8 }
+      effectParams: { radius: 85, duration: 3000, damage: 8 }
     },
     {
       id: 'cannon_shrapnel',

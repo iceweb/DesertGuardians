@@ -4,6 +4,7 @@ import { TOWER_CONFIGS, GAME_CONFIG } from '../data';
 import { PathSystem } from './MapPathSystem';
 import { TowerUIManager } from './TowerUIManager';
 import { GoldMineManager } from './GoldMineManager';
+import type { UIHitDetector } from './UIHitDetector';
 
 /**
  * TowerManager handles tower placement, selection, and management.
@@ -61,6 +62,11 @@ export class TowerManager {
     // Provide mine check (to hide placement preview over mines)
     this.uiManager.isOverMine = (x: number, y: number) => {
       return this.goldMineManager?.getMineAtPosition(x, y) !== null;
+    };
+    
+    // Provide buildable zone check (from PathSystem)
+    this.uiManager.isInBuildableZone = (x: number, y: number) => {
+      return this.pathSystem.isInBuildableZone(x, y);
     };
     
     // Handle build request
@@ -361,6 +367,17 @@ export class TowerManager {
   }
 
   /**
+   * Set the UI hit detector for centralized UI bounds checking
+   */
+  setUIHitDetector(detector: UIHitDetector): void {
+    this.uiManager.setUIHitDetector(detector);
+    
+    // Register callbacks with the detector
+    detector.setTowerCallback((x, y) => this.getTowerAt(x, y));
+    detector.setMenuCallback(() => this.uiManager.isMenuOpen());
+  }
+
+  /**
    * Set review mode - when true, tower menus only show stats (no upgrade/sell)
    */
   setReviewMode(enabled: boolean): void {
@@ -372,9 +389,10 @@ export class TowerManager {
    * Called when towers are built, upgraded, or sold
    */
   updateAuraBuffs(): void {
-    // First, reset all tower damage multipliers
+    // First, reset all tower damage multipliers and crit bonuses
     for (const tower of this.towers) {
       tower.setDamageMultiplier(1.0);
+      tower.setAuraCritBonus(0);
     }
     
     // Find all aura towers
@@ -385,6 +403,7 @@ export class TowerManager {
       if (tower.isAuraTower()) continue;  // Aura towers don't buff themselves
       
       let bestMultiplier = 0;
+      let hasCritAura = false;
       
       for (const auraTower of auraTowers) {
         const distance = Phaser.Math.Distance.Between(
@@ -399,12 +418,23 @@ export class TowerManager {
           if (auraMultiplier > bestMultiplier) {
             bestMultiplier = auraMultiplier;
           }
+          
+          // Check if this aura tower has Critical Aura ability selected
+          const selectedAbilityId = auraTower.getSelectedAbilityId();
+          if (selectedAbilityId === 'aura_critaura') {
+            hasCritAura = true;
+          }
         }
       }
       
       // Apply the best aura buff (only highest applies, no stacking)
       if (bestMultiplier > 0) {
         tower.setDamageMultiplier(1.0 + bestMultiplier);
+      }
+      
+      // Apply crit aura buff (+15% crit chance)
+      if (hasCritAura) {
+        tower.setAuraCritBonus(0.15);
       }
     }
     

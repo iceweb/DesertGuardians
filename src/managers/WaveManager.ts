@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { CreepManager } from './CreepManager';
 import { PathSystem } from './MapPathSystem';
 import { Creep } from '../objects';
-import { WAVE_CONFIGS } from '../data/GameData';
+import { WAVE_CONFIGS, CREEP_TYPES } from '../data/GameData';
 import type { WaveCreepGroup, WaveType } from '../data/GameData';
 
 /**
@@ -477,6 +477,36 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     return {
       killed: this.totalCreepsKilled,
       goldEarned: this.totalGoldEarned
+    };
+  }
+
+  /**
+   * Get info about the next wave (creep types, wave number, wave type)
+   * Returns null if all waves are complete
+   */
+  getNextWaveInfo(): { 
+    types: Array<{ type: string; description: string }>; 
+    waveNumber: number; 
+    waveType?: WaveType;
+    isBossWave: boolean;
+  } | null {
+    const nextWaveIndex = this.currentWave;  // 0-indexed (after wave 1 completes, this is 1 for wave 2)
+    if (nextWaveIndex >= WAVE_CONFIGS.length) return null;
+    
+    const waveDef = WAVE_CONFIGS[nextWaveIndex];
+    
+    // Get unique creep types with their descriptions
+    const uniqueTypes = [...new Set(waveDef.creeps.map(g => g.type))];
+    const typesWithDescriptions = uniqueTypes.map(type => ({
+      type,
+      description: CREEP_TYPES[type]?.description || 'Unknown creep type.'
+    }));
+    
+    return {
+      types: typesWithDescriptions,
+      waveNumber: waveDef.waveNumber,
+      waveType: waveDef.waveType,
+      isBossWave: waveDef.waveType === 'boss'
     };
   }
 

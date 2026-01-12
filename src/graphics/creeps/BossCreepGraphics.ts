@@ -32,8 +32,14 @@ export class BossCreepGraphics {
       case 'boss_5':
         BossCreepGraphics.drawBoss5(g, bounceTime, faceDirection);
         break;
-      case 'boss_guard':
-        BossCreepGraphics.drawBossGuard(g, bounceTime, faceDirection);
+      case 'boss_guard_1':
+        BossCreepGraphics.drawBossGuard1(g, bounceTime, faceDirection);
+        break;
+      case 'boss_guard_2':
+        BossCreepGraphics.drawBossGuard2(g, bounceTime, faceDirection);
+        break;
+      case 'boss_guard_3':
+        BossCreepGraphics.drawBossGuard3(g, bounceTime, faceDirection);
         break;
     }
   }
@@ -508,7 +514,7 @@ export class BossCreepGraphics {
     }
     
     // Wings - functional, dragon-like
-    g.fillStyle(0x883322, 0.9);
+    g.fillStyle(0x883322, 1);
     // Left wing
     g.beginPath();
     g.moveTo(-16, -6 + hover);
@@ -531,7 +537,7 @@ export class BossCreepGraphics {
     g.fillPath();
     
     // Wing membrane
-    g.lineStyle(2, 0x662211, 0.7);
+    g.lineStyle(2, 0x662211, 0.9);
     g.beginPath();
     g.moveTo(-18, -4 + hover);
     g.lineTo(-42, -18 + hover + wingFlap * 28);
@@ -708,7 +714,7 @@ export class BossCreepGraphics {
     g.fillCircle(-66 * faceDirection, 14 + hover, 2);
     
     // Massive wings
-    g.fillStyle(0x661111, 0.95);
+    g.fillStyle(0x661111, 1);
     // Left wing
     g.beginPath();
     g.moveTo(-18, -8 + hover);
@@ -731,7 +737,7 @@ export class BossCreepGraphics {
     g.fillPath();
     
     // Wing membrane veins
-    g.lineStyle(2, 0x440000, 0.7);
+    g.lineStyle(2, 0x440000, 0.9);
     g.beginPath();
     g.moveTo(-20, -6 + hover);
     g.lineTo(-52, -28 + hover + wingFlap * 35);
@@ -907,90 +913,514 @@ export class BossCreepGraphics {
   }
 
   /**
-   * Boss Guard: "Drake Warrior" - Armored reptilian escort with shield
+   * Boss Guard 1: "Drake Knight" - Armored dragon knight with shield and sword
    */
-  static drawBossGuard(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBossGuard1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.03;
+    const swordSwing = Math.sin(bounceTime * 3) * 5;
     
-    // Protective aura
-    g.fillStyle(0x448844, 0.15);
-    g.fillCircle(0, 0, 38 * pulse);
+    // Green aura
+    g.fillStyle(0x447744, 0.2);
+    g.fillCircle(0, 0, 36 * pulse);
     
     // Shadow
     g.fillStyle(0x000000, 0.35);
-    g.fillEllipse(0, 24, 34, 12);
+    g.fillEllipse(0, 26, 36, 12);
     
-    // Tail
-    g.fillStyle(0x446644, 1);
+    // Cape flowing behind
+    g.fillStyle(0x224422, 1);
     g.beginPath();
-    g.moveTo(-16 * faceDirection, 10 + bounce);
-    g.lineTo(-28 * faceDirection, 18 + bounce);
-    g.lineTo(-32 * faceDirection, 14 + bounce);
-    g.lineTo(-18 * faceDirection, 6 + bounce);
+    g.moveTo(-8 * faceDirection, -8 + bounce);
+    g.lineTo(-24 * faceDirection, 20 + bounce + swordSwing * 0.3);
+    g.lineTo(-18 * faceDirection, 22 + bounce);
+    g.lineTo(-6 * faceDirection, 5 + bounce);
     g.closePath();
     g.fillPath();
     
-    // Body - armored reptilian
-    g.fillStyle(0x336633, 1);
-    g.fillEllipse(0, 0 + bounce, 30, 24);
+    // Legs with armored boots
+    g.fillStyle(0x445544, 1);
+    g.fillRect(-10, 10 + bounce, 6, 14);
+    g.fillRect(4, 10 + bounce, 6, 14);
+    // Boots
+    g.fillStyle(0x333333, 1);
+    g.fillEllipse(-7, 24, 8, 5);
+    g.fillEllipse(7, 24, 8, 5);
     
-    // Scale armor plates
-    g.fillStyle(0x557755, 1);
-    g.fillEllipse(0, -4 + bounce, 22, 14);
-    g.fillStyle(0x668866, 0.8);
-    for (let i = 0; i < 3; i++) {
-      g.fillEllipse(-8 + i * 8, 4 + bounce, 6, 8);
+    // Body - heavy plate armor
+    g.fillStyle(0x556655, 1);
+    g.fillEllipse(0, 0 + bounce, 28, 22);
+    // Chest plate
+    g.fillStyle(0x667766, 1);
+    g.fillEllipse(4 * faceDirection, -2 + bounce, 18, 14);
+    // Armor segments
+    g.fillStyle(0x778877, 0.9);
+    g.fillRect(-8, -4 + bounce, 16, 4);
+    g.fillRect(-6, 2 + bounce, 12, 3);
+    
+    // Shield (left side) - large kite shield with dragon emblem
+    g.fillStyle(0x554433, 1);
+    g.beginPath();
+    g.moveTo(-20 * faceDirection, -14 + bounce);
+    g.lineTo(-28 * faceDirection, 0 + bounce);
+    g.lineTo(-20 * faceDirection, 16 + bounce);
+    g.lineTo(-14 * faceDirection, 0 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Shield border
+    g.lineStyle(2, 0x776655, 1);
+    g.strokePath();
+    // Dragon emblem on shield
+    g.fillStyle(0x44AA44, 1);
+    g.fillCircle(-20 * faceDirection, 0 + bounce, 6);
+    g.fillStyle(0x55CC55, 1);
+    g.beginPath();
+    g.moveTo(-20 * faceDirection, -4 + bounce);
+    g.lineTo(-17 * faceDirection, 2 + bounce);
+    g.lineTo(-23 * faceDirection, 2 + bounce);
+    g.closePath();
+    g.fillPath();
+    
+    // Sword arm
+    g.fillStyle(0x556655, 1);
+    g.fillEllipse(18 * faceDirection, 0 + bounce, 8, 6);
+    
+    // Sword
+    g.fillStyle(0x888888, 1);
+    g.save();
+    g.translateCanvas(22 * faceDirection, -10 + bounce);
+    g.rotateCanvas((swordSwing * 0.02) * faceDirection);
+    // Blade
+    g.fillRect(-2, -24, 4, 28);
+    g.fillStyle(0xAAAAAA, 1);
+    g.fillRect(-1, -24, 2, 28);
+    // Tip
+    g.fillStyle(0xBBBBBB, 1);
+    g.beginPath();
+    g.moveTo(-2, -24);
+    g.lineTo(0, -32);
+    g.lineTo(2, -24);
+    g.closePath();
+    g.fillPath();
+    // Guard
+    g.fillStyle(0x664422, 1);
+    g.fillRect(-6, 2, 12, 3);
+    // Handle
+    g.fillStyle(0x442211, 1);
+    g.fillRect(-2, 5, 4, 8);
+    g.restore();
+    
+    // Head with dragon helm
+    g.fillStyle(0x556655, 1);
+    g.fillEllipse(6 * faceDirection, -14 + bounce, 14, 12);
+    // Visor
+    g.fillStyle(0x445544, 1);
+    g.fillRect(8 * faceDirection, -16 + bounce, 8, 8);
+    // Eye slit
+    g.fillStyle(0x000000, 1);
+    g.fillRect(10 * faceDirection, -14 + bounce, 6, 2);
+    // Glowing eyes behind visor
+    g.fillStyle(0x88FF88, 0.8);
+    g.fillCircle(12 * faceDirection, -13 + bounce, 2);
+    // Helmet crest
+    g.fillStyle(0x667766, 1);
+    g.beginPath();
+    g.moveTo(2 * faceDirection, -20 + bounce);
+    g.lineTo(6 * faceDirection, -28 + bounce);
+    g.lineTo(10 * faceDirection, -20 + bounce);
+    g.closePath();
+    g.fillPath();
+  }
+
+  /**
+   * Boss Guard 2: "Dragon Knight" - Elite warrior with ornate armor and heavy shield
+   */
+  static drawBossGuard2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const bounce = Math.sin(bounceTime * 4) * 2;
+    const pulse = 1 + Math.sin(bounceTime * 6) * 0.04;
+    const swordSwing = Math.sin(bounceTime * 3) * 6;
+    
+    // Golden-green aura
+    g.fillStyle(0x88AA44, 0.25);
+    g.fillCircle(0, 0, 42 * pulse);
+    g.fillStyle(0xAAAA44, 0.15);
+    g.fillCircle(0, 0, 48 * pulse);
+    
+    // Shadow
+    g.fillStyle(0x000000, 0.4);
+    g.fillEllipse(0, 28, 40, 14);
+    
+    // Cape - larger and more ornate
+    g.fillStyle(0x883322, 1);
+    g.beginPath();
+    g.moveTo(-6 * faceDirection, -10 + bounce);
+    g.lineTo(-28 * faceDirection, 24 + bounce + swordSwing * 0.3);
+    g.lineTo(-20 * faceDirection, 26 + bounce);
+    g.lineTo(-4 * faceDirection, 8 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Cape gold trim
+    g.lineStyle(2, 0xCCAA44, 1);
+    g.strokePath();
+    
+    // Legs with ornate greaves
+    g.fillStyle(0x556655, 1);
+    g.fillRect(-12, 10 + bounce, 7, 16);
+    g.fillRect(5, 10 + bounce, 7, 16);
+    // Knee guards
+    g.fillStyle(0xBB9944, 1);
+    g.fillCircle(-8, 12 + bounce, 4);
+    g.fillCircle(8, 12 + bounce, 4);
+    // Boots
+    g.fillStyle(0x444444, 1);
+    g.fillEllipse(-8, 26, 10, 6);
+    g.fillEllipse(8, 26, 10, 6);
+    
+    // Body - ornate dragon scale armor
+    g.fillStyle(0x667766, 1);
+    g.fillEllipse(0, 0 + bounce, 32, 24);
+    // Dragon scale pattern
+    g.fillStyle(0x778877, 1);
+    for (let row = 0; row < 3; row++) {
+      for (let col = 0; col < 4; col++) {
+        g.fillEllipse(-9 + col * 6, -6 + row * 6 + bounce, 5, 4);
+      }
+    }
+    // Gold trim on chest
+    g.lineStyle(2, 0xCCAA44, 1);
+    g.strokeEllipse(0, -2 + bounce, 20, 12);
+    
+    // Large tower shield with dragon motif
+    g.fillStyle(0x665544, 1);
+    g.beginPath();
+    g.moveTo(-22 * faceDirection, -18 + bounce);
+    g.lineTo(-32 * faceDirection, -8 + bounce);
+    g.lineTo(-32 * faceDirection, 10 + bounce);
+    g.lineTo(-22 * faceDirection, 20 + bounce);
+    g.lineTo(-14 * faceDirection, 10 + bounce);
+    g.lineTo(-14 * faceDirection, -8 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Shield gold border
+    g.lineStyle(3, 0xCCAA44, 1);
+    g.strokePath();
+    // Dragon head emblem
+    g.fillStyle(0xAA6622, 1);
+    g.fillCircle(-23 * faceDirection, 0 + bounce, 8);
+    g.fillStyle(0xCC8833, 1);
+    g.beginPath();
+    g.moveTo(-23 * faceDirection, -6 + bounce);
+    g.lineTo(-18 * faceDirection, 4 + bounce);
+    g.lineTo(-28 * faceDirection, 4 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Dragon eye on emblem
+    g.fillStyle(0xFF4400, 1);
+    g.fillCircle(-23 * faceDirection, 0 + bounce, 3);
+    
+    // Armored sword arm with pauldron
+    g.fillStyle(0x667766, 1);
+    g.fillEllipse(20 * faceDirection, -2 + bounce, 10, 8);
+    g.fillStyle(0xBB9944, 1);
+    g.fillCircle(18 * faceDirection, -6 + bounce, 5);
+    
+    // Larger ornate sword
+    g.save();
+    g.translateCanvas(24 * faceDirection, -12 + bounce);
+    g.rotateCanvas((swordSwing * 0.02) * faceDirection);
+    // Blade
+    g.fillStyle(0x999999, 1);
+    g.fillRect(-3, -28, 6, 32);
+    g.fillStyle(0xBBBBBB, 1);
+    g.fillRect(-1, -28, 2, 32);
+    // Blade edge highlight
+    g.fillStyle(0xDDDDDD, 1);
+    g.fillRect(2, -26, 1, 28);
+    // Tip
+    g.fillStyle(0xCCCCCC, 1);
+    g.beginPath();
+    g.moveTo(-3, -28);
+    g.lineTo(0, -38);
+    g.lineTo(3, -28);
+    g.closePath();
+    g.fillPath();
+    // Ornate guard with dragon wings
+    g.fillStyle(0xCCAA44, 1);
+    g.fillRect(-10, 2, 20, 4);
+    g.beginPath();
+    g.moveTo(-10, 4);
+    g.lineTo(-14, 0);
+    g.lineTo(-10, 2);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(10, 4);
+    g.lineTo(14, 0);
+    g.lineTo(10, 2);
+    g.closePath();
+    g.fillPath();
+    // Handle with gold wire wrap
+    g.fillStyle(0x553322, 1);
+    g.fillRect(-2, 6, 4, 10);
+    g.fillStyle(0xCCAA44, 0.8);
+    for (let i = 0; i < 4; i++) {
+      g.fillRect(-2, 7 + i * 2, 4, 1);
+    }
+    // Pommel
+    g.fillStyle(0xCCAA44, 1);
+    g.fillCircle(0, 18, 3);
+    g.restore();
+    
+    // Head with dragon-crested helm
+    g.fillStyle(0x667766, 1);
+    g.fillEllipse(8 * faceDirection, -16 + bounce, 16, 14);
+    // Face guard
+    g.fillStyle(0x556655, 1);
+    g.fillRect(10 * faceDirection, -20 + bounce, 10, 12);
+    // Eye slits with inner glow
+    g.fillStyle(0x000000, 1);
+    g.fillRect(12 * faceDirection, -16 + bounce, 8, 3);
+    g.fillStyle(0xFFDD44, 0.9);
+    g.fillCircle(14 * faceDirection, -15 + bounce, 2);
+    g.fillCircle(18 * faceDirection, -15 + bounce, 2);
+    // Dragon crest on helm
+    g.fillStyle(0xCCAA44, 1);
+    g.beginPath();
+    g.moveTo(4 * faceDirection, -22 + bounce);
+    g.lineTo(8 * faceDirection, -36 + bounce);
+    g.lineTo(12 * faceDirection, -22 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Side horns
+    g.fillStyle(0x888866, 1);
+    g.beginPath();
+    g.moveTo(-2 * faceDirection, -18 + bounce);
+    g.lineTo(-8 * faceDirection, -26 + bounce);
+    g.lineTo(0 * faceDirection, -20 + bounce);
+    g.closePath();
+    g.fillPath();
+  }
+
+  /**
+   * Boss Guard 3: "Flame Knight" - Master warrior with flaming swords
+   */
+  static drawBossGuard3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+    const bounce = Math.sin(bounceTime * 4) * 2;
+    const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
+    const swordSwing = Math.sin(bounceTime * 3) * 8;
+    const flameFlicker = Math.sin(bounceTime * 12) * 0.3 + 0.7;
+    const flameWave = Math.sin(bounceTime * 8);
+    
+    // Fiery aura
+    g.fillStyle(0xFF4400, 0.2 * flameFlicker);
+    g.fillCircle(0, 0, 50 * pulse);
+    g.fillStyle(0xFF6600, 0.15 * flameFlicker);
+    g.fillCircle(0, 0, 56 * pulse);
+    g.fillStyle(0xFFAA00, 0.1 * flameFlicker);
+    g.fillCircle(0, 0, 62 * pulse);
+    
+    // Ember particles around
+    for (let i = 0; i < 6; i++) {
+      const angle = bounceTime * 2 + i * (Math.PI / 3);
+      const dist = 35 + Math.sin(bounceTime * 4 + i) * 8;
+      const ex = Math.cos(angle) * dist;
+      const ey = Math.sin(angle) * dist * 0.6;
+      g.fillStyle(0xFF6600, 0.6 + Math.sin(bounceTime * 8 + i) * 0.3);
+      g.fillCircle(ex, ey, 2 + Math.sin(bounceTime * 6 + i) * 1);
     }
     
-    // Shield (prominent)
-    g.fillStyle(0x554433, 1);
-    g.fillEllipse(-22 * faceDirection, 0 + bounce, 10, 16);
-    g.fillStyle(0x776655, 1);
-    g.fillEllipse(-22 * faceDirection, 0 + bounce, 6, 10);
-    // Shield emblem - dragon scale pattern
-    g.fillStyle(0x338833, 1);
-    g.fillCircle(-22 * faceDirection, -2 + bounce, 4);
+    // Shadow
+    g.fillStyle(0x000000, 0.45);
+    g.fillEllipse(0, 30, 44, 16);
     
-    // Head - lizard-like with helmet
-    g.fillStyle(0x448844, 1);
-    g.fillEllipse(12 * faceDirection, -8 + bounce, 14, 12);
-    
-    // Snout
-    g.fillStyle(0x55AA55, 1);
-    g.fillEllipse(20 * faceDirection, -6 + bounce, 8, 6);
-    
-    // Helmet
-    g.fillStyle(0x665544, 1);
-    g.fillEllipse(10 * faceDirection, -14 + bounce, 12, 8);
-    g.fillStyle(0x887766, 1);
-    g.fillRect(6 * faceDirection, -18 + bounce, 10, 4);
-    
-    // Eyes - reptilian slits
-    g.fillStyle(0xFFCC00, 1);
-    g.fillEllipse(14 * faceDirection, -10 + bounce, 3, 4);
-    g.fillStyle(0x000000, 1);
-    g.fillEllipse(14 * faceDirection, -10 + bounce, 1, 3);
-    
-    // Spear
-    g.fillStyle(0x553311, 1);
-    g.fillRect(24 * faceDirection, -30 + bounce, 3, 45);
-    g.fillStyle(0xAAAAAA, 1);
+    // Burning cape
+    g.fillStyle(0x441111, 1);
     g.beginPath();
-    g.moveTo(22 * faceDirection, -30 + bounce);
-    g.lineTo(25.5 * faceDirection, -40 + bounce);
-    g.lineTo(29 * faceDirection, -30 + bounce);
+    g.moveTo(-8 * faceDirection, -12 + bounce);
+    g.lineTo(-32 * faceDirection, 28 + bounce + swordSwing * 0.4);
+    g.lineTo(-24 * faceDirection, 30 + bounce);
+    g.lineTo(-4 * faceDirection, 10 + bounce);
     g.closePath();
     g.fillPath();
+    // Flame edges on cape
+    for (let i = 0; i < 5; i++) {
+      const fx = -32 * faceDirection + i * 2 * faceDirection;
+      const fy = 28 + bounce + Math.sin(bounceTime * 10 + i) * 3;
+      g.fillStyle(0xFF4400, 0.7);
+      g.fillCircle(fx, fy, 3);
+      g.fillStyle(0xFFAA00, 0.5);
+      g.fillCircle(fx, fy - 4, 2);
+    }
     
-    // Feet with claws
-    g.fillStyle(0x335533, 1);
-    g.fillEllipse(-10, 22, 8, 5);
-    g.fillEllipse(10, 22, 8, 5);
-    g.fillStyle(0x223322, 1);
-    g.fillCircle(-14, 23, 2);
-    g.fillCircle(-6, 24, 2);
-    g.fillCircle(6, 24, 2);
-    g.fillCircle(14, 23, 2);
+    // Legs with flame-etched greaves
+    g.fillStyle(0x333333, 1);
+    g.fillRect(-14, 10 + bounce, 8, 18);
+    g.fillRect(6, 10 + bounce, 8, 18);
+    // Flame etchings
+    g.fillStyle(0xFF4400, 0.6);
+    g.fillRect(-12, 14 + bounce, 4, 2);
+    g.fillRect(-12, 20 + bounce, 4, 2);
+    g.fillRect(8, 14 + bounce, 4, 2);
+    g.fillRect(8, 20 + bounce, 4, 2);
+    // Boots with flame tips
+    g.fillStyle(0x222222, 1);
+    g.fillEllipse(-10, 28, 12, 7);
+    g.fillEllipse(10, 28, 12, 7);
+    g.fillStyle(0xFF6600, 0.7 * flameFlicker);
+    g.fillCircle(-14, 26, 3);
+    g.fillCircle(14, 26, 3);
+    
+    // Body - black dragon scale armor with flame accents
+    g.fillStyle(0x222222, 1);
+    g.fillEllipse(0, 0 + bounce, 36, 28);
+    // Dragon scale pattern
+    g.fillStyle(0x333333, 1);
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 5; col++) {
+        g.fillEllipse(-12 + col * 6, -8 + row * 6 + bounce, 5, 4);
+      }
+    }
+    // Flame veins in armor
+    g.fillStyle(0xFF4400, 0.6 * flameFlicker);
+    g.fillRect(-10, -2 + bounce, 20, 2);
+    g.fillRect(-8, 4 + bounce, 16, 2);
+    // Glowing chest core
+    g.fillStyle(0xFF6600, 0.8 * flameFlicker);
+    g.fillCircle(0, 0 + bounce, 6);
+    g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+    g.fillCircle(0, 0 + bounce, 4);
+    
+    // Left flaming sword
+    g.save();
+    g.translateCanvas(-20 * faceDirection, -8 + bounce);
+    g.rotateCanvas((-swordSwing * 0.03 - 0.3) * faceDirection);
+    // Blade
+    g.fillStyle(0x444444, 1);
+    g.fillRect(-2, -32, 4, 36);
+    g.fillStyle(0x666666, 1);
+    g.fillRect(-1, -32, 2, 36);
+    // Flame on blade
+    for (let i = 0; i < 8; i++) {
+      const flameY = -30 + i * 4;
+      const flameSize = 4 + Math.sin(bounceTime * 12 + i) * 2;
+      const flameOffset = Math.sin(bounceTime * 10 + i * 0.5) * 3;
+      g.fillStyle(0xFF4400, 0.8 * flameFlicker);
+      g.fillCircle(flameOffset, flameY, flameSize);
+      g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+      g.fillCircle(flameOffset, flameY - 2, flameSize * 0.6);
+      g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
+      g.fillCircle(flameOffset, flameY - 3, flameSize * 0.3);
+    }
+    // Tip with flame burst
+    g.fillStyle(0xFF6600, 0.9);
+    g.beginPath();
+    g.moveTo(-2, -32);
+    g.lineTo(0, -42 - flameWave * 3);
+    g.lineTo(2, -32);
+    g.closePath();
+    g.fillPath();
+    // Guard
+    g.fillStyle(0x222222, 1);
+    g.fillRect(-6, 2, 12, 4);
+    // Handle
+    g.fillStyle(0x111111, 1);
+    g.fillRect(-2, 6, 4, 10);
+    g.restore();
+    
+    // Right flaming sword
+    g.save();
+    g.translateCanvas(26 * faceDirection, -10 + bounce);
+    g.rotateCanvas((swordSwing * 0.03 + 0.3) * faceDirection);
+    // Blade
+    g.fillStyle(0x444444, 1);
+    g.fillRect(-2, -34, 4, 38);
+    g.fillStyle(0x666666, 1);
+    g.fillRect(-1, -34, 2, 38);
+    // Flame on blade
+    for (let i = 0; i < 9; i++) {
+      const flameY = -32 + i * 4;
+      const flameSize = 5 + Math.sin(bounceTime * 11 + i * 1.1) * 2;
+      const flameOffset = Math.sin(bounceTime * 9 + i * 0.7) * 3;
+      g.fillStyle(0xFF4400, 0.8 * flameFlicker);
+      g.fillCircle(flameOffset, flameY, flameSize);
+      g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+      g.fillCircle(flameOffset, flameY - 2, flameSize * 0.6);
+      g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
+      g.fillCircle(flameOffset, flameY - 3, flameSize * 0.3);
+    }
+    // Tip with flame burst
+    g.fillStyle(0xFF6600, 0.9);
+    g.beginPath();
+    g.moveTo(-2, -34);
+    g.lineTo(0, -46 - flameWave * 4);
+    g.lineTo(2, -34);
+    g.closePath();
+    g.fillPath();
+    // Guard
+    g.fillStyle(0x222222, 1);
+    g.fillRect(-6, 2, 12, 4);
+    // Handle
+    g.fillStyle(0x111111, 1);
+    g.fillRect(-2, 6, 4, 10);
+    g.restore();
+    
+    // Armored shoulders with flame pauldrons
+    g.fillStyle(0x333333, 1);
+    g.fillEllipse(-16 * faceDirection, -6 + bounce, 10, 8);
+    g.fillEllipse(20 * faceDirection, -6 + bounce, 10, 8);
+    // Flame on pauldrons
+    g.fillStyle(0xFF4400, 0.7 * flameFlicker);
+    g.fillCircle(-16 * faceDirection, -10 + bounce, 5);
+    g.fillCircle(20 * faceDirection, -10 + bounce, 5);
+    g.fillStyle(0xFFAA00, 0.5 * flameFlicker);
+    g.fillCircle(-16 * faceDirection, -13 + bounce, 3);
+    g.fillCircle(20 * faceDirection, -13 + bounce, 3);
+    
+    // Head with dragon flame helm
+    g.fillStyle(0x222222, 1);
+    g.fillEllipse(8 * faceDirection, -18 + bounce, 18, 16);
+    // Face plate with dragon visage
+    g.fillStyle(0x333333, 1);
+    g.beginPath();
+    g.moveTo(12 * faceDirection, -26 + bounce);
+    g.lineTo(22 * faceDirection, -18 + bounce);
+    g.lineTo(20 * faceDirection, -8 + bounce);
+    g.lineTo(8 * faceDirection, -6 + bounce);
+    g.lineTo(4 * faceDirection, -18 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Eye slits with fire glow
+    g.fillStyle(0x000000, 1);
+    g.fillRect(10 * faceDirection, -20 + bounce, 10, 4);
+    g.fillStyle(0xFF4400, 0.9 * flameFlicker);
+    g.fillCircle(13 * faceDirection, -18 + bounce, 3);
+    g.fillCircle(18 * faceDirection, -18 + bounce, 3);
+    g.fillStyle(0xFFFF00, 0.7 * flameFlicker);
+    g.fillCircle(13 * faceDirection, -18 + bounce, 1.5);
+    g.fillCircle(18 * faceDirection, -18 + bounce, 1.5);
+    // Dragon horns with flames
+    g.fillStyle(0x222222, 1);
+    g.beginPath();
+    g.moveTo(2 * faceDirection, -24 + bounce);
+    g.lineTo(-4 * faceDirection, -38 + bounce);
+    g.lineTo(4 * faceDirection, -26 + bounce);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(14 * faceDirection, -26 + bounce);
+    g.lineTo(18 * faceDirection, -40 + bounce);
+    g.lineTo(18 * faceDirection, -26 + bounce);
+    g.closePath();
+    g.fillPath();
+    // Flames on horn tips
+    g.fillStyle(0xFF4400, 0.8 * flameFlicker);
+    g.fillCircle(-4 * faceDirection, -40 + bounce + flameWave * 2, 4);
+    g.fillCircle(18 * faceDirection, -42 + bounce + flameWave * 2, 4);
+    g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+    g.fillCircle(-4 * faceDirection, -44 + bounce + flameWave * 3, 3);
+    g.fillCircle(18 * faceDirection, -46 + bounce + flameWave * 3, 3);
+    g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
+    g.fillCircle(-4 * faceDirection, -47 + bounce + flameWave * 4, 2);
+    g.fillCircle(18 * faceDirection, -49 + bounce + flameWave * 4, 2);
   }
 }

@@ -494,4 +494,9 @@ export class Creep extends Phaser.GameObjects.Container {
   getIsGhostPhase(): boolean { return this.abilities.getState().isGhostPhase; }
   getDiggerPhase(): 'walking' | 'stopping' | 'burrowed' | 'resurfacing' { return this.abilities.getState().diggerPhase; }
   canBeTargeted(): boolean { return this.isActive && this.abilities.canBeTargeted(); }
+  
+  /**
+   * Check if this creep is a boss (immune to instant-kill abilities and strong CC)
+   */
+  isBoss(): boolean { return this.config.type.startsWith('boss'); }
 }

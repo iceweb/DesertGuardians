@@ -151,7 +151,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
 
   /**
    * Play income collection animation
-   * Shows coin burst and floating +Xg text
+   * Shows a mine wagon rolling out with gold
    */
   playIncomeAnimation(): Promise<void> {
     return new Promise((resolve) => {
@@ -161,73 +161,215 @@ export class GoldMine extends Phaser.GameObjects.Container {
         return;
       }
       
-      // Create floating text
-      const text = this.scene.add.text(this.x, this.y - 20, `+${income}g`, {
-        fontFamily: 'Arial Black',
-        fontSize: '18px',
-        color: '#ffd700',
-        stroke: '#000000',
-        strokeThickness: 3
-      }).setOrigin(0.5).setDepth(300);
+      // Create the wagon graphics
+      const wagon = this.scene.add.graphics();
+      wagon.setDepth(298);
       
-      // Animate text rising and fading
+      // Draw the wagon with gold based on mine level
+      GoldMineGraphics.drawWagon(wagon, this.mineLevel);
+      
+      // Position wagon inside the mine entrance
+      wagon.setPosition(this.x, this.y + 5);
+      wagon.setScale(0.5);
+      wagon.setAlpha(0);
+      
+      // Create rails for wagon to roll on (temporary visual)
+      const rails = this.scene.add.graphics();
+      rails.setDepth(297);
+      rails.lineStyle(3, 0x5a5a5a, 1);
+      rails.lineBetween(this.x - 10, this.y + 25, this.x, this.y + 70);
+      rails.lineBetween(this.x + 10, this.y + 25, this.x, this.y + 70);
+      rails.lineStyle(2, 0x6b4423, 1);
+      rails.lineBetween(this.x - 14, this.y + 35, this.x + 14, this.y + 35);
+      rails.lineBetween(this.x - 16, this.y + 50, this.x + 16, this.y + 50);
+      rails.lineBetween(this.x - 18, this.y + 65, this.x + 18, this.y + 65);
+      rails.setAlpha(0);
+      
+      // Fade in rails
       this.scene.tweens.add({
-        targets: text,
-        y: this.y - 60,
-        alpha: 0,
-        duration: 1200,
-        ease: 'Cubic.Out',
-        onComplete: () => {
-          text.destroy();
-          resolve();
-        }
+        targets: rails,
+        alpha: 0.8,
+        duration: 200,
+        ease: 'Quad.Out'
       });
       
-      // Create coin burst particles
-      this.createCoinBurst();
-      
-      // Scale pop effect on mine
+      // Animate wagon emerging from mine
       this.scene.tweens.add({
-        targets: this.graphics,
-        scaleX: 1.15,
-        scaleY: 1.15,
-        duration: 100,
-        yoyo: true,
-        ease: 'Quad.Out'
+        targets: wagon,
+        alpha: 1,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 200,
+        ease: 'Quad.Out',
+        onComplete: () => {
+          // Wagon rolls out
+          this.scene.tweens.add({
+            targets: wagon,
+            y: this.y + 55,
+            duration: 600,
+            ease: 'Quad.Out',
+            onComplete: () => {
+              // Create gold burst from wagon
+              this.createWagonGoldBurst(wagon.x, wagon.y);
+              
+              // Create floating text
+              const text = this.scene.add.text(wagon.x, wagon.y - 25, `+${income}g`, {
+                fontFamily: 'Arial Black',
+                fontSize: '22px',
+                color: '#ffd700',
+                stroke: '#000000',
+                strokeThickness: 4
+              }).setOrigin(0.5).setDepth(301);
+              
+              // Animate text rising
+              this.scene.tweens.add({
+                targets: text,
+                y: wagon.y - 80,
+                alpha: 0,
+                scaleX: 1.3,
+                scaleY: 1.3,
+                duration: 1200,
+                ease: 'Cubic.Out',
+                onComplete: () => {
+                  text.destroy();
+                }
+              });
+              
+              // Wagon rolls back into mine
+              this.scene.time.delayedCall(400, () => {
+                this.scene.tweens.add({
+                  targets: wagon,
+                  y: this.y + 5,
+                  scaleX: 0.5,
+                  scaleY: 0.5,
+                  alpha: 0,
+                  duration: 400,
+                  ease: 'Quad.In',
+                  onComplete: () => {
+                    wagon.destroy();
+                  }
+                });
+                
+                // Fade out rails
+                this.scene.tweens.add({
+                  targets: rails,
+                  alpha: 0,
+                  duration: 300,
+                  delay: 200,
+                  ease: 'Quad.In',
+                  onComplete: () => {
+                    rails.destroy();
+                    resolve();
+                  }
+                });
+              });
+              
+              // Scale pop effect on mine
+              this.scene.tweens.add({
+                targets: this.graphics,
+                scaleX: 1.1,
+                scaleY: 1.1,
+                duration: 100,
+                yoyo: true,
+                ease: 'Quad.Out'
+              });
+            }
+          });
+        }
       });
     });
   }
 
   /**
-   * Create coin burst effect
+   * Create gold burst effect from wagon
    */
-  private createCoinBurst(): void {
-    const coinCount = Math.min(3 + this.mineLevel, 5);
+  private createWagonGoldBurst(x: number, y: number): void {
+    const coinCount = 5 + this.mineLevel * 3;
     
     for (let i = 0; i < coinCount; i++) {
       const coin = this.scene.add.graphics();
+      
+      // More detailed coin
       coin.fillStyle(0xffd700, 1);
-      coin.fillCircle(0, 0, 4);
-      coin.lineStyle(1, 0xdaa520, 1);
-      coin.strokeCircle(0, 0, 4);
-      coin.setPosition(this.x, this.y);
-      coin.setDepth(295);
+      coin.fillCircle(0, 0, 5);
+      coin.lineStyle(1.5, 0xdaa520, 1);
+      coin.strokeCircle(0, 0, 5);
+      coin.fillStyle(0xffec8b, 1);
+      coin.fillCircle(-1, -1, 2);
       
-      // Random burst direction
-      const angle = (Math.PI * 2 * i) / coinCount - Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-      const distance = 30 + Math.random() * 20;
-      const targetX = this.x + Math.cos(angle) * distance;
-      const targetY = this.y + Math.sin(angle) * distance - 20;
+      coin.setPosition(x + (Math.random() - 0.5) * 20, y);
+      coin.setDepth(300);
       
-      // Animate coin
+      // Randomized burst pattern - coins fly up and arc
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.8;
+      const distance = 40 + Math.random() * 40;
+      const targetX = x + Math.cos(angle) * distance;
+      const peakY = y - 50 - Math.random() * 30;
+      const targetY = y - 20 + Math.random() * 10;
+      
+      // Arc motion using timeline
       this.scene.tweens.add({
         targets: coin,
         x: targetX,
-        y: targetY,
-        alpha: 0,
         duration: 600 + Math.random() * 200,
+        ease: 'Quad.Out'
+      });
+      
+      this.scene.tweens.add({
+        targets: coin,
+        y: peakY,
+        duration: 300 + Math.random() * 100,
         ease: 'Quad.Out',
-        onComplete: () => coin.destroy()
+        onComplete: () => {
+          this.scene.tweens.add({
+            targets: coin,
+            y: targetY + 40,
+            alpha: 0,
+            duration: 400,
+            ease: 'Quad.In',
+            onComplete: () => coin.destroy()
+          });
+        }
+      });
+      
+      // Spin effect
+      this.scene.tweens.add({
+        targets: coin,
+        scaleX: { from: 1, to: -1 },
+        duration: 150,
+        yoyo: true,
+        repeat: 3,
+        ease: 'Linear'
+      });
+    }
+    
+    // Add sparkle trail
+    for (let i = 0; i < 8; i++) {
+      this.scene.time.delayedCall(i * 50, () => {
+        const sparkle = this.scene.add.graphics();
+        sparkle.fillStyle(0xffff88, 1);
+        // Draw a simple 4-pointed star shape
+        sparkle.fillTriangle(-3, 0, 0, -5, 3, 0);
+        sparkle.fillTriangle(-3, 0, 0, 5, 3, 0);
+        sparkle.fillTriangle(0, -3, -5, 0, 0, 3);
+        sparkle.fillTriangle(0, -3, 5, 0, 0, 3);
+        sparkle.setPosition(
+          x + (Math.random() - 0.5) * 40,
+          y - Math.random() * 30
+        );
+        sparkle.setDepth(299);
+        sparkle.setScale(0.5 + Math.random() * 0.5);
+        
+        this.scene.tweens.add({
+          targets: sparkle,
+          y: sparkle.y - 20,
+          alpha: 0,
+          scaleX: 0,
+          scaleY: 0,
+          duration: 400,
+          ease: 'Quad.Out',
+          onComplete: () => sparkle.destroy()
+        });
       });
     }
   }

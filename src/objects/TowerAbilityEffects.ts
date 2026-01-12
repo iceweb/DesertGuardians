@@ -76,29 +76,151 @@ export class TowerAbilityEffects {
   }
 
   executeEarthquake(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
-    const { scene, hitPosition, allCreeps } = context;
-    const radius = params.radius || 120;
+    const { scene, hitPosition, allCreeps, tower } = context;
+    const radius = params.radius || 85;
     const duration = params.duration || 3000;
     const damage = params.damage || 8;
     
-    const zone = scene.add.graphics();
-    zone.setPosition(hitPosition.x, hitPosition.y);
-    zone.setDepth(15);
+    // Show floating text over tower
+    this.visuals.showFloatingText(tower.x, tower.y - 40, 'EARTHQUAKE!', 0x8b4513);
     
-    zone.fillStyle(0x8b4513, 0.4);
-    zone.fillCircle(0, 0, radius);
-    zone.lineStyle(2, 0x5c4033, 0.6);
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
-      zone.lineBetween(0, 0, Math.cos(angle) * radius * 0.9, Math.sin(angle) * radius * 0.9);
-    }
+    // Create earthquake zone container for complex visuals
+    const zoneContainer = scene.add.container(hitPosition.x, hitPosition.y);
+    zoneContainer.setDepth(15);
+    
+    // Main ground zone graphics
+    const zone = scene.add.graphics();
+    zoneContainer.add(zone);
+    
+    // Crack pattern graphics (separate for animation)
+    const cracks = scene.add.graphics();
+    zoneContainer.add(cracks);
+    
+    // Debris particles container
+    const debrisContainer = scene.add.container(0, 0);
+    zoneContainer.add(debrisContainer);
+    
+    // Draw base cracked ground
+    const drawEarthquakeZone = (intensity: number = 1) => {
+      zone.clear();
+      cracks.clear();
+      
+      // Ground base with gradient-like appearance
+      zone.fillStyle(0x5c4033, 0.4 * intensity);
+      zone.fillCircle(0, 0, radius);
+      zone.fillStyle(0x8b4513, 0.5 * intensity);
+      zone.fillCircle(0, 0, radius * 0.7);
+      zone.fillStyle(0x6b3d2e, 0.6 * intensity);
+      zone.fillCircle(0, 0, radius * 0.4);
+      
+      // Outer ring with rocky texture
+      zone.lineStyle(4, 0x3d2817, 0.8 * intensity);
+      zone.strokeCircle(0, 0, radius);
+      zone.lineStyle(2, 0x654321, 0.6 * intensity);
+      zone.strokeCircle(0, 0, radius * 0.85);
+      
+      // Main crack lines radiating from center (jagged)
+      cracks.lineStyle(3, 0x2a1a0f, 0.9 * intensity);
+      for (let i = 0; i < 8; i++) {
+        const baseAngle = (i / 8) * Math.PI * 2;
+        cracks.beginPath();
+        cracks.moveTo(0, 0);
+        
+        // Create jagged line
+        let x = 0, y = 0;
+        const segments = 4;
+        for (let s = 1; s <= segments; s++) {
+          const progress = s / segments;
+          const jitter = (Math.random() - 0.5) * 15;
+          const angle = baseAngle + jitter * 0.03;
+          x = Math.cos(angle) * radius * 0.9 * progress;
+          y = Math.sin(angle) * radius * 0.9 * progress;
+          cracks.lineTo(x, y);
+        }
+        cracks.strokePath();
+      }
+      
+      // Secondary cracks (shorter, thinner)
+      cracks.lineStyle(2, 0x3d2817, 0.7 * intensity);
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2 + 0.15;
+        const startDist = radius * (0.3 + Math.random() * 0.2);
+        const endDist = radius * (0.6 + Math.random() * 0.25);
+        const startX = Math.cos(angle) * startDist;
+        const startY = Math.sin(angle) * startDist;
+        const jitterAngle = angle + (Math.random() - 0.5) * 0.3;
+        const endX = Math.cos(jitterAngle) * endDist;
+        const endY = Math.sin(jitterAngle) * endDist;
+        cracks.lineBetween(startX, startY, endX, endY);
+      }
+      
+      // Small rocks/debris at crack intersections
+      cracks.fillStyle(0x4a3020, 0.8 * intensity);
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2 + Math.random() * 0.5;
+        const dist = radius * (0.4 + Math.random() * 0.3);
+        const rockX = Math.cos(angle) * dist;
+        const rockY = Math.sin(angle) * dist;
+        const rockSize = 3 + Math.random() * 4;
+        cracks.fillCircle(rockX, rockY, rockSize);
+      }
+    };
+    
+    // Initial draw
+    drawEarthquakeZone(1);
+    
+    // Spawn initial debris particles rising from cracks
+    const spawnDebris = () => {
+      for (let i = 0; i < 8; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * radius * 0.8;
+        const debris = scene.add.graphics();
+        debris.fillStyle(0x8b4513, 0.9);
+        const size = 2 + Math.random() * 4;
+        debris.fillCircle(0, 0, size);
+        debris.setPosition(Math.cos(angle) * dist, Math.sin(angle) * dist);
+        debrisContainer.add(debris);
+        
+        scene.tweens.add({
+          targets: debris,
+          y: debris.y - 15 - Math.random() * 20,
+          x: debris.x + (Math.random() - 0.5) * 20,
+          alpha: 0,
+          duration: 400 + Math.random() * 300,
+          onComplete: () => debris.destroy()
+        });
+      }
+    };
+    
+    // Initial shake and debris
+    spawnDebris();
+    
+    // Shaking animation
+    const shakeEarthquake = () => {
+      scene.tweens.chain({
+        targets: zoneContainer,
+        tweens: [
+          { x: hitPosition.x - 5, y: hitPosition.y - 3, duration: 40 },
+          { x: hitPosition.x + 5, y: hitPosition.y + 3, duration: 40 },
+          { x: hitPosition.x - 3, y: hitPosition.y + 4, duration: 40 },
+          { x: hitPosition.x + 4, y: hitPosition.y - 4, duration: 40 },
+          { x: hitPosition.x, y: hitPosition.y, duration: 40 }
+        ]
+      });
+    };
+    
+    shakeEarthquake();
     
     const tickInterval = 500;
+    let tickCount = 0;
+    const maxTicks = Math.floor(duration / tickInterval);
     
     const timer = scene.time.addEvent({
       delay: tickInterval,
-      repeat: Math.floor(duration / tickInterval) - 1,
+      repeat: maxTicks - 1,
       callback: () => {
+        tickCount++;
+        
         for (const creep of allCreeps) {
           if (!creep.getIsActive()) continue;
           const dist = Phaser.Math.Distance.Between(hitPosition.x, hitPosition.y, creep.x, creep.y);
@@ -107,22 +229,45 @@ export class TowerAbilityEffects {
           }
         }
         
-        scene.tweens.add({
-          targets: zone,
-          alpha: 0.3,
-          duration: 100,
-          yoyo: true
-        });
+        // Shake and spawn debris on each tick
+        shakeEarthquake();
+        spawnDebris();
+        
+        // Redraw with slightly faded intensity as duration progresses
+        const intensity = 1 - (tickCount / maxTicks) * 0.3;
+        drawEarthquakeZone(intensity);
       }
     });
     
     scene.time.delayedCall(duration, () => {
       timer.destroy();
+      
+      // Final debris burst
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const debris = scene.add.graphics();
+        debris.fillStyle(0x6b4423, 0.8);
+        debris.fillCircle(0, 0, 3 + Math.random() * 3);
+        debris.setPosition(hitPosition.x, hitPosition.y);
+        debris.setDepth(16);
+        
+        scene.tweens.add({
+          targets: debris,
+          x: hitPosition.x + Math.cos(angle) * (radius * 0.5 + Math.random() * 20),
+          y: hitPosition.y + Math.sin(angle) * (radius * 0.5 + Math.random() * 20) - 10,
+          alpha: 0,
+          duration: 400,
+          onComplete: () => debris.destroy()
+        });
+      }
+      
       scene.tweens.add({
-        targets: zone,
+        targets: zoneContainer,
         alpha: 0,
-        duration: 300,
-        onComplete: () => zone.destroy()
+        scaleX: 1.1,
+        scaleY: 1.1,
+        duration: 400,
+        onComplete: () => zoneContainer.destroy()
       });
     });
     
@@ -173,7 +318,7 @@ export class TowerAbilityEffects {
   
   executeCriticalStrike(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
     const damageMultiplier = params.damageMultiplier || 2.0;
-    this.visuals.showFloatingText(context.hitPosition.x, context.hitPosition.y - 20, 'CRIT!', 0xff0000);
+    this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'CRIT HIT!', 0xff0000);
     
     return { 
       triggered: true, 
@@ -184,7 +329,7 @@ export class TowerAbilityEffects {
   }
 
   executeArmorPierce(context: AbilityContext, _params: AbilityDefinition['effectParams']): AbilityResult {
-    this.visuals.showFloatingText(context.hitPosition.x, context.hitPosition.y - 20, 'PIERCE!', 0x00bfff);
+    this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'PIERCE!', 0x00bfff);
     this.visuals.showArmorPierceTrail(context.tower.x, context.tower.y, context.hitPosition.x, context.hitPosition.y);
     
     return { 
@@ -201,8 +346,21 @@ export class TowerAbilityEffects {
     
     const healthPercent = target.getCurrentHealth() / target.getConfig().maxHealth;
     
+    // Bosses are IMMUNE to instant-kill - always do bonus damage instead
+    if (target.isBoss()) {
+      this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'HEADSHOT!', 0xff6666);
+      this.visuals.showFloatingText(target.x, target.y - 30, 'IMMUNE', 0xffaa00);
+      
+      return { 
+        triggered: true, 
+        abilityId: 'sniper_headshot',
+        extraDamage: damage * (damageMultiplier - 1),
+        message: 'HEADSHOT!'
+      };
+    }
+    
     if (healthPercent <= hpThreshold) {
-      this.visuals.showFloatingText(context.hitPosition.x, context.hitPosition.y - 20, '💀 HEADSHOT!', 0xff0000);
+      this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, '💀 HEADSHOT!', 0xff0000);
       this.visuals.showSkullEffect(context.hitPosition.x, context.hitPosition.y);
       
       return { 
@@ -212,7 +370,7 @@ export class TowerAbilityEffects {
         message: 'HEADSHOT!'
       };
     } else {
-      this.visuals.showFloatingText(context.hitPosition.x, context.hitPosition.y - 20, 'HEADSHOT!', 0xff6666);
+      this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'HEADSHOT!', 0xff6666);
       
       return { 
         triggered: true, 
@@ -227,7 +385,13 @@ export class TowerAbilityEffects {
   
   executeIceTrap(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
     const { target } = context;
-    const duration = params.duration || 2000;
+    let duration = params.duration || 2000;
+    
+    // Bosses resist CC - reduced freeze duration
+    if (target.isBoss()) {
+      duration = Math.floor(duration * 0.3); // 30% duration on bosses
+      this.visuals.showFloatingText(target.x, target.y - 30, 'RESISTED', 0xffaa00);
+    }
     
     target.applyFreeze(duration);
     this.visuals.showIceBlockEffect(target.x, target.y, duration);
@@ -257,10 +421,16 @@ export class TowerAbilityEffects {
 
   executeShatter(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
     const { target, damage } = context;
-    const damageMultiplier = params.damageMultiplier || 2.0;
+    let damageMultiplier = params.damageMultiplier || 2.0;
     
     if (!target.isSlowed()) {
       return { triggered: false };
+    }
+    
+    // Bosses resist massive % damage - reduced multiplier
+    if (target.isBoss()) {
+      damageMultiplier = 1.0 + (damageMultiplier - 1.0) * 0.5; // 50% of bonus damage on bosses
+      this.visuals.showFloatingText(target.x, target.y - 30, 'RESISTED', 0xffaa00);
     }
     
     target.clearSlow();
@@ -309,10 +479,16 @@ export class TowerAbilityEffects {
 
   executeCorrosiveAcid(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
     const { target } = context;
-    const armorReduction = params.armorReduction || 2;
+    let armorReduction = params.armorReduction || 2;
+    
+    // Bosses resist armor reduction
+    if (target.isBoss()) {
+      armorReduction = Math.floor(armorReduction * 0.5); // 50% effectiveness on bosses
+      this.visuals.showFloatingText(target.x, target.y - 30, 'RESISTED', 0xffaa00);
+    }
     
     target.applyArmorReduction(armorReduction);
-    this.visuals.showFloatingText(target.x, target.y - 20, 'CORRODE!', 0x9acd32);
+    this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'CORRODE!', 0x9acd32);
     
     return { triggered: true, abilityId: 'poison_corrosive', message: 'CORRODE!' };
   }

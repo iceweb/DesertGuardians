@@ -26,6 +26,9 @@ export class AuraAnimator {
   private orbY: number = 0;
   private orbSize: number = 0;
   
+  // Scale factor - matches AuraTowerGraphics
+  private readonly scale: number = 0.5;
+  
   constructor(scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) {
     this.container = container;
     this.level = level;
@@ -46,13 +49,13 @@ export class AuraAnimator {
   }
   
   /**
-   * Calculate orb position based on level
+   * Calculate orb position based on level (scaled)
    */
   private updateOrbPosition(): void {
-    const pillarHeight = 35 + this.level * 8;
-    const platY = -pillarHeight - 5;
-    this.orbY = platY - 12 - this.level * 3;
-    this.orbSize = 10 + this.level * 3;
+    const pillarHeight = (35 + this.level * 8) * this.scale;
+    const platY = -pillarHeight - 5 * this.scale;
+    this.orbY = platY - (12 + this.level * 3) * this.scale;
+    this.orbSize = (10 + this.level * 3) * this.scale;
   }
   
   /**
@@ -114,17 +117,17 @@ export class AuraAnimator {
     const baseAlpha = 0.3 + glowIntensity * 0.4;
     
     // Outer glow
-    const outerSize = this.orbSize + 8 + glowIntensity * 6;
+    const outerSize = this.orbSize + (8 + glowIntensity * 6) * this.scale;
     g.fillStyle(0xff2222, baseAlpha * 0.3);
     g.fillCircle(0, this.orbY, outerSize);
     
     // Middle glow
-    const middleSize = this.orbSize + 4 + glowIntensity * 3;
+    const middleSize = this.orbSize + (4 + glowIntensity * 3) * this.scale;
     g.fillStyle(0xff4444, baseAlpha * 0.5);
     g.fillCircle(0, this.orbY, middleSize);
     
     // Inner bright core
-    const innerSize = this.orbSize - 2 + glowIntensity * 2;
+    const innerSize = this.orbSize - 2 * this.scale + glowIntensity * 2 * this.scale;
     g.fillStyle(0xff6666, baseAlpha * 0.8);
     g.fillCircle(0, this.orbY, innerSize);
     
@@ -138,7 +141,7 @@ export class AuraAnimator {
     
     // Expanding pulse ring
     if (this.level >= 2) {
-      const pulseRadius = this.orbSize + this.pulsePhase * 30;
+      const pulseRadius = this.orbSize + this.pulsePhase * 30 * this.scale;
       const pulseAlpha = (1 - this.pulsePhase) * 0.4;
       g.lineStyle(2, 0xff4444, pulseAlpha);
       g.strokeCircle(0, this.orbY, pulseRadius);
@@ -153,7 +156,7 @@ export class AuraAnimator {
     g.clear();
     
     const particleCount = 3 + this.level;
-    const orbitRadius = this.orbSize + 10 + this.level * 2;
+    const orbitRadius = this.orbSize + (10 + this.level * 2) * this.scale;
     
     for (let i = 0; i < particleCount; i++) {
       const angle = this.particleAngle + (i * Math.PI * 2) / particleCount;
@@ -162,29 +165,29 @@ export class AuraAnimator {
       
       // Particle glow
       g.fillStyle(0xff6666, 0.3);
-      g.fillCircle(x, y, 6);
+      g.fillCircle(x, y, 6 * this.scale);
       
       // Particle core
       g.fillStyle(0xff4444, 0.8);
-      g.fillCircle(x, y, 3);
+      g.fillCircle(x, y, 3 * this.scale);
       
       // Particle center
       g.fillStyle(0xffaaaa, 1);
-      g.fillCircle(x, y, 1.5);
+      g.fillCircle(x, y, 1.5 * this.scale);
     }
     
-    // Level 3: Additional outer particle ring
-    if (this.level === 3) {
-      const outerRadius = orbitRadius + 12;
+    // Level 3+: Additional outer particle ring
+    if (this.level >= 3) {
+      const outerRadius = orbitRadius + 12 * this.scale;
       for (let i = 0; i < 4; i++) {
         const angle = -this.particleAngle * 0.7 + (i * Math.PI * 2) / 4;
         const x = Math.cos(angle) * outerRadius;
         const y = this.orbY + Math.sin(angle) * outerRadius * 0.4;
         
         g.fillStyle(0xffd700, 0.4);
-        g.fillCircle(x, y, 4);
+        g.fillCircle(x, y, 4 * this.scale);
         g.fillStyle(0xffee88, 0.8);
-        g.fillCircle(x, y, 2);
+        g.fillCircle(x, y, 2 * this.scale);
       }
     }
   }

@@ -116,9 +116,9 @@ export const GAME_CONFIG = {
   /** Veteran ranks - towers earn ranks by accumulating kills */
   VETERAN_RANKS: [
     { name: 'Recruit', minKills: 0, damageBonus: 0 },
-    { name: 'Corporal', minKills: 25, damageBonus: 0.05 },
-    { name: 'Sergeant', minKills: 60, damageBonus: 0.10 },
-    { name: 'Captain', minKills: 120, damageBonus: 0.15 },
+    { name: 'Corporal', minKills: 50, damageBonus: 0.05 },
+    { name: 'Sergeant', minKills: 150, damageBonus: 0.10 },
+    { name: 'Captain', minKills: 350, damageBonus: 0.15 },
   ],
 } as const;
 

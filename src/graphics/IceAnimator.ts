@@ -43,13 +43,13 @@ export class IceAnimator {
   private cheerTimer: number = 0;
   private cheerArmAngle: number = 0;
   
-  // Tower heights per level
-  private readonly MAGE_Y = [-28, -35, -42];
+  // Tower heights per level (level 4 uses same as level 3)
+  private readonly MAGE_Y = [-28, -35, -42, -42];
   
   // Staff position in local space (points LEFT like archer's bow)
   private readonly STAFF_LOCAL_X = -18;
   private readonly STAFF_LOCAL_Y = 8;
-  private readonly CRYSTAL_TIP_OFFSET = [18, 22, 28];
+  private readonly CRYSTAL_TIP_OFFSET = [18, 22, 28, 28];
   
   constructor(scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) {
     this.container = container;
@@ -602,8 +602,8 @@ export class IceAnimator {
       g.fillTriangle(crystalX - 6, crystalY + 4, crystalX - 10, crystalY + 8, crystalX - 4, crystalY + 8);
     }
     
-    // Level 3: Crystal formation
-    if (this.level === 3) {
+    // Level 3+: Crystal formation
+    if (this.level >= 3) {
       g.fillStyle(0xaaddff, 0.7);
       g.fillTriangle(crystalX - 12, crystalY, crystalX - 18, crystalY - 5, crystalX - 18, crystalY + 5);
     }

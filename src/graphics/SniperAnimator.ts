@@ -42,11 +42,11 @@ export class SniperAnimator {
   private cheerTimer: number = 0;
   private cheerArmAngle: number = 0;
   
-  // Tower heights per level
-  private readonly SNIPER_Y = [-32, -40, -48];
+  // Tower heights per level (level 4 uses same as level 3)
+  private readonly SNIPER_Y = [-32, -40, -48, -48];
   
   // Rifle barrel length for projectile spawn
-  private readonly BARREL_LENGTH = [35, 45, 55];
+  private readonly BARREL_LENGTH = [35, 45, 55, 55];
   
   constructor(scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) {
     this.container = container;
@@ -526,8 +526,8 @@ export class SniperAnimator {
       g.fillRect(barrelWidth / 2 + 1, bodyY - barrelLength - 3 + recoilOffset, 1, 3);
     }
     
-    // === SUPPRESSOR (level 3) ===
-    if (this.level === 3) {
+    // === SUPPRESSOR (level 3+) ===
+    if (this.level >= 3) {
       g.fillStyle(0x1a1a1a, 1);
       g.fillRect(-4, bodyY - barrelLength - 12 + recoilOffset, 8, 10);
     }
@@ -544,7 +544,7 @@ export class SniperAnimator {
     
     const alpha = this.flashTimer / 0.1;
     const barrelLength = this.BARREL_LENGTH[this.level - 1];
-    const flashY = 10 - barrelLength - (this.level === 3 ? 12 : 4);
+    const flashY = 10 - barrelLength - (this.level >= 3 ? 12 : 4);
     
     // Small, precise muzzle flash
     g.fillStyle(0xffaa00, alpha * 0.7);

@@ -38,11 +38,11 @@ export class RapidFireAnimator {
   // Muzzle flash
   private muzzleFlashTimer: number = 0;
   
-  // Tower heights per level (Y position of turret pivot from tower base at y=0)
-  private readonly TURRET_Y = [-29, -35, -41]; // Negative because up is negative Y
+  // Tower heights per level (Y position of turret pivot from tower base at y=0, level 4 uses same as level 3)
+  private readonly TURRET_Y = [-29, -35, -41, -41]; // Negative because up is negative Y
   
   // Barrel tip offset from turret center (for projectile spawn)
-  private readonly BARREL_LENGTH = [25, 30, 45];
+  private readonly BARREL_LENGTH = [25, 30, 45, 45];
   
   constructor(scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) {
     this.container = container;

@@ -20,7 +20,6 @@ export class GameEnvironment {
   private flagGraphics: Phaser.GameObjects.Graphics | null = null;
   private flagPhase: number = 0;
   private currentDamageState: number = 0; // 0 = healthy, 1 = 50%, 2 = 25%
-  private isDestroyed: boolean = false;
   private destroyedCastleGraphics: Phaser.GameObjects.Graphics | null = null;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
@@ -149,7 +148,6 @@ export class GameEnvironment {
         duration: 300,
         onComplete: () => {
           // Draw the destroyed castle
-          this.isDestroyed = true;
           this.drawDestroyedCastle();
           
           // Camera shake
@@ -169,8 +167,6 @@ export class GameEnvironment {
    */
   showDestroyedCastle(): void {
     if (!this.castlePosition || !this.castleContainer) return;
-    
-    this.isDestroyed = true;
     
     // Hide the normal castle elements
     this.castleContainer.setAlpha(0);
