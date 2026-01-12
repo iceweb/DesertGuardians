@@ -419,24 +419,12 @@ export class Projectile extends Phaser.GameObjects.Container {
       }
     }
     
-    // Sniper crit chance (can stack with ability crit)
-    let didCrit = false;
-    if (this.config.branch === 'sniper' && stats.critChance) {
-      if (Math.random() < stats.critChance) {
-        damage *= stats.critMultiplier || 2;
-        didCrit = true;
-        // Show crit effect
-        this.showCritEffect(false);
-      }
-    }
-    
     // Aura crit bonus - applies to ALL tower types (from Critical Aura ability)
-    if (!didCrit && this.sourceTower) {
+    if (this.sourceTower) {
       const auraCritBonus = this.sourceTower.getAuraCritBonus();
       if (auraCritBonus > 0 && Math.random() < auraCritBonus) {
         damage *= 2;  // Aura crit deals double damage
-        didCrit = true;
-        // Show special aura crit effect (orange/gold instead of red)
+        // Show special aura crit effect (orange/gold)
         this.showCritEffect(true);
       }
     }

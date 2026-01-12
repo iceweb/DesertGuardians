@@ -269,12 +269,12 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'ghost', count: 14, intervalMs: 1000 },
     { type: 'digger', count: 10, intervalMs: 1200, delayStart: 11300 }
   ]},
-  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Knight Escorts!', creeps: [
+  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Knight Escorts!', parallelSpawn: true, creeps: [
     { type: 'tank', count: 12, intervalMs: 1200 },
     { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
     { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
-    { type: 'boss_guard_1', count: 2, intervalMs: 1000, delayStart: 28000 },
-    { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 29000 }
+    { type: 'boss_guard_1', count: 2, intervalMs: 2000, delayStart: 26000 },
+    { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 26000 }
   ]},
   { waveNumber: 22, waveType: 'broodmother', announcement: '🕷️ BROODMOTHER WAVE!\nKill fast, expect babies!', creeps: [
     { type: 'tank', count: 10, intervalMs: 1200 },
@@ -303,12 +303,12 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 10, intervalMs: 1200 },
     { type: 'broodmother', count: 6, intervalMs: 2500, delayStart: 7500 }
   ]},
-  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Dragon Knight Escorts!', creeps: [
+  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Dragon Knight Escorts!', parallelSpawn: true, creeps: [
     { type: 'shielded', count: 12, intervalMs: 1100 },
     { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
     { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },
-    { type: 'boss_guard_2', count: 2, intervalMs: 1000, delayStart: 33000 },
-    { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 34000 }
+    { type: 'boss_guard_2', count: 2, intervalMs: 2000, delayStart: 30000 },
+    { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 30000 }
   ]},
   { waveNumber: 29, waveType: 'ghost', announcement: '👻 ELITE GHOSTS!\n5 sec immunity at 15% HP!', creeps: [
     { type: 'ghost', count: 20, intervalMs: 800 },
@@ -350,8 +350,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 16, intervalMs: 900 },
     { type: 'tank', count: 18, intervalMs: 850 },
     { type: 'broodmother', count: 5, intervalMs: 2400 },
-    { type: 'boss_guard_3', count: 2, intervalMs: 1000, delayStart: 25000 },
-    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 26000 }
+    { type: 'boss_guard_3', count: 2, intervalMs: 2000, delayStart: 24000 },
+    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 24000 }
   ]}
 ];
 

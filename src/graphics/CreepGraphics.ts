@@ -4,6 +4,7 @@ import { BossCreepGraphics } from './creeps/BossCreepGraphics';
 import { SpecialCreepGraphics } from './creeps/SpecialCreepGraphics';
 import { ElementalCreepGraphics } from './creeps/ElementalCreepGraphics';
 import { CreepEffectsGraphics } from './creeps/CreepEffectsGraphics';
+import { DragonKnightGraphics } from './creeps/DragonKnightGraphics';
 
 /**
  * CreepGraphics handles all creep rendering/drawing logic.
@@ -15,6 +16,9 @@ export class CreepGraphics {
   
   // Boss creep types
   private static readonly BOSS_TYPES = new Set(['boss', 'boss_1', 'boss_2', 'boss_3', 'boss_4', 'boss_5']);
+  
+  // Boss guard types - Dragon Knights
+  private static readonly GUARD_TYPES = new Set(['boss_guard_1', 'boss_guard_2', 'boss_guard_3']);
   
   // Special ability creep types
   private static readonly SPECIAL_TYPES = new Set(['flying', 'ghost', 'shielded', 'jumper', 'digger', 'broodmother', 'baby']);
@@ -45,6 +49,10 @@ export class CreepGraphics {
     // Dispatch to appropriate graphics class based on creep type
     if (CreepGraphics.BASIC_TYPES.has(type)) {
       BasicCreepGraphics.draw(g, type, bounceTime, faceDirection);
+    } else if (CreepGraphics.GUARD_TYPES.has(type)) {
+      // Dragon Knight guards - extract tier from type name
+      const tier = parseInt(type.replace('boss_guard_', '')) || 1;
+      DragonKnightGraphics.draw(g, tier, bounceTime, faceDirection);
     } else if (CreepGraphics.BOSS_TYPES.has(type)) {
       BossCreepGraphics.draw(g, type, bounceTime, faceDirection);
     } else if (CreepGraphics.SPECIAL_TYPES.has(type)) {

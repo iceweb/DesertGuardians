@@ -32,15 +32,7 @@ export class BossCreepGraphics {
       case 'boss_5':
         BossCreepGraphics.drawBoss5(g, bounceTime, faceDirection);
         break;
-      case 'boss_guard_1':
-        BossCreepGraphics.drawBossGuard1(g, bounceTime, faceDirection);
-        break;
-      case 'boss_guard_2':
-        BossCreepGraphics.drawBossGuard2(g, bounceTime, faceDirection);
-        break;
-      case 'boss_guard_3':
-        BossCreepGraphics.drawBossGuard3(g, bounceTime, faceDirection);
-        break;
+      // Note: boss_guard_1, boss_guard_2, boss_guard_3 are now handled by DragonKnightGraphics
     }
   }
 

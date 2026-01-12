@@ -444,6 +444,10 @@ export class Creep extends Phaser.GameObjects.Container {
     this.isActive = false;
     this.isDying = true;
     
+    // Clear health bar immediately to prevent distorted visuals during death animation
+    this.healthBarBg.clear();
+    this.healthBarFg.clear();
+    
     const goldReward = this.config.goldReward;
     this.emit('died', this, goldReward);
     

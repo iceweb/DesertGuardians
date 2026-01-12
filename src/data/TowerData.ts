@@ -143,13 +143,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 1,
     upgradeCost: 150,
-    description: 'Long range, high damage. 20% crit chance.',
+    description: 'Long range, high damage per shot.',
     stats: {
       range: 300,
       fireRate: 2200,
-      damage: 60,
-      critChance: 0.2,
-      critMultiplier: 2
+      damage: 60
     }
   },
   sniper_2: {
@@ -159,13 +157,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 2,
     upgradeCost: 240,
-    description: 'Deadly precision. 25% crit chance.',
+    description: 'Deadly precision. Increased damage and range.',
     stats: {
       range: 330,
       fireRate: 2000,
-      damage: 77,  // Reduced from 90 for aura balance
-      critChance: 0.25,
-      critMultiplier: 2
+      damage: 77  // Reduced from 90 for aura balance
     }
   },
   sniper_3: {
@@ -175,13 +171,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 3,
     upgradeCost: 480,
-    description: 'Assassin elite. 30% crit with 2.5x damage.',
+    description: 'Assassin elite. Maximum damage and range.',
     stats: {
       range: 360,
       fireRate: 1800,
-      damage: 110,  // Reduced from 130 for aura balance
-      critChance: 0.30,
-      critMultiplier: 2.5
+      damage: 110  // Reduced from 130 for aura balance
     }
   },
 
@@ -421,13 +415,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 4,
     upgradeCost: 750,
-    description: 'Elite assassin. 35% crit, 2.5x multiplier. Special ability.',
+    description: 'Elite assassin. Special ability unlocked.',
     stats: {
       range: 400,
       fireRate: 1700,
-      damage: 140,
-      critChance: 0.35,
-      critMultiplier: 2.5
+      damage: 140
     }
   },
   
