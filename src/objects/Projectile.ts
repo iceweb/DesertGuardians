@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Creep } from './Creep';
-import type { TowerBranch, TowerStats } from './Tower';
+import type { TowerBranch, TowerStats } from '../data';
 import type { Tower } from './Tower';
 import type { AbilityContext, AbilityResult } from './TowerAbilities';
 
@@ -384,6 +384,12 @@ export class Projectile extends Phaser.GameObjects.Container {
     let damage = this.config.damage;
     let isMagic = this.config.isMagic;
     
+    // Apply air damage bonus if tower has it and target is flying
+    if (stats.airDamageBonus && this.target.isFlying()) {
+      damage = Math.floor(damage * (1 + stats.airDamageBonus));
+      this.showAirBonusEffect();
+    }
+    
     // Try to trigger tower ability
     let abilityResult: AbilityResult = { triggered: false };
     if (this.sourceTower?.getAbilityHandler()) {
@@ -546,6 +552,29 @@ export class Projectile extends Phaser.GameObjects.Container {
         });
       }
     }
+  }
+
+  /**
+   * Show visual effect when hitting a flying target with air damage bonus
+   */
+  private showAirBonusEffect(): void {
+    const x = this.x;
+    const y = this.y;
+    
+    // Light blue flash for anti-air hit
+    const flash = this.scene.add.graphics();
+    flash.fillStyle(0x66ccff, 0.6);
+    flash.fillCircle(x, y, 12);
+    flash.setDepth(30);
+    
+    this.scene.tweens.add({
+      targets: flash,
+      alpha: 0,
+      scaleX: 1.8,
+      scaleY: 1.8,
+      duration: 150,
+      onComplete: () => flash.destroy()
+    });
   }
 
   /**

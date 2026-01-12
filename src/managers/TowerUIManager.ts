@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS } from '../data';
-import type { TowerBranch } from '../objects/Tower';
+import type { TowerBranch } from '../data';
 import type { AbilityDefinition } from '../objects/TowerAbilities';
 import { UIHelper } from './UIHelper';
 import type { UIHitDetector } from './UIHitDetector';
@@ -242,8 +242,25 @@ export class TowerUIManager {
     }).setOrigin(0, 0.5);
     this.buildMenuContainer.add(rangeValue);
     
+    // Air damage bonus
+    if (stats.airDamageBonus) {
+      const airLabel = this.scene.add.text(-30, 50, 'vs Air:', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: canAfford ? '#aaaaaa' : '#555555'
+      }).setOrigin(0, 0.5);
+      this.buildMenuContainer.add(airLabel);
+      
+      const airValue = this.scene.add.text(25, 50, `+${Math.round(stats.airDamageBonus * 100)}%`, {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: canAfford ? '#66ccff' : '#555555'
+      }).setOrigin(0, 0.5);
+      this.buildMenuContainer.add(airValue);
+    }
+    
     // Target type
-    const targetText = this.scene.add.text(45, 50, 'Single target', {
+    const targetText = this.scene.add.text(45, 68, 'Single target', {
       fontFamily: 'Arial',
       fontSize: '12px',
       color: canAfford ? '#888888' : '#444444',
@@ -560,6 +577,23 @@ export class TowerUIManager {
       color: '#66ff66'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rangeValue);
+    
+    // Air damage bonus (right side, after range)
+    if (config.stats.airDamageBonus) {
+      const airLabel = this.scene.add.text(statsStartX + 260, yOffset, 'vs Air:', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#aaaaaa'
+      }).setOrigin(0, 0.5);
+      this.upgradeMenuContainer.add(airLabel);
+      
+      const airValue = this.scene.add.text(statsStartX + 310, yOffset, `+${Math.round(config.stats.airDamageBonus * 100)}%`, {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: '#66ccff'
+      }).setOrigin(0, 0.5);
+      this.upgradeMenuContainer.add(airValue);
+    }
     
     yOffset += statLineHeight + 2;
     

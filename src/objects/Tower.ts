@@ -1,40 +1,10 @@
 import Phaser from 'phaser';
-import { TowerGraphics, RapidFireAnimator, ArcherAnimator, CannonAnimator, SniperAnimator, IceAnimator, PoisonAnimator, AuraAnimator } from '../graphics';
+import { TowerGraphics } from '../graphics';
+import type { TowerAnimatorFactory, TowerAnimator } from '../graphics/TowerAnimatorFactory';
 import type { TowerConfig, TowerBranch } from '../data';
 import { TOWER_CONFIGS, BRANCH_OPTIONS, GAME_CONFIG } from '../data';
 import { TowerAbilityHandler, TOWER_ABILITIES } from './TowerAbilities';
 import type { AbilityDefinition, AbilityContext, AbilityResult } from './TowerAbilities';
-
-// Re-export types for backwards compatibility
-export type { TowerStats, TowerConfig, TowerBranch } from '../data';
-export { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
-
-/**
- * Common interface for all tower animators
- */
-interface TowerAnimator {
-  update(delta: number): void;
-  setTarget(targetX: number, targetY: number, towerX: number, towerY: number): void;
-  clearTarget(): void;
-  onFire(): { x: number; y: number };
-  onKill(): void;
-  setLevel(level: number): void;
-  getProjectileSpawnOffset(): { x: number; y: number };
-  destroy(): void;
-}
-
-/**
- * Animator factory map - maps branch names to animator constructors
- */
-const ANIMATOR_CONSTRUCTORS: Record<string, new (scene: Phaser.Scene, container: Phaser.GameObjects.Container, level: number) => TowerAnimator> = {
-  'rapidfire': RapidFireAnimator,
-  'archer': ArcherAnimator,
-  'rockcannon': CannonAnimator,
-  'sniper': SniperAnimator,
-  'icetower': IceAnimator,
-  'poison': PoisonAnimator,
-  'aura': AuraAnimator,
-};
 
 /**
  * Tower game object that can target and shoot creeps.
@@ -64,6 +34,7 @@ export class Tower extends Phaser.GameObjects.Container {
   // Single animator reference (replaces 6 separate nullable properties)
   private animator: TowerAnimator | null = null;
   private animatorBranch: TowerBranch | null = null;
+  private animatorFactory: TowerAnimatorFactory | null = null;
   
   // Current target tracking (for animated turrets)
   private currentTarget: { x: number; y: number } | null = null;
@@ -72,8 +43,10 @@ export class Tower extends Phaser.GameObjects.Container {
   private abilityHandler: TowerAbilityHandler | null = null;
   private selectedAbilityId: string | null = null;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string = 'archer_1') {
+  constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string = 'archer_1', animatorFactory?: TowerAnimatorFactory) {
     super(scene, x, y);
+    
+    this.animatorFactory = animatorFactory || null;
     
     const initialConfig = TOWER_CONFIGS[towerKey];
     if (!initialConfig) {
@@ -294,15 +267,15 @@ export class Tower extends Phaser.GameObjects.Container {
    */
   private drawTower(): void {
     // Check if we need to create a new animator (branch changed or first time)
-    const AnimatorClass = ANIMATOR_CONSTRUCTORS[this.currentBranch];
+    const hasAnimator = this.animatorFactory?.hasAnimator(this.currentBranch) ?? false;
     
-    if (AnimatorClass) {
+    if (hasAnimator && this.animatorFactory) {
       // This branch uses an animator
       if (this.animatorBranch !== this.currentBranch) {
         // Branch changed - destroy old animator and create new one
         this.animator?.destroy();
         this.graphics.clear();
-        this.animator = new AnimatorClass(this.scene, this, this.currentLevel);
+        this.animator = this.animatorFactory.create(this.currentBranch, this, this.currentLevel);
         this.animatorBranch = this.currentBranch;
       } else if (this.animator) {
         // Same branch - just update level

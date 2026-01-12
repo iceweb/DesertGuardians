@@ -1,9 +1,5 @@
 export { Creep } from './Creep';
-export type { CreepConfig } from '../data';
-export { CREEP_TYPES } from '../data';
 export { Tower } from './Tower';
-export type { TowerStats, TowerConfig, TowerBranch } from '../data';
-export { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
 export { Projectile } from './Projectile';
 export type { ProjectileConfig } from './Projectile';
 export { StatusEffectHandler } from './StatusEffectHandler';

@@ -7,10 +7,6 @@ import { StatusEffectHandler } from './StatusEffectHandler';
 import { CreepAbilities } from './CreepAbilities';
 import { CreepEffects } from './CreepEffects';
 
-// Re-export types for backwards compatibility
-export type { CreepConfig } from '../data';
-export { CREEP_TYPES } from '../data';
-
 /**
  * Creep game object that follows a path from spawn to castle.
  * Rendered using graphics (no sprites needed).

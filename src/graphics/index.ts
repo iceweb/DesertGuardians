@@ -13,3 +13,4 @@ export * from './IceAnimator';
 export * from './PoisonAnimator';
 export * from './AuraAnimator';
 export * from './GoldMineGraphics';
+export * from './TowerAnimatorFactory';

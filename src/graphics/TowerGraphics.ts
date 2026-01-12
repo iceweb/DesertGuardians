@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { TowerBranch } from '../objects/Tower';
+import type { TowerBranch } from '../data';
 import {
   drawRangeCircle,
   drawLevelIndicator,

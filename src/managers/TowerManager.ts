@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS, GAME_CONFIG } from '../data';
+import { TowerAnimatorFactory } from '../graphics/TowerAnimatorFactory';
 import { PathSystem } from './MapPathSystem';
 import { TowerUIManager } from './TowerUIManager';
 import { GoldMineManager } from './GoldMineManager';
@@ -18,6 +19,9 @@ export class TowerManager {
   
   // UI Manager
   private uiManager: TowerUIManager;
+  
+  // Animator factory for dependency injection
+  private animatorFactory: TowerAnimatorFactory;
   
   // Settings (from centralized config)
   private readonly PATH_BUFFER = GAME_CONFIG.TOWER_PATH_BUFFER;
@@ -38,6 +42,9 @@ export class TowerManager {
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
     this.pathSystem = pathSystem;
+    
+    // Create animator factory for dependency injection
+    this.animatorFactory = new TowerAnimatorFactory(scene);
     
     // Create UI manager
     this.uiManager = new TowerUIManager(scene);
@@ -238,8 +245,8 @@ export class TowerManager {
     const config = TOWER_CONFIGS[towerKey];
     if (!config) return;
     
-    // Create tower
-    const tower = new Tower(this.scene, x, y, towerKey);
+    // Create tower with animator factory
+    const tower = new Tower(this.scene, x, y, towerKey, this.animatorFactory);
     this.towers.push(tower);
     
     // Setup tower click handler

@@ -11,6 +11,7 @@ export interface TowerStats {
   critChance?: number;   // for Sniper
   critMultiplier?: number;
   auraDamageMultiplier?: number; // for Aura Tower - damage buff for nearby towers
+  airDamageBonus?: number; // Bonus damage multiplier vs flying units (e.g., 2.0 = +200% = 3x total)
 }
 
 export type TowerBranch = 'archer' | 'rapidfire' | 'sniper' | 'rockcannon' | 'icetower' | 'poison' | 'aura';
@@ -41,11 +42,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     level: 1,
     buildCost: 50,
     upgradeCost: 0,
-    description: 'Basic single target tower. Can branch into specialized towers.',
+    description: 'Basic tower. Highly effective vs air (+200% damage). Can branch into specialized towers.',
     stats: {
       range: 200,
       fireRate: 900,
-      damage: 10
+      damage: 10,
+      airDamageBonus: 2.0
     }
   },
   archer_2: {
@@ -55,11 +57,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'archer',
     level: 2,
     upgradeCost: 110,
-    description: 'Improved archer. Can still branch into specialized towers.',
+    description: 'Improved archer. Highly effective vs air (+200% damage). Can still branch.',
     stats: {
       range: 220,
       fireRate: 800,
-      damage: 15
+      damage: 15,
+      airDamageBonus: 2.0
     }
   },
   archer_3: {
@@ -69,11 +72,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'archer',
     level: 3,
     upgradeCost: 280,
-    description: 'Master archer. Elite single-target damage.',
+    description: 'Master archer. Highly effective vs air (+200% damage). Elite damage.',
     stats: {
       range: 250,
       fireRate: 700,
-      damage: 19  // Reduced from 22 for aura balance
+      damage: 19,  // Reduced from 22 for aura balance
+      airDamageBonus: 2.0
     }
   },
   archer_4: {
@@ -83,11 +87,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'archer',
     level: 4,
     upgradeCost: 800,
-    description: 'Legendary marksman. Endgame single-target devastation.',
+    description: 'Legendary marksman. Highly effective vs air (+200% damage). Endgame devastation.',
     stats: {
       range: 280,
       fireRate: 550,
-      damage: 45
+      damage: 45,
+      airDamageBonus: 2.0
     }
   },
 
