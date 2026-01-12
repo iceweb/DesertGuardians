@@ -31,6 +31,9 @@ export class TowerUIManager {
   // Track if menu was closed this frame (to prevent immediate reopen)
   private menuClosedThisFrame: boolean = false;
   
+  // Review mode - only show stats, no action buttons
+  private reviewMode: boolean = false;
+  
   // Callbacks
   public onBuildRequested?: (x: number, y: number, towerKey: string) => void;
   public onUpgradeRequested?: (tower: Tower, newKey: string) => void;
@@ -46,6 +49,13 @@ export class TowerUIManager {
     
     this.placementGraphics = scene.add.graphics();
     this.placementGraphics.setDepth(50);
+  }
+
+  /**
+   * Set review mode - when true, only show stats, no upgrade/sell buttons
+   */
+  setReviewMode(enabled: boolean): void {
+    this.reviewMode = enabled;
   }
 
   /**
@@ -381,13 +391,16 @@ export class TowerUIManager {
     const killCount = tower.getKillCount();
     
     // Calculate menu dimensions based on content
-    const menuWidth = hasBranches ? Math.max(680, branchCount * 105 + 60) : 420;
+    const menuWidth = hasBranches && !this.reviewMode ? Math.max(680, branchCount * 105 + 60) : 420;
     let menuHeight = 140; // Base height for title, stats, and veteran info
     if (isBuffed) menuHeight += 16;
-    if (hasBranches) menuHeight += 170; // Space for branch cards
+    if (this.reviewMode) {
+      // Review mode: just stats, no action buttons
+      menuHeight += 20;
+    } else if (hasBranches) menuHeight += 170; // Space for branch cards
     else if (hasLevelUp) menuHeight += 130; // Space for upgrade preview with larger stats
     else menuHeight += 40; // Max level indicator
-    menuHeight += 45; // Space for sell button at bottom
+    if (!this.reviewMode) menuHeight += 45; // Space for sell button at bottom
     
     this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - (menuHeight / 2) - 40);
     this.upgradeMenuContainer.setDepth(200);
@@ -584,7 +597,7 @@ export class TowerUIManager {
     
     yOffset += 8; // Spacing before upgrade section
     
-    if (hasBranches) {
+    if (hasBranches && !this.reviewMode) {
       // === SPECIALIZATION SELECTION ===
       const branchLabel = this.scene.add.text(0, yOffset, 'Choose Specialization:', {
         fontFamily: 'Arial Black',
@@ -720,7 +733,7 @@ export class TowerUIManager {
       
       yOffset += btnHeight + 10;
       
-    } else if (hasLevelUp) {
+    } else if (hasLevelUp && !this.reviewMode) {
       // === LEVEL UPGRADE ===
       const levelUpConfig = TOWER_CONFIGS[upgradeOptions.levelUp!];
       if (levelUpConfig) {
@@ -895,7 +908,7 @@ export class TowerUIManager {
         
         yOffset += 75;
       }
-    } else {
+    } else if (!this.reviewMode) {
       // === MAX LEVEL ===
       // Check if tower is level 4 without ability selected
       if (tower.getLevel() === 4 && !tower.getSelectedAbilityId()) {
@@ -925,23 +938,25 @@ export class TowerUIManager {
       yOffset += 35;
     }
     
-    // === SELL BUTTON (always bottom right) ===
-    const sellValue = tower.getSellValue();
-    const sellButton = this.uiHelper.createButton({
-      text: `Sell: ${sellValue}g`,
-      x: menuWidth / 2 - 55,
-      y: menuHeight / 2 - 22,
-      fontSize: 12,
-      textColor: '#ff6666',
-      bgColor: 0x4a2a2a,
-      hoverBgColor: 0x6a3a3a,
-      borderColor: 0xff6666,
-      paddingX: 12,
-      paddingY: 6,
-      enabled: true,
-      onClick: () => this.onSellRequested?.(tower)
-    });
-    this.upgradeMenuContainer.add(sellButton.container);
+    // === SELL BUTTON (always bottom right) - hide in review mode ===
+    if (!this.reviewMode) {
+      const sellValue = tower.getSellValue();
+      const sellButton = this.uiHelper.createButton({
+        text: `Sell: ${sellValue}g`,
+        x: menuWidth / 2 - 55,
+        y: menuHeight / 2 - 22,
+        fontSize: 12,
+        textColor: '#ff6666',
+        bgColor: 0x4a2a2a,
+        hoverBgColor: 0x6a3a3a,
+        borderColor: 0xff6666,
+        paddingX: 12,
+        paddingY: 6,
+        enabled: true,
+        onClick: () => this.onSellRequested?.(tower)
+      });
+      this.upgradeMenuContainer.add(sellButton.container);
+    }
     
     // Close button
     const closeBtn = this.scene.add.text(menuWidth / 2 - 18, -menuHeight / 2 + 16, '✕', {

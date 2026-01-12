@@ -24,6 +24,9 @@ export class GoldMineUIManager {
   // Track if menu was closed this frame
   private menuClosedThisFrame: boolean = false;
   
+  // Review mode - only show stats, no upgrade buttons
+  private reviewMode: boolean = false;
+  
   // Callbacks
   public getPlayerGold?: () => number;
 
@@ -37,6 +40,13 @@ export class GoldMineUIManager {
   }
 
   /**
+   * Set review mode - when true, only show stats, no upgrade buttons
+   */
+  setReviewMode(enabled: boolean): void {
+    this.reviewMode = enabled;
+  }
+
+  /**
    * Handle mine click event
    */
   private handleMineClicked(mine: GoldMine): void {
@@ -44,7 +54,8 @@ export class GoldMineUIManager {
     
     if (mine.isBuilt()) {
       this.showUpgradeMenu(mine);
-    } else {
+    } else if (!this.reviewMode) {
+      // Don't show build menu in review mode
       this.showBuildMenu(mine);
     }
   }
@@ -179,7 +190,7 @@ export class GoldMineUIManager {
     
     const config = mine.getConfig();
     const playerGold = this.getPlayerGold?.() || 0;
-    const canUpgrade = mine.canUpgrade();
+    const canUpgrade = mine.canUpgrade() && !this.reviewMode;
     const upgradeCost = mine.getUpgradeCost();
     const canAffordUpgrade = canUpgrade && playerGold >= upgradeCost;
     

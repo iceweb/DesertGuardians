@@ -9,9 +9,26 @@ export class MenuScene extends Phaser.Scene {
   private settingsContainer: Phaser.GameObjects.Container | null = null;
   private audioManager!: AudioManager;
   private decorations: Phaser.GameObjects.Graphics | null = null;
+  
+  // Track if a game is currently running (paused in background)
+  private static gameInProgress: boolean = false;
 
   constructor() {
     super({ key: 'MenuScene' });
+  }
+  
+  /**
+   * Call this when a new game starts
+   */
+  public static setGameInProgress(inProgress: boolean): void {
+    MenuScene.gameInProgress = inProgress;
+  }
+  
+  /**
+   * Check if a game is in progress
+   */
+  public static isGameInProgress(): boolean {
+    return MenuScene.gameInProgress;
   }
 
   create(): void {
@@ -475,13 +492,29 @@ export class MenuScene extends Phaser.Scene {
    */
   private createMenuButtons(width: number, height: number): void {
     const buttonY = height / 2 + 40;
+    const hasGameInProgress = MenuScene.isGameInProgress();
     
-    // Start Game button (larger, centered)
+    // Resume button (only shown if game in progress)
+    if (hasGameInProgress) {
+      this.createStyledButton(
+        width / 2, buttonY - 80,
+        '▶  RESUME', 
+        220, 65,
+        true,
+        () => {
+          this.audioManager.playSFX('ui_click');
+          this.resumeGame();
+        }
+      );
+    }
+    
+    // Start/Restart Game button
+    const startButtonText = hasGameInProgress ? 'RESTART' : 'START';
     this.createStyledButton(
       width / 2, buttonY,
-      'START', 
+      startButtonText, 
       220, 65,
-      true,
+      !hasGameInProgress, // Primary only if no game in progress
       () => {
         this.audioManager.playSFX('ui_click');
         this.startGame();
@@ -618,8 +651,24 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private startGame(): void {
-    console.log('MenuScene: Starting game...');
+    console.log('MenuScene: Starting new game...');
+    // Stop any existing game scene first
+    if (this.scene.isActive('GameScene')) {
+      this.scene.stop('GameScene');
+    }
+    if (this.scene.isActive('UIScene')) {
+      this.scene.stop('UIScene');
+    }
+    MenuScene.setGameInProgress(true);
     this.scene.start('GameScene');
+  }
+  
+  private resumeGame(): void {
+    console.log('MenuScene: Resuming game...');
+    // Wake up the paused game scene
+    this.scene.stop('MenuScene');
+    this.scene.wake('GameScene');
+    this.scene.wake('UIScene');
   }
 
   private showHighscores(): void {

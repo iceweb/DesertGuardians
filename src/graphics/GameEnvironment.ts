@@ -20,6 +20,8 @@ export class GameEnvironment {
   private flagGraphics: Phaser.GameObjects.Graphics | null = null;
   private flagPhase: number = 0;
   private currentDamageState: number = 0; // 0 = healthy, 1 = 50%, 2 = 25%
+  private isDestroyed: boolean = false;
+  private destroyedCastleGraphics: Phaser.GameObjects.Graphics | null = null;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
@@ -71,6 +73,262 @@ export class GameEnvironment {
       this.currentDamageState = newState;
       this.drawCastleDamage(this.castlePosition.x, this.castlePosition.y);
     }
+  }
+
+  /**
+   * Play castle destruction animation and show destroyed state
+   */
+  playCastleDestructionAnimation(onComplete?: () => void): void {
+    if (!this.castlePosition || !this.castleContainer) {
+      onComplete?.();
+      return;
+    }
+
+    const cx = this.castlePosition.x - 20;
+    const cy = this.castlePosition.y - 80;
+
+    // Hide the flag
+    if (this.flagGraphics) {
+      this.flagGraphics.setVisible(false);
+    }
+
+    // Create explosion particles
+    const particles: Phaser.GameObjects.Graphics[] = [];
+    const numParticles = 30;
+
+    for (let i = 0; i < numParticles; i++) {
+      const particle = this.scene.add.graphics();
+      particle.setDepth(20);
+      
+      // Random debris color
+      const colors = [0x9a8a7a, 0xa0522d, 0x8b6914, 0x4a3a2a, 0x3a3020];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      
+      particle.fillStyle(color, 1);
+      const size = 5 + Math.random() * 15;
+      particle.fillRect(-size / 2, -size / 2, size, size);
+      
+      particle.setPosition(cx + (Math.random() - 0.5) * 100, cy + (Math.random() - 0.5) * 80);
+      particles.push(particle);
+
+      // Animate particle flying outward
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 100 + Math.random() * 150;
+      const targetX = particle.x + Math.cos(angle) * distance;
+      const targetY = particle.y + Math.sin(angle) * distance + 100; // Fall down
+
+      this.scene.tweens.add({
+        targets: particle,
+        x: targetX,
+        y: targetY,
+        alpha: 0,
+        rotation: Math.random() * 10 - 5,
+        duration: 800 + Math.random() * 400,
+        ease: 'Power2',
+        onComplete: () => {
+          particle.destroy();
+        }
+      });
+    }
+
+    // Shake the castle
+    this.scene.tweens.add({
+      targets: this.castleContainer,
+      x: { from: -5, to: 5 },
+      duration: 50,
+      repeat: 10,
+      yoyo: true
+    });
+
+    // After shake, collapse the castle
+    this.scene.time.delayedCall(500, () => {
+      // Fade out the normal castle
+      this.scene.tweens.add({
+        targets: this.castleContainer,
+        alpha: 0,
+        duration: 300,
+        onComplete: () => {
+          // Draw the destroyed castle
+          this.isDestroyed = true;
+          this.drawDestroyedCastle();
+          
+          // Camera shake
+          this.scene.cameras.main.shake(500, 0.02);
+          
+          // Delay before callback
+          this.scene.time.delayedCall(800, () => {
+            onComplete?.();
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * Show the castle as already destroyed (for review mode)
+   */
+  showDestroyedCastle(): void {
+    if (!this.castlePosition || !this.castleContainer) return;
+    
+    this.isDestroyed = true;
+    
+    // Hide the normal castle elements
+    this.castleContainer.setAlpha(0);
+    if (this.flagGraphics) {
+      this.flagGraphics.setVisible(false);
+    }
+    
+    // Draw the destroyed version
+    this.drawDestroyedCastle();
+  }
+
+  /**
+   * Draw the destroyed castle rubble
+   */
+  private drawDestroyedCastle(): void {
+    if (!this.castlePosition) return;
+    
+    if (this.destroyedCastleGraphics) {
+      this.destroyedCastleGraphics.destroy();
+    }
+    
+    this.destroyedCastleGraphics = this.scene.add.graphics();
+    this.destroyedCastleGraphics.setDepth(15);
+    
+    const x = this.castlePosition.x;
+    const y = this.castlePosition.y;
+    const cx = x - 20;
+    const cy = y - 80;
+    
+    const g = this.destroyedCastleGraphics;
+    
+    // Shadow of rubble
+    g.fillStyle(0x000000, 0.3);
+    g.fillEllipse(cx, cy + 95, 180, 50);
+    
+    // Remaining foundation/platform (damaged)
+    g.fillStyle(0x7a6a50, 1);
+    g.beginPath();
+    g.moveTo(cx - 80, cy + 85);
+    g.lineTo(cx + 80, cy + 85);
+    g.lineTo(cx + 70, cy + 70);
+    g.lineTo(cx - 60, cy + 70);
+    g.closePath();
+    g.fillPath();
+    
+    // Rubble piles
+    const rubbleColors = [0x9a8a7a, 0x8b7a6a, 0x7a6a5a, 0xa89878];
+    
+    // Large central rubble pile
+    g.fillStyle(rubbleColors[0], 1);
+    g.beginPath();
+    g.moveTo(cx - 60, cy + 70);
+    g.lineTo(cx - 40, cy + 20);
+    g.lineTo(cx - 20, cy + 35);
+    g.lineTo(cx + 10, cy + 15);
+    g.lineTo(cx + 40, cy + 30);
+    g.lineTo(cx + 60, cy + 70);
+    g.closePath();
+    g.fillPath();
+    
+    // Secondary rubble
+    g.fillStyle(rubbleColors[1], 1);
+    g.beginPath();
+    g.moveTo(cx - 50, cy + 70);
+    g.lineTo(cx - 35, cy + 40);
+    g.lineTo(cx - 10, cy + 50);
+    g.lineTo(cx + 20, cy + 35);
+    g.lineTo(cx + 45, cy + 70);
+    g.closePath();
+    g.fillPath();
+    
+    // Broken tower stump (left)
+    g.fillStyle(0xe8dcc8, 0.9);
+    g.fillRect(cx - 75, cy + 20, 35, 50);
+    g.fillStyle(rubbleColors[2], 1);
+    g.beginPath();
+    g.moveTo(cx - 75, cy + 20);
+    g.lineTo(cx - 65, cy - 5);
+    g.lineTo(cx - 55, cy + 10);
+    g.lineTo(cx - 40, cy + 20);
+    g.closePath();
+    g.fillPath();
+    
+    // Broken tower stump (right)
+    g.fillStyle(0xe8dcc8, 0.9);
+    g.fillRect(cx + 35, cy + 30, 35, 40);
+    g.fillStyle(rubbleColors[3], 1);
+    g.beginPath();
+    g.moveTo(cx + 35, cy + 30);
+    g.lineTo(cx + 50, cy + 5);
+    g.lineTo(cx + 60, cy + 25);
+    g.lineTo(cx + 70, cy + 30);
+    g.closePath();
+    g.fillPath();
+    
+    // Fallen roof piece
+    g.fillStyle(0xa0522d, 0.8);
+    g.beginPath();
+    g.moveTo(cx - 30, cy + 60);
+    g.lineTo(cx - 15, cy + 40);
+    g.lineTo(cx + 10, cy + 55);
+    g.closePath();
+    g.fillPath();
+    
+    // Another fallen roof piece
+    g.fillStyle(0x8b4513, 0.8);
+    g.beginPath();
+    g.moveTo(cx + 50, cy + 65);
+    g.lineTo(cx + 65, cy + 45);
+    g.lineTo(cx + 80, cy + 60);
+    g.closePath();
+    g.fillPath();
+    
+    // Scattered debris stones
+    g.fillStyle(0x6a5a4a, 0.9);
+    g.fillCircle(cx - 80, cy + 80, 8);
+    g.fillCircle(cx - 70, cy + 85, 6);
+    g.fillCircle(cx + 75, cy + 78, 7);
+    g.fillCircle(cx + 85, cy + 82, 5);
+    g.fillCircle(cx - 45, cy + 75, 5);
+    g.fillCircle(cx + 55, cy + 72, 6);
+    
+    // Smoke/dust clouds
+    g.fillStyle(0x4a4a4a, 0.3);
+    g.fillCircle(cx - 20, cy, 20);
+    g.fillCircle(cx + 15, cy - 10, 18);
+    g.fillCircle(cx - 5, cy - 20, 15);
+    g.fillStyle(0x5a5a5a, 0.2);
+    g.fillCircle(cx + 30, cy + 5, 22);
+    g.fillCircle(cx - 40, cy - 5, 16);
+    
+    // Broken flagpole on ground
+    g.fillStyle(0x3a3a3a, 1);
+    g.fillRect(cx - 90, cy + 70, 40, 4);
+    
+    // Torn flag on ground
+    g.fillStyle(0x880000, 0.7);
+    g.beginPath();
+    g.moveTo(cx - 50, cy + 72);
+    g.lineTo(cx - 35, cy + 65);
+    g.lineTo(cx - 20, cy + 75);
+    g.lineTo(cx - 35, cy + 80);
+    g.closePath();
+    g.fillPath();
+    
+    // Cracks in foundation
+    g.lineStyle(2, 0x3a2a1a, 0.8);
+    g.beginPath();
+    g.moveTo(cx - 40, cy + 85);
+    g.lineTo(cx - 30, cy + 75);
+    g.lineTo(cx - 35, cy + 70);
+    g.strokePath();
+    
+    g.beginPath();
+    g.moveTo(cx + 30, cy + 85);
+    g.lineTo(cx + 25, cy + 78);
+    g.lineTo(cx + 35, cy + 72);
+    g.strokePath();
   }
 
   // ─────────────────────────────────────────────────────────────

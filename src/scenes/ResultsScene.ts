@@ -17,6 +17,18 @@ export interface GameResultData {
   runTimeSeconds: number;
 }
 
+// Store last game result for review mode
+let lastGameResult: GameResultData | null = null;
+let lastGameScore: number = 0;
+
+export function getLastGameResult(): GameResultData | null {
+  return lastGameResult;
+}
+
+export function getLastGameScore(): number {
+  return lastGameScore;
+}
+
 /**
  * Highscore entry stored in localStorage
  */
@@ -99,6 +111,10 @@ export class ResultsScene extends Phaser.Scene {
       hpBonus,
       timeMultiplier
     };
+    
+    // Store for review mode
+    lastGameResult = this.resultData;
+    lastGameScore = this.finalScore;
     
     console.log('ResultsScene: Score calculated', this.scoreBreakdown, 'Final:', this.finalScore);
   }
@@ -309,12 +325,12 @@ export class ResultsScene extends Phaser.Scene {
     const audioManager = AudioManager.getInstance();
     
     // Submit/Save button
-    const submitBtn = this.add.text(width / 2 - 120, buttonY, '💾 Save Score', {
+    const submitBtn = this.add.text(width / 2 - 180, buttonY, '💾 Save Score', {
       fontFamily: 'Arial',
-      fontSize: '22px',
+      fontSize: '20px',
       color: '#ffffff',
       backgroundColor: '#4a7530',
-      padding: { x: 15, y: 10 }
+      padding: { x: 12, y: 8 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     
     submitBtn.on('pointerover', () => submitBtn.setStyle({ backgroundColor: '#5a8540' }));
@@ -324,13 +340,30 @@ export class ResultsScene extends Phaser.Scene {
       this.saveScore();
     });
     
-    // Play Again button
-    const playAgainBtn = this.add.text(width / 2 + 120, buttonY, '🔄 Play Again', {
+    // Review Game button (to go back and check towers)
+    const reviewBtn = this.add.text(width / 2, buttonY, '🔍 Review Game', {
       fontFamily: 'Arial',
-      fontSize: '22px',
+      fontSize: '20px',
+      color: '#ffffff',
+      backgroundColor: '#4a5a70',
+      padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    
+    reviewBtn.on('pointerover', () => reviewBtn.setStyle({ backgroundColor: '#5a6a80' }));
+    reviewBtn.on('pointerout', () => reviewBtn.setStyle({ backgroundColor: '#4a5a70' }));
+    reviewBtn.on('pointerdown', () => {
+      audioManager.playSFX('ui_click');
+      // Go back to game in review mode
+      this.scene.start('GameScene', { reviewMode: true, isDefeat: !this.resultData.isVictory });
+    });
+    
+    // Play Again button
+    const playAgainBtn = this.add.text(width / 2 + 180, buttonY, '🔄 Play Again', {
+      fontFamily: 'Arial',
+      fontSize: '20px',
       color: '#ffffff',
       backgroundColor: '#4a3520',
-      padding: { x: 15, y: 10 }
+      padding: { x: 12, y: 8 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     
     playAgainBtn.on('pointerover', () => playAgainBtn.setStyle({ backgroundColor: '#6b4d30' }));

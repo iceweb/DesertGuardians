@@ -361,6 +361,13 @@ export class TowerManager {
   }
 
   /**
+   * Set review mode - when true, tower menus only show stats (no upgrade/sell)
+   */
+  setReviewMode(enabled: boolean): void {
+    this.uiManager.setReviewMode(enabled);
+  }
+
+  /**
    * Recalculate all aura buffs for towers
    * Called when towers are built, upgraded, or sold
    */
