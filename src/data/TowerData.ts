@@ -292,7 +292,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 1,
     upgradeCost: 65,
-    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor.',
+    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor. Great vs armored!',
     stats: {
       range: 200,
       fireRate: 1400,
@@ -308,7 +308,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 2,
     upgradeCost: 130,
-    description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x.',
+    description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x. Great vs armored!',
     stats: {
       range: 220,
       fireRate: 1300,
@@ -324,7 +324,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 3,
     upgradeCost: 240,
-    description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x.',
+    description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x. Great vs armored!',
     stats: {
       range: 240,
       fireRate: 1150,
@@ -469,7 +469,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 4,
     upgradeCost: 500,
-    description: 'Plague master. 15 dmg/s for 6s. Special ability.',
+    description: 'Plague master. 15 dmg/s for 6s. Great vs armored! Special ability.',
     stats: {
       range: 260,
       fireRate: 1100,

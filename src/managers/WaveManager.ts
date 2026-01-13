@@ -299,6 +299,12 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       // Mark group as finished
       group.finished = true;
       console.log(`WaveManager: Group ${group.creepType} finished spawning`);
+      
+      // If no more sequential groups in queue, trigger boss groups immediately
+      if (this.groupQueue.length === 0 && this.pendingBossGroups.length > 0) {
+        console.log(`WaveManager: Last sequential group finished, triggering boss groups`);
+        this.startNextGroup();  // This will spawn the boss groups
+      }
     }
   }
 

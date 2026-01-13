@@ -130,11 +130,11 @@ export class TowerUIManager {
     // Larger background panel
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.97);
-    bg.fillRoundedRect(-160, -90, 320, 180, 14);
+    bg.fillRoundedRect(-175, -90, 350, 195, 14);
     bg.lineStyle(3, 0xd4a574, 1);
-    bg.strokeRoundedRect(-160, -90, 320, 180, 14);
+    bg.strokeRoundedRect(-175, -90, 350, 195, 14);
     bg.lineStyle(1, 0x8b6914, 0.6);
-    bg.strokeRoundedRect(-155, -85, 310, 170, 12);
+    bg.strokeRoundedRect(-170, -85, 340, 185, 12);
     this.buildMenuContainer.add(bg);
     
     // Title with larger font
@@ -151,25 +151,25 @@ export class TowerUIManager {
     // Decorative line under title
     const titleLine = this.scene.add.graphics();
     titleLine.lineStyle(2, 0xd4a574, 0.8);
-    titleLine.lineBetween(-100, -50, 100, -50);
+    titleLine.lineBetween(-120, -50, 120, -50);
     this.buildMenuContainer.add(titleLine);
     
     // Tower button background
     const btnBg = this.scene.add.graphics();
     btnBg.fillStyle(canAfford ? 0x2a2015 : 0x1a1510, 1);
-    btnBg.fillRoundedRect(-145, -40, 290, 100, 10);
+    btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
     btnBg.lineStyle(2, canAfford ? 0xc49564 : 0x555555, 1);
-    btnBg.strokeRoundedRect(-145, -40, 290, 100, 10);
+    btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
     this.buildMenuContainer.add(btnBg);
     
     // Draw actual tower icon
     const towerIcon = this.scene.add.graphics();
-    towerIcon.setPosition(-95, 20);
+    towerIcon.setPosition(-110, 20);
     this.drawArcherTowerIcon(towerIcon, canAfford);
     this.buildMenuContainer.add(towerIcon);
     
     // Tower name with larger font
-    const nameText = this.scene.add.text(45, -25, 'Archer Tower', {
+    const nameText = this.scene.add.text(30, -25, 'Archer Tower', {
       fontFamily: 'Georgia, serif',
       fontSize: '22px',
       color: canAfford ? '#ffffff' : '#666666',
@@ -183,14 +183,14 @@ export class TowerUIManager {
     const dps = (stats.damage / (stats.fireRate / 1000)).toFixed(1);
     
     // Damage stat
-    const dmgLabel = this.scene.add.text(-30, 5, 'DMG:', {
+    const dmgLabel = this.scene.add.text(-45, 5, 'DMG:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: canAfford ? '#aaaaaa' : '#555555'
     }).setOrigin(0, 0.5);
     this.buildMenuContainer.add(dmgLabel);
     
-    const dmgValue = this.scene.add.text(10, 5, `${stats.damage}`, {
+    const dmgValue = this.scene.add.text(-5, 5, `${stats.damage}`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: canAfford ? '#ff6666' : '#555555'
@@ -198,14 +198,14 @@ export class TowerUIManager {
     this.buildMenuContainer.add(dmgValue);
     
     // Rate stat
-    const rateLabel = this.scene.add.text(45, 5, 'Rate:', {
+    const rateLabel = this.scene.add.text(30, 5, 'Rate:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: canAfford ? '#aaaaaa' : '#555555'
     }).setOrigin(0, 0.5);
     this.buildMenuContainer.add(rateLabel);
     
-    const rateValue = this.scene.add.text(90, 5, `${fireRateSec}s`, {
+    const rateValue = this.scene.add.text(75, 5, `${fireRateSec}s`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: canAfford ? '#66ccff' : '#555555'
@@ -213,14 +213,14 @@ export class TowerUIManager {
     this.buildMenuContainer.add(rateValue);
     
     // DPS stat
-    const dpsLabel = this.scene.add.text(-30, 28, 'DPS:', {
+    const dpsLabel = this.scene.add.text(-45, 28, 'DPS:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: canAfford ? '#aaaaaa' : '#555555'
     }).setOrigin(0, 0.5);
     this.buildMenuContainer.add(dpsLabel);
     
-    const dpsValue = this.scene.add.text(10, 28, `${dps}`, {
+    const dpsValue = this.scene.add.text(-5, 28, `${dps}`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: canAfford ? '#ffcc44' : '#555555'
@@ -228,14 +228,14 @@ export class TowerUIManager {
     this.buildMenuContainer.add(dpsValue);
     
     // Range stat
-    const rangeLabel = this.scene.add.text(45, 28, 'Range:', {
+    const rangeLabel = this.scene.add.text(30, 28, 'Range:', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: canAfford ? '#aaaaaa' : '#555555'
     }).setOrigin(0, 0.5);
     this.buildMenuContainer.add(rangeLabel);
     
-    const rangeValue = this.scene.add.text(105, 28, `${stats.range}`, {
+    const rangeValue = this.scene.add.text(90, 28, `${stats.range}`, {
       fontFamily: 'Arial Black',
       fontSize: '14px',
       color: canAfford ? '#66ff66' : '#555555'
@@ -244,32 +244,32 @@ export class TowerUIManager {
     
     // Air damage bonus
     if (stats.airDamageBonus) {
-      const airLabel = this.scene.add.text(-30, 50, 'vs Air:', {
+      const airLabel = this.scene.add.text(-45, 50, 'vs Air:', {
         fontFamily: 'Arial',
         fontSize: '14px',
         color: canAfford ? '#aaaaaa' : '#555555'
       }).setOrigin(0, 0.5);
       this.buildMenuContainer.add(airLabel);
       
-      const airValue = this.scene.add.text(25, 50, `+${Math.round(stats.airDamageBonus * 100)}%`, {
+      const airValue = this.scene.add.text(10, 50, `+${Math.round(stats.airDamageBonus * 100)}%`, {
         fontFamily: 'Arial Black',
         fontSize: '14px',
         color: canAfford ? '#66ccff' : '#555555'
       }).setOrigin(0, 0.5);
       this.buildMenuContainer.add(airValue);
+      
+      // Target type (next to air bonus)
+      const targetText = this.scene.add.text(85, 50, 'Single target', {
+        fontFamily: 'Arial',
+        fontSize: '12px',
+        color: canAfford ? '#888888' : '#444444',
+        fontStyle: 'italic'
+      }).setOrigin(0, 0.5);
+      this.buildMenuContainer.add(targetText);
     }
     
-    // Target type
-    const targetText = this.scene.add.text(45, 68, 'Single target', {
-      fontFamily: 'Arial',
-      fontSize: '12px',
-      color: canAfford ? '#888888' : '#444444',
-      fontStyle: 'italic'
-    }).setOrigin(0.5);
-    this.buildMenuContainer.add(targetText);
-    
     // Cost with larger font
-    const costText = this.scene.add.text(0, 75, `Cost: ${archerConfig.buildCost}g`, {
+    const costText = this.scene.add.text(0, 85, `Cost: ${archerConfig.buildCost}g`, {
       fontFamily: 'Georgia, serif',
       fontSize: '20px',
       color: canAfford ? '#ffd700' : '#ff4444',
@@ -278,7 +278,7 @@ export class TowerUIManager {
     this.buildMenuContainer.add(costText);
     
     if (canAfford) {
-      const hitArea = this.scene.add.rectangle(0, 10, 290, 100, 0xffffff, 0);
+      const hitArea = this.scene.add.rectangle(0, 10, 320, 100, 0xffffff, 0);
       hitArea.setInteractive({ useHandCursor: true });
       hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
         event.stopPropagation();
@@ -288,21 +288,21 @@ export class TowerUIManager {
       hitArea.on('pointerover', () => {
         btnBg.clear();
         btnBg.fillStyle(0x3a3025, 1);
-        btnBg.fillRoundedRect(-145, -40, 290, 100, 10);
+        btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
         btnBg.lineStyle(2, 0xffd700, 1);
-        btnBg.strokeRoundedRect(-145, -40, 290, 100, 10);
+        btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
       });
       hitArea.on('pointerout', () => {
         btnBg.clear();
         btnBg.fillStyle(0x2a2015, 1);
-        btnBg.fillRoundedRect(-145, -40, 290, 100, 10);
+        btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
         btnBg.lineStyle(2, 0xc49564, 1);
-        btnBg.strokeRoundedRect(-145, -40, 290, 100, 10);
+        btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
       });
       this.buildMenuContainer.add(hitArea);
     }
     
-    const closeBtn = this.scene.add.text(145, -75, '✕', {
+    const closeBtn = this.scene.add.text(160, -75, '✕', {
       fontFamily: 'Arial',
       fontSize: '24px',
       color: '#ff6666'
@@ -315,8 +315,8 @@ export class TowerUIManager {
     closeBtn.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.buildMenuContainer.add(closeBtn);
     
-    // Clamp popup to screen bounds (menu is 320x180)
-    this.uiHelper.clampToScreen(this.buildMenuContainer, 320, 180, 0.5, 0.5);
+    // Clamp popup to screen bounds (menu is 350x195)
+    this.uiHelper.clampToScreen(this.buildMenuContainer, 350, 195, 0.5, 0.5);
   }
 
   /**
@@ -430,14 +430,14 @@ export class TowerUIManager {
     const killCount = tower.getKillCount();
     
     // Calculate menu dimensions based on content
-    const menuWidth = hasBranches && !this.reviewMode ? Math.max(680, branchCount * 105 + 60) : 420;
-    let menuHeight = 170; // Base height for title, stats (now multi-line), and veteran info
+    const menuWidth = hasBranches && !this.reviewMode ? Math.max(780, branchCount * 115 + 60) : 420;
+    let menuHeight = 190; // Base height for title, stats (now multi-line), hint, and veteran info
     if (hasDamageBuff) menuHeight += 18;
     if (hasCritBuff) menuHeight += 18;
     if (this.reviewMode) {
       // Review mode: just stats, no action buttons
       menuHeight += 20;
-    } else if (hasBranches) menuHeight += 170; // Space for branch cards
+    } else if (hasBranches) menuHeight += 190; // Space for branch cards (increased for larger fonts)
     else if (hasLevelUp) menuHeight += 130; // Space for upgrade preview with larger stats
     else {
       // Max level - check if there's ability info to show
@@ -490,47 +490,47 @@ export class TowerUIManager {
     const baseDps = config.stats.fireRate > 0 ? (baseDamage / (config.stats.fireRate / 1000)).toFixed(1) : '0';
     const buffedDps = config.stats.fireRate > 0 ? (buffedDamage / (config.stats.fireRate / 1000)).toFixed(1) : '0';
     
-    // Stats in two rows for better readability
-    const statsStartX = -menuWidth / 2 + 40;
-    const statLineHeight = 20;
+    // Stats in two rows for better readability - centered
+    const statsStartX = -menuWidth / 2 + 50;
+    const statLineHeight = 24;
     
     // Row 1: DMG and Rate
     // DMG
     const dmgLabel = this.scene.add.text(statsStartX, yOffset, 'DMG:', {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(dmgLabel);
     
-    const dmgValue = this.scene.add.text(statsStartX + 45, yOffset, `${baseDamage}`, {
+    const dmgValue = this.scene.add.text(statsStartX + 50, yOffset, `${baseDamage}`, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#ff6666'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(dmgValue);
     
     if (hasBonus) {
       const bonusDmg = buffedDamage - baseDamage;
-      const dmgBonus = this.scene.add.text(statsStartX + 45 + dmgValue.width + 3, yOffset, `(+${bonusDmg})`, {
+      const dmgBonus = this.scene.add.text(statsStartX + 50 + dmgValue.width + 3, yOffset, `(+${bonusDmg})`, {
         fontFamily: 'Arial',
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#88ff88'
       }).setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(dmgBonus);
     }
     
     // Rate (right side of row 1)
-    const rateLabel = this.scene.add.text(statsStartX + 150, yOffset, 'Rate:', {
+    const rateLabel = this.scene.add.text(statsStartX + 160, yOffset, 'Rate:', {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rateLabel);
     
-    const rateValue = this.scene.add.text(statsStartX + 195, yOffset, `${fireRateSec}s`, {
+    const rateValue = this.scene.add.text(statsStartX + 210, yOffset, `${fireRateSec}s`, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#66ccff'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rateValue);
@@ -541,55 +541,55 @@ export class TowerUIManager {
     // DPS
     const dpsLabel = this.scene.add.text(statsStartX, yOffset, 'DPS:', {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(dpsLabel);
     
-    const dpsValue = this.scene.add.text(statsStartX + 45, yOffset, `${baseDps}`, {
+    const dpsValue = this.scene.add.text(statsStartX + 50, yOffset, `${baseDps}`, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#ffcc44'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(dpsValue);
     
     if (hasBonus) {
       const bonusDps = (parseFloat(buffedDps) - parseFloat(baseDps)).toFixed(1);
-      const dpsBonus = this.scene.add.text(statsStartX + 45 + dpsValue.width + 3, yOffset, `(+${bonusDps})`, {
+      const dpsBonus = this.scene.add.text(statsStartX + 50 + dpsValue.width + 3, yOffset, `(+${bonusDps})`, {
         fontFamily: 'Arial',
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#88ff88'
       }).setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(dpsBonus);
     }
     
     // Range (right side of row 2)
-    const rangeLabel = this.scene.add.text(statsStartX + 150, yOffset, 'Range:', {
+    const rangeLabel = this.scene.add.text(statsStartX + 160, yOffset, 'Range:', {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rangeLabel);
     
-    const rangeValue = this.scene.add.text(statsStartX + 205, yOffset, `${config.stats.range}`, {
+    const rangeValue = this.scene.add.text(statsStartX + 220, yOffset, `${config.stats.range}`, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#66ff66'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rangeValue);
     
     // Air damage bonus (right side, after range)
     if (config.stats.airDamageBonus) {
-      const airLabel = this.scene.add.text(statsStartX + 260, yOffset, 'vs Air:', {
+      const airLabel = this.scene.add.text(statsStartX + 280, yOffset, 'vs Air:', {
         fontFamily: 'Arial',
-        fontSize: '14px',
+        fontSize: '16px',
         color: '#aaaaaa'
       }).setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(airLabel);
       
-      const airValue = this.scene.add.text(statsStartX + 310, yOffset, `+${Math.round(config.stats.airDamageBonus * 100)}%`, {
+      const airValue = this.scene.add.text(statsStartX + 340, yOffset, `+${Math.round(config.stats.airDamageBonus * 100)}%`, {
         fontFamily: 'Arial Black',
-        fontSize: '14px',
+        fontSize: '16px',
         color: '#66ccff'
       }).setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(airValue);
@@ -609,29 +609,29 @@ export class TowerUIManager {
     // Kills on left
     const killsLabel = this.scene.add.text(statsStartX, yOffset, '☠ Kills:', {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(killsLabel);
     
-    const killsValue = this.scene.add.text(statsStartX + 60, yOffset, `${killCount}`, {
+    const killsValue = this.scene.add.text(statsStartX + 70, yOffset, `${killCount}`, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '16px',
       color: killCount > 0 ? '#ff9966' : '#666666'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(killsValue);
     
     // Veteran rank on right
-    const rankLabel = this.scene.add.text(statsStartX + 130, yOffset, '🎖 Rank:', {
+    const rankLabel = this.scene.add.text(statsStartX + 140, yOffset, '🎖 Rank:', {
       fontFamily: 'Arial',
-      fontSize: '14px',
+      fontSize: '16px',
       color: '#aaaaaa'
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rankLabel);
     
-    const rankValue = this.scene.add.text(statsStartX + 195, yOffset, veteranName, {
+    const rankValue = this.scene.add.text(statsStartX + 215, yOffset, veteranName, {
       fontFamily: 'Arial Black',
-      fontSize: '14px',
+      fontSize: '16px',
       color: rankColor
     }).setOrigin(0, 0.5);
     this.upgradeMenuContainer.add(rankValue);
@@ -639,37 +639,60 @@ export class TowerUIManager {
     // Veteran bonus if any
     if (veteranRank > 0) {
       const veteranBonus = tower.getVeteranDamageBonus();
-      const bonusText = this.scene.add.text(statsStartX + 195 + rankValue.width + 8, yOffset, `+${veteranBonus}% DMG`, {
+      const bonusText = this.scene.add.text(statsStartX + 215 + rankValue.width + 8, yOffset, `+${veteranBonus}% DMG`, {
         fontFamily: 'Arial',
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#88ff88'
       }).setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(bonusText);
     }
     
-    yOffset += 20;
+    yOffset += 22;
+    
+    // === TOWER HINT - Explain strengths and usage ===
+    const towerHints: Record<TowerBranch, string> = {
+      archer: '🏹 Versatile tower. +200% damage vs flying units. Good all-rounder.',
+      rapidfire: '⚡ Very fast attacks shred unarmored targets. Weak vs heavy armor.',
+      sniper: '🎯 Extreme range and damage. Best for picking off tough single targets.',
+      rockcannon: '💥 Splash damage hits multiple enemies. Great for swarms.',
+      icetower: '❄️ Slows enemies so other towers deal more damage. Essential support.',
+      poison: '☠️ Damage over time ignores armor. Best counter to armored units!',
+      aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.'
+    };
+    
+    const hintText = this.scene.add.text(0, yOffset, towerHints[config.branch], {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#88ccff',
+      fontStyle: 'italic',
+      align: 'center',
+      wordWrap: { width: menuWidth - 60 }
+    }).setOrigin(0.5);
+    this.upgradeMenuContainer.add(hintText);
+    
+    yOffset += 24;
     
     // Buff indicators - show each active buff
     if (hasDamageBuff) {
       const buffPercent = Math.round((damageMultiplier - 1) * 100);
       const buffText = this.scene.add.text(0, yOffset, `🔴 Aura Buff: +${buffPercent}% damage`, {
         fontFamily: 'Arial',
-        fontSize: '13px',
+        fontSize: '15px',
         color: '#ff6666'
       }).setOrigin(0.5);
       this.upgradeMenuContainer.add(buffText);
-      yOffset += 16;
+      yOffset += 18;
     }
     
     if (hasCritBuff) {
       const critPercent = Math.round(tower.getAuraCritBonus() * 100);
       const critText = this.scene.add.text(0, yOffset, `⚡ Critical Aura: +${critPercent}% crit chance`, {
         fontFamily: 'Arial',
-        fontSize: '13px',
+        fontSize: '15px',
         color: '#ffa500'
       }).setOrigin(0.5);
       this.upgradeMenuContainer.add(critText);
-      yOffset += 16;
+      yOffset += 18;
     }
     
     yOffset += 8; // Spacing before upgrade section
@@ -705,18 +728,18 @@ export class TowerUIManager {
       };
       
       const branchDescriptions: Record<TowerBranch, string> = {
-        archer: 'Anti-Air specialist',
-        rapidfire: 'Fast attacks',
-        sniper: 'High damage',
-        rockcannon: 'AOE splash',
-        icetower: 'Slows enemies',
-        poison: 'DOT damage',
-        aura: 'Buffs towers'
+        archer: 'Best vs flying units',
+        rapidfire: 'Fast attacks, weak vs armor',
+        sniper: 'High single-target damage',
+        rockcannon: 'AOE splash damage',
+        icetower: 'Slows enemies for allies',
+        poison: 'Best vs armored units',
+        aura: 'Buffs nearby towers'
       };
       
       const branches = upgradeOptions.branches!;
-      const btnWidth = 100;
-      const btnHeight = 130;
+      const btnWidth = 110;
+      const btnHeight = 160;
       const startX = -((branches.length - 1) * (btnWidth + 5)) / 2;
       
       branches.forEach((branch, index) => {
@@ -740,22 +763,24 @@ export class TowerUIManager {
         
         // Tower icon
         const towerIcon = this.scene.add.graphics();
-        this.drawMiniTowerIcon(towerIcon, bx, by + 35, branch, canAfford);
+        this.drawMiniTowerIcon(towerIcon, bx, by + 38, branch, canAfford);
         this.upgradeMenuContainer!.add(towerIcon);
         
         // Branch name
-        const nameText = this.scene.add.text(bx, by + 62, branchNames[branch], {
+        const nameText = this.scene.add.text(bx, by + 68, branchNames[branch], {
           fontFamily: 'Arial Black',
-          fontSize: '12px',
+          fontSize: '14px',
           color: canAfford ? '#ffffff' : '#666666'
         }).setOrigin(0.5);
         this.upgradeMenuContainer!.add(nameText);
         
-        // Branch description
-        const descText = this.scene.add.text(bx, by + 78, branchDescriptions[branch], {
+        // Branch description (with word wrap)
+        const descText = this.scene.add.text(bx, by + 92, branchDescriptions[branch], {
           fontFamily: 'Arial',
-          fontSize: '11px',
-          color: canAfford ? '#aaaaaa' : '#555555'
+          fontSize: '12px',
+          color: canAfford ? '#aaaaaa' : '#555555',
+          align: 'center',
+          wordWrap: { width: btnWidth - 8 }
         }).setOrigin(0.5);
         this.upgradeMenuContainer!.add(descText);
         
@@ -768,17 +793,17 @@ export class TowerUIManager {
         } else {
           statsPreview = `${stats.damage} dmg | ${previewDps} DPS`;
         }
-        const previewText = this.scene.add.text(bx, by + 94, statsPreview, {
+        const previewText = this.scene.add.text(bx, by + 120, statsPreview, {
           fontFamily: 'Arial',
-          fontSize: '11px',
+          fontSize: '12px',
           color: canAfford ? '#88ff88' : '#555555'
         }).setOrigin(0.5);
         this.upgradeMenuContainer!.add(previewText);
         
         // Cost
-        const costText = this.scene.add.text(bx, by + 112, `${cost}g`, {
+        const costText = this.scene.add.text(bx, by + 142, `${cost}g`, {
           fontFamily: 'Arial Black',
-          fontSize: '14px',
+          fontSize: '16px',
           color: canAfford ? '#ffd700' : '#ff4444'
         }).setOrigin(0.5);
         this.upgradeMenuContainer!.add(costText);
@@ -856,40 +881,40 @@ export class TowerUIManager {
         
         // Create individual stat improvement lines with colors
         let statY = yOffset + 42;
-        const statSpacing = 18;
+        const statSpacing = 22;
         
         if (dmgDiff > 0) {
           const dmgLabel = this.scene.add.text(-80, statY, 'DMG:', {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#aaaaaa'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dmgLabel);
           
-          const dmgValue = this.scene.add.text(-40, statY, `${oldStats.damage}`, {
+          const dmgValue = this.scene.add.text(-35, statY, `${oldStats.damage}`, {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffffff'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dmgValue);
           
-          const dmgArrow = this.scene.add.text(-5, statY, '→', {
+          const dmgArrow = this.scene.add.text(5, statY, '→', {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#88ff88'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dmgArrow);
           
-          const dmgNew = this.scene.add.text(20, statY, `${newStats.damage}`, {
+          const dmgNew = this.scene.add.text(30, statY, `${newStats.damage}`, {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#88ff88'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dmgNew);
           
-          const dmgBonus = this.scene.add.text(55, statY, `(+${dmgDiff})`, {
+          const dmgBonus = this.scene.add.text(70, statY, `(+${dmgDiff})`, {
             fontFamily: 'Arial',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#44ff44'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dmgBonus);
@@ -900,35 +925,35 @@ export class TowerUIManager {
         if (parseFloat(dpsDiff) > 0) {
           const dpsLabel = this.scene.add.text(-80, statY, 'DPS:', {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#aaaaaa'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dpsLabel);
           
-          const dpsValue = this.scene.add.text(-40, statY, `${oldDps}`, {
+          const dpsValue = this.scene.add.text(-35, statY, `${oldDps}`, {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffffff'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dpsValue);
           
-          const dpsArrow = this.scene.add.text(-5, statY, '→', {
+          const dpsArrow = this.scene.add.text(5, statY, '→', {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffaa44'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dpsArrow);
           
-          const dpsNew = this.scene.add.text(20, statY, `${newDps}`, {
+          const dpsNew = this.scene.add.text(30, statY, `${newDps}`, {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffaa44'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dpsNew);
           
-          const dpsBonus = this.scene.add.text(65, statY, `(+${dpsDiff})`, {
+          const dpsBonus = this.scene.add.text(80, statY, `(+${dpsDiff})`, {
             fontFamily: 'Arial',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#ffcc66'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(dpsBonus);
@@ -939,35 +964,35 @@ export class TowerUIManager {
         if (rangeDiff > 0) {
           const rangeLabel = this.scene.add.text(-80, statY, 'Range:', {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#aaaaaa'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(rangeLabel);
           
-          const rangeValue = this.scene.add.text(-20, statY, `${oldStats.range}`, {
+          const rangeValue = this.scene.add.text(-15, statY, `${oldStats.range}`, {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#ffffff'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(rangeValue);
           
-          const rangeArrow = this.scene.add.text(15, statY, '→', {
+          const rangeArrow = this.scene.add.text(25, statY, '→', {
             fontFamily: 'Arial',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#44aaff'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(rangeArrow);
           
-          const rangeNew = this.scene.add.text(40, statY, `${newStats.range}`, {
+          const rangeNew = this.scene.add.text(50, statY, `${newStats.range}`, {
             fontFamily: 'Arial Black',
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#44aaff'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(rangeNew);
           
-          const rangeBonus = this.scene.add.text(80, statY, `(+${rangeDiff})`, {
+          const rangeBonus = this.scene.add.text(95, statY, `(+${rangeDiff})`, {
             fontFamily: 'Arial',
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#66ccff'
           }).setOrigin(0, 0.5);
           this.upgradeMenuContainer.add(rangeBonus);
@@ -976,9 +1001,9 @@ export class TowerUIManager {
         }
         
         // Cost - position below the stats
-        const costText = this.scene.add.text(0, yOffset + 100, `Cost: ${cost}g`, {
+        const costText = this.scene.add.text(0, yOffset + 110, `Cost: ${cost}g`, {
           fontFamily: 'Arial Black',
-          fontSize: '12px',
+          fontSize: '16px',
           color: canAfford ? '#ffd700' : '#ff4444'
         }).setOrigin(0.5);
         this.upgradeMenuContainer.add(costText);
@@ -1022,7 +1047,7 @@ export class TowerUIManager {
           // Ability name with icon indicator
           const abilityName = this.scene.add.text(0, yOffset + 10, `⚡ ${selectedAbility.name}`, {
             fontFamily: 'Arial Black',
-            fontSize: '13px',
+            fontSize: '14px',
             color: abilityColor
           }).setOrigin(0.5);
           this.upgradeMenuContainer.add(abilityName);
@@ -1031,7 +1056,7 @@ export class TowerUIManager {
           // Trigger chance
           const triggerText = this.scene.add.text(0, yOffset + 10, `${Math.round(selectedAbility.triggerChance * 100)}% trigger chance`, {
             fontFamily: 'Arial',
-            fontSize: '11px',
+            fontSize: '13px',
             color: '#aaaaaa'
           }).setOrigin(0.5);
           this.upgradeMenuContainer.add(triggerText);
@@ -1040,7 +1065,7 @@ export class TowerUIManager {
           // Description
           const descText = this.scene.add.text(0, yOffset + 10, selectedAbility.description, {
             fontFamily: 'Arial',
-            fontSize: '11px',
+            fontSize: '13px',
             color: '#888888'
           }).setOrigin(0.5);
           this.upgradeMenuContainer.add(descText);
@@ -1056,7 +1081,7 @@ export class TowerUIManager {
         text: `Sell: ${sellValue}g`,
         x: menuWidth / 2 - 55,
         y: menuHeight / 2 - 22,
-        fontSize: 12,
+        fontSize: 14,
         textColor: '#ff6666',
         bgColor: 0x4a2a2a,
         hoverBgColor: 0x6a3a3a,
@@ -1204,8 +1229,8 @@ export class TowerUIManager {
     const abilities = tower.getAvailableAbilities();
     if (abilities.length === 0) return;
     
-    const menuWidth = 500;
-    const menuHeight = 220;
+    const menuWidth = 540;
+    const menuHeight = 250;
     
     this.abilityMenuContainer = this.scene.add.container(tower.x, tower.y - menuHeight / 2 - 50);
     this.abilityMenuContainer.setDepth(250);
@@ -1219,18 +1244,18 @@ export class TowerUIManager {
     this.abilityMenuContainer.add(bg);
     
     // Title
-    const title = this.scene.add.text(0, -menuHeight / 2 + 22, '⭐ Choose Special Ability ⭐', {
+    const title = this.scene.add.text(0, -menuHeight / 2 + 24, '⭐ Choose Special Ability ⭐', {
       fontFamily: 'Arial Black',
-      fontSize: '18px',
+      fontSize: '20px',
       color: '#ffd700'
     }).setOrigin(0.5);
     this.abilityMenuContainer.add(title);
     
     // Ability buttons
-    const btnWidth = 150;
-    const btnHeight = 130;
+    const btnWidth = 160;
+    const btnHeight = 150;
     const startX = -((abilities.length - 1) * (btnWidth + 10)) / 2;
-    const btnY = 10;
+    const btnY = 15;
     
     abilities.forEach((ability, index) => {
       const bx = startX + index * (btnWidth + 10);
@@ -1244,30 +1269,30 @@ export class TowerUIManager {
       
       // Icon
       const icon = this.scene.add.graphics();
-      icon.setPosition(bx, btnY - 30);
+      icon.setPosition(bx, btnY - 35);
       this.drawAbilityIcon(icon, ability);
       this.abilityMenuContainer!.add(icon);
       
       // Name
       const nameText = this.scene.add.text(bx, btnY + 5, ability.name, {
         fontFamily: 'Arial Black',
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#ffffff'
       }).setOrigin(0.5);
       this.abilityMenuContainer!.add(nameText);
       
       // Trigger chance
-      const chanceText = this.scene.add.text(bx, btnY + 22, `${Math.round(ability.triggerChance * 100)}% chance`, {
+      const chanceText = this.scene.add.text(bx, btnY + 25, `${Math.round(ability.triggerChance * 100)}% chance`, {
         fontFamily: 'Arial',
-        fontSize: '10px',
+        fontSize: '12px',
         color: '#aaaaaa'
       }).setOrigin(0.5);
       this.abilityMenuContainer!.add(chanceText);
       
       // Description (wrapped)
-      const descText = this.scene.add.text(bx, btnY + 42, ability.description, {
+      const descText = this.scene.add.text(bx, btnY + 50, ability.description, {
         fontFamily: 'Arial',
-        fontSize: '9px',
+        fontSize: '11px',
         color: '#888888',
         align: 'center',
         wordWrap: { width: btnWidth - 10 }

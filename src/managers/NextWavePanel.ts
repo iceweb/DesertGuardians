@@ -21,8 +21,8 @@ export class NextWavePanel {
   
   private readonly PANEL_X = 20;
   private readonly PANEL_Y_OFFSET = 130;  // Distance from bottom (above menu button)
-  private readonly ICON_SIZE = 36;
-  private readonly ICON_SPACING = 50;  // Increased spacing between icons
+  private readonly ICON_SIZE = 42;
+  private readonly ICON_SPACING = 56;  // Increased spacing between icons
   private readonly MAX_ICONS_PER_ROW = 5;
   
   constructor(scene: Phaser.Scene) {
@@ -46,8 +46,8 @@ export class NextWavePanel {
     // Calculate panel dimensions
     const iconCount = Math.min(creepTypes.length, this.MAX_ICONS_PER_ROW);
     const rows = Math.ceil(creepTypes.length / this.MAX_ICONS_PER_ROW);
-    const panelWidth = Math.max(140, iconCount * this.ICON_SPACING + 40);
-    const panelHeight = 75 + rows * this.ICON_SPACING;  // Extra height for icons moved down
+    const panelWidth = Math.max(160, iconCount * this.ICON_SPACING + 50);
+    const panelHeight = 95 + rows * this.ICON_SPACING;  // Extra height for icons moved down
     
     // Position container
     this.container.setPosition(this.PANEL_X, height - this.PANEL_Y_OFFSET - panelHeight / 2);
@@ -83,9 +83,9 @@ export class NextWavePanel {
     // Header text
     const headerText = isBossWave ? '⚔️ BOSS WAVE' : 'Next Wave';
     const headerColor = isBossWave ? '#ff4444' : '#d4a574';
-    const header = this.scene.add.text(panelWidth / 2, 12, headerText, {
+    const header = this.scene.add.text(panelWidth / 2, 14, headerText, {
       fontFamily: 'Arial',
-      fontSize: isBossWave ? '13px' : '12px',
+      fontSize: isBossWave ? '16px' : '15px',
       fontStyle: isBossWave ? 'bold' : 'normal',
       color: headerColor,
       stroke: '#000000',
@@ -94,16 +94,19 @@ export class NextWavePanel {
     this.container.add(header);
     
     // Wave number subtitle
-    const subtitle = this.scene.add.text(panelWidth / 2, 26, `Wave ${waveNumber}`, {
+    const subtitle = this.scene.add.text(panelWidth / 2, 34, `Wave ${waveNumber}`, {
       fontFamily: 'Arial',
-      fontSize: '10px',
+      fontSize: '13px',
       color: '#888888'
     }).setOrigin(0.5, 0);
     this.container.add(subtitle);
     
-    // Create creep icons (with margin below title)
-    const startX = 20 + this.ICON_SIZE / 2;
-    const startY = 65;  // Moved icons further down
+    // Create creep icons (vertically centered in icon area)
+    const headerHeight = 55;  // Space taken by header + subtitle
+    const iconAreaHeight = panelHeight - headerHeight - 10;  // Available height for icons
+    const totalIconHeight = rows * this.ICON_SPACING;
+    const startX = 25 + this.ICON_SIZE / 2;
+    const startY = headerHeight + (iconAreaHeight - totalIconHeight) / 2 + this.ICON_SIZE / 2;
     
     creepTypes.forEach((creepInfo, index) => {
       const row = Math.floor(index / this.MAX_ICONS_PER_ROW);
@@ -207,15 +210,15 @@ export class NextWavePanel {
     // Measure text for sizing
     const tempText = this.scene.add.text(0, 0, description, {
       fontFamily: 'Arial',
-      fontSize: '11px',
-      wordWrap: { width: 180 }
+      fontSize: '13px',
+      wordWrap: { width: 200 }
     });
-    const textWidth = Math.min(tempText.width, 180);
+    const textWidth = Math.min(tempText.width, 200);
     const textHeight = tempText.height;
     tempText.destroy();
     
-    const tooltipWidth = Math.max(textWidth + 20, 100);
-    const tooltipHeight = textHeight + 35;
+    const tooltipWidth = Math.max(textWidth + 24, 120);
+    const tooltipHeight = textHeight + 42;
     
     // Background
     const bg = this.scene.add.graphics();
@@ -239,20 +242,20 @@ export class NextWavePanel {
     this.tooltip.add(bg);
     
     // Name text
-    const nameText = this.scene.add.text(0, -tooltipHeight + 8, name, {
+    const nameText = this.scene.add.text(0, -tooltipHeight + 10, name, {
       fontFamily: 'Arial',
-      fontSize: '12px',
+      fontSize: '14px',
       fontStyle: 'bold',
       color: '#ffd700'
     }).setOrigin(0.5, 0);
     this.tooltip.add(nameText);
     
     // Description text
-    const descText = this.scene.add.text(0, -tooltipHeight + 24, description, {
+    const descText = this.scene.add.text(0, -tooltipHeight + 30, description, {
       fontFamily: 'Arial',
-      fontSize: '11px',
+      fontSize: '13px',
       color: '#ffffff',
-      wordWrap: { width: tooltipWidth - 16 },
+      wordWrap: { width: tooltipWidth - 20 },
       align: 'center'
     }).setOrigin(0.5, 0);
     this.tooltip.add(descText);
