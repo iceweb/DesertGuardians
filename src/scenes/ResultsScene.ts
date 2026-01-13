@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { AudioManager } from '../managers';
+import { AudioManager, HighscoreAPI } from '../managers';
 import { GAME_CONFIG } from '../data/GameConfig';
 
 /**
@@ -64,6 +64,9 @@ export class ResultsScene extends Phaser.Scene {
   private cursorVisible: boolean = true;
   private cursorTimer!: Phaser.Time.TimerEvent;
   private hasSubmitted: boolean = false;
+  
+  // Global submission status
+  private globalSubmitStatus!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'ResultsScene' });
@@ -420,9 +423,9 @@ export class ResultsScene extends Phaser.Scene {
   }
 
   /**
-   * Save score to localStorage
+   * Save score to localStorage and submit to global leaderboard
    */
-  private saveScore(): void {
+  private async saveScore(): Promise<void> {
     if (this.hasSubmitted) return;
     this.hasSubmitted = true;
     
@@ -457,29 +460,65 @@ export class ResultsScene extends Phaser.Scene {
     // Keep only top scores
     const trimmedScores = highscores.slice(0, MAX_HIGHSCORES);
     
-    // Save
+    // Save locally
     localStorage.setItem(HIGHSCORES_KEY, JSON.stringify(trimmedScores));
     
     // Update display
     this.cursorTimer.destroy();
     this.updateNameDisplay();
     
-    // Show confirmation
+    // Show local save confirmation
     const width = this.cameras.main.width;
-    const confirmText = this.add.text(width / 2, this.cameras.main.height - 130, '✓ Score Saved!', {
+    const confirmText = this.add.text(width / 2, this.cameras.main.height - 130, '✓ Score Saved Locally!', {
       fontFamily: 'Arial',
       fontSize: '18px',
       color: '#00ff00'
     }).setOrigin(0.5);
     
+    console.log('ResultsScene: Score saved locally', newScore);
+    
+    // Submit to global leaderboard
+    this.globalSubmitStatus = this.add.text(width / 2, this.cameras.main.height - 105, '📡 Submitting to global leaderboard...', {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#88ccff'
+    }).setOrigin(0.5);
+    
+    try {
+      const result = await HighscoreAPI.submitScore({
+        name,
+        score: this.finalScore,
+        waveReached: this.resultData.waveReached,
+        totalWaves: this.resultData.totalWaves,
+        hpRemaining: this.resultData.castleHP,
+        goldEarned: this.resultData.totalGoldEarned,
+        creepsKilled: this.resultData.creepsKilled,
+        timeSeconds: this.resultData.runTimeSeconds,
+        isVictory: this.resultData.isVictory
+      });
+      
+      if (result.success) {
+        this.globalSubmitStatus.setText('✓ Submitted to Global Leaderboard!');
+        this.globalSubmitStatus.setColor('#00ff00');
+        console.log('ResultsScene: Score submitted to global leaderboard');
+      } else {
+        this.globalSubmitStatus.setText('⚠ ' + (result.error || 'Could not submit globally'));
+        this.globalSubmitStatus.setColor('#ffaa00');
+        console.warn('ResultsScene: Global submission failed:', result.error);
+      }
+    } catch (error) {
+      this.globalSubmitStatus.setText('⚠ Offline - saved locally only');
+      this.globalSubmitStatus.setColor('#ffaa00');
+      console.warn('ResultsScene: Global submission error:', error);
+    }
+    
+    // Fade out confirmation messages
     this.tweens.add({
-      targets: confirmText,
+      targets: [confirmText, this.globalSubmitStatus],
       alpha: 0,
       duration: 2000,
-      delay: 1000
+      delay: 3000
     });
-    
-    console.log('ResultsScene: Score saved', newScore);
   }
 
   /**

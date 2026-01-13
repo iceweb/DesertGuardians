@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { Highscore } from './ResultsScene';
-import { AudioManager } from '../managers';
+import { AudioManager, HighscoreAPI } from '../managers';
+import type { GlobalScore } from '../managers';
 
 const HIGHSCORES_KEY = 'desert_guardians_scores_v1';
 
@@ -12,6 +13,11 @@ export class MenuScene extends Phaser.Scene {
   
   // Track if a game is currently running (paused in background)
   private static gameInProgress: boolean = false;
+  
+  // Highscore tab state
+  private showingGlobalScores: boolean = true;
+  private globalScoresCache: GlobalScore[] = [];
+  private scoresLoading: boolean = false;
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -681,6 +687,10 @@ export class MenuScene extends Phaser.Scene {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
     
+    // Larger panel to fit 20 scores
+    const panelWidth = 760;
+    const panelHeight = 620;
+    
     this.highscoreContainer = this.add.container(width / 2, height / 2);
     this.highscoreContainer.setDepth(100);
     
@@ -689,41 +699,41 @@ export class MenuScene extends Phaser.Scene {
     
     // Outer shadow
     bg.fillStyle(0x000000, 0.6);
-    bg.fillRoundedRect(-355, -245, 720, 500, 18);
+    bg.fillRoundedRect(-panelWidth/2 + 5, -panelHeight/2 + 5, panelWidth, panelHeight, 18);
     
     // Main panel body
     bg.fillStyle(0x1a0a00, 0.98);
-    bg.fillRoundedRect(-360, -250, 720, 500, 16);
+    bg.fillRoundedRect(-panelWidth/2, -panelHeight/2, panelWidth, panelHeight, 16);
     
     // 3D edge effect (bottom/right darker)
     bg.lineStyle(4, 0x0a0400, 1);
-    bg.strokeRoundedRect(-360, -250, 720, 500, 16);
+    bg.strokeRoundedRect(-panelWidth/2, -panelHeight/2, panelWidth, panelHeight, 16);
     
     // Inner glow edge
     bg.lineStyle(2, 0xd4a574, 1);
-    bg.strokeRoundedRect(-355, -245, 710, 490, 14);
+    bg.strokeRoundedRect(-panelWidth/2 + 5, -panelHeight/2 + 5, panelWidth - 10, panelHeight - 10, 14);
     
     // Inner border
     bg.lineStyle(1, 0x8b6914, 0.6);
-    bg.strokeRoundedRect(-350, -240, 700, 480, 12);
+    bg.strokeRoundedRect(-panelWidth/2 + 10, -panelHeight/2 + 10, panelWidth - 20, panelHeight - 20, 12);
     
     // Corner decorations
-    this.drawModalCorner(bg, -350, -240);
-    this.drawModalCorner(bg, 350, -240);
-    this.drawModalCorner(bg, -350, 240);
-    this.drawModalCorner(bg, 350, 240);
+    this.drawModalCorner(bg, -panelWidth/2 + 20, -panelHeight/2 + 20);
+    this.drawModalCorner(bg, panelWidth/2 - 20, -panelHeight/2 + 20);
+    this.drawModalCorner(bg, -panelWidth/2 + 20, panelHeight/2 - 20);
+    this.drawModalCorner(bg, panelWidth/2 - 20, panelHeight/2 - 20);
     
     this.highscoreContainer.add(bg);
     
     // Title with decorative styling
-    const titleShadow = this.add.text(2, -218, '🏆  HIGHSCORES  🏆', {
+    const titleShadow = this.add.text(2, -panelHeight/2 + 38, '🏆  LEADERBOARD  🏆', {
       fontFamily: 'Georgia, serif',
       fontSize: '34px',
       color: '#000000'
     }).setOrigin(0.5).setAlpha(0.5);
     this.highscoreContainer.add(titleShadow);
     
-    const title = this.add.text(0, -220, '🏆  HIGHSCORES  🏆', {
+    const title = this.add.text(0, -panelHeight/2 + 36, '🏆  LEADERBOARD  🏆', {
       fontFamily: 'Georgia, serif',
       fontSize: '34px',
       color: '#ffd700',
@@ -732,130 +742,22 @@ export class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.highscoreContainer.add(title);
     
-    // Decorative line under title
+    // Tab buttons
+    const tabY = -panelHeight/2 + 80;
+    this.createHighscoreTab(-100, tabY, '🌐 GLOBAL', true);
+    this.createHighscoreTab(100, tabY, '💾 LOCAL', false);
+    
+    // Decorative line under tabs
     const titleLine = this.add.graphics();
     titleLine.lineStyle(2, 0xd4a574, 0.8);
-    titleLine.lineBetween(-180, -190, 180, -190);
-    titleLine.fillStyle(0xffd700, 1);
-    titleLine.fillCircle(-190, -190, 4);
-    titleLine.fillCircle(190, -190, 4);
+    titleLine.lineBetween(-panelWidth/2 + 40, tabY + 30, panelWidth/2 - 40, tabY + 30);
     this.highscoreContainer.add(titleLine);
     
-    // Load highscores
-    const highscores = this.loadHighscores();
-    
-    if (highscores.length === 0) {
-      const noScores = this.add.text(0, 0, 'No highscores yet!\nPlay a game to set the first record.', {
-        fontFamily: 'Arial',
-        fontSize: '20px',
-        color: '#888888',
-        align: 'center'
-      }).setOrigin(0.5);
-      this.highscoreContainer.add(noScores);
-    } else {
-      // Header row
-      const headerY = -170;
-      const headers = [
-        { text: '#', x: -320 },
-        { text: 'Name', x: -260 },
-        { text: 'Score', x: -80 },
-        { text: 'Wave', x: 30 },
-        { text: 'HP', x: 110 },
-        { text: 'Time', x: 170 },
-        { text: 'Date', x: 250 }
-      ];
-      
-      headers.forEach(h => {
-        const headerText = this.add.text(h.x, headerY, h.text, {
-          fontFamily: 'Arial',
-          fontSize: '16px',
-          color: '#c9a86c'
-        }).setOrigin(h.text === '#' ? 0.5 : 0, 0.5);
-        this.highscoreContainer!.add(headerText);
-      });
-      
-      // Separator line
-      const sepLine = this.add.graphics();
-      sepLine.lineStyle(1, 0x4a3520, 1);
-      sepLine.lineBetween(-330, headerY + 20, 330, headerY + 20);
-      this.highscoreContainer.add(sepLine);
-      
-      // Score rows
-      const rowHeight = 35;
-      const startY = headerY + 45;
-      
-      highscores.slice(0, 10).forEach((score, index) => {
-        const y = startY + index * rowHeight;
-        const isTop3 = index < 3;
-        const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
-        const rankColor = isTop3 ? rankColors[index] : '#888888';
-        
-        // Rank
-        const rank = this.add.text(-320, y, `${index + 1}`, {
-          fontFamily: 'Arial Black',
-          fontSize: '18px',
-          color: rankColor
-        }).setOrigin(0.5, 0.5);
-        this.highscoreContainer!.add(rank);
-        
-        // Name
-        const name = this.add.text(-260, y, this.truncateName(score.playerName, 10), {
-          fontFamily: 'Arial',
-          fontSize: '16px',
-          color: '#ffffff'
-        }).setOrigin(0, 0.5);
-        this.highscoreContainer!.add(name);
-        
-        // Score
-        const scoreText = this.add.text(-80, y, score.score.toLocaleString(), {
-          fontFamily: 'Arial Black',
-          fontSize: '16px',
-          color: isTop3 ? '#ffd700' : '#ffcc44'
-        }).setOrigin(0, 0.5);
-        this.highscoreContainer!.add(scoreText);
-        
-        // Wave - use totalWaves from score if available, fallback to 35
-        const totalWaves = score.totalWaves || 35;
-        const isVictory = score.waveReached >= totalWaves;
-        const wave = this.add.text(30, y, `${score.waveReached}/${totalWaves}`, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: isVictory ? '#00ff00' : '#aaaaaa'
-        }).setOrigin(0, 0.5);
-        this.highscoreContainer!.add(wave);
-        
-        // HP left
-        const hpLeft = score.runStats?.hpLeft ?? 0;
-        const hpText = this.add.text(110, y, `${hpLeft}❤️`, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: hpLeft > 0 ? '#ff6666' : '#666666'
-        }).setOrigin(0, 0.5);
-        this.highscoreContainer!.add(hpText);
-        
-        // Time
-        const timeSeconds = score.runStats?.timeSeconds ?? 0;
-        const timeStr = this.formatTime(timeSeconds);
-        const timeText = this.add.text(170, y, timeStr, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: '#88ccff'
-        }).setOrigin(0, 0.5);
-        this.highscoreContainer!.add(timeText);
-        
-        // Date
-        const dateStr = this.formatDate(score.date);
-        const dateText = this.add.text(250, y, dateStr, {
-          fontFamily: 'Arial',
-          fontSize: '12px',
-          color: '#666666'
-        }).setOrigin(0, 0.5);
-        this.highscoreContainer!.add(dateText);
-      });
-    }
+    // Load and display scores
+    this.refreshHighscoreDisplay();
     
     // Close button with styled design
-    const closeBtn = this.createModalButton(0, 210, '✕  CLOSE', 140, 45);
+    const closeBtn = this.createModalButton(0, panelHeight/2 - 45, '✕  CLOSE', 140, 45);
     closeBtn.hitArea.on('pointerdown', () => {
       this.audioManager.playSFX('ui_click');
       this.closeHighscores();
@@ -869,6 +771,291 @@ export class MenuScene extends Phaser.Scene {
       targets: this.highscoreContainer,
       alpha: 1,
       duration: 200
+    });
+  }
+  
+  /**
+   * Create a tab button for highscore panel
+   */
+  private createHighscoreTab(x: number, y: number, text: string, isGlobal: boolean): void {
+    if (!this.highscoreContainer) return;
+    
+    const isActive = isGlobal === this.showingGlobalScores;
+    
+    const tabBtn = this.add.text(x, y, text, {
+      fontFamily: 'Arial',
+      fontSize: '18px',
+      color: isActive ? '#ffd700' : '#888888',
+      backgroundColor: isActive ? '#3a2a18' : '#1a0a00',
+      padding: { x: 16, y: 8 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    
+    tabBtn.on('pointerover', () => {
+      if (!isActive) tabBtn.setColor('#ccaa66');
+    });
+    
+    tabBtn.on('pointerout', () => {
+      tabBtn.setColor(isActive ? '#ffd700' : '#888888');
+    });
+    
+    tabBtn.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
+      this.showingGlobalScores = isGlobal;
+      this.closeHighscores();
+      this.showHighscores();
+    });
+    
+    this.highscoreContainer.add(tabBtn);
+  }
+  
+  /**
+   * Refresh the highscore display based on current tab
+   */
+  private async refreshHighscoreDisplay(): Promise<void> {
+    if (!this.highscoreContainer) return;
+    
+    const panelHeight = 620;
+    const headerY = -panelHeight/2 + 130;
+    const startY = headerY + 35;
+    const rowHeight = 24;
+    
+    // Show loading for global scores
+    if (this.showingGlobalScores && !this.scoresLoading) {
+      this.scoresLoading = true;
+      
+      const loadingText = this.add.text(0, 0, 'Loading global scores...', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#888888'
+      }).setOrigin(0.5);
+      loadingText.setData('scoreRow', true);
+      this.highscoreContainer.add(loadingText);
+      
+      try {
+        this.globalScoresCache = await HighscoreAPI.fetchScores();
+      } catch (e) {
+        console.warn('Failed to fetch global scores:', e);
+        this.globalScoresCache = [];
+      }
+      
+      this.scoresLoading = false;
+      loadingText.destroy();
+      
+      // Re-render with fetched data
+      this.renderScoreRows(headerY, startY, rowHeight);
+    } else {
+      this.renderScoreRows(headerY, startY, rowHeight);
+    }
+  }
+  
+  /**
+   * Render score rows (either global or local)
+   */
+  private renderScoreRows(headerY: number, startY: number, rowHeight: number): void {
+    if (!this.highscoreContainer) return;
+    
+    // Clear existing score rows
+    const toRemove = this.highscoreContainer.list.filter((obj: Phaser.GameObjects.GameObject) => 
+      obj.getData('scoreRow') === true
+    );
+    toRemove.forEach((obj: Phaser.GameObjects.GameObject) => obj.destroy());
+    
+    // Header row
+    const headers = [
+      { text: '#', x: -340, align: 0.5 },
+      { text: 'Name', x: -290, align: 0 },
+      { text: 'Score', x: -100, align: 0 },
+      { text: 'Wave', x: 20, align: 0 },
+      { text: 'Victory', x: 120, align: 0 },
+      { text: 'Date', x: 220, align: 0 }
+    ];
+    
+    headers.forEach(h => {
+      const headerText = this.add.text(h.x, headerY, h.text, {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#c9a86c'
+      }).setOrigin(h.align, 0.5);
+      headerText.setData('scoreRow', true);
+      this.highscoreContainer!.add(headerText);
+    });
+    
+    // Separator line
+    const sepLine = this.add.graphics();
+    sepLine.lineStyle(1, 0x4a3520, 1);
+    sepLine.lineBetween(-350, headerY + 15, 350, headerY + 15);
+    sepLine.setData('scoreRow', true);
+    this.highscoreContainer.add(sepLine);
+    
+    if (this.showingGlobalScores) {
+      this.renderGlobalScores(startY, rowHeight);
+    } else {
+      this.renderLocalScores(startY, rowHeight);
+    }
+  }
+  
+  /**
+   * Render global scores from API
+   */
+  private renderGlobalScores(startY: number, rowHeight: number): void {
+    if (!this.highscoreContainer) return;
+    
+    if (this.globalScoresCache.length === 0) {
+      const noScores = this.add.text(0, startY + 100, 'No global scores yet!\nBe the first to submit a score.', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#888888',
+        align: 'center'
+      }).setOrigin(0.5);
+      noScores.setData('scoreRow', true);
+      this.highscoreContainer.add(noScores);
+      return;
+    }
+    
+    this.globalScoresCache.slice(0, 20).forEach((score, index) => {
+      const y = startY + index * rowHeight;
+      const isTop3 = index < 3;
+      const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+      const rankColor = isTop3 ? rankColors[index] : '#888888';
+      
+      // Rank
+      const rank = this.add.text(-340, y, `${index + 1}`, {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: rankColor
+      }).setOrigin(0.5, 0.5);
+      rank.setData('scoreRow', true);
+      this.highscoreContainer!.add(rank);
+      
+      // Name
+      const name = this.add.text(-290, y, this.truncateName(score.player_name, 12), {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffffff'
+      }).setOrigin(0, 0.5);
+      name.setData('scoreRow', true);
+      this.highscoreContainer!.add(name);
+      
+      // Score
+      const scoreText = this.add.text(-100, y, score.score.toLocaleString(), {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: isTop3 ? '#ffd700' : '#ffcc44'
+      }).setOrigin(0, 0.5);
+      scoreText.setData('scoreRow', true);
+      this.highscoreContainer!.add(scoreText);
+      
+      // Wave
+      const wave = this.add.text(20, y, `${score.wave_reached}/${score.total_waves}`, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: score.is_victory ? '#00ff00' : '#aaaaaa'
+      }).setOrigin(0, 0.5);
+      wave.setData('scoreRow', true);
+      this.highscoreContainer!.add(wave);
+      
+      // Victory status
+      const victoryText = this.add.text(120, y, score.is_victory ? '🏆' : '💀', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: score.is_victory ? '#00ff00' : '#ff6666'
+      }).setOrigin(0, 0.5);
+      victoryText.setData('scoreRow', true);
+      this.highscoreContainer!.add(victoryText);
+      
+      // Date
+      const dateText = this.add.text(220, y, score.date, {
+        fontFamily: 'Arial',
+        fontSize: '12px',
+        color: '#666666'
+      }).setOrigin(0, 0.5);
+      dateText.setData('scoreRow', true);
+      this.highscoreContainer!.add(dateText);
+    });
+  }
+  
+  /**
+   * Render local scores from localStorage
+   */
+  private renderLocalScores(startY: number, rowHeight: number): void {
+    if (!this.highscoreContainer) return;
+    
+    const highscores = this.loadHighscores();
+    
+    if (highscores.length === 0) {
+      const noScores = this.add.text(0, startY + 100, 'No local scores yet!\nPlay a game to set the first record.', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#888888',
+        align: 'center'
+      }).setOrigin(0.5);
+      noScores.setData('scoreRow', true);
+      this.highscoreContainer.add(noScores);
+      return;
+    }
+    
+    highscores.slice(0, 20).forEach((score, index) => {
+      const y = startY + index * rowHeight;
+      const isTop3 = index < 3;
+      const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
+      const rankColor = isTop3 ? rankColors[index] : '#888888';
+      
+      // Rank
+      const rank = this.add.text(-340, y, `${index + 1}`, {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: rankColor
+      }).setOrigin(0.5, 0.5);
+      rank.setData('scoreRow', true);
+      this.highscoreContainer!.add(rank);
+      
+      // Name
+      const name = this.add.text(-290, y, this.truncateName(score.playerName, 12), {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffffff'
+      }).setOrigin(0, 0.5);
+      name.setData('scoreRow', true);
+      this.highscoreContainer!.add(name);
+      
+      // Score
+      const scoreText = this.add.text(-100, y, score.score.toLocaleString(), {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: isTop3 ? '#ffd700' : '#ffcc44'
+      }).setOrigin(0, 0.5);
+      scoreText.setData('scoreRow', true);
+      this.highscoreContainer!.add(scoreText);
+      
+      // Wave
+      const totalWaves = score.totalWaves || 35;
+      const isVictory = score.waveReached >= totalWaves;
+      const wave = this.add.text(20, y, `${score.waveReached}/${totalWaves}`, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: isVictory ? '#00ff00' : '#aaaaaa'
+      }).setOrigin(0, 0.5);
+      wave.setData('scoreRow', true);
+      this.highscoreContainer!.add(wave);
+      
+      // Victory status
+      const victoryText = this.add.text(120, y, isVictory ? '🏆' : '💀', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: isVictory ? '#00ff00' : '#ff6666'
+      }).setOrigin(0, 0.5);
+      victoryText.setData('scoreRow', true);
+      this.highscoreContainer!.add(victoryText);
+      
+      // Date
+      const dateStr = this.formatDate(score.date);
+      const dateText = this.add.text(220, y, dateStr, {
+        fontFamily: 'Arial',
+        fontSize: '12px',
+        color: '#666666'
+      }).setOrigin(0, 0.5);
+      dateText.setData('scoreRow', true);
+      this.highscoreContainer!.add(dateText);
     });
   }
 

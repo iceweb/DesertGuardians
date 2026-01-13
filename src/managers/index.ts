@@ -21,3 +21,5 @@ export { GoldMineUIManager } from './GoldMineUIManager';
 export { UIHitDetector } from './UIHitDetector';
 export type { UIBounds } from './UIHitDetector';
 export { FinalWaveEffects } from './FinalWaveEffects';
+export { HighscoreAPI } from './HighscoreAPI';
+export type { ScoreSubmission, GlobalScore } from './HighscoreAPI';

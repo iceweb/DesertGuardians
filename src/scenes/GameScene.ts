@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager, GoldMineManager, GoldMineUIManager, UIHitDetector, GameController } from '../managers';
+import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager, GoldMineManager, GoldMineUIManager, UIHitDetector, GameController, HighscoreAPI } from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -118,6 +118,15 @@ export class GameScene extends Phaser.Scene {
     this.audioManager = AudioManager.getInstance();
     this.audioManager.initialize();
     this.audioManager.playBGM();
+
+    // Request a session token for global highscore submission
+    HighscoreAPI.requestSession().then(token => {
+      if (token) {
+        console.log('GameScene: Highscore session ready');
+      } else {
+        console.warn('GameScene: Could not get highscore session (offline mode)');
+      }
+    });
 
     // Launch UIScene as overlay
     this.scene.launch('UIScene');
