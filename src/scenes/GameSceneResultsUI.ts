@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { GameResultData, Highscore } from './ResultsScene';
 import { GAME_CONFIG } from '../data/GameConfig';
 
-const HIGHSCORES_KEY = 'tower_defense_highscores';
+const HIGHSCORES_KEY = 'desert_guardians_scores_v1';
 const MAX_HIGHSCORES = 10;
 
 /**

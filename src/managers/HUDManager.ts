@@ -401,6 +401,16 @@ export class HUDManager {
    */
   showCountdown(nextWave: number, onComplete: () => void): void {
     let countdown = 3;
+    let completed = false;
+    
+    // Safety callback to ensure onComplete is called exactly once
+    const safeComplete = () => {
+      if (!completed) {
+        completed = true;
+        this.countdownText.setVisible(false);
+        onComplete();
+      }
+    };
     
     this.countdownText.setText(`Wave ${nextWave} in ${countdown}...`);
     this.countdownText.setVisible(true);
@@ -413,10 +423,17 @@ export class HUDManager {
         if (countdown > 0) {
           this.countdownText.setText(`Wave ${nextWave} in ${countdown}...`);
         } else {
-          this.countdownText.setVisible(false);
           countdownTimer.destroy();
-          onComplete();
+          safeComplete();
         }
+      }
+    });
+    
+    // Fallback: ensure wave starts even if timer fails (mobile Safari issue)
+    this.scene.time.delayedCall(4000, () => {
+      if (!completed) {
+        console.warn('HUDManager: Countdown timer fallback triggered');
+        safeComplete();
       }
     });
   }

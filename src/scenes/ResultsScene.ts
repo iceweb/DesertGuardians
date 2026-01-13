@@ -45,7 +45,7 @@ export interface Highscore {
   };
 }
 
-const HIGHSCORES_KEY = 'tower_defense_highscores';
+const HIGHSCORES_KEY = 'desert_guardians_scores_v1';
 const MAX_HIGHSCORES = 10;
 
 export class ResultsScene extends Phaser.Scene {

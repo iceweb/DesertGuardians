@@ -20,6 +20,10 @@ export class GoldMineManager {
   private mines: GoldMine[] = [];
   private selectedMine: GoldMine | null = null;
   
+  // Tutorial arrow for first mine
+  private tutorialArrow: Phaser.GameObjects.Container | null = null;
+  private tutorialArrowTween: Phaser.Tweens.Tween | null = null;
+  
   // Callbacks
   public onMineBuild?: (mine: GoldMine, cost: number) => void;
   public onMineUpgraded?: (mine: GoldMine, cost: number) => void;
@@ -30,15 +34,19 @@ export class GoldMineManager {
   }
 
   /**
-   * Initialize mines from minepad data
+   * Initialize mines from minepad data (sorted left to right by x position)
    */
   initializeFromPads(minePads: MinePadData[]): void {
-    for (const pad of minePads) {
+    // Sort pads by x position to ensure left-to-right ordering
+    const sortedPads = [...minePads].sort((a, b) => a.x - b.x);
+    
+    for (let i = 0; i < sortedPads.length; i++) {
+      const pad = sortedPads[i];
       const mine = new GoldMine(
         this.scene,
         pad.x + pad.width / 2,  // Center the mine in the pad
         pad.y + pad.height / 2,
-        pad.id,
+        i + 1,  // Assign ID based on sorted order (1, 2, 3 from left to right)
         pad.width,
         pad.height
       );
@@ -52,6 +60,90 @@ export class GoldMineManager {
     }
     
     console.log(`GoldMineManager: Initialized ${this.mines.length} mine slots`);
+    
+    // Create tutorial arrow above first mine
+    this.createTutorialArrow();
+  }
+
+  /**
+   * Create a bouncing arrow above the first mine to guide new players
+   */
+  private createTutorialArrow(): void {
+    if (this.mines.length === 0) return;
+    
+    const firstMine = this.mines[0];
+    const arrowX = firstMine.x;
+    const arrowY = firstMine.y - 60;
+    
+    // Create container for arrow
+    this.tutorialArrow = this.scene.add.container(arrowX, arrowY);
+    this.tutorialArrow.setDepth(100);
+    
+    // Draw desert-themed arrow (sandy/golden colors)
+    const arrow = this.scene.add.graphics();
+    
+    // Arrow shadow
+    arrow.fillStyle(0x000000, 0.3);
+    arrow.fillTriangle(-12, -22, 12, -22, 0, 2);
+    
+    // Arrow body - golden/sand gradient effect
+    arrow.fillStyle(0xD4A84B, 1);  // Sandy gold
+    arrow.fillTriangle(-10, -25, 10, -25, 0, 0);
+    
+    // Arrow highlight
+    arrow.fillStyle(0xF5D980, 1);  // Light sand
+    arrow.fillTriangle(-6, -23, 4, -23, 0, -8);
+    
+    // Arrow outline
+    arrow.lineStyle(2, 0x8B6914, 1);  // Dark sand/brown
+    arrow.strokeTriangle(-10, -25, 10, -25, 0, 0);
+    
+    this.tutorialArrow.add(arrow);
+    
+    // Add "Click to build!" text
+    const text = this.scene.add.text(0, -45, '💰 Gold Mine', {
+      fontFamily: 'Arial Black',
+      fontSize: '14px',
+      color: '#FFD700',
+      stroke: '#000000',
+      strokeThickness: 3
+    }).setOrigin(0.5);
+    this.tutorialArrow.add(text);
+    
+    // Bouncing animation
+    this.tutorialArrowTween = this.scene.tweens.add({
+      targets: this.tutorialArrow,
+      y: arrowY - 15,
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+  }
+
+  /**
+   * Hide the tutorial arrow (called when first mine is built)
+   */
+  private hideTutorialArrow(): void {
+    if (this.tutorialArrow) {
+      if (this.tutorialArrowTween) {
+        this.tutorialArrowTween.stop();
+        this.tutorialArrowTween = null;
+      }
+      
+      // Fade out animation
+      this.scene.tweens.add({
+        targets: this.tutorialArrow,
+        alpha: 0,
+        y: this.tutorialArrow.y - 30,
+        duration: 300,
+        ease: 'Cubic.easeOut',
+        onComplete: () => {
+          this.tutorialArrow?.destroy();
+          this.tutorialArrow = null;
+        }
+      });
+    }
   }
 
   /**
@@ -83,6 +175,10 @@ export class GoldMineManager {
     if (mine.build()) {
       this.onMineBuild?.(mine, cost);
       console.log(`GoldMineManager: Built mine at slot ${slotId}, cost: ${cost}g`);
+      
+      // Hide tutorial arrow when first mine is built
+      this.hideTutorialArrow();
+      
       return true;
     }
     
@@ -127,24 +223,39 @@ export class GoldMineManager {
    * Returns a promise that resolves with total income when all animations complete
    */
   async collectIncomeWithAnimation(): Promise<number> {
-    const activeMinse = this.mines.filter(m => m.isBuilt());
+    const activeMines = this.mines.filter(m => m.isBuilt());
     
-    if (activeMinse.length === 0) {
+    if (activeMines.length === 0) {
       return 0;
     }
     
     let totalIncome = 0;
     
-    // Stagger animations for each mine
-    for (let i = 0; i < activeMinse.length; i++) {
-      const mine = activeMinse[i];
+    // Calculate total income first (so we return correct value even if animations fail)
+    for (const mine of activeMines) {
       totalIncome += mine.getIncomePerWave();
+    }
+    
+    // Stagger animations for each mine with timeout protection
+    for (let i = 0; i < activeMines.length; i++) {
+      const mine = activeMines[i];
       
-      // Delay each mine's animation slightly
+      // Delay each mine's animation slightly, with timeout fallback
       await new Promise<void>(resolve => {
+        let resolved = false;
+        const safeResolve = () => {
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
+        };
+        
         this.scene.time.delayedCall(i * 200, () => {
-          mine.playIncomeAnimation().then(resolve);
+          mine.playIncomeAnimation().then(safeResolve).catch(safeResolve);
         });
+        
+        // Timeout fallback (mobile Safari can stall timers)
+        this.scene.time.delayedCall(i * 200 + 1500, safeResolve);
       });
     }
     
@@ -217,6 +328,16 @@ export class GoldMineManager {
    * Clean up resources
    */
   destroy(): void {
+    // Clean up tutorial arrow
+    if (this.tutorialArrowTween) {
+      this.tutorialArrowTween.stop();
+      this.tutorialArrowTween = null;
+    }
+    if (this.tutorialArrow) {
+      this.tutorialArrow.destroy();
+      this.tutorialArrow = null;
+    }
+    
     for (const mine of this.mines) {
       mine.destroy();
     }

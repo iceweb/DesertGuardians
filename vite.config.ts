@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // Use relative paths so the game works from any subdirectory
+  base: './',
   server: {
     // Keep the server running even if there are errors
     hmr: {

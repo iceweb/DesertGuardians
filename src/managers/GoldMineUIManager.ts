@@ -79,6 +79,21 @@ export class GoldMineUIManager {
     this.buildMenuContainer = this.scene.add.container(x, y);
     this.buildMenuContainer.setDepth(200);
     
+    // Full-screen invisible blocker to catch clicks and prevent them from reaching the scene
+    const blocker = this.scene.add.rectangle(
+      -x + this.scene.cameras.main.width / 2,
+      -y + this.scene.cameras.main.height / 2,
+      this.scene.cameras.main.width,
+      this.scene.cameras.main.height,
+      0x000000, 0
+    );
+    blocker.setInteractive();
+    blocker.on('pointerdown', () => {
+      // Close menu when clicking outside
+      this.closeMenus();
+    });
+    this.buildMenuContainer.add(blocker);
+    
     // Background
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
@@ -86,6 +101,12 @@ export class GoldMineUIManager {
     bg.lineStyle(3, 0xffd700, 0.8);
     bg.strokeRoundedRect(-130, -70, 260, 140, 12);
     this.buildMenuContainer.add(bg);
+    
+    // Menu hit area to block clicks on the menu from closing it
+    const menuHitArea = this.scene.add.rectangle(0, 0, 260, 140, 0xffffff, 0);
+    menuHitArea.setInteractive();
+    menuHitArea.on('pointerdown', () => { /* block clicks on menu background */ });
+    this.buildMenuContainer.add(menuHitArea);
     
     // Title
     const title = this.scene.add.text(0, -52, 'Build Gold Mine', {
@@ -142,10 +163,9 @@ export class GoldMineUIManager {
     if (canAfford) {
       const hitArea = this.scene.add.rectangle(0, 12, 220, 80, 0xffffff, 0);
       hitArea.setInteractive({ useHandCursor: true });
-      hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-        event.stopPropagation();
-        this.goldMineManager.buildMine(mine.getSlotId());
+      hitArea.on('pointerdown', () => {
         this.closeMenus();
+        this.goldMineManager.buildMine(mine.getSlotId());
       });
       hitArea.on('pointerover', () => {
         btnBg.clear();
@@ -170,10 +190,9 @@ export class GoldMineUIManager {
       fontSize: '22px',
       color: '#ff6666'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.closeMenus();
-    });
+    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on('pointerover', () => closeBtn.setColor('#ff9999'));
+    closeBtn.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.buildMenuContainer.add(closeBtn);
     
     // Clamp popup to screen bounds (menu is 260x140)
@@ -202,6 +221,21 @@ export class GoldMineUIManager {
     this.upgradeMenuContainer = this.scene.add.container(x, y);
     this.upgradeMenuContainer.setDepth(200);
     
+    // Full-screen invisible blocker to catch clicks and prevent them from reaching the scene
+    const blocker = this.scene.add.rectangle(
+      -x + this.scene.cameras.main.width / 2,
+      -y + this.scene.cameras.main.height / 2,
+      this.scene.cameras.main.width,
+      this.scene.cameras.main.height,
+      0x000000, 0
+    );
+    blocker.setInteractive();
+    blocker.on('pointerdown', () => {
+      // Close menu when clicking outside
+      this.closeMenus();
+    });
+    this.upgradeMenuContainer.add(blocker);
+    
     // Background
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
@@ -209,6 +243,12 @@ export class GoldMineUIManager {
     bg.lineStyle(3, 0xffd700, 0.8);
     bg.strokeRoundedRect(-menuWidth / 2, -menuHeight / 2, menuWidth, menuHeight, 12);
     this.upgradeMenuContainer.add(bg);
+    
+    // Menu hit area to block clicks on the menu from closing it
+    const menuHitArea = this.scene.add.rectangle(0, 0, menuWidth, menuHeight, 0xffffff, 0);
+    menuHitArea.setInteractive();
+    menuHitArea.on('pointerdown', () => { /* block clicks on menu background */ });
+    this.upgradeMenuContainer.add(menuHitArea);
     
     // Title with level
     const levelStars = '★'.repeat(mine.getLevel());
@@ -269,8 +309,7 @@ export class GoldMineUIManager {
       if (canAffordUpgrade) {
         const upgradeHitArea = this.scene.add.rectangle(0, btnY, btnW, btnH, 0xffffff, 0);
         upgradeHitArea.setInteractive({ useHandCursor: true });
-        upgradeHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-          event.stopPropagation();
+        upgradeHitArea.on('pointerdown', () => {
           this.goldMineManager.upgradeMine(mine);
           // Refresh menu to show new state
           this.showUpgradeMenu(mine);
@@ -311,10 +350,9 @@ export class GoldMineUIManager {
       fontSize: '22px',
       color: '#ff6666'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.closeMenus();
-    });
+    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on('pointerover', () => closeBtn.setColor('#ff9999'));
+    closeBtn.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.upgradeMenuContainer.add(closeBtn);
     
     // Clamp popup to screen bounds

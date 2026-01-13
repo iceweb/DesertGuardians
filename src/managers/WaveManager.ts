@@ -50,6 +50,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   private currentGroup: GroupSpawnState | null = null;  // Currently spawning group
   private spawnTimer: Phaser.Time.TimerEvent | null = null;  // Timer for current group
   private groupCreeps: Set<Creep> = new Set();  // Track creeps spawned by current group
+  private pendingBossGroups: GroupSpawnState[] = [];  // Boss/guard groups waiting to spawn after all sequential groups
   
   // Parallel spawning state (for final wave)
   private parallelGroups: GroupSpawnState[] = [];  // Groups spawning in parallel
@@ -144,9 +145,19 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       this.groupQueue = [];
       this.startParallelSpawning();
     } else {
-      // SEQUENTIAL MODE: Groups spawn one after another
-      this.groupQueue = allGroups;
+      // SEQUENTIAL MODE: Normal groups spawn one after another (50% path rule)
+      // Boss/guard groups always spawn LAST (together, after all normal groups finish)
+      const isBossOrGuard = (type: string) => type.includes('boss');
+      
+      const sequentialGroups = allGroups.filter(g => !isBossOrGuard(g.creepType));
+      const bossGuardGroups = allGroups.filter(g => isBossOrGuard(g.creepType));
+      
+      this.groupQueue = sequentialGroups;
       this.parallelGroups = [];
+      this.pendingBossGroups = bossGuardGroups;  // Store for spawning after sequential groups
+      
+      console.log(`WaveManager: ${sequentialGroups.length} sequential groups, ${bossGuardGroups.length} boss/guard groups (spawn last)`);
+      
       this.startNextGroup();
     }
     
@@ -227,8 +238,17 @@ export class WaveManager extends Phaser.Events.EventEmitter {
    */
   private startNextGroup(): void {
     if (this.groupQueue.length === 0) {
-      console.log('WaveManager: All groups spawned');
+      console.log('WaveManager: All sequential groups spawned');
       this.currentGroup = null;
+      
+      // If there are pending boss/guard groups, spawn them all together now
+      if (this.pendingBossGroups.length > 0) {
+        console.log(`WaveManager: Starting ${this.pendingBossGroups.length} boss/guard groups together`);
+        for (const bossGroup of this.pendingBossGroups) {
+          this.startParallelGroup(bossGroup);
+        }
+        this.pendingBossGroups = [];
+      }
       return;
     }
     
@@ -524,6 +544,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     }
     this.parallelTimers.clear();
     this.parallelGroups = [];
+    this.pendingBossGroups = [];
     this.isParallelMode = false;
     
     this.groupQueue = [];

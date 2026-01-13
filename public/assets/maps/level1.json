@@ -22,7 +22,7 @@
         {
           "name": "MinePad1",
           "type": "minepad",
-          "x": 760,
+          "x": 530,
           "y": 880,
           "width": 60,
           "height": 60
@@ -30,7 +30,7 @@
         {
           "name": "MinePad2",
           "type": "minepad",
-          "x": 530,
+          "x": 760,
           "y": 880,
           "width": 60,
           "height": 60

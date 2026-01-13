@@ -269,7 +269,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'ghost', count: 14, intervalMs: 1000 },
     { type: 'digger', count: 10, intervalMs: 1200, delayStart: 11300 }
   ]},
-  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Knight Escorts!', parallelSpawn: true, creeps: [
+  { waveNumber: 21, waveType: 'boss', announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Knight Escorts!', creeps: [
     { type: 'tank', count: 12, intervalMs: 1200 },
     { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
     { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
@@ -303,7 +303,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 10, intervalMs: 1200 },
     { type: 'broodmother', count: 6, intervalMs: 2500, delayStart: 7500 }
   ]},
-  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Dragon Knight Escorts!', parallelSpawn: true, creeps: [
+  { waveNumber: 28, waveType: 'boss', announcement: '🐉 YOUNG DRAGON APPROACHES!\nWith Dragon Knight Escorts!', creeps: [
     { type: 'shielded', count: 12, intervalMs: 1100 },
     { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
     { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },

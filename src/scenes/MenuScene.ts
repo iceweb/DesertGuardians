@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { Highscore } from './ResultsScene';
 import { AudioManager } from '../managers';
 
-const HIGHSCORES_KEY = 'tower_defense_highscores';
+const HIGHSCORES_KEY = 'desert_guardians_scores_v1';
 
 export class MenuScene extends Phaser.Scene {
   private highscoreContainer: Phaser.GameObjects.Container | null = null;

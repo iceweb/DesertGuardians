@@ -100,6 +100,9 @@ export class GameScene extends Phaser.Scene {
     
     this.goldMineUIManager = new GoldMineUIManager(this, this.goldMineManager);
     this.goldMineUIManager.getPlayerGold = () => this.gameController.gold;
+    
+    // Connect gold mine UI manager to tower manager (to prevent tower menu when mine menu is open)
+    this.towerManager.setGoldMineUIManager(this.goldMineUIManager);
 
     // Initialize HUD manager
     this.hudManager = new HUDManager(this);
@@ -369,6 +372,11 @@ export class GameScene extends Phaser.Scene {
     
     // Set mine callback for mine detection
     this.uiHitDetector.setMineCallback((x, y) => this.goldMineManager.getMineAtPosition(x, y));
+    
+    // Override menu callback to check BOTH tower and mine menus
+    this.uiHitDetector.setMenuCallback(() => 
+      this.towerManager.isMenuOpen() || this.goldMineUIManager.isMenuOpen()
+    );
     
     // Register static UI bounds for NextWavePanel area (bottom-left)
     // The panel dynamically shows/hides but always occupies this general area

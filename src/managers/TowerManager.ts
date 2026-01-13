@@ -5,6 +5,7 @@ import { TowerAnimatorFactory } from '../graphics/TowerAnimatorFactory';
 import { PathSystem } from './MapPathSystem';
 import { TowerUIManager } from './TowerUIManager';
 import { GoldMineManager } from './GoldMineManager';
+import type { GoldMineUIManager } from './GoldMineUIManager';
 import type { UIHitDetector } from './UIHitDetector';
 
 /**
@@ -38,6 +39,9 @@ export class TowerManager {
   
   // Reference to gold mine manager to check for mine clicks
   private goldMineManager: GoldMineManager | null = null;
+  
+  // Reference to gold mine UI manager to check if mine menu is open
+  private goldMineUIManager: GoldMineUIManager | null = null;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
@@ -114,6 +118,11 @@ export class TowerManager {
   private handleClick(x: number, y: number): void {
     // Check if a menu was just closed (e.g., by clicking X button)
     if (this.uiManager.wasMenuJustClosed()) {
+      return;
+    }
+    
+    // Check if gold mine UI is open or was just closed - don't process click
+    if (this.goldMineUIManager?.isMenuOpen() || this.goldMineUIManager?.wasMenuJustClosed()) {
       return;
     }
     
@@ -374,6 +383,13 @@ export class TowerManager {
   }
 
   /**
+   * Set reference to gold mine UI manager for menu state checking
+   */
+  setGoldMineUIManager(manager: GoldMineUIManager): void {
+    this.goldMineUIManager = manager;
+  }
+
+  /**
    * Set the UI hit detector for centralized UI bounds checking
    */
   setUIHitDetector(detector: UIHitDetector): void {
@@ -389,6 +405,13 @@ export class TowerManager {
    */
   setReviewMode(enabled: boolean): void {
     this.uiManager.setReviewMode(enabled);
+  }
+
+  /**
+   * Check if any tower menu is currently open
+   */
+  isMenuOpen(): boolean {
+    return this.uiManager.isMenuOpen();
   }
 
   /**

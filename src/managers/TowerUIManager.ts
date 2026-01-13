@@ -705,7 +705,7 @@ export class TowerUIManager {
       };
       
       const branchDescriptions: Record<TowerBranch, string> = {
-        archer: 'Balanced fighter',
+        archer: 'Anti-Air specialist',
         rapidfire: 'Fast attacks',
         sniper: 'High damage',
         rockcannon: 'AOE splash',
