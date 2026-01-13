@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS } from '../data';
-import type { TowerBranch } from '../data';
-import type { AbilityDefinition } from '../objects/TowerAbilities';
+import { TOWER_BRANCH_COLORS, VETERAN_RANK_COLORS } from '../data/ThemeConfig';
 import { UIHelper } from './UIHelper';
 import type { UIHitDetector } from './UIHitDetector';
+import { TowerIconRenderer, TOWER_HINTS, BRANCH_NAMES, BRANCH_DESCRIPTIONS } from './TowerIconRenderer';
 
 /**
  * TowerUIManager handles tower build/upgrade menus and placement preview.
@@ -165,7 +165,7 @@ export class TowerUIManager {
     // Draw actual tower icon
     const towerIcon = this.scene.add.graphics();
     towerIcon.setPosition(-110, 20);
-    this.drawArcherTowerIcon(towerIcon, canAfford);
+    TowerIconRenderer.drawArcherTowerIcon(towerIcon, canAfford);
     this.buildMenuContainer.add(towerIcon);
     
     // Tower name with larger font
@@ -317,66 +317,6 @@ export class TowerUIManager {
     
     // Clamp popup to screen bounds (menu is 350x195)
     this.uiHelper.clampToScreen(this.buildMenuContainer, 350, 195, 0.5, 0.5);
-  }
-
-  /**
-   * Draw archer tower icon for build menu
-   */
-  private drawArcherTowerIcon(g: Phaser.GameObjects.Graphics, canAfford: boolean): void {
-    const alpha = canAfford ? 1 : 0.5;
-    
-    // Shadow
-    g.fillStyle(0x000000, 0.3 * alpha);
-    g.fillEllipse(0, 18, 35, 12);
-    
-    // Base
-    g.fillStyle(canAfford ? 0x8b5a2b : 0x555555, alpha);
-    g.fillRect(-20, 5, 40, 14);
-    g.fillStyle(canAfford ? 0x9a6a3b : 0x666666, alpha);
-    g.fillRect(-17, 7, 34, 10);
-    
-    // Tower body
-    g.fillStyle(canAfford ? 0xb88a5c : 0x666666, alpha);
-    g.beginPath();
-    g.moveTo(-16, 7);
-    g.lineTo(-12, -28);
-    g.lineTo(12, -28);
-    g.lineTo(16, 7);
-    g.closePath();
-    g.fillPath();
-    
-    // Roof
-    g.fillStyle(canAfford ? 0x8b4513 : 0x444444, alpha);
-    g.beginPath();
-    g.moveTo(-18, -28);
-    g.lineTo(0, -45);
-    g.lineTo(18, -28);
-    g.closePath();
-    g.fillPath();
-    
-    // Roof highlight
-    g.fillStyle(canAfford ? 0xa0522d : 0x555555, 0.7 * alpha);
-    g.beginPath();
-    g.moveTo(-12, -28);
-    g.lineTo(0, -40);
-    g.lineTo(0, -45);
-    g.closePath();
-    g.fillPath();
-    
-    // Window
-    g.fillStyle(canAfford ? 0xfff4cc : 0x888888, 0.9 * alpha);
-    g.fillRect(-5, -20, 10, 14);
-    g.lineStyle(1, canAfford ? 0x5a4a38 : 0x444444, alpha);
-    g.strokeRect(-5, -20, 10, 14);
-    g.lineBetween(0, -20, 0, -6);
-    g.lineBetween(-5, -13, 5, -13);
-    
-    // Bow on top
-    g.lineStyle(2, canAfford ? 0x6b4020 : 0x444444, alpha);
-    g.beginPath();
-    g.arc(0, -35, 8, Math.PI * 0.3, Math.PI * 0.7, true);
-    g.strokePath();
-    g.lineBetween(0, -43, 0, -27);
   }
 
   /**
@@ -598,13 +538,7 @@ export class TowerUIManager {
     yOffset += statLineHeight + 2;
     
     // === VETERAN RANK & KILLS - Always visible ===
-    const rankColors: Record<number, string> = {
-      0: '#888888', // Recruit - gray
-      1: '#d4a574', // Corporal - bronze
-      2: '#c0c0c0', // Sergeant - silver
-      3: '#ffd700'  // Captain - gold
-    };
-    const rankColor = rankColors[veteranRank] || '#888888';
+    const rankColor = VETERAN_RANK_COLORS[veteranRank] || '#888888';
     
     // Kills on left
     const killsLabel = this.scene.add.text(statsStartX, yOffset, '☠ Kills:', {
@@ -650,17 +584,7 @@ export class TowerUIManager {
     yOffset += 22;
     
     // === TOWER HINT - Explain strengths and usage ===
-    const towerHints: Record<TowerBranch, string> = {
-      archer: '🏹 Versatile tower. +200% damage vs flying units. Good all-rounder.',
-      rapidfire: '⚡ Very fast attacks shred unarmored targets. Weak vs heavy armor.',
-      sniper: '🎯 Extreme range and damage. Best for picking off tough single targets.',
-      rockcannon: '💥 Splash damage hits multiple enemies. Great for swarms.',
-      icetower: '❄️ Slows enemies so other towers deal more damage. Essential support.',
-      poison: '☠️ Damage over time ignores armor. Best counter to armored units!',
-      aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.'
-    };
-    
-    const hintText = this.scene.add.text(0, yOffset, towerHints[config.branch], {
+    const hintText = this.scene.add.text(0, yOffset, TOWER_HINTS[config.branch], {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: '#88ccff',
@@ -707,36 +631,6 @@ export class TowerUIManager {
       this.upgradeMenuContainer.add(branchLabel);
       yOffset += 22;
       
-      const branchColors: Record<TowerBranch, number> = {
-        archer: 0xcc3333,
-        rapidfire: 0xffd700,
-        sniper: 0x4169e1,
-        rockcannon: 0xff6600,
-        icetower: 0x87ceeb,
-        poison: 0x00ff00,
-        aura: 0xff4444
-      };
-      
-      const branchNames: Record<TowerBranch, string> = {
-        archer: 'Archer II',
-        rapidfire: 'Rapid Fire',
-        sniper: 'Sniper',
-        rockcannon: 'Cannon',
-        icetower: 'Ice',
-        poison: 'Poison',
-        aura: 'Aura'
-      };
-      
-      const branchDescriptions: Record<TowerBranch, string> = {
-        archer: 'Best vs flying units',
-        rapidfire: 'Fast attacks, weak vs armor',
-        sniper: 'High single-target damage',
-        rockcannon: 'AOE splash damage',
-        icetower: 'Slows enemies for allies',
-        poison: 'Best vs armored units',
-        aura: 'Buffs nearby towers'
-      };
-      
       const branches = upgradeOptions.branches!;
       const btnWidth = 110;
       const btnHeight = 160;
@@ -751,7 +645,7 @@ export class TowerUIManager {
         const by = yOffset;
         const cost = branchConfig.upgradeCost;
         const canAfford = playerGold >= cost;
-        const color = branchColors[branch];
+        const color = TOWER_BRANCH_COLORS[branch];
         
         // Card background
         const btn = this.scene.add.graphics();
@@ -763,11 +657,11 @@ export class TowerUIManager {
         
         // Tower icon
         const towerIcon = this.scene.add.graphics();
-        this.drawMiniTowerIcon(towerIcon, bx, by + 38, branch, canAfford);
+        TowerIconRenderer.drawMiniTowerIcon(towerIcon, bx, by + 38, branch, canAfford);
         this.upgradeMenuContainer!.add(towerIcon);
         
         // Branch name
-        const nameText = this.scene.add.text(bx, by + 68, branchNames[branch], {
+        const nameText = this.scene.add.text(bx, by + 68, BRANCH_NAMES[branch], {
           fontFamily: 'Arial Black',
           fontSize: '14px',
           color: canAfford ? '#ffffff' : '#666666'
@@ -775,7 +669,7 @@ export class TowerUIManager {
         this.upgradeMenuContainer!.add(nameText);
         
         // Branch description (with word wrap)
-        const descText = this.scene.add.text(bx, by + 92, branchDescriptions[branch], {
+        const descText = this.scene.add.text(bx, by + 92, BRANCH_DESCRIPTIONS[branch], {
           fontFamily: 'Arial',
           fontSize: '12px',
           color: canAfford ? '#aaaaaa' : '#555555',
@@ -1108,106 +1002,6 @@ export class TowerUIManager {
   }
 
   /**
-   * Draw mini tower icon for upgrade menu
-   */
-  private drawMiniTowerIcon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, branch: TowerBranch, canAfford: boolean): void {
-    const alpha = canAfford ? 1 : 0.4;
-    const scale = 0.7;
-    
-    switch (branch) {
-      case 'rapidfire':
-        graphics.fillStyle(0x4a4a4a, alpha);
-        graphics.fillRect(x - 12 * scale, y + 10 * scale, 24 * scale, 15 * scale);
-        graphics.fillStyle(0x6a6a6a, alpha);
-        graphics.fillRect(x - 10 * scale, y - 30 * scale, 20 * scale, 40 * scale);
-        graphics.fillStyle(0xffd700, alpha);
-        graphics.fillRect(x - 4 * scale, y - 20 * scale, 3 * scale, 10 * scale);
-        graphics.fillRect(x + 1 * scale, y - 22 * scale, 3 * scale, 12 * scale);
-        break;
-        
-      case 'sniper':
-        graphics.fillStyle(0x5a5a5a, alpha);
-        graphics.fillRect(x - 10 * scale, y + 10 * scale, 20 * scale, 12 * scale);
-        graphics.fillStyle(0x8a8a8a, alpha);
-        graphics.fillRect(x - 6 * scale, y - 45 * scale, 12 * scale, 55 * scale);
-        graphics.fillStyle(0x4a4a8a, alpha);
-        graphics.fillCircle(x, y - 25 * scale, 6 * scale);
-        graphics.lineStyle(1, 0xff0000, alpha);
-        graphics.lineBetween(x - 4 * scale, y - 25 * scale, x + 4 * scale, y - 25 * scale);
-        graphics.lineBetween(x, y - 29 * scale, x, y - 21 * scale);
-        break;
-        
-      case 'rockcannon':
-        graphics.fillStyle(0x6a5a4a, alpha);
-        graphics.fillRect(x - 16 * scale, y + 5 * scale, 32 * scale, 18 * scale);
-        graphics.fillStyle(0x8a7a6a, alpha);
-        graphics.fillRect(x - 14 * scale, y - 25 * scale, 28 * scale, 30 * scale);
-        graphics.fillStyle(0x3a3a3a, alpha);
-        graphics.fillCircle(x, y - 30 * scale, 8 * scale);
-        graphics.fillStyle(0x2a2a2a, alpha);
-        graphics.fillCircle(x, y - 30 * scale, 5 * scale);
-        break;
-        
-      case 'icetower':
-        graphics.fillStyle(0x87ceeb, alpha);
-        graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
-        graphics.fillStyle(0xb0e0e6, alpha * 0.9);
-        graphics.fillTriangle(x - 10 * scale, y + 8 * scale, x, y - 40 * scale, x + 10 * scale, y + 8 * scale);
-        graphics.fillStyle(0xe0ffff, alpha * 0.7);
-        graphics.fillTriangle(x - 6 * scale, y + 5 * scale, x, y - 35 * scale, x + 6 * scale, y + 5 * scale);
-        graphics.fillStyle(0xffffff, alpha * 0.8);
-        graphics.fillCircle(x - 4 * scale, y - 15 * scale, 2 * scale);
-        graphics.fillCircle(x + 3 * scale, y - 25 * scale, 2 * scale);
-        break;
-        
-      case 'poison':
-        graphics.fillStyle(0x4a3a2a, alpha);
-        graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
-        graphics.fillStyle(0x3a2a1a, alpha);
-        graphics.fillRect(x - 8 * scale, y - 25 * scale, 16 * scale, 35 * scale);
-        graphics.fillStyle(0x2a2a2a, alpha);
-        graphics.fillCircle(x, y - 30 * scale, 10 * scale);
-        graphics.fillStyle(0x00ff00, alpha * 0.8);
-        graphics.fillCircle(x, y - 32 * scale, 7 * scale);
-        graphics.fillStyle(0x88ff88, alpha * 0.7);
-        graphics.fillCircle(x - 2 * scale, y - 35 * scale, 2 * scale);
-        graphics.fillCircle(x + 3 * scale, y - 30 * scale, 2 * scale);
-        break;
-        
-      case 'aura':
-        // Pedestal base
-        graphics.fillStyle(0x4a3a3a, alpha);
-        graphics.fillRect(x - 14 * scale, y + 5 * scale, 28 * scale, 15 * scale);
-        // Pillar
-        graphics.fillStyle(0x3a2a2a, alpha);
-        graphics.fillRect(x - 8 * scale, y - 30 * scale, 16 * scale, 40 * scale);
-        // Red glowing orb
-        graphics.fillStyle(0xff4444, alpha * 0.4);
-        graphics.fillCircle(x, y - 38 * scale, 14 * scale);
-        graphics.fillStyle(0xff6666, alpha * 0.6);
-        graphics.fillCircle(x, y - 38 * scale, 10 * scale);
-        graphics.fillStyle(0xffaaaa, alpha * 0.8);
-        graphics.fillCircle(x, y - 38 * scale, 6 * scale);
-        graphics.fillStyle(0xffffff, alpha);
-        graphics.fillCircle(x - 2 * scale, y - 40 * scale, 2 * scale);
-        break;
-        
-      default: // archer
-        graphics.fillStyle(0x8b7355, alpha);
-        graphics.fillRect(x - 14 * scale, y + 8 * scale, 28 * scale, 12 * scale);
-        graphics.fillStyle(0xd4a574, alpha);
-        graphics.fillRect(x - 11 * scale, y - 35 * scale, 22 * scale, 45 * scale);
-        graphics.fillStyle(0x2a1a0a, alpha);
-        graphics.fillRect(x - 4 * scale, y - 20 * scale, 8 * scale, 14 * scale);
-        graphics.fillStyle(0xc9a06c, alpha);
-        graphics.fillRect(x - 10 * scale, y - 40 * scale, 8 * scale, 8 * scale);
-        graphics.fillRect(x - 3 * scale, y - 40 * scale, 8 * scale, 8 * scale);
-        graphics.fillRect(x + 4 * scale, y - 40 * scale, 8 * scale, 8 * scale);
-        break;
-    }
-  }
-
-  /**
    * Show ability selection panel for level 4 upgrade
    */
   private showAbilitySelection(tower: Tower, upgradeKey: string): void {
@@ -1270,7 +1064,7 @@ export class TowerUIManager {
       // Icon
       const icon = this.scene.add.graphics();
       icon.setPosition(bx, btnY - 35);
-      this.drawAbilityIcon(icon, ability);
+      TowerIconRenderer.drawAbilityIcon(icon, ability);
       this.abilityMenuContainer!.add(icon);
       
       // Name
@@ -1335,31 +1129,6 @@ export class TowerUIManager {
     
     // Clamp to screen
     this.uiHelper.clampToScreen(this.abilityMenuContainer, menuWidth, menuHeight, 0.5, 0.5);
-  }
-  
-  /**
-   * Draw ability icon programmatically
-   */
-  private drawAbilityIcon(g: Phaser.GameObjects.Graphics, ability: AbilityDefinition): void {
-    const primary = ability.icon.primaryColor;
-    const secondary = ability.icon.secondaryColor;
-    const size = 20;
-    
-    // Outer glow
-    g.fillStyle(primary, 0.3);
-    g.fillCircle(0, 0, size + 5);
-    
-    // Main icon circle
-    g.fillStyle(primary, 0.9);
-    g.fillCircle(0, 0, size);
-    
-    // Inner highlight
-    g.fillStyle(secondary, 0.7);
-    g.fillCircle(-size * 0.25, -size * 0.25, size * 0.4);
-    
-    // White shine
-    g.fillStyle(0xffffff, 0.5);
-    g.fillCircle(-size * 0.35, -size * 0.35, size * 0.2);
   }
 
   /**

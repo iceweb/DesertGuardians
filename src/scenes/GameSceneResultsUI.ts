@@ -1,9 +1,8 @@
 import Phaser from 'phaser';
-import type { GameResultData, Highscore } from './ResultsScene';
+import type { GameResultData } from './ResultsScene';
 import { GAME_CONFIG } from '../data/GameConfig';
-
-const HIGHSCORES_KEY = 'desert_guardians_scores_v1';
-const MAX_HIGHSCORES = 10;
+import { HighscoreAPI } from '../managers';
+import type { GlobalScore } from '../managers';
 
 /**
  * Interface for GameScene methods that ResultsUI needs access to
@@ -46,6 +45,10 @@ export class GameSceneResultsUI {
   // Review mode state
   private isDefeatReview: boolean = false;
   private reviewModeUI: Phaser.GameObjects.Container | null = null;
+  
+  // Top 20 qualification
+  private qualifiesForTop20: boolean = false;
+  private currentScores: GlobalScore[] = [];
 
   constructor(host: GameSceneResultsUIHost) {
     this.host = host;
@@ -285,135 +288,18 @@ export class GameSceneResultsUI {
       this.resultsPopup.add(finalScoreValue);
     }
     
-    // Highscores section
-    const highscoresY = 50;
-    const hsTitle = this.host.add.text(0, highscoresY, '🏅 High Scores', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#d4a574'
-    }).setOrigin(0.5);
-    this.resultsPopup.add(hsTitle);
-    
-    // Load and display highscores
-    const highscores = this.loadHighscores();
-    const hsListY = highscoresY + 30;
-    const hsGap = 22;
-    
-    if (highscores.length === 0) {
-      const noScores = this.host.add.text(0, hsListY + 20, 'No scores yet!', {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#666666',
-        fontStyle: 'italic'
-      }).setOrigin(0.5);
-      this.resultsPopup.add(noScores);
-    } else {
-      const displayScores = highscores.slice(0, 5);
-      displayScores.forEach((score, i) => {
-        const y = hsListY + i * hsGap;
-        const rankColor = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : i === 2 ? '#cd7f32' : '#888888';
-        
-        const rankText = this.host.add.text(-180, y, `${i + 1}.`, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: rankColor
-        }).setOrigin(0, 0.5);
-        this.resultsPopup?.add(rankText);
-        
-        const nameText = this.host.add.text(-150, y, score.playerName, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: '#cccccc'
-        }).setOrigin(0, 0.5);
-        this.resultsPopup?.add(nameText);
-        
-        const scoreText = this.host.add.text(180, y, `${score.score}`, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: '#ffd700'
-        }).setOrigin(1, 0.5);
-        this.resultsPopup?.add(scoreText);
-      });
-    }
-    
-    // Name entry section
-    const nameY = panelHeight / 2 - 160;
-    
-    // Save section container
-    this.saveSection = this.host.add.container(0, nameY);
-    
-    const nameLabel = this.host.add.text(0, 0, 'Enter your name:', {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5);
-    this.saveSection.add(nameLabel);
-    
-    // Input background
-    const inputBg = this.host.add.graphics();
-    inputBg.fillStyle(0x2a1a00, 1);
-    inputBg.fillRoundedRect(-100, 15, 200, 30, 6);
-    inputBg.lineStyle(1, 0x8b6914, 1);
-    inputBg.strokeRoundedRect(-100, 15, 200, 30, 6);
-    this.saveSection.add(inputBg);
-    
-    this.nameInputText = this.host.add.text(0, 30, '|', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-    this.saveSection.add(this.nameInputText);
-    
-    // Setup cursor blinking
-    this.cursorVisible = true;
-    this.cursorTimer = this.host.time.addEvent({
-      delay: 530,
-      loop: true,
-      callback: () => {
-        this.cursorVisible = !this.cursorVisible;
-        this.updateNameDisplay();
-      }
-    });
-    
-    // Save button
-    const saveBtn = this.createThemedButton(0, 70, '💾 Save Score', 120, () => {
-      this.saveScore();
-    });
-    this.saveSection.add(saveBtn);
-    
-    this.resultsPopup.add(this.saveSection);
-    
-    // Saved confirmation (hidden initially)
-    this.savedConfirmation = this.host.add.container(0, nameY + 30);
-    this.savedConfirmation.setVisible(false);
-    const savedText = this.host.add.text(0, 0, '✓ Score Saved!', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#66ff66'
-    }).setOrigin(0.5);
-    this.savedConfirmation.add(savedText);
-    
-    // If already submitted, hide save section and show confirmation
-    if (this.hasSubmitted) {
-      this.saveSection.setVisible(false);
-      this.savedConfirmation.setVisible(true);
-    } else {
-      this.saveSection.setVisible(true);
-      this.savedConfirmation.setVisible(false);
-    }
-    
-    // Buttons row
+    // Buttons row (always visible)
     const buttonY = panelHeight / 2 - 55;
     
     // Review Game button (themed)
-    const reviewBtn = this.createThemedButton(-80, buttonY, '🔍 Review Game', 130, () => {
+    const reviewBtn = this.createThemedButton(-90, buttonY, 'Review Game', 140, () => {
       this.hideResultsPopup();
       this.createReviewModeUI();
     });
     this.resultsPopup.add(reviewBtn);
     
     // Play Again button (themed)
-    const playAgainBtn = this.createThemedButton(80, buttonY, '🔄 Play Again', 120, () => {
+    const playAgainBtn = this.createThemedButton(90, buttonY, 'Play Again', 140, () => {
       this.host.scene.start('GameScene');
     });
     this.resultsPopup.add(playAgainBtn);
@@ -434,6 +320,9 @@ export class GameSceneResultsUI {
     });
     this.resultsPopup.add(menuBtn);
     
+    // Check top 20 qualification and show appropriate section
+    this.checkTop20Qualification(panelHeight);
+    
     // Fade in
     this.resultsPopup.setAlpha(0);
     this.host.tweens.add({
@@ -441,9 +330,181 @@ export class GameSceneResultsUI {
       alpha: 1,
       duration: 300
     });
+  }
+  
+  /**
+   * Check if player qualifies for top 20 and show appropriate UI
+   */
+  private async checkTop20Qualification(panelHeight: number): Promise<void> {
+    if (!this.resultsPopup) return;
     
-    // Setup keyboard input
+    const nameY = panelHeight / 2 - 210;
+    
+    // Show loading text
+    const loadingText = this.host.add.text(0, nameY, 'Checking leaderboard...', {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#888888'
+    }).setOrigin(0.5);
+    this.resultsPopup.add(loadingText);
+    
+    try {
+      this.currentScores = await HighscoreAPI.fetchScores();
+      
+      // Check if player qualifies for top 20
+      if (this.currentScores.length < 20) {
+        this.qualifiesForTop20 = true;
+      } else {
+        const lowestScore = this.currentScores[this.currentScores.length - 1].score;
+        this.qualifiesForTop20 = this.finalScore > lowestScore;
+      }
+    } catch (error) {
+      console.warn('Could not fetch leaderboard, allowing submission:', error);
+      this.qualifiesForTop20 = true;
+    }
+    
+    loadingText.destroy();
+    
+    if (this.qualifiesForTop20 && !this.hasSubmitted) {
+      this.createNameEntrySection(nameY);
+    } else if (this.hasSubmitted) {
+      this.createSubmittedSection(nameY);
+    } else {
+      this.createLeaderboardPreview(nameY);
+    }
+  }
+  
+  /**
+   * Create name entry section for players who qualify for top 20
+   */
+  private createNameEntrySection(nameY: number): void {
+    if (!this.resultsPopup) return;
+    
+    this.saveSection = this.host.add.container(0, nameY);
+    
+    // "NEW HIGH SCORE!" message
+    const newHighScore = this.host.add.text(0, -25, '- NEW HIGH SCORE -', {
+      fontFamily: 'Georgia, serif',
+      fontSize: '16px',
+      color: '#ffd700'
+    }).setOrigin(0.5);
+    this.saveSection.add(newHighScore);
+    
+    const nameLabel = this.host.add.text(0, 5, 'Enter your name:', {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#888888'
+    }).setOrigin(0.5);
+    this.saveSection.add(nameLabel);
+    
+    // Input background
+    const inputBg = this.host.add.graphics();
+    inputBg.fillStyle(0x2a1a00, 1);
+    inputBg.fillRoundedRect(-100, 25, 200, 30, 6);
+    inputBg.lineStyle(1, 0x8b6914, 1);
+    inputBg.strokeRoundedRect(-100, 25, 200, 30, 6);
+    this.saveSection.add(inputBg);
+    
+    this.nameInputText = this.host.add.text(0, 40, '|', {
+      fontFamily: 'Arial',
+      fontSize: '16px',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+    this.saveSection.add(this.nameInputText);
+    
+    // Setup cursor blinking
+    this.cursorVisible = true;
+    this.cursorTimer = this.host.time.addEvent({
+      delay: 530,
+      loop: true,
+      callback: () => {
+        this.cursorVisible = !this.cursorVisible;
+        this.updateNameDisplay();
+      }
+    });
+    
+    // Save button
+    const saveBtn = this.createThemedButton(0, 85, 'Save Score', 130, () => {
+      this.saveScore();
+    });
+    this.saveSection.add(saveBtn);
+    
+    this.resultsPopup.add(this.saveSection);
+    
+    // Setup keyboard input for name entry
     this.setupNameInput();
+  }
+  
+  /**
+   * Create section showing score was submitted
+   */
+  private createSubmittedSection(nameY: number): void {
+    if (!this.resultsPopup) return;
+    
+    this.savedConfirmation = this.host.add.container(0, nameY);
+    const savedText = this.host.add.text(0, 0, '✓ Score Submitted!', {
+      fontFamily: 'Arial',
+      fontSize: '16px',
+      color: '#66ff66'
+    }).setOrigin(0.5);
+    this.savedConfirmation.add(savedText);
+    this.resultsPopup.add(this.savedConfirmation);
+  }
+  
+  /**
+   * Create leaderboard preview for players who don't qualify
+   */
+  private createLeaderboardPreview(nameY: number): void {
+    if (!this.resultsPopup) return;
+    
+    const container = this.host.add.container(0, nameY - 20);
+    
+    // Message
+    const message = this.host.add.text(0, -40, 'Score not in top 20', {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#888888'
+    }).setOrigin(0.5);
+    container.add(message);
+    
+    // Top 5 preview
+    const title = this.host.add.text(0, -15, '🏆 Top Scores', {
+      fontFamily: 'Arial Black',
+      fontSize: '14px',
+      color: '#d4a574'
+    }).setOrigin(0.5);
+    container.add(title);
+    
+    const startY = 10;
+    const rowHeight = 20;
+    
+    this.currentScores.slice(0, 5).forEach((score, i) => {
+      const y = startY + i * rowHeight;
+      const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32', '#888888', '#888888'];
+      
+      const rank = this.host.add.text(-100, y, `${i + 1}.`, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: rankColors[i]
+      }).setOrigin(0, 0.5);
+      container.add(rank);
+      
+      const name = this.host.add.text(-75, y, score.player_name.slice(0, 10), {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: '#cccccc'
+      }).setOrigin(0, 0.5);
+      container.add(name);
+      
+      const scoreText = this.host.add.text(100, y, score.score.toLocaleString(), {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: '#ffd700'
+      }).setOrigin(1, 0.5);
+      container.add(scoreText);
+    });
+    
+    this.resultsPopup.add(container);
   }
 
   /**
@@ -451,28 +512,46 @@ export class GameSceneResultsUI {
    */
   private createThemedButton(x: number, y: number, text: string, width: number, onClick: () => void): Phaser.GameObjects.Container {
     const container = this.host.add.container(x, y);
-    const height = 36;
+    const height = 40;
     
     const bg = this.host.add.graphics();
-    const drawButton = (hover: boolean) => {
+    const drawButton = (hover: boolean, pressed: boolean = false) => {
       bg.clear();
-      // Button background
-      bg.fillStyle(hover ? 0x5a4530 : 0x4a3520, 1);
-      bg.fillRoundedRect(-width / 2, -height / 2, width, height, 8);
+      const offsetY = pressed ? 2 : 0;
+      
+      // Shadow
+      if (!pressed) {
+        bg.fillStyle(0x000000, 0.4);
+        bg.fillRoundedRect(-width / 2 + 3, -height / 2 + 3, width, height, 10);
+      }
+      
+      // Bottom edge (3D effect)
+      bg.fillStyle(0x4a3520, 1);
+      bg.fillRoundedRect(-width / 2, -height / 2 + 3 + offsetY, width, height, 10);
+      
+      // Main body
+      const baseColor = hover ? 0x8b6914 : 0x6b4914;
+      bg.fillStyle(baseColor, 1);
+      bg.fillRoundedRect(-width / 2, -height / 2 + offsetY, width, height - 3, 10);
+      
+      // Top highlight
+      bg.fillStyle(hover ? 0xa08050 : 0x8b6914, 0.5);
+      bg.fillRoundedRect(-width / 2 + 3, -height / 2 + 3 + offsetY, width - 6, height / 3, 8);
+      
       // Border
-      bg.lineStyle(2, hover ? 0xffd700 : 0xd4a574, 1);
-      bg.strokeRoundedRect(-width / 2, -height / 2, width, height, 8);
-      // Inner highlight
-      bg.lineStyle(1, 0x8b6914, 0.5);
-      bg.strokeRoundedRect(-width / 2 + 3, -height / 2 + 3, width - 6, height - 6, 6);
+      bg.lineStyle(2, 0xd4a574, 1);
+      bg.strokeRoundedRect(-width / 2, -height / 2 + offsetY, width, height - 3, 10);
     };
     drawButton(false);
     container.add(bg);
     
-    const label = this.host.add.text(0, 0, text, {
-      fontFamily: 'Arial',
+    const label = this.host.add.text(0, -1, text, {
+      fontFamily: 'Georgia, serif',
       fontSize: '14px',
-      color: '#ffffff'
+      color: '#fff8dc',
+      fontStyle: 'bold',
+      stroke: '#4a3520',
+      strokeThickness: 2
     }).setOrigin(0.5);
     container.add(label);
     
@@ -487,11 +566,17 @@ export class GameSceneResultsUI {
     
     hitArea.on('pointerout', () => {
       drawButton(false);
-      label.setColor('#ffffff');
+      label.setColor('#fff8dc');
     });
     
     hitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       pointer.event.stopPropagation();
+      drawButton(true, true);
+    });
+    
+    hitArea.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+      pointer.event.stopPropagation();
+      drawButton(true);
       this.host.playSFX('ui_click');
       onClick();
     });
@@ -548,41 +633,13 @@ export class GameSceneResultsUI {
   }
 
   /**
-   * Save score to localStorage
+   * Submit score to global leaderboard
    */
-  private saveScore(): void {
+  private async saveScore(): Promise<void> {
     if (this.hasSubmitted || !this.resultData) return;
     this.hasSubmitted = true;
     
     const name = this.playerName.trim() || 'Anonymous';
-    
-    const newScore: Highscore = {
-      playerName: name,
-      score: this.finalScore,
-      waveReached: this.resultData.waveReached,
-      totalWaves: this.resultData.totalWaves,
-      date: Date.now(),
-      runStats: {
-        hpLeft: this.resultData.castleHP,
-        goldEarned: this.resultData.totalGoldEarned,
-        timeSeconds: this.resultData.runTimeSeconds
-      }
-    };
-    
-    // Load existing scores
-    const highscores = this.loadHighscores();
-    highscores.push(newScore);
-    
-    // Sort by score (desc), then HP (desc), then time (asc)
-    highscores.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.runStats.hpLeft !== a.runStats.hpLeft) return b.runStats.hpLeft - a.runStats.hpLeft;
-      return a.runStats.timeSeconds - b.runStats.timeSeconds;
-    });
-    
-    // Keep only top scores
-    const trimmedScores = highscores.slice(0, MAX_HIGHSCORES);
-    localStorage.setItem(HIGHSCORES_KEY, JSON.stringify(trimmedScores));
     
     // Stop cursor blinking
     if (this.cursorTimer) {
@@ -590,40 +647,54 @@ export class GameSceneResultsUI {
       this.cursorTimer = null;
     }
     
-    // Hide save section, show confirmation
+    // Hide save section, show submitting status
     if (this.saveSection) {
       this.saveSection.setVisible(false);
     }
-    if (this.savedConfirmation) {
-      this.savedConfirmation.setVisible(true);
-      // Animate the confirmation
-      this.savedConfirmation.setScale(0.5);
-      this.savedConfirmation.setAlpha(0);
-      this.host.tweens.add({
-        targets: this.savedConfirmation,
-        scale: 1,
-        alpha: 1,
-        duration: 300,
-        ease: 'Back.easeOut'
+    
+    // Show submitting status
+    const width = this.host.cameras.main.width;
+    const submitStatus = this.host.add.text(width / 2, this.host.cameras.main.height / 2 + 180, '📡 Submitting to leaderboard...', {
+      fontFamily: 'Arial',
+      fontSize: '16px',
+      color: '#88ccff'
+    }).setOrigin(0.5).setDepth(300);
+    
+    try {
+      const result = await HighscoreAPI.submitScore({
+        name,
+        score: this.finalScore,
+        waveReached: this.resultData.waveReached,
+        totalWaves: this.resultData.totalWaves,
+        hpRemaining: this.resultData.castleHP,
+        goldEarned: this.resultData.totalGoldEarned,
+        creepsKilled: this.resultData.creepsKilled,
+        timeSeconds: this.resultData.runTimeSeconds,
+        isVictory: this.resultData.isVictory
       });
+      
+      if (result.success) {
+        submitStatus.setText('✓ Score Submitted!');
+        submitStatus.setColor('#00ff00');
+        console.log('GameScene: Score submitted to global leaderboard');
+      } else {
+        submitStatus.setText('⚠ ' + (result.error || 'Could not submit'));
+        submitStatus.setColor('#ffaa00');
+        console.warn('GameScene: Global submission failed:', result.error);
+      }
+    } catch (error) {
+      submitStatus.setText('⚠ Could not connect to server');
+      submitStatus.setColor('#ffaa00');
+      console.warn('GameScene: Global submission error:', error);
     }
     
-    console.log('GameScene: Score saved', newScore);
-  }
-
-  /**
-   * Load highscores from localStorage
-   */
-  private loadHighscores(): Highscore[] {
-    try {
-      const data = localStorage.getItem(HIGHSCORES_KEY);
-      if (data) {
-        return JSON.parse(data) as Highscore[];
-      }
-    } catch (e) {
-      console.warn('Failed to load highscores:', e);
-    }
-    return [];
+    // Fade out after delay
+    this.host.tweens.add({
+      targets: submitStatus,
+      alpha: 0,
+      duration: 2000,
+      delay: 2000
+    });
   }
 
   /**

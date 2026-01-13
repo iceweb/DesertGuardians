@@ -90,3 +90,4 @@ coverage/
 *.bak
 *.tmp
 *.temp
+server/migrate_add_stats.php

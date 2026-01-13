@@ -23,3 +23,6 @@ export type { UIBounds } from './UIHitDetector';
 export { FinalWaveEffects } from './FinalWaveEffects';
 export { HighscoreAPI } from './HighscoreAPI';
 export type { ScoreSubmission, GlobalScore } from './HighscoreAPI';
+export { UIComponents } from './UIComponents';
+export type { PanelConfig, ButtonConfig, TooltipConfig } from './UIComponents';
+export { TowerIconRenderer, TOWER_HINTS, BRANCH_NAMES, BRANCH_DESCRIPTIONS } from './TowerIconRenderer';

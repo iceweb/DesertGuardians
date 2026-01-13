@@ -224,7 +224,9 @@ function handleGetRequest() {
     $pdo = getDbConnection();
     
     $stmt = $pdo->prepare("
-        SELECT player_name, score, wave_reached, total_waves, is_victory, submission_date 
+        SELECT player_name, score, wave_reached, total_waves, 
+               hp_remaining, gold_earned, creeps_killed, time_seconds,
+               is_victory, submission_date 
         FROM highscores 
         ORDER BY score DESC, wave_reached DESC, submission_date ASC 
         LIMIT 20
@@ -236,6 +238,10 @@ function handleGetRequest() {
         $date = new DateTime($score['submission_date']);
         $score['date'] = $date->format('d/m/Y');
         $score['is_victory'] = (bool)$score['is_victory'];
+        $score['hp_remaining'] = (int)$score['hp_remaining'];
+        $score['gold_earned'] = (int)$score['gold_earned'];
+        $score['creeps_killed'] = (int)$score['creeps_killed'];
+        $score['time_seconds'] = (int)$score['time_seconds'];
         unset($score['submission_date']);
     }
     

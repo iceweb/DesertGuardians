@@ -30,6 +30,10 @@ export interface GlobalScore {
   score: number;
   wave_reached: number;
   total_waves: number;
+  hp_remaining: number;
+  gold_earned: number;
+  creeps_killed: number;
+  time_seconds: number;
   is_victory: boolean;
   date: string;
 }
