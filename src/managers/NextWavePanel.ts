@@ -80,6 +80,14 @@ export class NextWavePanel {
     this.drawPanelBackground(bg, panelWidth, panelHeight, isBossWave);
     this.container.add(bg);
     
+    // Add invisible hit area to block clicks from propagating to game
+    const hitBlocker = this.scene.add.rectangle(panelWidth / 2, panelHeight / 2, panelWidth, panelHeight, 0x000000, 0);
+    hitBlocker.setInteractive();
+    hitBlocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+    });
+    this.container.add(hitBlocker);
+    
     // Header text
     const headerText = isBossWave ? '⚔️ BOSS WAVE' : 'Next Wave';
     const headerColor = isBossWave ? '#ff4444' : '#d4a574';
@@ -145,6 +153,11 @@ export class NextWavePanel {
     const hitArea = this.scene.add.rectangle(0, 0, this.ICON_SIZE + 4, this.ICON_SIZE + 4, 0x000000, 0);
     hitArea.setInteractive({ useHandCursor: true });
     iconContainer.add(hitArea);
+    
+    // Block click propagation to prevent build menu
+    hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+    });
     
     // Format display name
     const displayName = this.formatCreepName(creepType);

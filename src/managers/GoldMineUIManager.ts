@@ -88,7 +88,8 @@ export class GoldMineUIManager {
       0x000000, 0
     );
     blocker.setInteractive();
-    blocker.on('pointerdown', () => {
+    blocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
       // Close menu when clicking outside
       this.closeMenus();
     });
@@ -105,7 +106,10 @@ export class GoldMineUIManager {
     // Menu hit area to block clicks on the menu from closing it
     const menuHitArea = this.scene.add.rectangle(0, 0, 260, 140, 0xffffff, 0);
     menuHitArea.setInteractive();
-    menuHitArea.on('pointerdown', () => { /* block clicks on menu background */ });
+    menuHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      /* block clicks on menu background */
+    });
     this.buildMenuContainer.add(menuHitArea);
     
     // Title
@@ -163,9 +167,11 @@ export class GoldMineUIManager {
     if (canAfford) {
       const hitArea = this.scene.add.rectangle(0, 12, 220, 80, 0xffffff, 0);
       hitArea.setInteractive({ useHandCursor: true });
-      hitArea.on('pointerdown', () => {
-        this.closeMenus();
-        this.goldMineManager.buildMine(mine.getSlotId());
+      hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+        event.stopPropagation();
+        const slotId = mine.getSlotId();
+        this.closeMenus();  // Close first to set menuClosedThisFrame flag
+        this.goldMineManager.buildMine(slotId);  // Then build
       });
       hitArea.on('pointerover', () => {
         btnBg.clear();
@@ -190,7 +196,10 @@ export class GoldMineUIManager {
       fontSize: '22px',
       color: '#ff6666'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      this.closeMenus();
+    });
     closeBtn.on('pointerover', () => closeBtn.setColor('#ff9999'));
     closeBtn.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.buildMenuContainer.add(closeBtn);
@@ -230,7 +239,8 @@ export class GoldMineUIManager {
       0x000000, 0
     );
     blocker.setInteractive();
-    blocker.on('pointerdown', () => {
+    blocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
       // Close menu when clicking outside
       this.closeMenus();
     });
@@ -247,7 +257,10 @@ export class GoldMineUIManager {
     // Menu hit area to block clicks on the menu from closing it
     const menuHitArea = this.scene.add.rectangle(0, 0, menuWidth, menuHeight, 0xffffff, 0);
     menuHitArea.setInteractive();
-    menuHitArea.on('pointerdown', () => { /* block clicks on menu background */ });
+    menuHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      /* block clicks on menu background */
+    });
     this.upgradeMenuContainer.add(menuHitArea);
     
     // Title with level
@@ -309,10 +322,16 @@ export class GoldMineUIManager {
       if (canAffordUpgrade) {
         const upgradeHitArea = this.scene.add.rectangle(0, btnY, btnW, btnH, 0xffffff, 0);
         upgradeHitArea.setInteractive({ useHandCursor: true });
-        upgradeHitArea.on('pointerdown', () => {
+        upgradeHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+          event.stopPropagation();
+          this.closeMenus();  // Close first to set menuClosedThisFrame flag
           this.goldMineManager.upgradeMine(mine);
-          // Refresh menu to show new state
-          this.showUpgradeMenu(mine);
+          // Refresh menu to show new state after a small delay
+          this.scene.time.delayedCall(50, () => {
+            if (mine.canUpgrade()) {
+              this.showUpgradeMenu(mine);
+            }
+          });
         });
         upgradeHitArea.on('pointerover', () => {
           upgradeBtnBg.clear();
@@ -350,7 +369,10 @@ export class GoldMineUIManager {
       fontSize: '22px',
       color: '#ff6666'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      this.closeMenus();
+    });
     closeBtn.on('pointerover', () => closeBtn.setColor('#ff9999'));
     closeBtn.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.upgradeMenuContainer.add(closeBtn);

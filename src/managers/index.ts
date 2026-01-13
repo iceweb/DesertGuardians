@@ -20,3 +20,4 @@ export { GoldMineManager } from './GoldMineManager';
 export { GoldMineUIManager } from './GoldMineUIManager';
 export { UIHitDetector } from './UIHitDetector';
 export type { UIBounds } from './UIHitDetector';
+export { FinalWaveEffects } from './FinalWaveEffects';

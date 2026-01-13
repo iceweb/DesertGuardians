@@ -231,6 +231,17 @@ export class GameScene extends Phaser.Scene {
       this.registry.events.emit('wave-started', waveNumber);
     });
 
+    // Final wave dramatic effects
+    this.waveManager.on('finalWaveStarted', () => {
+      console.log('GameScene: Final wave started - notifying UIScene');
+      this.registry.events.emit('final-wave-started');
+    });
+
+    this.waveManager.on('finalBossSpawning', () => {
+      console.log('GameScene: Final boss spawning - notifying UIScene');
+      this.registry.events.emit('final-boss-spawning');
+    });
+
     this.waveManager.on('waveComplete', async (waveNumber: number) => {
       console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
       this.audioManager.playSFX('wave_complete');
@@ -286,8 +297,10 @@ export class GameScene extends Phaser.Scene {
       this.registry.events.emit('creep-killed', goldReward);
     });
 
-    this.waveManager.on('creepLeaked', () => {
-      const destroyed = this.gameController.takeDamage(1);
+    this.waveManager.on('creepLeaked', (creep: Creep) => {
+      // Bosses deal 2 damage, normal creeps and guards deal 1
+      const damage = creep.isBoss() ? 2 : 1;
+      const destroyed = this.gameController.takeDamage(damage);
       this.hudManager.updateCastleHP(this.gameController.castleHP);
       this.audioManager.playSFX('creep_leak');
       
@@ -334,6 +347,9 @@ export class GameScene extends Phaser.Scene {
       creepsKilled: stats.killed,
       runTimeSeconds: stateSnapshot.runTimeSeconds
     };
+    
+    // Notify UIScene to stop any effects (like final wave effects)
+    this.registry.events.emit('game-over');
     
     // Stop BGM
     this.audioManager.stopBGM();

@@ -350,8 +350,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'shielded', count: 16, intervalMs: 900 },
     { type: 'tank', count: 18, intervalMs: 850 },
     { type: 'broodmother', count: 5, intervalMs: 2400 },
-    { type: 'boss_guard_3', count: 2, intervalMs: 2000, delayStart: 24000 },
-    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 24000 }
+    { type: 'boss_guard_3', count: 2, intervalMs: 2000, delayStart: 38000 },
+    { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 40000 }
   ]}
 ];
 

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from '../data/GameConfig';
+import { FinalWaveEffects } from '../managers/FinalWaveEffects';
 
 /**
  * UIScene - Overlay scene that runs parallel to GameScene
@@ -7,6 +8,7 @@ import { GAME_CONFIG } from '../data/GameConfig';
  */
 export class UIScene extends Phaser.Scene {
   private damageFlash!: Phaser.GameObjects.Rectangle;
+  private finalWaveEffects!: FinalWaveEffects;
   
   constructor() {
     super({ key: 'UIScene' });
@@ -23,10 +25,16 @@ export class UIScene extends Phaser.Scene {
       0
     ).setDepth(500);
 
+    // Create final wave effects manager
+    this.finalWaveEffects = new FinalWaveEffects(this);
+
     // Listen for game events via registry
     this.registry.events.on('castle-damaged', this.onCastleDamaged, this);
     this.registry.events.on('wave-started', this.onWaveStarted, this);
     this.registry.events.on('creep-killed', this.onCreepKilled, this);
+    this.registry.events.on('final-wave-started', this.onFinalWaveStarted, this);
+    this.registry.events.on('final-boss-spawning', this.onFinalBossSpawning, this);
+    this.registry.events.on('game-over', this.onGameOver, this);
     
     console.log('UIScene: UI overlay ready');
   }
@@ -62,14 +70,44 @@ export class UIScene extends Phaser.Scene {
     // Could add kill counter or combo system here
   }
 
+  /**
+   * Start dramatic visual effects for the final wave
+   */
+  private onFinalWaveStarted(): void {
+    console.log('UIScene: Final wave started - activating dramatic effects');
+    this.finalWaveEffects.startFinalWaveEffects();
+  }
+
+  /**
+   * Intensify effects when the final boss spawns
+   */
+  private onFinalBossSpawning(): void {
+    console.log('UIScene: Final boss spawning - intensifying effects');
+    this.finalWaveEffects.playBossSpawnEffect();
+  }
+
+  /**
+   * Stop effects when game ends
+   */
+  private onGameOver(): void {
+    console.log('UIScene: Game over - stopping final wave effects');
+    this.finalWaveEffects.stopEffects();
+  }
+
   update(_time: number, _delta: number): void {
     // Update UI elements if needed
   }
 
   shutdown(): void {
+    // Clean up final wave effects
+    this.finalWaveEffects.destroy();
+    
     // Clean up event listeners
     this.registry.events.off('castle-damaged', this.onCastleDamaged, this);
     this.registry.events.off('wave-started', this.onWaveStarted, this);
     this.registry.events.off('creep-killed', this.onCreepKilled, this);
+    this.registry.events.off('final-wave-started', this.onFinalWaveStarted, this);
+    this.registry.events.off('final-boss-spawning', this.onFinalBossSpawning, this);
+    this.registry.events.off('game-over', this.onGameOver, this);
   }
 }

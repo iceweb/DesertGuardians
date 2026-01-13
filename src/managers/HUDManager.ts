@@ -255,7 +255,8 @@ export class HUDManager {
 
     backButton.on('pointerover', () => drawMenuButton(true));
     backButton.on('pointerout', () => drawMenuButton(false));
-    backButton.on('pointerdown', () => {
+    backButton.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
       this.onMenuClicked?.();
     });
   }

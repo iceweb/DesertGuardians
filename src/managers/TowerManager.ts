@@ -161,7 +161,7 @@ export class TowerManager {
     
     // Check screen bounds
     if (x < 30 || x > this.scene.cameras.main.width - 30) return false;
-    if (y > this.scene.cameras.main.height - 60) return false;
+    if (y > this.scene.cameras.main.height - 100) return false;  // Exclude bottom bar with menu button
     
     // Check path exclusion zone
     if (this.isNearPath(x, y)) return false;
