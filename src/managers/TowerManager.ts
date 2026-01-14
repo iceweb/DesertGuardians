@@ -83,11 +83,11 @@ export class TowerManager {
   }
 
   private handleClick(x: number, y: number): void {
-    if (this.uiManager.wasMenuJustClosed()) {
+    if (this.uiManager.isMenuOpen()) {
       return;
     }
 
-    if (this.goldMineUIManager?.isMenuOpen() || this.goldMineUIManager?.wasMenuJustClosed()) {
+    if (this.goldMineUIManager?.isMenuOpen()) {
       return;
     }
 

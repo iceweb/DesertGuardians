@@ -15,8 +15,6 @@ export class GoldMineUIManager {
   private currentMine: GoldMine | null = null;
   private lastKnownGold: number = 0;
 
-  private menuClosedThisFrame: boolean = false;
-
   private reviewMode: boolean = false;
 
   public getPlayerGold?: () => number;
@@ -34,8 +32,6 @@ export class GoldMineUIManager {
   }
 
   private handleMineClicked(mine: GoldMine): void {
-    if (this.menuClosedThisFrame) return;
-
     if (mine.isBuilt()) {
       this.showUpgradeMenu(mine);
     } else if (!this.reviewMode) {
@@ -197,17 +193,6 @@ export class GoldMineUIManager {
     closeBtnBg.setInteractive({ useHandCursor: true });
     closeBtnBg.on(
       'pointerdown',
-      (
-        _pointer: Phaser.Input.Pointer,
-        _localX: number,
-        _localY: number,
-        event: Phaser.Types.Input.EventData
-      ) => {
-        event.stopPropagation();
-      }
-    );
-    closeBtnBg.on(
-      'pointerup',
       (
         _pointer: Phaser.Input.Pointer,
         _localX: number,
@@ -426,17 +411,6 @@ export class GoldMineUIManager {
         event: Phaser.Types.Input.EventData
       ) => {
         event.stopPropagation();
-      }
-    );
-    closeBtnBg.on(
-      'pointerup',
-      (
-        _pointer: Phaser.Input.Pointer,
-        _localX: number,
-        _localY: number,
-        event: Phaser.Types.Input.EventData
-      ) => {
-        event.stopPropagation();
         this.closeMenus();
       }
     );
@@ -485,21 +459,10 @@ export class GoldMineUIManager {
       this.currentMine = null;
       this.goldMineManager.clearSelection();
     }
-
-    if (!preserveState) {
-      this.menuClosedThisFrame = true;
-      this.scene.time.delayedCall(50, () => {
-        this.menuClosedThisFrame = false;
-      });
-    }
   }
 
   isMenuOpen(): boolean {
     return this.buildMenuContainer !== null || this.upgradeMenuContainer !== null;
-  }
-
-  wasMenuJustClosed(): boolean {
-    return this.menuClosedThisFrame;
   }
 
   destroy(): void {
