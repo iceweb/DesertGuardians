@@ -1,46 +1,30 @@
 import Phaser from 'phaser';
 import { Creep } from '../objects/Creep';
 
-/**
- * FinalWaveEffects - Creates apocalyptic visual effects for the final wave
- * Features:
- * - Dark reddish overlay that makes the map feel dangerous
- * - Volumetric light rays shining through cloudy sky
- * - Ash/ember particles floating in the air
- * - Dynamic spotlight following the final boss
- * - Atmospheric cloud layer with transparency
- */
 export class FinalWaveEffects {
   private scene: Phaser.Scene;
   private container!: Phaser.GameObjects.Container;
   private isActive: boolean = false;
-  
-  // Overlay layers
+
   private darknessOverlay!: Phaser.GameObjects.Graphics;
   private redTintOverlay!: Phaser.GameObjects.Graphics;
   private cloudLayer!: Phaser.GameObjects.Container;
   private lightRaysContainer!: Phaser.GameObjects.Container;
-  
-  // Spotlight for boss
+
   private bossSpotlight!: Phaser.GameObjects.Graphics;
   private bossSpotlightGlow!: Phaser.GameObjects.Graphics;
   private trackedBoss: Creep | null = null;
-  
-  // Particles
+
   private ashParticles: Phaser.GameObjects.Graphics[] = [];
   private emberParticles: Phaser.GameObjects.Graphics[] = [];
   private particleTimers: Phaser.Time.TimerEvent[] = [];
-  
-  // Light rays
+
   private lightRays: { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number }[] = [];
-  
-  // Tweens
+
   private activeTweens: Phaser.Tweens.Tween[] = [];
-  
-  // Callback to get creeps
+
   public getCreeps?: () => Creep[];
 
-  // Configuration
   private readonly DEPTH_DARKNESS = 445;
   private readonly DEPTH_CLOUDS = 446;
   private readonly DEPTH_RAYS = 447;
@@ -52,9 +36,6 @@ export class FinalWaveEffects {
     this.scene = scene;
   }
 
-  /**
-   * Start the apocalyptic final wave effects
-   */
   startFinalWaveEffects(): void {
     if (this.isActive) return;
     this.isActive = true;
@@ -63,86 +44,65 @@ export class FinalWaveEffects {
     const width = camera.width;
     const height = camera.height;
 
-    // Create main container
     this.container = this.scene.add.container(0, 0);
     this.container.setDepth(this.DEPTH_DARKNESS);
     this.container.setScrollFactor(0);
 
-    // Layer 1: Darkness overlay (makes everything darker)
     this.createDarknessOverlay(width, height);
 
-    // Layer 2: Red tint (apocalyptic color)
     this.createRedTintOverlay(width, height);
 
-    // Layer 3: Animated cloud layer
     this.createCloudLayer(width, height);
 
-    // Layer 4: Volumetric light rays
     this.createLightRays(width, height);
 
-    // Layer 5: Boss spotlight (starts hidden)
     this.createBossSpotlight();
 
-    // Start particle effects
     this.startAshParticles(width, height);
     this.startEmberParticles(width, height);
 
-    // Initial dramatic transition
     this.playTransitionIn();
 
     console.log('FinalWaveEffects: Started apocalyptic visual effects');
   }
 
-  /**
-   * Create darkness overlay
-   */
   private createDarknessOverlay(width: number, height: number): void {
     this.darknessOverlay = this.scene.add.graphics();
     this.darknessOverlay.setScrollFactor(0);
     this.darknessOverlay.setDepth(this.DEPTH_DARKNESS);
-    
-    // Full screen dark overlay
+
     this.darknessOverlay.fillStyle(0x000000, 0.35);
     this.darknessOverlay.fillRect(0, 0, width, height);
-    
-    // Add to container
+
     this.container.add(this.darknessOverlay);
   }
 
-  /**
-   * Create red tint overlay for apocalyptic feel
-   */
   private createRedTintOverlay(width: number, height: number): void {
     this.redTintOverlay = this.scene.add.graphics();
     this.redTintOverlay.setScrollFactor(0);
     this.redTintOverlay.setDepth(this.DEPTH_OVERLAY);
-    
-    // Red gradient from edges
-    // Top edge - heavy red
+
     for (let i = 0; i < 6; i++) {
       const alpha = 0.08 - i * 0.012;
       this.redTintOverlay.fillStyle(0x8B0000, alpha);
       this.redTintOverlay.fillRect(0, i * 30, width, 30);
     }
-    
-    // Bottom edge
+
     for (let i = 0; i < 4; i++) {
       const alpha = 0.06 - i * 0.012;
       this.redTintOverlay.fillStyle(0x8B0000, alpha);
       this.redTintOverlay.fillRect(0, height - (i + 1) * 30, width, 30);
     }
-    
-    // Side edges
+
     for (let i = 0; i < 4; i++) {
       const alpha = 0.05 - i * 0.01;
       this.redTintOverlay.fillStyle(0x8B0000, alpha);
       this.redTintOverlay.fillRect(i * 25, 0, 25, height);
       this.redTintOverlay.fillRect(width - (i + 1) * 25, 0, 25, height);
     }
-    
+
     this.container.add(this.redTintOverlay);
-    
-    // Pulse the red overlay
+
     const pulseTween = this.scene.tweens.add({
       targets: this.redTintOverlay,
       alpha: { from: 1, to: 0.6 },
@@ -154,16 +114,12 @@ export class FinalWaveEffects {
     this.activeTweens.push(pulseTween);
   }
 
-  /**
-   * Create animated cloud layer
-   */
   private createCloudLayer(width: number, _height: number): void {
     this.cloudLayer = this.scene.add.container(0, 0);
     this.cloudLayer.setScrollFactor(0);
     this.cloudLayer.setDepth(this.DEPTH_CLOUDS);
     this.container.add(this.cloudLayer);
 
-    // Create several cloud patches
     const numClouds = 8;
     for (let i = 0; i < numClouds; i++) {
       const cloud = this.createCloud(
@@ -172,8 +128,7 @@ export class FinalWaveEffects {
         80 + Math.random() * 120
       );
       this.cloudLayer.add(cloud);
-      
-      // Slow horizontal drift
+
       const driftTween = this.scene.tweens.add({
         targets: cloud,
         x: cloud.x + (Math.random() - 0.5) * 200,
@@ -183,8 +138,7 @@ export class FinalWaveEffects {
         ease: 'Sine.easeInOut'
       });
       this.activeTweens.push(driftTween);
-      
-      // Subtle alpha pulse
+
       const alphaTween = this.scene.tweens.add({
         targets: cloud,
         alpha: 0.3 + Math.random() * 0.2,
@@ -197,49 +151,40 @@ export class FinalWaveEffects {
     }
   }
 
-  /**
-   * Create a single cloud graphic
-   */
   private createCloud(x: number, y: number, size: number): Phaser.GameObjects.Graphics {
     const cloud = this.scene.add.graphics();
     cloud.setPosition(x, y);
-    
-    // Draw cloud as overlapping circles (dark storm cloud)
+
     const cloudColor = 0x2a1a1a;
     const numPuffs = 5 + Math.floor(Math.random() * 4);
-    
+
     for (let i = 0; i < numPuffs; i++) {
       const puffX = (Math.random() - 0.5) * size;
       const puffY = (Math.random() - 0.5) * size * 0.4;
       const puffRadius = size * 0.3 + Math.random() * size * 0.3;
       const alpha = 0.4 + Math.random() * 0.3;
-      
+
       cloud.fillStyle(cloudColor, alpha);
       cloud.fillCircle(puffX, puffY, puffRadius);
     }
-    
-    // Add some reddish highlights
+
     for (let i = 0; i < 2; i++) {
       const hx = (Math.random() - 0.5) * size * 0.5;
       const hy = (Math.random() - 0.3) * size * 0.3;
       cloud.fillStyle(0x4a2020, 0.3);
       cloud.fillCircle(hx, hy, size * 0.15);
     }
-    
+
     cloud.setAlpha(0.5);
     return cloud;
   }
 
-  /**
-   * Create volumetric light rays shining through clouds
-   */
   private createLightRays(width: number, height: number): void {
     this.lightRaysContainer = this.scene.add.container(0, 0);
     this.lightRaysContainer.setScrollFactor(0);
     this.lightRaysContainer.setDepth(this.DEPTH_RAYS);
     this.container.add(this.lightRaysContainer);
 
-    // Create several light rays from top
     const numRays = 5;
     for (let i = 0; i < numRays; i++) {
       const rayX = 80 + (width - 160) * (i / (numRays - 1)) + (Math.random() - 0.5) * 60;
@@ -248,7 +193,6 @@ export class FinalWaveEffects {
       this.lightRays.push(ray);
     }
 
-    // Animate rays slowly swaying
     this.lightRays.forEach((ray, index) => {
       const swayTween = this.scene.tweens.add({
         targets: ray,
@@ -262,8 +206,7 @@ export class FinalWaveEffects {
         }
       });
       this.activeTweens.push(swayTween);
-      
-      // Intensity pulse
+
       const intensityTween = this.scene.tweens.add({
         targets: ray.graphics,
         alpha: 0.15 + Math.random() * 0.15,
@@ -276,47 +219,39 @@ export class FinalWaveEffects {
     });
   }
 
-  /**
-   * Create a single volumetric light ray
-   */
   private createLightRay(x: number, height: number): { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number } {
     const graphics = this.scene.add.graphics();
-    const angle = -5 + Math.random() * 10; // Slight angle variation
+    const angle = -5 + Math.random() * 10;
     const ray = {
       graphics,
       baseX: x,
       angle,
       speed: 0.5 + Math.random() * 0.5
     };
-    
+
     this.updateLightRay(ray, height);
     graphics.setAlpha(0.2 + Math.random() * 0.1);
-    
+
     return ray;
   }
 
-  /**
-   * Update/redraw a light ray
-   */
   private updateLightRay(ray: { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number }, height: number): void {
     const g = ray.graphics;
     g.clear();
-    
+
     const topWidth = 30 + Math.random() * 20;
     const bottomWidth = 80 + Math.random() * 60;
     const angleRad = (ray.angle * Math.PI) / 180;
     const xOffset = Math.tan(angleRad) * height;
-    
-    // Draw light ray with gradient (multiple layers for soft edges)
+
     const layers = 4;
     for (let i = layers - 1; i >= 0; i--) {
       const layerAlpha = 0.03 + (i / layers) * 0.08;
       const widthMult = 1 + (layers - i) * 0.3;
-      
-      // Golden-orange color for apocalyptic feel
+
       const color = i === 0 ? 0xFFAA44 : 0xFF8833;
       g.fillStyle(color, layerAlpha);
-      
+
       g.beginPath();
       g.moveTo(ray.baseX - topWidth * widthMult / 2, -20);
       g.lineTo(ray.baseX + topWidth * widthMult / 2, -20);
@@ -325,8 +260,7 @@ export class FinalWaveEffects {
       g.closePath();
       g.fillPath();
     }
-    
-    // Add dust motes in the light ray
+
     const numMotes = 3;
     for (let i = 0; i < numMotes; i++) {
       const moteY = Math.random() * height;
@@ -336,18 +270,14 @@ export class FinalWaveEffects {
     }
   }
 
-  /**
-   * Create boss spotlight effect
-   */
   private createBossSpotlight(): void {
-    // Outer glow
+
     this.bossSpotlightGlow = this.scene.add.graphics();
     this.bossSpotlightGlow.setScrollFactor(0);
     this.bossSpotlightGlow.setDepth(this.DEPTH_SPOTLIGHT);
     this.bossSpotlightGlow.setVisible(false);
     this.container.add(this.bossSpotlightGlow);
-    
-    // Inner spotlight
+
     this.bossSpotlight = this.scene.add.graphics();
     this.bossSpotlight.setScrollFactor(0);
     this.bossSpotlight.setDepth(this.DEPTH_SPOTLIGHT + 1);
@@ -355,35 +285,27 @@ export class FinalWaveEffects {
     this.container.add(this.bossSpotlight);
   }
 
-  /**
-   * Draw the boss spotlight at a position
-   */
   private drawBossSpotlight(x: number, y: number): void {
     const camera = this.scene.cameras.main;
-    
-    // Convert world position to screen position
+
     const screenX = x - camera.scrollX;
     const screenY = y - camera.scrollY;
-    
-    // Draw outer glow
+
     this.bossSpotlightGlow.clear();
-    // Multiple rings for soft glow
+
     for (let i = 5; i >= 0; i--) {
       const radius = 80 + i * 25;
       const alpha = 0.02 - i * 0.003;
       this.bossSpotlightGlow.fillStyle(0xFF4400, alpha);
       this.bossSpotlightGlow.fillCircle(screenX, screenY, radius);
     }
-    
-    // Draw light cone from above
+
     this.bossSpotlight.clear();
-    
-    // Light cone
+
     const coneTopY = -50;
     const coneWidth = 60;
     const spotRadius = 70;
-    
-    // Draw cone with gradient
+
     for (let i = 3; i >= 0; i--) {
       const widthMult = 1 + i * 0.4;
       const alpha = 0.03 + i * 0.02;
@@ -396,8 +318,7 @@ export class FinalWaveEffects {
       this.bossSpotlight.closePath();
       this.bossSpotlight.fillPath();
     }
-    
-    // Ground spotlight circle
+
     for (let i = 3; i >= 0; i--) {
       const radius = 50 + i * 15;
       const alpha = 0.04 - i * 0.008;
@@ -406,9 +327,6 @@ export class FinalWaveEffects {
     }
   }
 
-  /**
-   * Start ash particle effects (floating down)
-   */
   private startAshParticles(width: number, height: number): void {
     const createAsh = () => {
       if (!this.isActive) return;
@@ -418,7 +336,6 @@ export class FinalWaveEffects {
       const startY = -20;
       const size = 1.5 + Math.random() * 2.5;
 
-      // Gray ash
       ash.fillStyle(0x555555, 0.4 + Math.random() * 0.3);
       ash.fillCircle(0, 0, size);
       ash.setPosition(startX, startY);
@@ -427,7 +344,6 @@ export class FinalWaveEffects {
 
       this.ashParticles.push(ash);
 
-      // Float down with drift
       const driftX = (Math.random() - 0.5) * 100;
       this.scene.tweens.add({
         targets: ash,
@@ -453,9 +369,6 @@ export class FinalWaveEffects {
     this.particleTimers.push(timer);
   }
 
-  /**
-   * Start ember particle effects (floating up with glow)
-   */
   private startEmberParticles(width: number, height: number): void {
     const createEmber = () => {
       if (!this.isActive) return;
@@ -464,28 +377,25 @@ export class FinalWaveEffects {
       const startX = Math.random() * width;
       const startY = height + 20;
 
-      // Ember colors (orange to red)
       const colors = [0xFF6600, 0xFF4400, 0xFF2200, 0xFFAA00];
       const color = colors[Math.floor(Math.random() * colors.length)];
       const size = 2 + Math.random() * 3;
 
-      // Draw ember with glow
       ember.fillStyle(color, 0.3);
       ember.fillCircle(0, 0, size * 2);
       ember.fillStyle(color, 0.7);
       ember.fillCircle(0, 0, size);
       ember.fillStyle(0xFFFF88, 0.9);
       ember.fillCircle(0, 0, size * 0.4);
-      
+
       ember.setPosition(startX, startY);
       ember.setScrollFactor(0);
       ember.setDepth(this.DEPTH_PARTICLES + 1);
 
       this.emberParticles.push(ember);
 
-      // Float up with flickering
       const driftX = (Math.random() - 0.5) * 150;
-      
+
       this.scene.tweens.add({
         targets: ember,
         x: startX + driftX,
@@ -498,8 +408,7 @@ export class FinalWaveEffects {
           if (index > -1) this.emberParticles.splice(index, 1);
         }
       });
-      
-      // Flicker effect
+
       this.scene.tweens.add({
         targets: ember,
         alpha: { from: 1, to: 0.3 },
@@ -519,13 +428,9 @@ export class FinalWaveEffects {
     this.particleTimers.push(timer);
   }
 
-  /**
-   * Play dramatic transition effect when effects start
-   */
   private playTransitionIn(): void {
     const camera = this.scene.cameras.main;
-    
-    // Fade the whole container in
+
     this.container.setAlpha(0);
     this.scene.tweens.add({
       targets: this.container,
@@ -533,8 +438,7 @@ export class FinalWaveEffects {
       duration: 2000,
       ease: 'Cubic.easeIn'
     });
-    
-    // Initial flash
+
     const flash = this.scene.add.rectangle(
       camera.width / 2,
       camera.height / 2,
@@ -554,13 +458,9 @@ export class FinalWaveEffects {
       onComplete: () => flash.destroy()
     });
 
-    // Screen shake
     camera.shake(500, 0.01);
   }
 
-  /**
-   * Intensify effects and activate spotlight when boss spawns
-   */
   playBossSpawnEffect(): void {
     if (!this.isActive) return;
 
@@ -568,10 +468,8 @@ export class FinalWaveEffects {
 
     const camera = this.scene.cameras.main;
 
-    // Intense screen shake
     camera.shake(800, 0.025);
 
-    // Red flash
     const flash = this.scene.add.rectangle(
       camera.width / 2,
       camera.height / 2,
@@ -591,7 +489,6 @@ export class FinalWaveEffects {
       onComplete: () => flash.destroy()
     });
 
-    // Make the darkness even darker temporarily
     this.scene.tweens.add({
       targets: this.darknessOverlay,
       alpha: 1.5,
@@ -600,12 +497,11 @@ export class FinalWaveEffects {
       ease: 'Quad.easeOut'
     });
 
-    // Show boss spotlight
     this.bossSpotlight.setVisible(true);
     this.bossSpotlightGlow.setVisible(true);
     this.bossSpotlight.setAlpha(0);
     this.bossSpotlightGlow.setAlpha(0);
-    
+
     this.scene.tweens.add({
       targets: [this.bossSpotlight, this.bossSpotlightGlow],
       alpha: 1,
@@ -613,22 +509,21 @@ export class FinalWaveEffects {
       ease: 'Cubic.easeOut'
     });
 
-    // Create dramatic burst of embers
     for (let i = 0; i < 40; i++) {
       this.scene.time.delayedCall(i * 25, () => {
         if (!this.isActive) return;
-        
+
         const ember = this.scene.add.graphics();
         const centerX = camera.width / 2;
         const centerY = camera.height / 2;
         const angle = Math.random() * Math.PI * 2;
         const distance = 20 + Math.random() * 50;
-        
+
         ember.fillStyle(0xFF4400, 1);
         ember.fillCircle(0, 0, 3 + Math.random() * 4);
         ember.fillStyle(0xFFFF88, 0.8);
         ember.fillCircle(0, 0, 2);
-        
+
         ember.setPosition(
           centerX + Math.cos(angle) * distance,
           centerY + Math.sin(angle) * distance
@@ -649,16 +544,12 @@ export class FinalWaveEffects {
       });
     }
 
-    // Show dramatic text
     this.showBossArrivalText();
   }
 
-  /**
-   * Show dramatic text when boss arrives
-   */
   private showBossArrivalText(): void {
     const camera = this.scene.cameras.main;
-    
+
     const text = this.scene.add.text(
       camera.width / 2,
       camera.height / 2 - 100,
@@ -678,7 +569,6 @@ export class FinalWaveEffects {
     text.setAlpha(0);
     text.setScale(0.5);
 
-    // Dramatic entrance
     this.scene.tweens.add({
       targets: text,
       alpha: 1,
@@ -686,7 +576,7 @@ export class FinalWaveEffects {
       duration: 600,
       ease: 'Back.easeOut',
       onComplete: () => {
-        // Pulse
+
         this.scene.tweens.add({
           targets: text,
           scale: 1.1,
@@ -695,7 +585,7 @@ export class FinalWaveEffects {
           repeat: 3,
           ease: 'Sine.easeInOut',
           onComplete: () => {
-            // Fade out
+
             this.scene.tweens.add({
               targets: text,
               alpha: 0,
@@ -710,22 +600,18 @@ export class FinalWaveEffects {
     });
   }
 
-  /**
-   * Update method - call every frame to track boss for spotlight
-   */
   update(): void {
     if (!this.isActive) return;
 
-    // Find and track boss for spotlight
     if (this.getCreeps && this.bossSpotlight.visible) {
       const creeps = this.getCreeps();
       const boss = creeps.find(c => c.isBoss() && c.active);
-      
+
       if (boss) {
         this.trackedBoss = boss;
         this.drawBossSpotlight(boss.x, boss.y);
       } else if (this.trackedBoss) {
-        // Boss died, fade out spotlight
+
         this.trackedBoss = null;
         this.scene.tweens.add({
           targets: [this.bossSpotlight, this.bossSpotlightGlow],
@@ -740,16 +626,12 @@ export class FinalWaveEffects {
     }
   }
 
-  /**
-   * Stop and clean up all effects
-   */
   stopEffects(): void {
     if (!this.isActive) return;
     this.isActive = false;
 
     console.log('FinalWaveEffects: Stopping apocalyptic effects');
 
-    // Stop all tweens
     this.activeTweens.forEach(tween => {
       if (tween && tween.isPlaying()) {
         tween.stop();
@@ -757,11 +639,9 @@ export class FinalWaveEffects {
     });
     this.activeTweens = [];
 
-    // Stop particle timers
     this.particleTimers.forEach(timer => timer.destroy());
     this.particleTimers = [];
 
-    // Fade out and destroy container
     if (this.container) {
       this.scene.tweens.add({
         targets: this.container,
@@ -773,26 +653,19 @@ export class FinalWaveEffects {
       });
     }
 
-    // Clean up particles
     this.ashParticles.forEach(p => p.destroy());
     this.ashParticles = [];
     this.emberParticles.forEach(p => p.destroy());
     this.emberParticles = [];
-    
+
     this.lightRays = [];
     this.trackedBoss = null;
   }
 
-  /**
-   * Check if effects are currently active
-   */
   getIsActive(): boolean {
     return this.isActive;
   }
 
-  /**
-   * Destroy the manager
-   */
   destroy(): void {
     this.stopEffects();
   }

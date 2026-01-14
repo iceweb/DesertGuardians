@@ -6,35 +6,27 @@ import { CreepManager } from './CreepManager';
 import type { Tower } from '../objects/Tower';
 import type { AbilityContext } from '../objects/TowerAbilities';
 
-/**
- * ProjectileManager handles object pooling and lifecycle of all projectiles.
- * Extends EventEmitter to allow GameScene to listen for hit events for audio.
- */
 export class ProjectileManager extends Phaser.Events.EventEmitter {
   private scene: Phaser.Scene;
   private creepManager: CreepManager;
   private pool: Projectile[] = [];
   private activeProjectiles: Projectile[] = [];
-  private effectPool: Phaser.GameObjects.Graphics[] = []; // Pool for visual effects
+  private effectPool: Phaser.GameObjects.Graphics[] = [];
   private readonly POOL_SIZE = 100;
 
   constructor(scene: Phaser.Scene, creepManager: CreepManager) {
     super();
     this.scene = scene;
     this.creepManager = creepManager;
-    
-    // Initialize the pool
+
     this.initializePool();
-    
+
     console.log('ProjectileManager: Initialized');
   }
 
-  /**
-   * Get a graphics object from the effect pool or create a new one
-   */
   private getEffectGraphic(x: number, y: number, depth: number): Phaser.GameObjects.Graphics {
     let g: Phaser.GameObjects.Graphics;
-    
+
     if (this.effectPool.length > 0) {
       g = this.effectPool.pop()!;
       g.setVisible(true);
@@ -42,122 +34,90 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       g.setScale(1);
       g.rotation = 0;
       g.clear();
-      // Ensure no leftover tweens are manipulating this object
+
       this.scene.tweens.killTweensOf(g);
     } else {
       g = this.scene.add.graphics();
     }
-    
+
     g.setPosition(x, y);
     g.setDepth(depth);
     return g;
   }
 
-  /**
-   * Return a graphics object to the effect pool
-   */
   private releaseEffectGraphic(g: Phaser.GameObjects.Graphics): void {
     g.setVisible(false);
     this.effectPool.push(g);
   }
 
-  /**
-   * Create initial pool of projectiles
-   */
   private initializePool(): void {
     for (let i = 0; i < this.POOL_SIZE; i++) {
       const projectile = new Projectile(this.scene);
-      
-      // Listen for splash damage events
+
       projectile.on('splash', this.handleSplash, this);
-      
-      // Listen for hit events and forward to GameScene for audio
+
       projectile.on('hit', this.handleHit, this);
-      
-      // Listen for kill events to notify source tower
+
       projectile.on('kill', this.handleKill, this);
-      
-      // Listen for creep list requests from abilities
+
       projectile.on('getCreeps', this.handleGetCreeps, this);
-      
+
       this.pool.push(projectile);
     }
-    
+
     console.log(`ProjectileManager: Pool initialized with ${this.POOL_SIZE} projectiles`);
   }
 
-  /**
-   * Get a projectile from the pool
-   */
   private getFromPool(): Projectile | null {
     const projectile = this.pool.find(p => !p.getIsActive());
     return projectile || null;
   }
 
-  /**
-   * Fire a projectile from a tower at a target
-   */
   fire(x: number, y: number, target: Creep, config: ProjectileConfig, sourceTower?: Tower): Projectile | null {
     const projectile = this.getFromPool();
-    
+
     if (!projectile) {
       console.warn('ProjectileManager: Pool exhausted');
       return null;
     }
-    
+
     projectile.fire(x, y, target, config, sourceTower);
     this.activeProjectiles.push(projectile);
-    
+
     return projectile;
   }
 
-  /**
-   * Handle hit event from projectile and forward it for audio
-   */
   private handleHit(hitType: 'shield' | 'armor' | 'flesh'): void {
     this.emit('hit', hitType);
   }
 
-  /**
-   * Handle kill event - notify the source tower for animations
-   */
   private handleKill(tower: Tower): void {
     tower.onKill();
   }
-  
-  /**
-   * Handle creep list request from abilities
-   */
+
   private handleGetCreeps(context: AbilityContext): void {
     context.allCreeps = this.creepManager.getActiveCreeps();
   }
 
-  /**
-   * Handle splash damage from Rock Cannon
-   */
   private handleSplash(x: number, y: number, radius: number, damage: number, isMagic: boolean, towerBranch?: string): void {
     const creeps = this.creepManager.getActiveCreeps();
-    
+
     for (const creep of creeps) {
       const distance = Phaser.Math.Distance.Between(x, y, creep.x, creep.y);
       if (distance <= radius) {
         creep.takeDamage(damage, isMagic, towerBranch);
       }
     }
-    
-    // Show splash effect
+
     this.showSplashEffect(x, y, radius);
   }
 
-  /**
-   * Show visual splash effect - explosion animation where cannonball lands
-   */
   private showSplashEffect(x: number, y: number, radius: number): void {
-    // Create main explosion flash
+
     const explosionFlash = this.getEffectGraphic(x, y, 26);
     explosionFlash.fillStyle(0xffaa00, 0.9);
     explosionFlash.fillCircle(0, 0, radius * 0.3);
-    
+
     this.scene.tweens.add({
       targets: explosionFlash,
       alpha: 0,
@@ -166,12 +126,11 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       duration: 150,
       onComplete: () => this.releaseEffectGraphic(explosionFlash)
     });
-    
-    // Create explosion ring
+
     const explosionRing = this.getEffectGraphic(x, y, 25);
     explosionRing.lineStyle(4, 0xff6600, 1);
     explosionRing.strokeCircle(0, 0, radius * 0.2);
-    
+
     this.scene.tweens.add({
       targets: explosionRing,
       alpha: 0,
@@ -180,26 +139,23 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       duration: 300,
       onComplete: () => this.releaseEffectGraphic(explosionRing)
     });
-    
-    // Create debris particles flying outward
+
     const numDebris = 8;
     for (let i = 0; i < numDebris; i++) {
       const angle = (i / numDebris) * Math.PI * 2 + Math.random() * 0.5;
       const speed = 80 + Math.random() * 60;
       const debris = this.getEffectGraphic(x, y, 24);
-      
-      // Random debris color (brown/grey rocks)
+
       const colors = [0x8b4513, 0x696969, 0xa0522d, 0x808080];
       const color = colors[Math.floor(Math.random() * colors.length)];
       const size = 3 + Math.random() * 4;
-      
+
       debris.fillStyle(color, 1);
       debris.fillCircle(0, 0, size);
-      
+
       const targetX = x + Math.cos(angle) * speed;
       const targetY = y + Math.sin(angle) * speed;
-      
-      // Arc the debris upward then down
+
       this.scene.tweens.add({
         targets: debris,
         x: targetX,
@@ -210,12 +166,11 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
         onComplete: () => this.releaseEffectGraphic(debris)
       });
     }
-    
-    // Create dust cloud
+
     const dustCloud = this.getEffectGraphic(x, y, 23);
     dustCloud.fillStyle(0xdeb887, 0.5);
     dustCloud.fillCircle(0, 0, radius * 0.5);
-    
+
     this.scene.tweens.add({
       targets: dustCloud,
       alpha: 0,
@@ -225,17 +180,16 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       duration: 500,
       onComplete: () => this.releaseEffectGraphic(dustCloud)
     });
-    
-    // Create smaller secondary explosions
+
     for (let i = 0; i < 3; i++) {
       const offsetX = (Math.random() - 0.5) * radius * 0.6;
       const offsetY = (Math.random() - 0.5) * radius * 0.6;
-      
+
       this.scene.time.delayedCall(50 + i * 40, () => {
         const spark = this.getEffectGraphic(x + offsetX, y + offsetY, 25);
         spark.fillStyle(0xffcc00, 0.8);
         spark.fillCircle(0, 0, 8);
-        
+
         this.scene.tweens.add({
           targets: spark,
           alpha: 0,
@@ -248,30 +202,21 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
     }
   }
 
-  /**
-   * Update all active projectiles
-   */
   update(delta: number): void {
     for (let i = this.activeProjectiles.length - 1; i >= 0; i--) {
       const projectile = this.activeProjectiles[i];
       const stillActive = projectile.update(delta);
-      
+
       if (!stillActive) {
         this.activeProjectiles.splice(i, 1);
       }
     }
   }
 
-  /**
-   * Get count of active projectiles
-   */
   getActiveCount(): number {
     return this.activeProjectiles.length;
   }
 
-  /**
-   * Clear all active projectiles
-   */
   clearAll(): void {
     for (const projectile of [...this.activeProjectiles]) {
       projectile.deactivate();
@@ -279,9 +224,6 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
     this.activeProjectiles = [];
   }
 
-  /**
-   * Destroy the manager and all projectiles
-   */
   destroy(): void {
     this.clearAll();
     for (const projectile of this.pool) {

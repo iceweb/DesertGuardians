@@ -2,28 +2,19 @@ import Phaser from 'phaser';
 import type { TowerBranch } from '../data';
 import type { AbilityDefinition } from '../objects/TowerAbilities';
 
-/**
- * TowerIconRenderer - Centralized tower icon drawing for menus.
- * Extracted from TowerUIManager to enable reuse and reduce file size.
- */
 export class TowerIconRenderer {
-  /**
-   * Draw archer tower icon for build menu
-   */
+
   static drawArcherTowerIcon(g: Phaser.GameObjects.Graphics, canAfford: boolean): void {
     const alpha = canAfford ? 1 : 0.5;
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.3 * alpha);
     g.fillEllipse(0, 18, 35, 12);
-    
-    // Base
+
     g.fillStyle(canAfford ? 0x8b5a2b : 0x555555, alpha);
     g.fillRect(-20, 5, 40, 14);
     g.fillStyle(canAfford ? 0x9a6a3b : 0x666666, alpha);
     g.fillRect(-17, 7, 34, 10);
-    
-    // Tower body
+
     g.fillStyle(canAfford ? 0xb88a5c : 0x666666, alpha);
     g.beginPath();
     g.moveTo(-16, 7);
@@ -32,8 +23,7 @@ export class TowerIconRenderer {
     g.lineTo(16, 7);
     g.closePath();
     g.fillPath();
-    
-    // Roof
+
     g.fillStyle(canAfford ? 0x8b4513 : 0x444444, alpha);
     g.beginPath();
     g.moveTo(-18, -28);
@@ -41,8 +31,7 @@ export class TowerIconRenderer {
     g.lineTo(18, -28);
     g.closePath();
     g.fillPath();
-    
-    // Roof highlight
+
     g.fillStyle(canAfford ? 0xa0522d : 0x555555, 0.7 * alpha);
     g.beginPath();
     g.moveTo(-12, -28);
@@ -50,16 +39,14 @@ export class TowerIconRenderer {
     g.lineTo(0, -45);
     g.closePath();
     g.fillPath();
-    
-    // Window
+
     g.fillStyle(canAfford ? 0xfff4cc : 0x888888, 0.9 * alpha);
     g.fillRect(-5, -20, 10, 14);
     g.lineStyle(1, canAfford ? 0x5a4a38 : 0x444444, alpha);
     g.strokeRect(-5, -20, 10, 14);
     g.lineBetween(0, -20, 0, -6);
     g.lineBetween(-5, -13, 5, -13);
-    
-    // Bow on top
+
     g.lineStyle(2, canAfford ? 0x6b4020 : 0x444444, alpha);
     g.beginPath();
     g.arc(0, -35, 8, Math.PI * 0.3, Math.PI * 0.7, true);
@@ -67,13 +54,10 @@ export class TowerIconRenderer {
     g.lineBetween(0, -43, 0, -27);
   }
 
-  /**
-   * Draw mini tower icon for upgrade menu branch selection
-   */
   static drawMiniTowerIcon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, branch: TowerBranch, canAfford: boolean): void {
     const alpha = canAfford ? 1 : 0.4;
     const scale = 0.7;
-    
+
     switch (branch) {
       case 'rapidfire':
         graphics.fillStyle(0x4a4a4a, alpha);
@@ -84,7 +68,7 @@ export class TowerIconRenderer {
         graphics.fillRect(x - 4 * scale, y - 20 * scale, 3 * scale, 10 * scale);
         graphics.fillRect(x + 1 * scale, y - 22 * scale, 3 * scale, 12 * scale);
         break;
-        
+
       case 'sniper':
         graphics.fillStyle(0x5a5a5a, alpha);
         graphics.fillRect(x - 10 * scale, y + 10 * scale, 20 * scale, 12 * scale);
@@ -96,7 +80,7 @@ export class TowerIconRenderer {
         graphics.lineBetween(x - 4 * scale, y - 25 * scale, x + 4 * scale, y - 25 * scale);
         graphics.lineBetween(x, y - 29 * scale, x, y - 21 * scale);
         break;
-        
+
       case 'rockcannon':
         graphics.fillStyle(0x6a5a4a, alpha);
         graphics.fillRect(x - 16 * scale, y + 5 * scale, 32 * scale, 18 * scale);
@@ -107,7 +91,7 @@ export class TowerIconRenderer {
         graphics.fillStyle(0x2a2a2a, alpha);
         graphics.fillCircle(x, y - 30 * scale, 5 * scale);
         break;
-        
+
       case 'icetower':
         graphics.fillStyle(0x87ceeb, alpha);
         graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
@@ -119,7 +103,7 @@ export class TowerIconRenderer {
         graphics.fillCircle(x - 4 * scale, y - 15 * scale, 2 * scale);
         graphics.fillCircle(x + 3 * scale, y - 25 * scale, 2 * scale);
         break;
-        
+
       case 'poison':
         graphics.fillStyle(0x4a3a2a, alpha);
         graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
@@ -133,7 +117,7 @@ export class TowerIconRenderer {
         graphics.fillCircle(x - 2 * scale, y - 35 * scale, 2 * scale);
         graphics.fillCircle(x + 3 * scale, y - 30 * scale, 2 * scale);
         break;
-        
+
       case 'aura':
         graphics.fillStyle(0x4a3a3a, alpha);
         graphics.fillRect(x - 14 * scale, y + 5 * scale, 28 * scale, 15 * scale);
@@ -148,8 +132,8 @@ export class TowerIconRenderer {
         graphics.fillStyle(0xffffff, alpha);
         graphics.fillCircle(x - 2 * scale, y - 40 * scale, 2 * scale);
         break;
-        
-      default: // archer
+
+      default:
         graphics.fillStyle(0x8b7355, alpha);
         graphics.fillRect(x - 14 * scale, y + 8 * scale, 28 * scale, 12 * scale);
         graphics.fillStyle(0xd4a574, alpha);
@@ -164,35 +148,25 @@ export class TowerIconRenderer {
     }
   }
 
-  /**
-   * Draw ability icon programmatically
-   */
   static drawAbilityIcon(g: Phaser.GameObjects.Graphics, ability: AbilityDefinition): void {
     const primary = ability.icon.primaryColor;
     const secondary = ability.icon.secondaryColor;
     const size = 20;
-    
-    // Outer glow
+
     g.fillStyle(primary, 0.3);
     g.fillCircle(0, 0, size + 5);
-    
-    // Main icon circle
+
     g.fillStyle(primary, 0.9);
     g.fillCircle(0, 0, size);
-    
-    // Inner highlight
+
     g.fillStyle(secondary, 0.7);
     g.fillCircle(-size * 0.25, -size * 0.25, size * 0.4);
-    
-    // White shine
+
     g.fillStyle(0xffffff, 0.5);
     g.fillCircle(-size * 0.35, -size * 0.35, size * 0.2);
   }
 }
 
-/**
- * Tower hint descriptions by branch
- */
 export const TOWER_HINTS: Record<TowerBranch, string> = {
   archer: '🏹 Versatile tower. +200% damage vs flying units. Good all-rounder.',
   rapidfire: '⚡ Very fast attacks shred unarmored targets. Weak vs heavy armor.',
@@ -203,9 +177,6 @@ export const TOWER_HINTS: Record<TowerBranch, string> = {
   aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.'
 };
 
-/**
- * Branch display names
- */
 export const BRANCH_NAMES: Record<TowerBranch, string> = {
   archer: 'Archer II',
   rapidfire: 'Rapid Fire',
@@ -216,9 +187,6 @@ export const BRANCH_NAMES: Record<TowerBranch, string> = {
   aura: 'Aura'
 };
 
-/**
- * Branch short descriptions
- */
 export const BRANCH_DESCRIPTIONS: Record<TowerBranch, string> = {
   archer: 'Best vs flying units',
   rapidfire: 'Fast attacks, weak vs armor',

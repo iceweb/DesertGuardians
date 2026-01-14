@@ -1,15 +1,8 @@
-/**
- * Desert Guardians - Highscore API Client
- * Communicates with the PHP backend for global leaderboard
- */
 
-// API Configuration
+
 const API_URL = 'https://iceweb.ch/dg/api.php';
 const SECRET_KEY = 'DesertGuardians2026SecretKey!@#$';
 
-/**
- * Data required for score submission
- */
 export interface ScoreSubmission {
   name: string;
   score: number;
@@ -22,9 +15,6 @@ export interface ScoreSubmission {
   isVictory: boolean;
 }
 
-/**
- * Score entry from global leaderboard
- */
 export interface GlobalScore {
   player_name: string;
   score: number;
@@ -38,9 +28,6 @@ export interface GlobalScore {
   date: string;
 }
 
-/**
- * API response types
- */
 interface SessionResponse {
   success: boolean;
   session_token?: string;
@@ -60,32 +47,25 @@ interface SubmitResponse {
   error?: string;
 }
 
-/**
- * Highscore API client for global leaderboard
- */
 export class HighscoreAPI {
   private static sessionToken: string | null = null;
   private static isOnline: boolean = true;
 
-  /**
-   * Request a new game session token from the server
-   * Call this when a new game starts
-   */
   static async requestSession(): Promise<string | null> {
     try {
       const response = await fetch(`${API_URL}?action=session`, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
-      
+
       if (!response.ok) {
         console.warn('HighscoreAPI: Failed to get session, status:', response.status);
         this.isOnline = false;
         return null;
       }
-      
+
       const data: SessionResponse = await response.json();
-      
+
       if (data.success && data.session_token) {
         this.sessionToken = data.session_token;
         this.isOnline = true;
@@ -102,23 +82,20 @@ export class HighscoreAPI {
     }
   }
 
-  /**
-   * Fetch global leaderboard scores
-   */
   static async fetchScores(): Promise<GlobalScore[]> {
     try {
       const response = await fetch(API_URL, {
         method: 'GET',
         headers: { 'Accept': 'application/json' }
       });
-      
+
       if (!response.ok) {
         console.warn('HighscoreAPI: Failed to fetch scores, status:', response.status);
         return [];
       }
-      
+
       const data: ScoresResponse = await response.json();
-      
+
       if (data.success && data.scores) {
         this.isOnline = true;
         return data.scores;
@@ -133,9 +110,6 @@ export class HighscoreAPI {
     }
   }
 
-  /**
-   * Submit a score to the global leaderboard
-   */
   static async submitScore(submission: ScoreSubmission): Promise<{ success: boolean; error?: string }> {
     if (!this.sessionToken) {
       console.warn('HighscoreAPI: No session token, cannot submit score');
@@ -167,7 +141,6 @@ export class HighscoreAPI {
 
       const data: SubmitResponse = await response.json();
 
-      // Consume the session token regardless of result
       this.sessionToken = null;
 
       if (data.success) {
@@ -186,9 +159,6 @@ export class HighscoreAPI {
     }
   }
 
-  /**
-   * Generate SHA-256 hash for authentication
-   */
   private static async generateHash(
     name: string,
     score: number,
@@ -198,37 +168,24 @@ export class HighscoreAPI {
     const message = `${name}${score}${waveReached}${sessionToken}${SECRET_KEY}`;
     const encoder = new TextEncoder();
     const data = encoder.encode(message);
-    
-    // Use Web Crypto API for SHA-256
+
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  /**
-   * Get the current session token (for debugging)
-   */
   static getSessionToken(): string | null {
     return this.sessionToken;
   }
 
-  /**
-   * Check if we have a valid session token
-   */
   static hasSession(): boolean {
     return this.sessionToken !== null;
   }
 
-  /**
-   * Check if we appear to be online
-   */
   static getIsOnline(): boolean {
     return this.isOnline;
   }
 
-  /**
-   * Clear the session token (e.g., when returning to menu)
-   */
   static clearSession(): void {
     this.sessionToken = null;
   }

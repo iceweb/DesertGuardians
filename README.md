@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/TypeScript-5.x-blue?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
-  <img src="https://img.shields.io/badge/Phaser-3.x-purple?style=for-the-badge&logo=phaser&logoColor=white" alt="Phaser"/>
-  <img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
-  <img src="https://img.shields.io/badge/Built%20with-Claude%20Opus-orange?style=for-the-badge" alt="Claude Opus"/>
+  <img src="https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/Phaser-3.90-purple?style=for-the-badge&logo=phaser&logoColor=white" alt="Phaser"/>
+  <img src="https://img.shields.io/badge/Vite-7.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
+  <img src="https://img.shields.io/badge/Built%20with-Claude%20Opus%204-orange?style=for-the-badge" alt="Claude Opus 4"/>
 </p>
 
 <p align="center">
@@ -55,14 +55,14 @@ Build a complete, polished browser game — including a global leaderboard backe
 
 | Project | Type | Model | Result |
 |:--------|:-----|:------|:-------|
-| **Swiss Adventure** | Platformer (Python/Pygame) | Claude Opus | ✅ Full game with global scores |
-| **Desert Guardians** | Tower Defense (TypeScript/Phaser) | Claude Opus | ✅ Complex strategy game with 6 tower types, 35 waves, global leaderboard |
+| **Swiss Adventure** | Platformer (Python/Pygame) | Claude Opus 3 | ✅ Full game with global scores |
+| **Desert Guardians** | Tower Defense (TypeScript/Phaser) | Claude Opus 4 | ✅ Complex strategy game with 7 tower branches, 35 waves, global leaderboard |
 
 ### Why Tower Defense?
 
 Tower defense games are significantly more complex than platformers:
-- **Strategic depth** — Multiple tower types with upgrade paths
-- **Enemy variety** — Different creep abilities (armor, shields, jumping, bosses)
+- **Strategic depth** — Multiple tower types with upgrade paths and special abilities
+- **Enemy variety** — Different creep abilities (armor, shields, flying, jumping, bosses)
 - **Resource management** — Gold economy, tower selling, gold mines
 - **Balancing** — 35 waves of carefully tuned difficulty progression
 - **State management** — Tracking dozens of entities simultaneously
@@ -75,9 +75,10 @@ Tower defense games are significantly more complex than platformers:
 
 ### 🏰 Core Gameplay
 - **35 Waves** of increasingly difficult enemies
-- **6 Tower Types** with unique abilities and upgrade paths
+- **7 Tower Branches** with up to 4 upgrade levels and special abilities
 - **Gold Mine System** — Build and upgrade mines for passive income
 - **Castle Defense** — Protect your 25 HP from leaking creeps
+- **Flying Enemies** — Air units require anti-air towers to counter
 - **Victory & Defeat** — All runs can submit to the global leaderboard
 
 ### 🎯 Strategic Elements
@@ -108,15 +109,17 @@ Tower defense games are significantly more complex than platformers:
 
 ## 🗼 Towers
 
-| Tower | Specialty | Upgrades To |
-|:------|:----------|:------------|
-| 🏹 **Archer** | Balanced damage, good range | Rapid Fire, Sniper |
-| ⚡ **Rapid Fire** | Fast attacks, lower damage | — |
-| 🎯 **Sniper** | High damage, long range, slow | — |
-| 💣 **Cannon** | Splash damage, slow | — |
-| ❄️ **Ice Tower** | Slows enemies | — |
-| ☠️ **Poison Tower** | Damage over time | — |
-| ✨ **Aura Tower** | Buffs nearby towers | — |
+All towers start as **Archer Tower** and can branch into specialized paths at level 2. Each branch upgrades to level 4, unlocking special abilities.
+
+| Tower | Type | Specialty | Level 4 Ability |
+|:------|:-----|:----------|:----------------|
+| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Elite marksman |
+| ⚡ **Rapid Fire** | Physical | Extreme attack speed | Burst mode |
+| 🎯 **Sniper** | Physical | High damage, long range | Assassination |
+| 💣 **Rock Cannon** | Physical | Splash damage (70-110px) | Siege bombardment |
+| ❄️ **Ice Tower** | Magic | Slows enemies 40-65% | Freeze wave |
+| ☠️ **Poison Tower** | Magic | DoT, ignores armor | Plague cloud |
+| ✨ **Aura Tower** | Support | Buffs nearby towers 20-50% | Ultimate buff |
 
 ---
 
@@ -127,11 +130,13 @@ Tower defense games are significantly more complex than platformers:
 | **Standard** | Basic creep |
 | **Fast** | Moves quickly |
 | **Tank** | High HP, slow |
-| **Armored** | Reduces damage taken |
+| **Armored** | Reduces physical damage taken |
 | **Shielded** | Blocks first few hits |
 | **Jumper** | Can leap past towers |
+| **Flying** | Ignores ground path, requires anti-air |
 | **Guards** | Escort boss creeps |
-| **Bosses** | Powerful, deal 2 damage if leaked |
+| **Dragon Knight** | Elite boss with massive HP |
+| **Bosses** | Powerful, deal 2+ damage if leaked |
 
 ---
 
@@ -144,7 +149,7 @@ Visit **[https://iceweb.ch/dg/](https://iceweb.ch/dg/)** — works in any modern
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/desert-guardians.git
+git clone https://github.com/mikeblochlevermore/desert-guardians.git
 cd desert-guardians
 
 # Install dependencies
@@ -158,7 +163,7 @@ npm run build
 ```
 
 ### Requirements
-- Node.js 18+
+- Node.js 20+
 - npm or pnpm
 
 ---

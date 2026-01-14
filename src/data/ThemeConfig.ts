@@ -1,56 +1,46 @@
-/**
- * ThemeConfig - Centralized styling constants for the entire game UI.
- * Use these values instead of hardcoded colors/fonts for consistent theming.
- */
+
 
 export const THEME = {
-  // Primary colors
+
   colors: {
-    // Gold tones
+
     gold: 0xffd700,
     goldLight: 0xfffacd,
     goldDark: 0x8b6914,
     goldMuted: 0xc9a86c,
-    
-    // Bronze/copper tones  
+
     bronze: 0xd4a574,
     bronzeDark: 0xc49564,
     bronzeLight: 0xebd4a4,
-    
-    // Background colors
+
     bgDark: 0x1a0a00,
     bgDarker: 0x0a0400,
     bgPanel: 0x2a2015,
     bgPanelHover: 0x3a3025,
     bgButton: 0x2a2a2a,
     bgButtonHover: 0x4a4a4a,
-    
-    // Border colors
+
     borderDark: 0x4a3520,
     borderLight: 0x8b6914,
-    
-    // UI state colors
+
     success: 0x00ff00,
     successMuted: 0x88ff88,
     error: 0xff4444,
     errorMuted: 0xff6666,
     warning: 0xffcc44,
     info: 0x66ccff,
-    
-    // Stat colors
+
     statDamage: 0xff6666,
     statDps: 0xffcc44,
     statRange: 0x66ff66,
     statRate: 0x66ccff,
     statAir: 0x66ccff,
-    
-    // Text colors
+
     textPrimary: 0xffffff,
     textSecondary: 0xaaaaaa,
     textMuted: 0x888888,
     textDisabled: 0x666666,
-    
-    // Tower branch colors
+
     towerArcher: 0xcc3333,
     towerRapidfire: 0xffd700,
     towerSniper: 0x4169e1,
@@ -59,16 +49,14 @@ export const THEME = {
     towerPoison: 0x00ff00,
     towerAura: 0xff4444,
   },
-  
-  // Font families
+
   fonts: {
     title: 'Georgia, serif',
     titleFancy: 'Papyrus, Copperplate, Georgia, serif',
     body: 'Arial',
     bodyBold: 'Arial Black',
   },
-  
-  // Font sizes
+
   fontSize: {
     xs: '12px',
     sm: '14px',
@@ -80,8 +68,7 @@ export const THEME = {
     titleLarge: '34px',
     hero: '80px',
   },
-  
-  // Spacing and dimensions
+
   spacing: {
     xs: 4,
     sm: 8,
@@ -90,8 +77,7 @@ export const THEME = {
     xl: 20,
     xxl: 30,
   },
-  
-  // Common UI dimensions
+
   dimensions: {
     hudHeight: 60,
     panelPadding: 15,
@@ -100,8 +86,7 @@ export const THEME = {
     buttonHeight: 45,
     buttonHeightLg: 65,
   },
-  
-  // Common alpha values
+
   alpha: {
     solid: 1,
     high: 0.95,
@@ -113,12 +98,10 @@ export const THEME = {
   },
 } as const;
 
-// Helper to convert hex color to CSS string
 export function hexToColor(hex: number): string {
   return `#${hex.toString(16).padStart(6, '0')}`;
 }
 
-// Tower branch color map for easy lookup
 export const TOWER_BRANCH_COLORS: Record<string, number> = {
   archer: THEME.colors.towerArcher,
   rapidfire: THEME.colors.towerRapidfire,
@@ -129,10 +112,9 @@ export const TOWER_BRANCH_COLORS: Record<string, number> = {
   aura: THEME.colors.towerAura,
 };
 
-// Veteran rank colors
 export const VETERAN_RANK_COLORS: Record<number, string> = {
-  0: '#888888', // Recruit - gray
-  1: '#d4a574', // Corporal - bronze
-  2: '#c0c0c0', // Sergeant - silver
-  3: '#ffd700', // Captain - gold
+  0: '#888888',
+  1: '#d4a574',
+  2: '#c0c0c0',
+  3: '#ffd700',
 };

@@ -12,21 +12,15 @@ import {
   drawAuraTower,
 } from './towers';
 
-/**
- * TowerGraphics facade - delegates to specialized tower graphics modules.
- * Supports levels 1-4 (archer only goes to 4) with progressively more sophisticated designs.
- */
 export class TowerGraphics {
-  /**
-   * Draw a tower based on its branch and level
-   */
+
   static drawTower(
     g: Phaser.GameObjects.Graphics,
     branch: TowerBranch,
     level: number
   ): void {
     g.clear();
-    
+
     switch (branch) {
       case 'archer':
         drawArcherTower(g, level);
@@ -52,16 +46,12 @@ export class TowerGraphics {
       default:
         drawArcherTower(g, level);
     }
-    
-    // Draw level indicator
+
     if (level >= 2) {
       drawLevelIndicator(g, level);
     }
   }
 
-  /**
-   * Draw range indicator circle
-   */
   static drawRangeCircle(
     g: Phaser.GameObjects.Graphics,
     range: number
@@ -69,4 +59,3 @@ export class TowerGraphics {
     drawRangeCircle(g, range);
   }
 }
-

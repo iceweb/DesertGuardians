@@ -1,8 +1,5 @@
 import type { TowerBranch } from '../data';
 
-/**
- * Icon types for ability visualization
- */
 export const AbilityIconType = {
   EXPLOSION: 'explosion',
   EARTHQUAKE: 'earthquake',
@@ -28,16 +25,13 @@ export const AbilityIconType = {
 } as const;
 export type AbilityIconType = typeof AbilityIconType[keyof typeof AbilityIconType];
 
-/**
- * Ability definition interface
- */
 export interface AbilityDefinition {
   id: string;
   name: string;
   description: string;
-  triggerChance: number;  // 0.0 - 1.0
+  triggerChance: number;
   isPassive?: boolean;
-  passiveTickRate?: number;  // ms between passive checks
+  passiveTickRate?: number;
   icon: {
     type: AbilityIconType;
     primaryColor: number;
@@ -60,9 +54,6 @@ export interface AbilityDefinition {
   };
 }
 
-/**
- * All Level 4 abilities organized by tower branch
- */
 export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
   rockcannon: [
     {
@@ -209,7 +200,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       id: 'aura_critaura',
       name: 'Critical Aura',
       description: 'Buffed towers gain +15% crit chance',
-      triggerChance: 1.0,  // Always active
+      triggerChance: 1.0,
       isPassive: true,
       icon: { type: AbilityIconType.STAR_BURST, primaryColor: 0xffa500, secondaryColor: 0xffd700 },
       effectParams: { }

@@ -1,12 +1,7 @@
 import Phaser from 'phaser';
 
-/**
- * BossCreepGraphics handles drawing for boss creep types.
- */
 export class BossCreepGraphics {
-  /**
-   * Draw a boss creep based on type
-   */
+
   static draw(
     g: Phaser.GameObjects.Graphics,
     type: string,
@@ -14,15 +9,15 @@ export class BossCreepGraphics {
     faceDirection: number,
     isPained: boolean = false
   ): void {
-    // Apply pain effect: red overlay and shaking
+
     if (isPained) {
-      // Add jitter for painful shaking effect
+
       const painShake = Math.sin(bounceTime * 30) * 2;
       g.setPosition(painShake, 0);
     } else {
       g.setPosition(0, 0);
     }
-    
+
     switch (type) {
       case 'boss':
         BossCreepGraphics.drawBoss(g, bounceTime, faceDirection, isPained);
@@ -42,30 +37,23 @@ export class BossCreepGraphics {
       case 'boss_5':
         BossCreepGraphics.drawBoss5(g, bounceTime, faceDirection, isPained);
         break;
-      // Note: boss_guard_1, boss_guard_2, boss_guard_3 are now handled by DragonKnightGraphics
+
     }
-    
-    // Draw pain overlay if in pained state
+
     if (isPained) {
       BossCreepGraphics.drawPainOverlay(g, bounceTime);
     }
   }
-  
-  /**
-   * Draw pain overlay effect - red pulsing glow
-   */
+
   private static drawPainOverlay(g: Phaser.GameObjects.Graphics, bounceTime: number): void {
     const painPulse = 0.3 + Math.sin(bounceTime * 8) * 0.15;
-    
-    // Red pain aura
+
     g.fillStyle(0xff0000, painPulse * 0.4);
     g.fillCircle(0, 0, 55);
-    
-    // Inner pain glow
+
     g.fillStyle(0xff3300, painPulse * 0.3);
     g.fillCircle(0, 0, 40);
-    
-    // Blood drip particles
+
     const numDrips = 3;
     for (let i = 0; i < numDrips; i++) {
       const dripY = (bounceTime * 40 + i * 30) % 60 - 10;
@@ -79,33 +67,27 @@ export class BossCreepGraphics {
   static drawBoss(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 4) * 3;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
-    
-    // Glow
+
     g.fillStyle(0x800080, 0.2);
     g.fillCircle(0, 0, 50 * pulse);
     g.fillStyle(0x800080, 0.1);
     g.fillCircle(0, 0, 60 * pulse);
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.4);
     g.fillEllipse(0, 30, 50, 18);
-    
-    // Body
+
     g.fillStyle(0x4B0082, 1);
     g.fillEllipse(0, 0 + bounce, 44 * pulse, 38 * pulse);
-    
-    // Fur pattern
+
     g.fillStyle(0x6A0DAD, 1);
     g.fillEllipse(-10, -10 + bounce, 16, 20);
     g.fillEllipse(10, 5 + bounce, 18, 16);
     g.fillStyle(0x8B008B, 1);
     g.fillEllipse(0, -5 + bounce, 12, 14);
-    
-    // Face
+
     g.fillStyle(0x9370DB, 1);
     g.fillEllipse(18 * faceDirection, -5 + bounce, 18, 16);
-    
-    // Crown
+
     g.fillStyle(0xFFD700, 1);
     g.beginPath();
     g.moveTo(-8 * faceDirection, -35 + bounce);
@@ -119,8 +101,7 @@ export class BossCreepGraphics {
     g.lineTo(14 * faceDirection, -38 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Eyes (3)
+
     g.fillStyle(0xFF0000, 1);
     g.fillCircle(14 * faceDirection, -12 + bounce, 5);
     g.fillCircle(24 * faceDirection, -8 + bounce, 4);
@@ -128,41 +109,32 @@ export class BossCreepGraphics {
     g.fillStyle(0xFFFFFF, 1);
     g.fillCircle(12 * faceDirection, -14 + bounce, 2);
     g.fillCircle(22 * faceDirection, -10 + bounce, 1.5);
-    
-    // Mouth
+
     g.fillStyle(0x2F0040, 1);
     g.fillEllipse(26 * faceDirection, 4 + bounce, 8, 6);
     g.fillStyle(0xFFFFFF, 1);
     g.fillRect(22 * faceDirection, 1 + bounce, 3, 4);
     g.fillRect(27 * faceDirection, 2 + bounce, 3, 3);
-    
-    // Arms
+
     g.fillStyle(0x4B0082, 1);
     g.fillEllipse(-25, 10 + bounce, 10, 8);
     g.fillEllipse(25, 10 + bounce, 10, 8);
-    
-    // Feet
+
     g.fillStyle(0x3A0066, 1);
     g.fillEllipse(-15, 28, 12, 8);
     g.fillEllipse(15, 28, 12, 8);
   }
 
-  /**
-   * Boss 1: "Giant Gecko" - Small agile lizard with fiery markings
-   */
   static drawBoss1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 5) * 2;
     const pulse = 1 + Math.sin(bounceTime * 8) * 0.04;
-    
-    // Fiery aura
+
     g.fillStyle(0xFF6600, 0.12);
     g.fillCircle(0, 0, 35 * pulse);
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.35);
     g.fillEllipse(0, 22, 32, 12);
-    
-    // Tail - long and curled
+
     g.fillStyle(0x55AA44, 1);
     g.beginPath();
     g.moveTo(-12 * faceDirection, 8 + bounce);
@@ -172,44 +144,36 @@ export class BossCreepGraphics {
     g.lineTo(-18 * faceDirection, 6 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Body - sleek gecko shape
+
     g.fillStyle(0x44CC33, 1);
     g.fillEllipse(0, 0 + bounce, 26, 20);
-    
-    // Scale pattern - orange spots
+
     g.fillStyle(0xFF8833, 0.7);
     g.fillCircle(-6, -4 + bounce, 4);
     g.fillCircle(4, 2 + bounce, 5);
     g.fillCircle(-2, 8 + bounce, 3);
-    
-    // Lighter underbelly
+
     g.fillStyle(0x88DD77, 1);
     g.fillEllipse(0, 6 + bounce, 16, 10);
-    
-    // Head - gecko-like with large eyes
+
     g.fillStyle(0x55BB44, 1);
     g.fillEllipse(14 * faceDirection, -6 + bounce, 14, 12);
-    
-    // Snout
+
     g.fillStyle(0x66CC55, 1);
     g.fillEllipse(22 * faceDirection, -4 + bounce, 8, 6);
-    
-    // Large gecko eyes
+
     g.fillStyle(0xFFDD00, 1);
     g.fillCircle(12 * faceDirection, -10 + bounce, 5);
     g.fillCircle(20 * faceDirection, -8 + bounce, 4);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(13 * faceDirection, -10 + bounce, 1.5, 4);
     g.fillEllipse(21 * faceDirection, -8 + bounce, 1, 3);
-    
-    // Forked tongue
+
     g.fillStyle(0xFF4444, 1);
     g.fillRect(26 * faceDirection, -3 + bounce, 6, 1);
     g.fillRect(30 * faceDirection, -4 + bounce, 3, 1);
     g.fillRect(30 * faceDirection, -2 + bounce, 3, 1);
-    
-    // Small spines starting to form
+
     g.fillStyle(0xFF6600, 1);
     for (let i = 0; i < 3; i++) {
       const spineX = -8 + i * 6;
@@ -220,8 +184,7 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    
-    // Sticky feet
+
     g.fillStyle(0x339922, 1);
     g.fillCircle(-12, 18, 5);
     g.fillCircle(12, 18, 5);
@@ -229,22 +192,16 @@ export class BossCreepGraphics {
     g.fillCircle(16, 8 + bounce, 4);
   }
 
-  /**
-   * Boss 2: "Komodo Warlord" - Armored komodo dragon with thick scales and claws
-   */
   static drawBoss2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.03;
-    
-    // Menacing aura
+
     g.fillStyle(0x668844, 0.15);
     g.fillCircle(0, 0, 45 * pulse);
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.4);
     g.fillEllipse(0, 28, 45, 14);
-    
-    // Tail - thick and powerful
+
     g.fillStyle(0x556644, 1);
     g.beginPath();
     g.moveTo(-14 * faceDirection, 6 + bounce);
@@ -255,7 +212,7 @@ export class BossCreepGraphics {
     g.lineTo(-16 * faceDirection, 0 + bounce);
     g.closePath();
     g.fillPath();
-    // Tail spikes
+
     g.fillStyle(0x445533, 1);
     g.beginPath();
     g.moveTo(-26 * faceDirection, 2 + bounce);
@@ -263,24 +220,20 @@ export class BossCreepGraphics {
     g.lineTo(-30 * faceDirection, 2 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Hind legs
+
     g.fillStyle(0x556644, 1);
     g.fillEllipse(-14, 14 + bounce, 10, 14);
     g.fillEllipse(10, 16 + bounce, 8, 12);
-    
-    // Body - massive armored komodo
+
     g.fillStyle(0x667755, 1);
     g.fillEllipse(0, 2 + bounce, 36, 26);
-    
-    // Armored scale plates
+
     g.fillStyle(0x778866, 1);
     g.fillEllipse(-8, -4 + bounce, 12, 10);
     g.fillEllipse(6, -2 + bounce, 14, 12);
     g.fillStyle(0x889977, 0.8);
     g.fillEllipse(-2, 8 + bounce, 18, 10);
-    
-    // Ridged back spines
+
     g.fillStyle(0x445533, 1);
     for (let i = 0; i < 5; i++) {
       const spineX = -12 + i * 6;
@@ -292,76 +245,62 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    
-    // Front legs with claws
+
     g.fillStyle(0x556644, 1);
     g.fillEllipse(-20, 6 + bounce, 10, 8);
     g.fillEllipse(22, 4 + bounce, 10, 8);
-    // Claws
+
     g.fillStyle(0x222211, 1);
     g.fillCircle(-24, 10 + bounce, 3);
     g.fillCircle(-28, 8 + bounce, 2);
     g.fillCircle(26, 8 + bounce, 3);
     g.fillCircle(30, 6 + bounce, 2);
-    
-    // Head - elongated komodo head
+
     g.fillStyle(0x778866, 1);
     g.fillEllipse(16 * faceDirection, -6 + bounce, 18, 14);
-    
-    // Snout - long and powerful
+
     g.fillStyle(0x889977, 1);
     g.fillEllipse(28 * faceDirection, -4 + bounce, 12, 8);
-    
-    // Nostrils
+
     g.fillStyle(0x333322, 1);
     g.fillCircle(34 * faceDirection, -6 + bounce, 2);
     g.fillCircle(32 * faceDirection, -2 + bounce, 2);
-    
-    // Eyes - cold reptilian
+
     g.fillStyle(0xDDAA00, 1);
     g.fillEllipse(14 * faceDirection, -10 + bounce, 4, 5);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(14 * faceDirection, -10 + bounce, 1.5, 4);
-    
-    // Forked tongue
+
     g.fillStyle(0xFF6688, 1);
     g.fillRect(36 * faceDirection, -3 + bounce, 8, 1);
     g.fillRect(42 * faceDirection, -4 + bounce, 4, 1);
     g.fillRect(42 * faceDirection, -2 + bounce, 4, 1);
-    
-    // Jaw with teeth visible
+
     g.fillStyle(0x556644, 1);
     g.fillEllipse(26 * faceDirection, 2 + bounce, 10, 6);
     g.fillStyle(0xFFFFEE, 1);
     g.fillRect(22 * faceDirection, 0 + bounce, 2, 3);
     g.fillRect(26 * faceDirection, 1 + bounce, 2, 2);
     g.fillRect(30 * faceDirection, 0 + bounce, 2, 3);
-    
-    // Feet
+
     g.fillStyle(0x445533, 1);
     g.fillEllipse(-14, 26, 10, 6);
     g.fillEllipse(10, 26, 8, 5);
   }
 
-  /**
-   * Boss 3: "Drake Champion" - Transitional form with wing stubs and prominent spines
-   */
   static drawBoss3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 3.5) * 3;
     const wingFlutter = Math.sin(bounceTime * 6) * 0.15;
     const pulse = 1 + Math.sin(bounceTime * 5) * 0.04;
-    
-    // Fire aura emerging
+
     g.fillStyle(0xFF6622, 0.12);
     g.fillCircle(0, -5 + bounce, 50 * pulse);
     g.fillStyle(0xFFAA44, 0.08);
     g.fillCircle(0, -5 + bounce, 42 * pulse);
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.4);
     g.fillEllipse(0, 30, 48, 16);
-    
-    // Tail - longer with barbed tip
+
     g.fillStyle(0x886644, 1);
     g.beginPath();
     g.moveTo(-16 * faceDirection, 8 + bounce);
@@ -372,7 +311,7 @@ export class BossCreepGraphics {
     g.lineTo(-18 * faceDirection, 2 + bounce);
     g.closePath();
     g.fillPath();
-    // Tail barb
+
     g.fillStyle(0x554433, 1);
     g.beginPath();
     g.moveTo(-46 * faceDirection, 9 + bounce);
@@ -380,10 +319,9 @@ export class BossCreepGraphics {
     g.lineTo(-50 * faceDirection, 12 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Wing stubs (not yet functional)
+
     g.fillStyle(0x775533, 0.85);
-    // Left wing stub
+
     g.beginPath();
     g.moveTo(-14, -8 + bounce);
     g.lineTo(-28, -18 + bounce + wingFlutter * 20);
@@ -392,7 +330,7 @@ export class BossCreepGraphics {
     g.lineTo(-16, 0 + bounce);
     g.closePath();
     g.fillPath();
-    // Right wing stub
+
     g.beginPath();
     g.moveTo(14, -8 + bounce);
     g.lineTo(28, -18 + bounce + wingFlutter * 20);
@@ -401,8 +339,7 @@ export class BossCreepGraphics {
     g.lineTo(16, 0 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Wing membrane hints
+
     g.lineStyle(1, 0x664422, 0.6);
     g.beginPath();
     g.moveTo(-16, -6 + bounce);
@@ -412,20 +349,17 @@ export class BossCreepGraphics {
     g.moveTo(16, -6 + bounce);
     g.lineTo(26, -12 + bounce + wingFlutter * 15);
     g.strokePath();
-    
-    // Body - muscular drake
+
     g.fillStyle(0x997755, 1);
     g.fillEllipse(0, 2 + bounce, 34, 28);
-    
-    // Armored belly plates
+
     g.fillStyle(0xBBAA88, 1);
     g.fillEllipse(0, 8 + bounce, 22, 14);
     g.fillStyle(0xCCBB99, 0.8);
     for (let i = 0; i < 4; i++) {
       g.fillRect(-10, 2 + i * 4 + bounce, 20, 2);
     }
-    
-    // Prominent back spines
+
     g.fillStyle(0x664422, 1);
     for (let i = 0; i < 6; i++) {
       const spineX = -14 + i * 5;
@@ -437,15 +371,13 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    
-    // Legs
+
     g.fillStyle(0x886655, 1);
     g.fillEllipse(-18, 16 + bounce, 10, 14);
     g.fillEllipse(18, 16 + bounce, 10, 14);
     g.fillEllipse(-22, 6 + bounce, 8, 10);
     g.fillEllipse(22, 6 + bounce, 8, 10);
-    
-    // Clawed feet
+
     g.fillStyle(0x443322, 1);
     g.fillEllipse(-18, 28, 10, 6);
     g.fillEllipse(18, 28, 10, 6);
@@ -453,20 +385,16 @@ export class BossCreepGraphics {
     g.fillCircle(-14, 30, 3);
     g.fillCircle(14, 30, 3);
     g.fillCircle(22, 29, 3);
-    
-    // Neck
+
     g.fillStyle(0x997755, 1);
     g.fillEllipse(14 * faceDirection, -10 + bounce, 12, 14);
-    
-    // Head - longer snout, more dragon-like
+
     g.fillStyle(0xAA8866, 1);
     g.fillEllipse(22 * faceDirection, -12 + bounce, 16, 14);
-    
-    // Snout
+
     g.fillStyle(0xBB9977, 1);
     g.fillEllipse(34 * faceDirection, -10 + bounce, 10, 8);
-    
-    // Head ridges
+
     g.fillStyle(0x775544, 1);
     g.beginPath();
     g.moveTo(16 * faceDirection, -22 + bounce);
@@ -480,20 +408,17 @@ export class BossCreepGraphics {
     g.lineTo(32 * faceDirection, -20 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Eyes - fiercer, starting to glow
+
     g.fillStyle(0xFF8800, 1);
     g.fillEllipse(24 * faceDirection, -16 + bounce, 4, 5);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(25 * faceDirection, -16 + bounce, 1.5, 4);
-    
-    // Nostrils with smoke hint
+
     g.fillStyle(0x333322, 1);
     g.fillCircle(40 * faceDirection, -12 + bounce, 2);
     g.fillStyle(0x888888, 0.4);
     g.fillCircle(44 * faceDirection, -14 + bounce, 3);
-    
-    // Open jaw with fire breath potential
+
     g.fillStyle(0x886655, 1);
     g.fillEllipse(34 * faceDirection, -4 + bounce, 10, 6);
     g.fillStyle(0xFF4400, 0.5);
@@ -504,25 +429,19 @@ export class BossCreepGraphics {
     g.fillRect(38 * faceDirection, -6 + bounce, 2, 4);
   }
 
-  /**
-   * Boss 4: "Young Dragon" - Functional wings, longer neck, fire-breathing capability
-   */
   static drawBoss4(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const hover = Math.sin(bounceTime * 3) * 3;
     const wingFlap = Math.sin(bounceTime * 4) * 0.25;
     const breathe = 1 + Math.sin(bounceTime * 4) * 0.04;
-    
-    // Fire aura
+
     g.fillStyle(0xFF4400, 0.12);
     g.fillCircle(0, -5 + hover, 60 * breathe);
     g.fillStyle(0xFFAA00, 0.08);
     g.fillCircle(0, -5 + hover, 50 * breathe);
-    
-    // Large shadow
+
     g.fillStyle(0x000000, 0.45);
     g.fillEllipse(0, 35, 55, 18);
-    
-    // Tail - long with barbed segments
+
     g.fillStyle(0xAA5533, 1);
     g.beginPath();
     g.moveTo(-18 * faceDirection, 10 + hover);
@@ -533,7 +452,7 @@ export class BossCreepGraphics {
     g.lineTo(-20 * faceDirection, 4 + hover);
     g.closePath();
     g.fillPath();
-    // Tail spikes
+
     g.fillStyle(0x663322, 1);
     for (let i = 0; i < 3; i++) {
       const tx = (-28 - i * 10) * faceDirection;
@@ -544,10 +463,9 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    
-    // Wings - functional, dragon-like
+
     g.fillStyle(0x883322, 1);
-    // Left wing
+
     g.beginPath();
     g.moveTo(-16, -6 + hover);
     g.lineTo(-40, -30 + hover + wingFlap * 35);
@@ -557,7 +475,7 @@ export class BossCreepGraphics {
     g.lineTo(-22, 6 + hover);
     g.closePath();
     g.fillPath();
-    // Right wing
+
     g.beginPath();
     g.moveTo(16, -6 + hover);
     g.lineTo(40, -30 + hover + wingFlap * 35);
@@ -567,8 +485,7 @@ export class BossCreepGraphics {
     g.lineTo(22, 6 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Wing membrane
+
     g.lineStyle(2, 0x662211, 0.9);
     g.beginPath();
     g.moveTo(-18, -4 + hover);
@@ -586,25 +503,21 @@ export class BossCreepGraphics {
     g.moveTo(20, 2 + hover);
     g.lineTo(46, -6 + hover + wingFlap * 22);
     g.strokePath();
-    
-    // Wing claws
+
     g.fillStyle(0x332211, 1);
     g.fillCircle(-40, -28 + hover + wingFlap * 32, 3);
     g.fillCircle(40, -28 + hover + wingFlap * 32, 3);
-    
-    // Body - powerful dragon body
+
     g.fillStyle(0xBB6644, 1);
     g.fillEllipse(0, 4 + hover, 40 * breathe, 32 * breathe);
-    
-    // Belly scales
+
     g.fillStyle(0xDDCC99, 1);
     g.fillEllipse(0, 10 + hover, 24, 18);
     g.fillStyle(0xEEDDAA, 0.8);
     for (let i = 0; i < 5; i++) {
       g.fillRect(-12, 2 + i * 4 + hover, 24, 2);
     }
-    
-    // Back spines (larger)
+
     g.fillStyle(0x774422, 1);
     for (let i = 0; i < 7; i++) {
       const spineX = -16 + i * 5;
@@ -616,17 +529,14 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    
-    // Hind legs
+
     g.fillStyle(0xAA5533, 1);
     g.fillEllipse(-16, 20 + hover, 12, 16);
     g.fillEllipse(16, 20 + hover, 12, 16);
-    
-    // Front legs
+
     g.fillEllipse(-24, 8 + hover, 10, 12);
     g.fillEllipse(24, 8 + hover, 10, 12);
-    
-    // Clawed feet
+
     g.fillStyle(0x553322, 1);
     g.fillEllipse(-16, 34, 12, 7);
     g.fillEllipse(16, 34, 12, 7);
@@ -634,20 +544,16 @@ export class BossCreepGraphics {
     g.fillCircle(-10, 36, 3);
     g.fillCircle(10, 36, 3);
     g.fillCircle(22, 35, 3);
-    
-    // Long neck
+
     g.fillStyle(0xBB6644, 1);
     g.fillEllipse(16 * faceDirection, -14 + hover, 14, 18);
-    
-    // Head - true dragon head
+
     g.fillStyle(0xCC7755, 1);
     g.fillEllipse(28 * faceDirection, -18 + hover, 18, 16);
-    
-    // Snout
+
     g.fillStyle(0xDD8866, 1);
     g.fillEllipse(42 * faceDirection, -16 + hover, 12, 10);
-    
-    // Horns (curved back)
+
     g.fillStyle(0x443322, 1);
     g.beginPath();
     g.moveTo(22 * faceDirection, -30 + hover);
@@ -663,8 +569,7 @@ export class BossCreepGraphics {
     g.lineTo(30 * faceDirection, -28 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Head ridges
+
     g.fillStyle(0x885544, 1);
     g.beginPath();
     g.moveTo(24 * faceDirection, -26 + hover);
@@ -672,32 +577,28 @@ export class BossCreepGraphics {
     g.lineTo(32 * faceDirection, -26 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Fierce eyes
+
     g.fillStyle(0xFF6600, 1);
     g.fillEllipse(32 * faceDirection, -22 + hover, 5, 6);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(33 * faceDirection, -22 + hover, 2, 5);
     g.fillStyle(0xFFFF00, 0.6);
     g.fillCircle(31 * faceDirection, -24 + hover, 1.5);
-    
-    // Nostrils with smoke
+
     g.fillStyle(0x332222, 1);
     g.fillCircle(50 * faceDirection, -18 + hover, 2);
     g.fillCircle(48 * faceDirection, -14 + hover, 2);
     g.fillStyle(0x666666, 0.4);
     g.fillCircle(54 * faceDirection, -20 + hover, 4);
     g.fillCircle(56 * faceDirection, -22 + hover, 3);
-    
-    // Open jaw with fire
+
     g.fillStyle(0xAA5533, 1);
     g.fillEllipse(42 * faceDirection, -8 + hover, 12, 8);
     g.fillStyle(0xFF4400, 0.6);
     g.fillEllipse(48 * faceDirection, -8 + hover, 8, 5);
     g.fillStyle(0xFFAA00, 0.4);
     g.fillCircle(54 * faceDirection, -8 + hover, 4);
-    
-    // Teeth
+
     g.fillStyle(0xFFFFEE, 1);
     g.fillRect(36 * faceDirection, -12 + hover, 2, 5);
     g.fillRect(40 * faceDirection, -13 + hover, 2, 6);
@@ -705,46 +606,38 @@ export class BossCreepGraphics {
     g.fillRect(48 * faceDirection, -11 + hover, 2, 4);
   }
 
-  /**
-   * Boss 5: "Elder Dragon Lord" - Massive ancient dragon with crown of horns and fire aura
-   */
   static drawBoss5(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, isPained: boolean = false): void {
-    // Elder Dragon Lord - A terrifying, dark and menacing dragon
+
     const hover = Math.sin(bounceTime * 2) * 3;
     const wingFlap = Math.sin(bounceTime * 3) * 0.4;
     const breathe = 1 + Math.sin(bounceTime * 2) * 0.03;
     const fireFlicker = Math.sin(bounceTime * 12) * 0.3 + 0.7;
     const painShake = isPained ? Math.sin(bounceTime * 25) * 3 : 0;
-    
-    // Colors - dark, menacing palette
-    const scalesDark = 0x1a0a0a;       // Near-black scales
-    const scalesMid = 0x2a1515;        // Dark crimson
-    const scalesLight = 0x3a2020;      // Dried blood
-    const underbelly = 0x4a3030;       // Charred flesh
-    const eyeGlow = 0xff2200;          // Hellfire eyes
-    const fireCore = 0xff6600;         // Molten fire
-    const boneColor = 0xccbbaa;        // Aged bone
-    const scarColor = 0x550000;        // Old wounds
-    
-    // Ominous dark aura - more subtle and menacing
+
+    const scalesDark = 0x1a0a0a;
+    const scalesMid = 0x2a1515;
+    const scalesLight = 0x3a2020;
+    const underbelly = 0x4a3030;
+    const eyeGlow = 0xff2200;
+    const fireCore = 0xff6600;
+    const boneColor = 0xccbbaa;
+    const scarColor = 0x550000;
+
     g.fillStyle(0x000000, 0.3);
     g.fillCircle(painShake, hover, 75 * breathe);
     g.fillStyle(scalesDark, 0.15);
     g.fillCircle(painShake, hover, 60 * breathe);
-    
-    // Heat distortion effect around dragon
+
     if (isPained) {
       g.fillStyle(0xff0000, 0.15 * fireFlicker);
       g.fillCircle(painShake, hover, 70);
     }
-    
-    // Ground shadow - large and imposing
+
     g.fillStyle(0x000000, 0.6);
     g.fillEllipse(0, 42, 70, 20);
-    
-    // === TAIL - Long, spiked, dangerous ===
+
     g.fillStyle(scalesDark, 1);
-    // Main tail segments
+
     g.beginPath();
     g.moveTo(-18 * faceDirection + painShake, 15 + hover);
     g.lineTo(-35 * faceDirection, 22 + hover);
@@ -756,8 +649,7 @@ export class BossCreepGraphics {
     g.lineTo(-16 * faceDirection + painShake, 8 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Tail spikes - jagged and dangerous
+
     g.fillStyle(boneColor, 1);
     for (let i = 0; i < 5; i++) {
       const tx = (-25 - i * 10) * faceDirection;
@@ -769,8 +661,7 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    
-    // Tail blade tip
+
     g.fillStyle(boneColor, 1);
     g.beginPath();
     g.moveTo(-68 * faceDirection, 8 + hover);
@@ -778,11 +669,9 @@ export class BossCreepGraphics {
     g.lineTo(-80 * faceDirection, 12 + hover);
     g.closePath();
     g.fillPath();
-    
-    // === MASSIVE WINGS - Tattered, battle-scarred ===
+
     const wingAngle = wingFlap * 45;
-    
-    // Left wing
+
     g.fillStyle(scalesDark, 1);
     g.beginPath();
     g.moveTo(-20 + painShake, -5 + hover);
@@ -793,8 +682,7 @@ export class BossCreepGraphics {
     g.lineTo(-35, 12 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Right wing
+
     g.beginPath();
     g.moveTo(20 + painShake, -5 + hover);
     g.lineTo(55, -45 + hover + wingAngle);
@@ -804,10 +692,9 @@ export class BossCreepGraphics {
     g.lineTo(35, 12 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Wing membrane - darker, more sinister
+
     g.fillStyle(0x0a0505, 0.9);
-    // Left membrane
+
     g.beginPath();
     g.moveTo(-22 + painShake, -3 + hover);
     g.lineTo(-50, -38 + hover + wingAngle);
@@ -817,7 +704,7 @@ export class BossCreepGraphics {
     g.lineTo(-30, 10 + hover);
     g.closePath();
     g.fillPath();
-    // Right membrane
+
     g.beginPath();
     g.moveTo(22 + painShake, -3 + hover);
     g.lineTo(50, -38 + hover + wingAngle);
@@ -827,10 +714,9 @@ export class BossCreepGraphics {
     g.lineTo(30, 10 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Wing bone structure - skeletal, visible
+
     g.lineStyle(3, scalesMid, 1);
-    // Left wing bones
+
     g.beginPath();
     g.moveTo(-22 + painShake, -3 + hover);
     g.lineTo(-55, -42 + hover + wingAngle);
@@ -843,7 +729,7 @@ export class BossCreepGraphics {
     g.moveTo(-28 + painShake, 5 + hover);
     g.lineTo(-58, 8 + hover + wingAngle * 0.3);
     g.strokePath();
-    // Right wing bones
+
     g.beginPath();
     g.moveTo(22 + painShake, -3 + hover);
     g.lineTo(55, -42 + hover + wingAngle);
@@ -856,12 +742,11 @@ export class BossCreepGraphics {
     g.moveTo(28 + painShake, 5 + hover);
     g.lineTo(58, 8 + hover + wingAngle * 0.3);
     g.strokePath();
-    
-    // Wing claws - sharp bone talons
+
     g.fillStyle(boneColor, 1);
     g.fillCircle(-55, -44 + hover + wingAngle, 4);
     g.fillCircle(55, -44 + hover + wingAngle, 4);
-    // Claw tips
+
     g.beginPath();
     g.moveTo(-55, -48 + hover + wingAngle);
     g.lineTo(-52, -55 + hover + wingAngle);
@@ -874,25 +759,21 @@ export class BossCreepGraphics {
     g.lineTo(50, -47 + hover + wingAngle);
     g.closePath();
     g.fillPath();
-    
-    // Tattered wing edges (battle damage)
+
     g.fillStyle(0x000000, 0.8);
     for (let i = 0; i < 3; i++) {
       const holeX = -45 + i * 8;
       const holeY = -15 + hover + wingAngle * 0.4 + i * 5;
       g.fillCircle(holeX, holeY, 3 + Math.random());
     }
-    
-    // === BODY - Massive, armored, scarred ===
+
     g.fillStyle(scalesMid, 1);
     g.fillEllipse(painShake, 5 + hover, 48 * breathe, 40 * breathe);
-    
-    // Armored scale plates on back
+
     g.fillStyle(scalesDark, 1);
     g.fillEllipse(painShake - 5, -8 + hover, 35, 25);
     g.fillEllipse(painShake + 5, 2 + hover, 38, 28);
-    
-    // Battle scars across body
+
     g.lineStyle(2, scarColor, 0.8);
     g.beginPath();
     g.moveTo(-15 + painShake, -5 + hover);
@@ -902,11 +783,10 @@ export class BossCreepGraphics {
     g.moveTo(8 + painShake, -10 + hover);
     g.lineTo(-5 + painShake, 8 + hover);
     g.strokePath();
-    
-    // Underbelly - charred and cracked
+
     g.fillStyle(underbelly, 1);
     g.fillEllipse(painShake, 18 + hover, 30, 20);
-    // Belly scale segments
+
     g.lineStyle(1, scalesDark, 0.6);
     for (let i = 0; i < 5; i++) {
       g.beginPath();
@@ -914,8 +794,7 @@ export class BossCreepGraphics {
       g.lineTo(15 + painShake, 10 + i * 4 + hover);
       g.strokePath();
     }
-    
-    // === MASSIVE DORSAL SPINES - Bone-like, terrifying ===
+
     g.fillStyle(boneColor, 1);
     for (let i = 0; i < 7; i++) {
       const spineX = -14 + i * 5 + painShake;
@@ -928,28 +807,23 @@ export class BossCreepGraphics {
       g.closePath();
       g.fillPath();
     }
-    // Spine ridges (darker base)
+
     g.fillStyle(scalesDark, 1);
     g.fillRect(-18 + painShake, -22 + hover, 36, 5);
-    
-    // === LEGS - Powerful, clawed ===
-    // Hind legs
+
     g.fillStyle(scalesMid, 1);
     g.fillEllipse(-20 + painShake, 28 + hover, 16, 20);
     g.fillEllipse(20 + painShake, 28 + hover, 16, 20);
-    
-    // Front legs
+
     g.fillEllipse(-30 + painShake, 12 + hover, 14, 16);
     g.fillEllipse(30 + painShake, 12 + hover, 14, 16);
-    
-    // Massive clawed feet
+
     g.fillStyle(scalesDark, 1);
     g.fillEllipse(-20, 42, 16, 8);
     g.fillEllipse(20, 42, 16, 8);
-    
-    // Claws - bone-white, sharp
+
     g.fillStyle(boneColor, 1);
-    // Left foot claws
+
     g.beginPath();
     g.moveTo(-28, 44);
     g.lineTo(-32, 48);
@@ -968,7 +842,7 @@ export class BossCreepGraphics {
     g.lineTo(-14, 46);
     g.closePath();
     g.fillPath();
-    // Right foot claws
+
     g.beginPath();
     g.moveTo(28, 44);
     g.lineTo(32, 48);
@@ -987,8 +861,7 @@ export class BossCreepGraphics {
     g.lineTo(14, 46);
     g.closePath();
     g.fillPath();
-    
-    // === NECK - Long, serpentine, armored ===
+
     g.fillStyle(scalesMid, 1);
     g.beginPath();
     g.moveTo(12 * faceDirection + painShake, -12 + hover);
@@ -999,20 +872,17 @@ export class BossCreepGraphics {
     g.lineTo(16 * faceDirection + painShake, -5 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Neck scales/ridges
+
     g.fillStyle(scalesDark, 1);
     for (let i = 0; i < 4; i++) {
       const nx = (15 + i * 6) * faceDirection;
       const ny = -14 - i * 4 + hover;
       g.fillCircle(nx, ny, 5 - i * 0.5);
     }
-    
-    // === HEAD - Terrifying dragon skull ===
+
     g.fillStyle(scalesMid, 1);
     g.fillEllipse(42 * faceDirection, -30 + hover, 24, 22);
-    
-    // Snout - elongated, predatory
+
     g.fillStyle(scalesLight, 1);
     g.beginPath();
     g.moveTo(48 * faceDirection, -38 + hover);
@@ -1022,8 +892,7 @@ export class BossCreepGraphics {
     g.lineTo(48 * faceDirection, -18 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Brow ridges - heavy, intimidating
+
     g.fillStyle(scalesDark, 1);
     g.beginPath();
     g.moveTo(30 * faceDirection, -42 + hover);
@@ -1033,10 +902,9 @@ export class BossCreepGraphics {
     g.lineTo(32 * faceDirection, -38 + hover);
     g.closePath();
     g.fillPath();
-    
-    // === HORNS - Massive, curved, ancient ===
+
     g.fillStyle(boneColor, 1);
-    // Main horns - curved back majestically
+
     g.beginPath();
     g.moveTo(28 * faceDirection, -42 + hover);
     g.lineTo(20 * faceDirection, -52 + hover);
@@ -1048,8 +916,7 @@ export class BossCreepGraphics {
     g.lineTo(32 * faceDirection, -40 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Secondary horns
+
     g.beginPath();
     g.moveTo(48 * faceDirection, -44 + hover);
     g.lineTo(55 * faceDirection, -58 + hover);
@@ -1057,47 +924,37 @@ export class BossCreepGraphics {
     g.lineTo(52 * faceDirection, -42 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Small horn tips (aged, worn)
+
     g.fillStyle(0x998877, 1);
     g.fillCircle(8 * faceDirection, -70 + hover, 3);
     g.fillCircle(55 * faceDirection, -60 + hover, 2);
-    
-    // === EYES - Hellfire, slitted, terrifying ===
-    // Eye socket - sunken, dark
+
     g.fillStyle(0x000000, 1);
     g.fillEllipse(44 * faceDirection, -34 + hover, 9, 10);
-    
-    // Eye - glowing with inner fire
+
     g.fillStyle(eyeGlow, 1);
     g.fillEllipse(44 * faceDirection, -34 + hover, 7, 8);
-    
-    // Slit pupil - pure malevolence
+
     g.fillStyle(0x000000, 1);
     g.fillEllipse(45 * faceDirection, -34 + hover, 2, 7);
-    
-    // Eye glow effect
+
     g.fillStyle(0xffaa00, 0.6);
     g.fillCircle(42 * faceDirection, -36 + hover, 2);
-    
-    // Second eye (slightly visible)
+
     g.fillStyle(eyeGlow, 0.5);
     g.fillEllipse(36 * faceDirection, -32 + hover, 4, 5);
     g.fillStyle(0x000000, 0.8);
     g.fillEllipse(36 * faceDirection, -32 + hover, 1, 4);
-    
-    // === NOSTRILS - Smoke and ember ===
+
     g.fillStyle(0x000000, 1);
     g.fillCircle(66 * faceDirection, -30 + hover, 4);
     g.fillCircle(64 * faceDirection, -24 + hover, 3);
-    
-    // Smoke wisps from nostrils
+
     g.fillStyle(0x333333, 0.4 * fireFlicker);
     g.fillCircle(70 * faceDirection, -34 + hover, 5);
     g.fillStyle(0x222222, 0.3 * fireFlicker);
     g.fillCircle(73 * faceDirection, -38 + hover, 4);
-    
-    // === JAW - Powerful, fanged ===
+
     g.fillStyle(scalesLight, 1);
     g.beginPath();
     g.moveTo(50 * faceDirection, -20 + hover);
@@ -1106,16 +963,14 @@ export class BossCreepGraphics {
     g.lineTo(48 * faceDirection, -12 + hover);
     g.closePath();
     g.fillPath();
-    
-    // Inside of mouth - hellish glow
+
     g.fillStyle(0x110000, 1);
     g.fillEllipse(58 * faceDirection, -14 + hover, 12, 6);
     g.fillStyle(fireCore, 0.5 * fireFlicker);
     g.fillEllipse(58 * faceDirection, -14 + hover, 8, 4);
-    
-    // === TEETH - Massive, irregular, predatory ===
+
     g.fillStyle(boneColor, 1);
-    // Upper fangs
+
     g.beginPath();
     g.moveTo(52 * faceDirection, -20 + hover);
     g.lineTo(54 * faceDirection, -8 + hover);
@@ -1128,21 +983,19 @@ export class BossCreepGraphics {
     g.lineTo(66 * faceDirection, -19 + hover);
     g.closePath();
     g.fillPath();
-    // Smaller teeth
+
     g.fillRect(68 * faceDirection, -18 + hover, 2, 5);
     g.fillRect(48 * faceDirection, -19 + hover, 2, 4);
-    
-    // Lower fangs
+
     g.beginPath();
     g.moveTo(55 * faceDirection, -10 + hover);
     g.lineTo(57 * faceDirection, -18 + hover);
     g.lineTo(59 * faceDirection, -10 + hover);
     g.closePath();
     g.fillPath();
-    
-    // === FIRE BREATH - If in combat ===
+
     if (isPained) {
-      // Enraged fire breath
+
       g.fillStyle(fireCore, 0.9 * fireFlicker);
       g.fillEllipse(75 * faceDirection, -14 + hover, 15, 10);
       g.fillStyle(0xffaa00, 0.7 * fireFlicker);
@@ -1150,8 +1003,7 @@ export class BossCreepGraphics {
       g.fillStyle(0xffff66, 0.5 * fireFlicker);
       g.fillCircle(98 * faceDirection, -14 + hover, 6);
     }
-    
-    // === AMBIENT EMBERS - Floating around ===
+
     for (let i = 0; i < 6; i++) {
       const angle = bounceTime * 1.2 + i * 1.1;
       const dist = 50 + Math.sin(bounceTime * 2 + i) * 15;
@@ -1165,23 +1017,17 @@ export class BossCreepGraphics {
     }
   }
 
-  /**
-   * Boss Guard 1: "Drake Knight" - Armored dragon knight with shield and sword
-   */
   static drawBossGuard1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.03;
     const swordSwing = Math.sin(bounceTime * 3) * 5;
-    
-    // Green aura
+
     g.fillStyle(0x447744, 0.2);
     g.fillCircle(0, 0, 36 * pulse);
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.35);
     g.fillEllipse(0, 26, 36, 12);
-    
-    // Cape flowing behind
+
     g.fillStyle(0x224422, 1);
     g.beginPath();
     g.moveTo(-8 * faceDirection, -8 + bounce);
@@ -1190,28 +1036,25 @@ export class BossCreepGraphics {
     g.lineTo(-6 * faceDirection, 5 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Legs with armored boots
+
     g.fillStyle(0x445544, 1);
     g.fillRect(-10, 10 + bounce, 6, 14);
     g.fillRect(4, 10 + bounce, 6, 14);
-    // Boots
+
     g.fillStyle(0x333333, 1);
     g.fillEllipse(-7, 24, 8, 5);
     g.fillEllipse(7, 24, 8, 5);
-    
-    // Body - heavy plate armor
+
     g.fillStyle(0x556655, 1);
     g.fillEllipse(0, 0 + bounce, 28, 22);
-    // Chest plate
+
     g.fillStyle(0x667766, 1);
     g.fillEllipse(4 * faceDirection, -2 + bounce, 18, 14);
-    // Armor segments
+
     g.fillStyle(0x778877, 0.9);
     g.fillRect(-8, -4 + bounce, 16, 4);
     g.fillRect(-6, 2 + bounce, 12, 3);
-    
-    // Shield (left side) - large kite shield with dragon emblem
+
     g.fillStyle(0x554433, 1);
     g.beginPath();
     g.moveTo(-20 * faceDirection, -14 + bounce);
@@ -1220,10 +1063,10 @@ export class BossCreepGraphics {
     g.lineTo(-14 * faceDirection, 0 + bounce);
     g.closePath();
     g.fillPath();
-    // Shield border
+
     g.lineStyle(2, 0x776655, 1);
     g.strokePath();
-    // Dragon emblem on shield
+
     g.fillStyle(0x44AA44, 1);
     g.fillCircle(-20 * faceDirection, 0 + bounce, 6);
     g.fillStyle(0x55CC55, 1);
@@ -1233,21 +1076,19 @@ export class BossCreepGraphics {
     g.lineTo(-23 * faceDirection, 2 + bounce);
     g.closePath();
     g.fillPath();
-    
-    // Sword arm
+
     g.fillStyle(0x556655, 1);
     g.fillEllipse(18 * faceDirection, 0 + bounce, 8, 6);
-    
-    // Sword
+
     g.fillStyle(0x888888, 1);
     g.save();
     g.translateCanvas(22 * faceDirection, -10 + bounce);
     g.rotateCanvas((swordSwing * 0.02) * faceDirection);
-    // Blade
+
     g.fillRect(-2, -24, 4, 28);
     g.fillStyle(0xAAAAAA, 1);
     g.fillRect(-1, -24, 2, 28);
-    // Tip
+
     g.fillStyle(0xBBBBBB, 1);
     g.beginPath();
     g.moveTo(-2, -24);
@@ -1255,27 +1096,26 @@ export class BossCreepGraphics {
     g.lineTo(2, -24);
     g.closePath();
     g.fillPath();
-    // Guard
+
     g.fillStyle(0x664422, 1);
     g.fillRect(-6, 2, 12, 3);
-    // Handle
+
     g.fillStyle(0x442211, 1);
     g.fillRect(-2, 5, 4, 8);
     g.restore();
-    
-    // Head with dragon helm
+
     g.fillStyle(0x556655, 1);
     g.fillEllipse(6 * faceDirection, -14 + bounce, 14, 12);
-    // Visor
+
     g.fillStyle(0x445544, 1);
     g.fillRect(8 * faceDirection, -16 + bounce, 8, 8);
-    // Eye slit
+
     g.fillStyle(0x000000, 1);
     g.fillRect(10 * faceDirection, -14 + bounce, 6, 2);
-    // Glowing eyes behind visor
+
     g.fillStyle(0x88FF88, 0.8);
     g.fillCircle(12 * faceDirection, -13 + bounce, 2);
-    // Helmet crest
+
     g.fillStyle(0x667766, 1);
     g.beginPath();
     g.moveTo(2 * faceDirection, -20 + bounce);
@@ -1285,25 +1125,19 @@ export class BossCreepGraphics {
     g.fillPath();
   }
 
-  /**
-   * Boss Guard 2: "Dragon Knight" - Elite warrior with ornate armor and heavy shield
-   */
   static drawBossGuard2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.04;
     const swordSwing = Math.sin(bounceTime * 3) * 6;
-    
-    // Golden-green aura
+
     g.fillStyle(0x88AA44, 0.25);
     g.fillCircle(0, 0, 42 * pulse);
     g.fillStyle(0xAAAA44, 0.15);
     g.fillCircle(0, 0, 48 * pulse);
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.4);
     g.fillEllipse(0, 28, 40, 14);
-    
-    // Cape - larger and more ornate
+
     g.fillStyle(0x883322, 1);
     g.beginPath();
     g.moveTo(-6 * faceDirection, -10 + bounce);
@@ -1312,38 +1146,35 @@ export class BossCreepGraphics {
     g.lineTo(-4 * faceDirection, 8 + bounce);
     g.closePath();
     g.fillPath();
-    // Cape gold trim
+
     g.lineStyle(2, 0xCCAA44, 1);
     g.strokePath();
-    
-    // Legs with ornate greaves
+
     g.fillStyle(0x556655, 1);
     g.fillRect(-12, 10 + bounce, 7, 16);
     g.fillRect(5, 10 + bounce, 7, 16);
-    // Knee guards
+
     g.fillStyle(0xBB9944, 1);
     g.fillCircle(-8, 12 + bounce, 4);
     g.fillCircle(8, 12 + bounce, 4);
-    // Boots
+
     g.fillStyle(0x444444, 1);
     g.fillEllipse(-8, 26, 10, 6);
     g.fillEllipse(8, 26, 10, 6);
-    
-    // Body - ornate dragon scale armor
+
     g.fillStyle(0x667766, 1);
     g.fillEllipse(0, 0 + bounce, 32, 24);
-    // Dragon scale pattern
+
     g.fillStyle(0x778877, 1);
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 4; col++) {
         g.fillEllipse(-9 + col * 6, -6 + row * 6 + bounce, 5, 4);
       }
     }
-    // Gold trim on chest
+
     g.lineStyle(2, 0xCCAA44, 1);
     g.strokeEllipse(0, -2 + bounce, 20, 12);
-    
-    // Large tower shield with dragon motif
+
     g.fillStyle(0x665544, 1);
     g.beginPath();
     g.moveTo(-22 * faceDirection, -18 + bounce);
@@ -1354,10 +1185,10 @@ export class BossCreepGraphics {
     g.lineTo(-14 * faceDirection, -8 + bounce);
     g.closePath();
     g.fillPath();
-    // Shield gold border
+
     g.lineStyle(3, 0xCCAA44, 1);
     g.strokePath();
-    // Dragon head emblem
+
     g.fillStyle(0xAA6622, 1);
     g.fillCircle(-23 * faceDirection, 0 + bounce, 8);
     g.fillStyle(0xCC8833, 1);
@@ -1367,29 +1198,27 @@ export class BossCreepGraphics {
     g.lineTo(-28 * faceDirection, 4 + bounce);
     g.closePath();
     g.fillPath();
-    // Dragon eye on emblem
+
     g.fillStyle(0xFF4400, 1);
     g.fillCircle(-23 * faceDirection, 0 + bounce, 3);
-    
-    // Armored sword arm with pauldron
+
     g.fillStyle(0x667766, 1);
     g.fillEllipse(20 * faceDirection, -2 + bounce, 10, 8);
     g.fillStyle(0xBB9944, 1);
     g.fillCircle(18 * faceDirection, -6 + bounce, 5);
-    
-    // Larger ornate sword
+
     g.save();
     g.translateCanvas(24 * faceDirection, -12 + bounce);
     g.rotateCanvas((swordSwing * 0.02) * faceDirection);
-    // Blade
+
     g.fillStyle(0x999999, 1);
     g.fillRect(-3, -28, 6, 32);
     g.fillStyle(0xBBBBBB, 1);
     g.fillRect(-1, -28, 2, 32);
-    // Blade edge highlight
+
     g.fillStyle(0xDDDDDD, 1);
     g.fillRect(2, -26, 1, 28);
-    // Tip
+
     g.fillStyle(0xCCCCCC, 1);
     g.beginPath();
     g.moveTo(-3, -28);
@@ -1397,7 +1226,7 @@ export class BossCreepGraphics {
     g.lineTo(3, -28);
     g.closePath();
     g.fillPath();
-    // Ornate guard with dragon wings
+
     g.fillStyle(0xCCAA44, 1);
     g.fillRect(-10, 2, 20, 4);
     g.beginPath();
@@ -1412,31 +1241,30 @@ export class BossCreepGraphics {
     g.lineTo(10, 2);
     g.closePath();
     g.fillPath();
-    // Handle with gold wire wrap
+
     g.fillStyle(0x553322, 1);
     g.fillRect(-2, 6, 4, 10);
     g.fillStyle(0xCCAA44, 0.8);
     for (let i = 0; i < 4; i++) {
       g.fillRect(-2, 7 + i * 2, 4, 1);
     }
-    // Pommel
+
     g.fillStyle(0xCCAA44, 1);
     g.fillCircle(0, 18, 3);
     g.restore();
-    
-    // Head with dragon-crested helm
+
     g.fillStyle(0x667766, 1);
     g.fillEllipse(8 * faceDirection, -16 + bounce, 16, 14);
-    // Face guard
+
     g.fillStyle(0x556655, 1);
     g.fillRect(10 * faceDirection, -20 + bounce, 10, 12);
-    // Eye slits with inner glow
+
     g.fillStyle(0x000000, 1);
     g.fillRect(12 * faceDirection, -16 + bounce, 8, 3);
     g.fillStyle(0xFFDD44, 0.9);
     g.fillCircle(14 * faceDirection, -15 + bounce, 2);
     g.fillCircle(18 * faceDirection, -15 + bounce, 2);
-    // Dragon crest on helm
+
     g.fillStyle(0xCCAA44, 1);
     g.beginPath();
     g.moveTo(4 * faceDirection, -22 + bounce);
@@ -1444,7 +1272,7 @@ export class BossCreepGraphics {
     g.lineTo(12 * faceDirection, -22 + bounce);
     g.closePath();
     g.fillPath();
-    // Side horns
+
     g.fillStyle(0x888866, 1);
     g.beginPath();
     g.moveTo(-2 * faceDirection, -18 + bounce);
@@ -1454,25 +1282,20 @@ export class BossCreepGraphics {
     g.fillPath();
   }
 
-  /**
-   * Boss Guard 3: "Flame Knight" - Master warrior with flaming swords
-   */
   static drawBossGuard3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
     const swordSwing = Math.sin(bounceTime * 3) * 8;
     const flameFlicker = Math.sin(bounceTime * 12) * 0.3 + 0.7;
     const flameWave = Math.sin(bounceTime * 8);
-    
-    // Fiery aura
+
     g.fillStyle(0xFF4400, 0.2 * flameFlicker);
     g.fillCircle(0, 0, 50 * pulse);
     g.fillStyle(0xFF6600, 0.15 * flameFlicker);
     g.fillCircle(0, 0, 56 * pulse);
     g.fillStyle(0xFFAA00, 0.1 * flameFlicker);
     g.fillCircle(0, 0, 62 * pulse);
-    
-    // Ember particles around
+
     for (let i = 0; i < 6; i++) {
       const angle = bounceTime * 2 + i * (Math.PI / 3);
       const dist = 35 + Math.sin(bounceTime * 4 + i) * 8;
@@ -1481,12 +1304,10 @@ export class BossCreepGraphics {
       g.fillStyle(0xFF6600, 0.6 + Math.sin(bounceTime * 8 + i) * 0.3);
       g.fillCircle(ex, ey, 2 + Math.sin(bounceTime * 6 + i) * 1);
     }
-    
-    // Shadow
+
     g.fillStyle(0x000000, 0.45);
     g.fillEllipse(0, 30, 44, 16);
-    
-    // Burning cape
+
     g.fillStyle(0x441111, 1);
     g.beginPath();
     g.moveTo(-8 * faceDirection, -12 + bounce);
@@ -1495,7 +1316,7 @@ export class BossCreepGraphics {
     g.lineTo(-4 * faceDirection, 10 + bounce);
     g.closePath();
     g.fillPath();
-    // Flame edges on cape
+
     for (let i = 0; i < 5; i++) {
       const fx = -32 * faceDirection + i * 2 * faceDirection;
       const fy = 28 + bounce + Math.sin(bounceTime * 10 + i) * 3;
@@ -1504,55 +1325,52 @@ export class BossCreepGraphics {
       g.fillStyle(0xFFAA00, 0.5);
       g.fillCircle(fx, fy - 4, 2);
     }
-    
-    // Legs with flame-etched greaves
+
     g.fillStyle(0x333333, 1);
     g.fillRect(-14, 10 + bounce, 8, 18);
     g.fillRect(6, 10 + bounce, 8, 18);
-    // Flame etchings
+
     g.fillStyle(0xFF4400, 0.6);
     g.fillRect(-12, 14 + bounce, 4, 2);
     g.fillRect(-12, 20 + bounce, 4, 2);
     g.fillRect(8, 14 + bounce, 4, 2);
     g.fillRect(8, 20 + bounce, 4, 2);
-    // Boots with flame tips
+
     g.fillStyle(0x222222, 1);
     g.fillEllipse(-10, 28, 12, 7);
     g.fillEllipse(10, 28, 12, 7);
     g.fillStyle(0xFF6600, 0.7 * flameFlicker);
     g.fillCircle(-14, 26, 3);
     g.fillCircle(14, 26, 3);
-    
-    // Body - black dragon scale armor with flame accents
+
     g.fillStyle(0x222222, 1);
     g.fillEllipse(0, 0 + bounce, 36, 28);
-    // Dragon scale pattern
+
     g.fillStyle(0x333333, 1);
     for (let row = 0; row < 4; row++) {
       for (let col = 0; col < 5; col++) {
         g.fillEllipse(-12 + col * 6, -8 + row * 6 + bounce, 5, 4);
       }
     }
-    // Flame veins in armor
+
     g.fillStyle(0xFF4400, 0.6 * flameFlicker);
     g.fillRect(-10, -2 + bounce, 20, 2);
     g.fillRect(-8, 4 + bounce, 16, 2);
-    // Glowing chest core
+
     g.fillStyle(0xFF6600, 0.8 * flameFlicker);
     g.fillCircle(0, 0 + bounce, 6);
     g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
     g.fillCircle(0, 0 + bounce, 4);
-    
-    // Left flaming sword
+
     g.save();
     g.translateCanvas(-20 * faceDirection, -8 + bounce);
     g.rotateCanvas((-swordSwing * 0.03 - 0.3) * faceDirection);
-    // Blade
+
     g.fillStyle(0x444444, 1);
     g.fillRect(-2, -32, 4, 36);
     g.fillStyle(0x666666, 1);
     g.fillRect(-1, -32, 2, 36);
-    // Flame on blade
+
     for (let i = 0; i < 8; i++) {
       const flameY = -30 + i * 4;
       const flameSize = 4 + Math.sin(bounceTime * 12 + i) * 2;
@@ -1564,7 +1382,7 @@ export class BossCreepGraphics {
       g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
       g.fillCircle(flameOffset, flameY - 3, flameSize * 0.3);
     }
-    // Tip with flame burst
+
     g.fillStyle(0xFF6600, 0.9);
     g.beginPath();
     g.moveTo(-2, -32);
@@ -1572,24 +1390,23 @@ export class BossCreepGraphics {
     g.lineTo(2, -32);
     g.closePath();
     g.fillPath();
-    // Guard
+
     g.fillStyle(0x222222, 1);
     g.fillRect(-6, 2, 12, 4);
-    // Handle
+
     g.fillStyle(0x111111, 1);
     g.fillRect(-2, 6, 4, 10);
     g.restore();
-    
-    // Right flaming sword
+
     g.save();
     g.translateCanvas(26 * faceDirection, -10 + bounce);
     g.rotateCanvas((swordSwing * 0.03 + 0.3) * faceDirection);
-    // Blade
+
     g.fillStyle(0x444444, 1);
     g.fillRect(-2, -34, 4, 38);
     g.fillStyle(0x666666, 1);
     g.fillRect(-1, -34, 2, 38);
-    // Flame on blade
+
     for (let i = 0; i < 9; i++) {
       const flameY = -32 + i * 4;
       const flameSize = 5 + Math.sin(bounceTime * 11 + i * 1.1) * 2;
@@ -1601,7 +1418,7 @@ export class BossCreepGraphics {
       g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
       g.fillCircle(flameOffset, flameY - 3, flameSize * 0.3);
     }
-    // Tip with flame burst
+
     g.fillStyle(0xFF6600, 0.9);
     g.beginPath();
     g.moveTo(-2, -34);
@@ -1609,30 +1426,28 @@ export class BossCreepGraphics {
     g.lineTo(2, -34);
     g.closePath();
     g.fillPath();
-    // Guard
+
     g.fillStyle(0x222222, 1);
     g.fillRect(-6, 2, 12, 4);
-    // Handle
+
     g.fillStyle(0x111111, 1);
     g.fillRect(-2, 6, 4, 10);
     g.restore();
-    
-    // Armored shoulders with flame pauldrons
+
     g.fillStyle(0x333333, 1);
     g.fillEllipse(-16 * faceDirection, -6 + bounce, 10, 8);
     g.fillEllipse(20 * faceDirection, -6 + bounce, 10, 8);
-    // Flame on pauldrons
+
     g.fillStyle(0xFF4400, 0.7 * flameFlicker);
     g.fillCircle(-16 * faceDirection, -10 + bounce, 5);
     g.fillCircle(20 * faceDirection, -10 + bounce, 5);
     g.fillStyle(0xFFAA00, 0.5 * flameFlicker);
     g.fillCircle(-16 * faceDirection, -13 + bounce, 3);
     g.fillCircle(20 * faceDirection, -13 + bounce, 3);
-    
-    // Head with dragon flame helm
+
     g.fillStyle(0x222222, 1);
     g.fillEllipse(8 * faceDirection, -18 + bounce, 18, 16);
-    // Face plate with dragon visage
+
     g.fillStyle(0x333333, 1);
     g.beginPath();
     g.moveTo(12 * faceDirection, -26 + bounce);
@@ -1642,7 +1457,7 @@ export class BossCreepGraphics {
     g.lineTo(4 * faceDirection, -18 + bounce);
     g.closePath();
     g.fillPath();
-    // Eye slits with fire glow
+
     g.fillStyle(0x000000, 1);
     g.fillRect(10 * faceDirection, -20 + bounce, 10, 4);
     g.fillStyle(0xFF4400, 0.9 * flameFlicker);
@@ -1651,7 +1466,7 @@ export class BossCreepGraphics {
     g.fillStyle(0xFFFF00, 0.7 * flameFlicker);
     g.fillCircle(13 * faceDirection, -18 + bounce, 1.5);
     g.fillCircle(18 * faceDirection, -18 + bounce, 1.5);
-    // Dragon horns with flames
+
     g.fillStyle(0x222222, 1);
     g.beginPath();
     g.moveTo(2 * faceDirection, -24 + bounce);
@@ -1665,7 +1480,7 @@ export class BossCreepGraphics {
     g.lineTo(18 * faceDirection, -26 + bounce);
     g.closePath();
     g.fillPath();
-    // Flames on horn tips
+
     g.fillStyle(0xFF4400, 0.8 * flameFlicker);
     g.fillCircle(-4 * faceDirection, -40 + bounce + flameWave * 2, 4);
     g.fillCircle(18 * faceDirection, -42 + bounce + flameWave * 2, 4);

@@ -1,17 +1,17 @@
 export interface TowerStats {
   range: number;
-  fireRate: number;      // ms between shots (0 = non-attacking, e.g., aura tower)
+  fireRate: number;
   damage: number;
-  splashRadius?: number; // for Rock Cannon
-  slowPercent?: number;  // for Ice Tower
-  slowDuration?: number; // for Ice Tower
-  maxSlowTargets?: number; // for Ice Tower - max creeps this tower can have slowed at once
-  dotDamage?: number;    // for Poison Tower
-  dotDuration?: number;  // for Poison Tower
-  critChance?: number;   // for Sniper
+  splashRadius?: number;
+  slowPercent?: number;
+  slowDuration?: number;
+  maxSlowTargets?: number;
+  dotDamage?: number;
+  dotDuration?: number;
+  critChance?: number;
   critMultiplier?: number;
-  auraDamageMultiplier?: number; // for Aura Tower - damage buff for nearby towers
-  airDamageBonus?: number; // Bonus damage multiplier vs flying units (e.g., 2.0 = +200% = 3x total)
+  auraDamageMultiplier?: number;
+  airDamageBonus?: number;
 }
 
 export type TowerBranch = 'archer' | 'rapidfire' | 'sniper' | 'rockcannon' | 'icetower' | 'poison' | 'aura';
@@ -22,18 +22,16 @@ export interface TowerConfig {
   type: 'physical' | 'magic' | 'support';
   branch: TowerBranch;
   level: 1 | 2 | 3 | 4;
-  buildCost?: number;        // Only for archer (the only buildable tower)
-  upgradeCost: number;       // Cost to upgrade TO this config
+  buildCost?: number;
+  upgradeCost: number;
   description: string;
   stats: TowerStats;
 }
 
-// Branch upgrade options from Archer (includes archer as upgrade path)
 export const BRANCH_OPTIONS: TowerBranch[] = ['archer', 'rapidfire', 'sniper', 'rockcannon', 'icetower', 'poison', 'aura'];
 
-// All tower configurations keyed by "branch_level" (e.g., "archer_1", "sniper_2")
 export const TOWER_CONFIGS: Record<string, TowerConfig> = {
-  // === ARCHER (Standard - the only buildable tower) ===
+
   archer_1: {
     key: 'archer_1',
     name: 'Archer Tower',
@@ -76,7 +74,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 250,
       fireRate: 700,
-      damage: 19,  // Reduced from 22 for aura balance
+      damage: 19,
       airDamageBonus: 2.0
     }
   },
@@ -96,7 +94,6 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     }
   },
 
-  // === RAPID FIRE ===
   rapidfire_1: {
     key: 'rapidfire_1',
     name: 'Rapid Fire',
@@ -122,7 +119,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 190,
       fireRate: 260,
-      damage: 11  // Reduced from 13 for aura balance
+      damage: 11
     }
   },
   rapidfire_3: {
@@ -136,11 +133,10 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 200,
       fireRate: 220,
-      damage: 15  // Reduced from 18 for aura balance
+      damage: 15
     }
   },
 
-  // === SNIPER ===
   sniper_1: {
     key: 'sniper_1',
     name: 'Sniper Tower',
@@ -166,7 +162,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 330,
       fireRate: 2000,
-      damage: 77  // Reduced from 90 for aura balance
+      damage: 77
     }
   },
   sniper_3: {
@@ -180,11 +176,10 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 360,
       fireRate: 1800,
-      damage: 110  // Reduced from 130 for aura balance
+      damage: 110
     }
   },
 
-  // === ROCK CANNON ===
   rockcannon_1: {
     key: 'rockcannon_1',
     name: 'Rock Cannon',
@@ -211,7 +206,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 240,
       fireRate: 1700,
-      damage: 32,  // Reduced from 38 for aura balance
+      damage: 32,
       splashRadius: 85
     }
   },
@@ -226,12 +221,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 260,
       fireRate: 1500,
-      damage: 47,  // Reduced from 55 for aura balance
+      damage: 47,
       splashRadius: 100
     }
   },
 
-  // === ICE TOWER ===
   icetower_1: {
     key: 'icetower_1',
     name: 'Ice Tower',
@@ -284,7 +278,6 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     }
   },
 
-  // === POISON ===
   poison_1: {
     key: 'poison_1',
     name: 'Poison Tower',
@@ -334,7 +327,6 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     }
   },
 
-  // === AURA TOWER (Support - buffs nearby towers) ===
   aura_1: {
     key: 'aura_1',
     name: 'Aura Tower',
@@ -344,8 +336,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 100,
     description: 'Buffs nearby towers +20% damage. Does not attack.',
     stats: {
-      range: 90,       // Aura radius - affects ~2-3 adjacent towers
-      fireRate: 0,     // 0 = non-attacking tower
+      range: 90,
+      fireRate: 0,
       damage: 0,
       auraDamageMultiplier: 0.20
     }
@@ -359,7 +351,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 200,
     description: 'Buffs nearby towers +30% damage. Wider aura.',
     stats: {
-      range: 105,      // Larger aura radius
+      range: 105,
       fireRate: 0,
       damage: 0,
       auraDamageMultiplier: 0.30
@@ -374,7 +366,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 400,
     description: 'Buffs nearby towers +40% damage. Maximum power.',
     stats: {
-      range: 120,      // Maximum aura radius
+      range: 120,
       fireRate: 0,
       damage: 0,
       auraDamageMultiplier: 0.40
@@ -396,8 +388,6 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     }
   },
 
-  // === LEVEL 4 UPGRADES WITH SPECIAL ABILITIES ===
-  
   rapidfire_4: {
     key: 'rapidfire_4',
     name: 'Rapid Fire IV',
@@ -412,7 +402,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 18
     }
   },
-  
+
   sniper_4: {
     key: 'sniper_4',
     name: 'Sniper Tower IV',
@@ -427,7 +417,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 140
     }
   },
-  
+
   rockcannon_4: {
     key: 'rockcannon_4',
     name: 'Rock Cannon IV',
@@ -443,7 +433,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       splashRadius: 110
     }
   },
-  
+
   icetower_4: {
     key: 'icetower_4',
     name: 'Ice Tower IV',
@@ -461,7 +451,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       maxSlowTargets: 5
     }
   },
-  
+
   poison_4: {
     key: 'poison_4',
     name: 'Poison Tower IV',

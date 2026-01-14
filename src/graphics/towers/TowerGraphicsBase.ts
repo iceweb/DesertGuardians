@@ -1,12 +1,5 @@
 import Phaser from 'phaser';
 
-/**
- * Shared utilities for tower graphics rendering.
- */
-
-/**
- * Draw range indicator circle
- */
 export function drawRangeCircle(
   g: Phaser.GameObjects.Graphics,
   range: number
@@ -18,9 +11,6 @@ export function drawRangeCircle(
   g.fillCircle(0, 0, range);
 }
 
-/**
- * Draw a star shape
- */
 export function drawStar(
   g: Phaser.GameObjects.Graphics,
   x: number,
@@ -37,20 +27,17 @@ export function drawStar(
   g.fillPoints(points, true);
 }
 
-/**
- * Draw level indicator (stars based on level)
- */
 export function drawLevelIndicator(
   g: Phaser.GameObjects.Graphics,
   level: number
 ): void {
   if (level === 2) {
-    // Two silver stars
+
     g.fillStyle(0xc0c0c0, 1);
     drawStar(g, -8, -98, 5);
     drawStar(g, 8, -98, 5);
   } else if (level === 3) {
-    // Three gold stars with glow
+
     g.fillStyle(0xffd700, 0.3);
     g.fillCircle(0, -100, 15);
     g.fillStyle(0xffd700, 1);
@@ -58,7 +45,7 @@ export function drawLevelIndicator(
     drawStar(g, 0, -102, 6);
     drawStar(g, 12, -98, 5);
   } else if (level === 4) {
-    // Four diamond stars with intense glow (legendary)
+
     g.fillStyle(0xffd700, 0.5);
     g.fillCircle(0, -102, 22);
     g.fillStyle(0xffffff, 0.3);
@@ -68,7 +55,7 @@ export function drawLevelIndicator(
     drawStar(g, -5, -104, 6);
     drawStar(g, 5, -104, 6);
     drawStar(g, 15, -96, 5);
-    // Center diamond
+
     g.fillStyle(0xff4444, 1);
     g.beginPath();
     g.moveTo(0, -114);

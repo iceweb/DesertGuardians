@@ -6,8 +6,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // Load any initial configuration or minimal assets needed for the preloader
-    // This is typically where you'd load your loading bar assets
+
     console.log('BootScene: Loading initial config...');
   }
 

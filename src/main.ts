@@ -9,13 +9,12 @@ import {
 } from './scenes';
 import './style.css';
 
-// Game configuration - 1920x1080 for crisp visuals on modern displays
 const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.WEBGL, // Force WebGL for best quality
+  type: Phaser.WEBGL,
   width: 1920,
   height: 1080,
   parent: 'game-container',
-  backgroundColor: '#1a0a00', // Dark desert color
+  backgroundColor: '#1a0a00',
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -23,7 +22,7 @@ const config: Phaser.Types.Core.GameConfig = {
   physics: {
     default: 'arcade',
     arcade: {
-      // Debug mode - disable in production
+
       debug: false,
       gravity: { x: 0, y: 0 }
     }
@@ -39,17 +38,15 @@ const config: Phaser.Types.Core.GameConfig = {
   render: {
     pixelArt: false,
     antialias: true,
-    roundPixels: true,       // Prevent sub-pixel rendering blur
+    roundPixels: true,
     transparent: false,
   },
-  // Ensure high DPI/Retina support
+
   autoFocus: true,
 };
 
-// Create the game instance
 const game = new Phaser.Game(config);
 
-// Export for potential access from other modules
 export default game;
 
 console.log('Desert Guardians - Tower Defense Game initialized');

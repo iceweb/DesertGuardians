@@ -1,37 +1,30 @@
-/**
- * Game Data - Combined configuration for Creeps, Waves, and Mines
- * Extracted from separate files for better organization (~500 LOC)
- */
 
-// ============================================================================
-// CREEP DATA
-// ============================================================================
 
 export interface CreepConfig {
   type: string;
   maxHealth: number;
-  speed: number;        // pixels per second
+  speed: number;
   armor: number;
   goldReward: number;
-  description?: string;    // Tooltip description for UI
-  // Special abilities
-  hasShield?: boolean;     // Blocks first 3 hits completely
-  canJump?: boolean;       // Leaps forward 150px every 4 seconds
-  isFlying?: boolean;      // Immune to ground-only towers (Rock Cannon, Poison)
-  canDig?: boolean;        // Burrows underground for 2s every 5s (invulnerable)
-  hasGhostPhase?: boolean; // Becomes invulnerable for 3s when dropping below 15% HP
-  canDispel?: boolean;     // Bosses periodically dispel slow/poison effects
-  dispelImmunity?: number; // Duration in ms of immunity after dispel (default from GAME_CONFIG)
-  spawnOnDeath?: {         // Spawns creeps when killed
+  description?: string;
+
+  hasShield?: boolean;
+  canJump?: boolean;
+  isFlying?: boolean;
+  canDig?: boolean;
+  hasGhostPhase?: boolean;
+  canDispel?: boolean;
+  dispelImmunity?: number;
+  spawnOnDeath?: {
     type: string;
     count: number;
   };
-  sizeScale?: number;      // Visual size multiplier (default 1.0)
-  onlyDamagedBy?: 'ice' | 'poison';  // Can only be damaged by this tower type
+  sizeScale?: number;
+  onlyDamagedBy?: 'ice' | 'poison';
 }
 
 export const CREEP_TYPES: Record<string, CreepConfig> = {
-  // === STANDARD CREEPS ===
+
   furball: {
     type: 'furball',
     maxHealth: 55,
@@ -75,7 +68,6 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     description: 'Energy shield blocks the first 3 hits completely.'
   },
 
-  // === SPECIAL ABILITY CREEPS ===
   flying: {
     type: 'flying',
     maxHealth: 95,
@@ -126,7 +118,6 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     description: 'Tiny offspring of Broodmother. Fast but weak.'
   },
 
-  // === ELEMENTAL CREEPS (require specific towers) ===
   flame: {
     type: 'flame',
     maxHealth: 16,
@@ -146,26 +137,18 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     description: '☠️ Only damaged by Poison Towers! Immune to other damage.'
   },
 
-  // === SCALED BOSSES ===
-  // dispelImmunity: duration in ms after dispel where boss is immune to slow/poison (early bosses nerfed)
   boss_1: { type: 'boss_1', maxHealth: 1200, speed: 50, armor: 3, goldReward: 60, sizeScale: 1.0, canDispel: true, dispelImmunity: 800, description: '🦎 Giant Gecko. Periodically dispels slow and poison effects.' },
   boss_2: { type: 'boss_2', maxHealth: 1870, speed: 48, armor: 4, goldReward: 100, sizeScale: 1.15, canDispel: true, dispelImmunity: 1200, description: '🦎 Komodo Warlord. Dispels debuffs. High HP and armor.' },
   boss_3: { type: 'boss_3', maxHealth: 3600, speed: 40, armor: 5, goldReward: 160, sizeScale: 1.3, canDispel: true, dispelImmunity: 1500, description: '🐉 Drake Champion. Massive HP. Dispels all negative effects.' },
   boss_4: { type: 'boss_4', maxHealth: 5500, speed: 35, armor: 6, goldReward: 240, sizeScale: 1.5, canDispel: true, dispelImmunity: 2000, description: '🐉 Young Dragon. Extremely tanky. Focus fire required.' },
   boss_5: { type: 'boss_5', maxHealth: 9000, speed: 30, armor: 7, goldReward: 400, sizeScale: 1.7, canDispel: true, dispelImmunity: 2000, description: '🐉 Elder Dragon Lord. The final challenge!' },
 
-  // === BOSS GUARDS ===
   boss_guard_1: { type: 'boss_guard_1', maxHealth: 800, speed: 38, armor: 5, goldReward: 40, sizeScale: 1.2, hasShield: true, description: 'Drake Knight. Armored guard with shield escorting Drake Champion.' },
   boss_guard_2: { type: 'boss_guard_2', maxHealth: 1200, speed: 36, armor: 6, goldReward: 60, sizeScale: 1.3, hasShield: true, description: 'Dragon Knight. Elite armored warrior with heavy shield.' },
   boss_guard_3: { type: 'boss_guard_3', maxHealth: 1800, speed: 34, armor: 7, goldReward: 80, sizeScale: 1.4, hasShield: true, description: 'Flame Knight. Master warrior with flaming swords.' },
 
-  // === GENERIC BOSS (legacy) ===
   boss: { type: 'boss', maxHealth: 1500, speed: 45, armor: 4, goldReward: 60, sizeScale: 1.1, canDispel: true, dispelImmunity: 1500, description: 'Legacy Boss. High HP with dispel ability.' }
 };
-
-// ============================================================================
-// WAVE DATA
-// ============================================================================
 
 export interface WaveCreepGroup {
   type: string;
@@ -184,11 +167,8 @@ export interface WaveDef {
   parallelSpawn?: boolean;
 }
 
-/**
- * All 35 wave configurations
- */
 export const WAVE_CONFIGS: WaveDef[] = [
-  // === EARLY GAME: Waves 1-5 ===
+
   { waveNumber: 1, creeps: [{ type: 'furball', count: 8, intervalMs: 1400 }] },
   { waveNumber: 2, creeps: [{ type: 'furball', count: 12, intervalMs: 1100 }] },
   { waveNumber: 3, creeps: [
@@ -200,8 +180,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'furball', count: 12, intervalMs: 900 },
     { type: 'runner', count: 12, intervalMs: 500, delayStart: 10500 }
   ]},
-  
-  // === EARLY-MID GAME: Waves 6-10 ===
+
   { waveNumber: 6, creeps: [
     { type: 'furball', count: 14, intervalMs: 800 },
     { type: 'tank', count: 3, intervalMs: 2500, delayStart: 11000 }
@@ -223,8 +202,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'tank', count: 6, intervalMs: 1600 },
     { type: 'runner', count: 12, intervalMs: 400, delayStart: 8500 }
   ]},
-  
-  // === MID GAME: Waves 11-17 ===
+
   { waveNumber: 11, waveType: 'ghost', announcement: '👻 GHOST WAVE!\nThey phase when low HP!', creeps: [
     { type: 'ghost', count: 10, intervalMs: 1200 },
     { type: 'furball', count: 12, intervalMs: 700, delayStart: 13100 }
@@ -257,8 +235,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'jumper', count: 10, intervalMs: 1200, delayStart: 8100 },
     { type: 'shielded', count: 6, intervalMs: 1600, delayStart: 19800 }
   ]},
-  
-  // === MID-LATE GAME: Waves 18-24 ===
+
   { waveNumber: 18, waveType: 'flying', announcement: '⚠️ FLYING SWARM!\nGround towers can\'t hit!', creeps: [
     { type: 'flying', count: 22, intervalMs: 650 },
     { type: 'runner', count: 18, intervalMs: 350, delayStart: 11750 }
@@ -290,8 +267,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'digger', count: 18, intervalMs: 900 },
     { type: 'shielded', count: 10, intervalMs: 1300, delayStart: 13500 }
   ]},
-  
-  // === LATE GAME: Waves 25-30 ===
+
   { waveNumber: 25, creeps: [
     { type: 'tank', count: 14, intervalMs: 1100 },
     { type: 'shielded', count: 12, intervalMs: 1200, delayStart: 12200 },
@@ -320,8 +296,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'plaguebearer', count: 16, intervalMs: 1100 },
     { type: 'tank', count: 12, intervalMs: 1200, delayStart: 14500 }
   ]},
-  
-  // === ENDGAME: Waves 31-35 ===
+
   { waveNumber: 31, waveType: 'broodmother', announcement: '🕷️ NIGHTMARE WAVE!\nGhosts + Broodmothers!', parallelSpawn: true, creeps: [
     { type: 'ghost', count: 18, intervalMs: 850 },
     { type: 'broodmother', count: 5, intervalMs: 2500 },
@@ -356,10 +331,6 @@ export const WAVE_CONFIGS: WaveDef[] = [
     { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 40000 }
   ]}
 ];
-
-// ============================================================================
-// MINE DATA
-// ============================================================================
 
 export interface MineConfig {
   level: 0 | 1 | 2 | 3;
@@ -400,16 +371,10 @@ export const MINE_CONFIGS: Record<number, MineConfig> = {
   }
 };
 
-/**
- * Get the cost to build or upgrade to a specific level
- */
 export function getMineCost(targetLevel: 1 | 2 | 3): number {
   return MINE_CONFIGS[targetLevel].buildCost;
 }
 
-/**
- * Get total gold invested to reach a specific level
- */
 export function getTotalInvestment(level: 0 | 1 | 2 | 3): number {
   let total = 0;
   for (let i = 1; i <= level; i++) {

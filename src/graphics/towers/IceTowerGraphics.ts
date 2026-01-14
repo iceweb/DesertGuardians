@@ -1,14 +1,7 @@
 import Phaser from 'phaser';
 
-/**
- * Draws the Ice Tower at the specified level.
- * Top-down view of a frost mage on a frozen platform with ice crystals.
- * Level 1: Simple ice platform with small crystals
- * Level 2: Larger platform with crystal ring
- * Level 3: Grand frozen citadel platform with swirling ice
- */
 export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): void {
-  // Frost aura - dramatically larger at higher levels
+
   if (level === 1) {
     g.fillStyle(0x87ceeb, 0.1);
     g.fillCircle(0, 0, 42);
@@ -25,15 +18,12 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.fillStyle(0xccffff, 0.05);
     g.fillCircle(0, 0, 110);
   }
-  
-  // Shadow beneath platform
+
   g.fillStyle(0x4a6080, 0.3);
   g.fillEllipse(0, 4, 50 + level * 6, 20 + level * 2);
-  
+
   if (level === 1) {
-    // === LEVEL 1: Simple frozen platform with ice mage ===
-    
-    // Frozen platform base (octagonal)
+
     g.fillStyle(0x88c8e8, 1);
     g.beginPath();
     for (let i = 0; i < 8; i++) {
@@ -45,39 +35,31 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     }
     g.closePath();
     g.fillPath();
-    
-    // Platform inner surface
+
     g.fillStyle(0xa8e0f8, 1);
     g.fillCircle(0, 0, 22);
-    
-    // Ice cracks on platform
+
     g.lineStyle(1, 0xffffff, 0.4);
     g.lineBetween(-15, -8, 10, 5);
     g.lineBetween(-8, 10, 5, -12);
     g.lineBetween(8, -5, -5, 8);
-    
-    // Frost mage body (top-down: hooded robe)
+
     g.fillStyle(0x6090c0, 1);
-    g.fillCircle(0, 0, 12); // Robe circle
-    
-    // Hood
+    g.fillCircle(0, 0, 12);
+
     g.fillStyle(0x5080b0, 1);
     g.fillCircle(0, -4, 8);
-    
-    // Face shadow under hood
+
     g.fillStyle(0x304060, 1);
     g.fillCircle(0, -2, 5);
-    
-    // Glowing eyes
+
     g.fillStyle(0x66ddff, 1);
     g.fillCircle(-2, -3, 1.5);
     g.fillCircle(2, -3, 1.5);
-    
-    // Ice staff (held in front)
+
     g.fillStyle(0x99ccdd, 1);
     g.fillRect(-2, 6, 4, 18);
-    
-    // Staff crystal tip
+
     g.fillStyle(0xaaeeff, 1);
     g.beginPath();
     g.moveTo(0, 24);
@@ -88,8 +70,7 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.fillPath();
     g.fillStyle(0xccffff, 1);
     g.fillCircle(0, 28, 3);
-    
-    // Small ice crystals around platform
+
     g.fillStyle(0xb0e8ff, 0.8);
     g.beginPath();
     g.moveTo(-24, -10);
@@ -103,11 +84,9 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(28, -6);
     g.closePath();
     g.fillPath();
-    
+
   } else if (level === 2) {
-    // === LEVEL 2: Crystal ring platform with frost mage ===
-    
-    // Outer crystal ring
+
     g.fillStyle(0x70b8d8, 1);
     g.beginPath();
     for (let i = 0; i < 12; i++) {
@@ -120,16 +99,13 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     }
     g.closePath();
     g.fillPath();
-    
-    // Inner platform
+
     g.fillStyle(0x98d0f0, 1);
     g.fillCircle(0, 0, 28);
-    
-    // Platform surface details
+
     g.fillStyle(0xb8e8ff, 1);
     g.fillCircle(0, 0, 22);
-    
-    // Snowflake pattern
+
     g.lineStyle(1, 0xffffff, 0.5);
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI) / 3;
@@ -139,8 +115,7 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
       const y2 = Math.sin(angle) * 20;
       g.lineBetween(x1, y1, x2, y2);
     }
-    
-    // Crystal pillars on ring
+
     g.fillStyle(0xaae0ff, 0.9);
     for (let i = 0; i < 6; i++) {
       const angle = (i * Math.PI * 2) / 6 + Math.PI / 6;
@@ -153,40 +128,33 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
       g.closePath();
       g.fillPath();
     }
-    
-    // Frost mage (larger, more detailed)
+
     g.fillStyle(0x5888b8, 1);
     g.fillCircle(0, 0, 14);
-    
-    // Ornate hood
+
     g.fillStyle(0x4878a8, 1);
     g.fillCircle(0, -5, 10);
-    
-    // Face shadow
+
     g.fillStyle(0x284060, 1);
     g.fillCircle(0, -3, 6);
-    
-    // Glowing eyes (brighter)
+
     g.fillStyle(0x44ddff, 1);
     g.fillCircle(-2.5, -4, 2);
     g.fillCircle(2.5, -4, 2);
     g.fillStyle(0xffffff, 1);
     g.fillCircle(-2.5, -4, 0.8);
     g.fillCircle(2.5, -4, 0.8);
-    
-    // Shoulders with frost crystals
+
     g.fillStyle(0x6090c0, 1);
     g.fillCircle(-10, 2, 5);
     g.fillCircle(10, 2, 5);
     g.fillStyle(0x88ccee, 1);
     g.fillCircle(-10, 0, 3);
     g.fillCircle(10, 0, 3);
-    
-    // Staff held forward
+
     g.fillStyle(0x88bbcc, 1);
     g.fillRect(-2.5, 8, 5, 22);
-    
-    // Staff ornate crystal head
+
     g.fillStyle(0x99ddff, 1);
     g.beginPath();
     g.moveTo(0, 30);
@@ -199,18 +167,15 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.fillCircle(0, 36, 4);
     g.fillStyle(0xffffff, 1);
     g.fillCircle(0, 35, 2);
-    
-    // Floating ice particles
+
     g.fillStyle(0xccffff, 0.8);
     g.fillCircle(-18, -18, 3);
     g.fillCircle(20, -15, 2.5);
     g.fillCircle(-22, 12, 2);
     g.fillCircle(18, 18, 2.5);
-    
+
   } else {
-    // === LEVEL 3: Grand frozen citadel with archmage ===
-    
-    // Outer ice wall ring
+
     g.fillStyle(0x5898c8, 1);
     g.beginPath();
     for (let i = 0; i < 16; i++) {
@@ -223,16 +188,13 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     }
     g.closePath();
     g.fillPath();
-    
-    // Ice wall inner ring
+
     g.fillStyle(0x78b8e0, 1);
     g.fillCircle(0, 0, 42);
-    
-    // Platform surface
+
     g.fillStyle(0x98d8f8, 1);
     g.fillCircle(0, 0, 36);
-    
-    // Grand snowflake pattern
+
     g.lineStyle(2, 0xffffff, 0.5);
     for (let i = 0; i < 8; i++) {
       const angle = (i * Math.PI) / 4;
@@ -241,15 +203,14 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
       const x2 = Math.cos(angle) * 32;
       const y2 = Math.sin(angle) * 32;
       g.lineBetween(x1, y1, x2, y2);
-      // Branch details
+
       const midX = Math.cos(angle) * 22;
       const midY = Math.sin(angle) * 22;
       const perpAngle = angle + Math.PI / 2;
       g.lineBetween(midX, midY, midX + Math.cos(perpAngle) * 6, midY + Math.sin(perpAngle) * 6);
       g.lineBetween(midX, midY, midX - Math.cos(perpAngle) * 6, midY - Math.sin(perpAngle) * 6);
     }
-    
-    // Ice spire pillars on outer ring
+
     g.fillStyle(0x99ddff, 0.95);
     for (let i = 0; i < 8; i++) {
       const angle = (i * Math.PI * 2) / 8;
@@ -261,18 +222,15 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
       g.lineTo(x + 5, y + 4);
       g.closePath();
       g.fillPath();
-      // Spire glow
+
       g.fillStyle(0xccffff, 0.7);
       g.fillCircle(x, y - 8, 3);
       g.fillStyle(0x99ddff, 0.95);
     }
-    
-    // Ice Archmage (grand, powerful)
-    // Ornate robe from above
+
     g.fillStyle(0x4070a0, 1);
     g.fillCircle(0, 0, 18);
-    
-    // Cape/robe flow
+
     g.fillStyle(0x3868a0, 0.9);
     g.beginPath();
     g.moveTo(-12, 8);
@@ -282,12 +240,10 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(12, 8);
     g.closePath();
     g.fillPath();
-    
-    // Grand hood with frost crown
+
     g.fillStyle(0x3860a0, 1);
     g.fillCircle(0, -6, 12);
-    
-    // Frost crown
+
     g.fillStyle(0xaaeeff, 1);
     g.beginPath();
     g.moveTo(-8, -14);
@@ -307,27 +263,24 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(8, -14);
     g.closePath();
     g.fillPath();
-    
-    // Face shadow
+
     g.fillStyle(0x203850, 1);
     g.fillCircle(0, -4, 7);
-    
-    // Powerful glowing eyes
+
     g.fillStyle(0x22ccff, 1);
     g.fillCircle(-3, -5, 2.5);
     g.fillCircle(3, -5, 2.5);
     g.fillStyle(0xffffff, 1);
     g.fillCircle(-3, -5, 1);
     g.fillCircle(3, -5, 1);
-    
-    // Shoulder armor with ice crystals
+
     g.fillStyle(0x5088b8, 1);
     g.fillCircle(-14, 2, 7);
     g.fillCircle(14, 2, 7);
     g.fillStyle(0x88ccee, 1);
     g.fillCircle(-14, 0, 4);
     g.fillCircle(14, 0, 4);
-    // Shoulder crystals
+
     g.fillStyle(0xaaeeff, 1);
     g.beginPath();
     g.moveTo(-16, -4);
@@ -341,17 +294,14 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(16, -4);
     g.closePath();
     g.fillPath();
-    
-    // Grand staff
+
     g.fillStyle(0x77aacc, 1);
     g.fillRect(-3, 10, 6, 28);
-    
-    // Staff frost runes
+
     g.fillStyle(0xaaddff, 0.8);
     g.fillCircle(0, 18, 3);
     g.fillCircle(0, 28, 3);
-    
-    // Staff massive crystal head
+
     g.fillStyle(0x88ddff, 1);
     g.beginPath();
     g.moveTo(0, 38);
@@ -360,7 +310,7 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(10, 48);
     g.closePath();
     g.fillPath();
-    // Inner crystal glow
+
     g.fillStyle(0xbbffff, 1);
     g.beginPath();
     g.moveTo(0, 42);
@@ -369,11 +319,10 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(5, 48);
     g.closePath();
     g.fillPath();
-    // Crystal core
+
     g.fillStyle(0xffffff, 1);
     g.fillCircle(0, 50, 4);
-    
-    // Many floating ice particles
+
     g.fillStyle(0xccffff, 0.9);
     const particles = [
       [-28, -26, 4], [30, -22, 3.5], [-32, 8, 3], [28, 14, 3],
@@ -383,8 +332,7 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     particles.forEach(([px, py, size]) => {
       g.fillCircle(px as number, py as number, size as number);
     });
-    
-    // Aurora energy lines around
+
     g.lineStyle(2, 0x66ddff, 0.25);
     g.beginPath();
     g.arc(0, 0, 55, 0, Math.PI * 0.4);

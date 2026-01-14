@@ -1,23 +1,14 @@
 import Phaser from 'phaser';
 
-/**
- * EnvironmentDecorations handles individual decoration rendering.
- * Extracted from GameEnvironment to keep files under 500 LOC.
- */
 export class EnvironmentDecorations {
-  
-  /**
-   * Draw a palm tree at the specified position
-   */
+
   static drawPalmTree(scene: Phaser.Scene, x: number, y: number, scale: number = 1): void {
     const palm = scene.add.graphics();
     palm.setDepth(10);
-    
-    // Shadow
+
     palm.fillStyle(0x000000, 0.2);
     palm.fillEllipse(x + 30, y + 10, 60 * scale, 20 * scale);
-    
-    // Trunk
+
     palm.fillStyle(0x8b6914, 1);
     palm.beginPath();
     palm.moveTo(x - 8 * scale, y);
@@ -26,15 +17,13 @@ export class EnvironmentDecorations {
     palm.lineTo(x + 8 * scale, y);
     palm.closePath();
     palm.fillPath();
-    
-    // Trunk texture
+
     palm.lineStyle(2, 0x6b4f10, 0.6);
     for (let i = 0; i < 6; i++) {
       const ty = y - 10 - i * 12 * scale;
       palm.lineBetween(x - 6 * scale, ty, x + 6 * scale, ty);
     }
-    
-    // Fronds
+
     const frondColors = [0x228b22, 0x2e8b2e, 0x3cb371];
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2;
@@ -42,22 +31,18 @@ export class EnvironmentDecorations {
       palm.fillStyle(frondColors[i % 3], 1);
       EnvironmentDecorations.drawFrond(palm, x, y - 85 * scale, angle, length * scale);
     }
-    
-    // Coconuts
+
     palm.fillStyle(0x8b4513, 1);
     palm.fillCircle(x - 5 * scale, y - 78 * scale, 5 * scale);
     palm.fillCircle(x + 6 * scale, y - 80 * scale, 4 * scale);
   }
 
-  /**
-   * Draw a palm frond
-   */
   private static drawFrond(graphics: Phaser.GameObjects.Graphics, x: number, y: number, angle: number, length: number): void {
     const endX = x + Math.cos(angle) * length;
     const endY = y + Math.sin(angle) * length * 0.6 - 20;
     const midX = x + Math.cos(angle) * length * 0.5;
     const midY = y + Math.sin(angle) * length * 0.3 - 25;
-    
+
     graphics.beginPath();
     graphics.moveTo(x, y);
     graphics.lineTo(midX - 10, midY);
@@ -65,23 +50,18 @@ export class EnvironmentDecorations {
     graphics.lineTo(midX + 10, midY);
     graphics.closePath();
     graphics.fillPath();
-    
+
     graphics.lineStyle(1, 0x1a6b1a, 0.5);
     graphics.lineBetween(x, y, endX, endY);
   }
 
-  /**
-   * Draw rock formations at the specified position
-   */
   static drawRocks(scene: Phaser.Scene, x: number, y: number): void {
     const rocks = scene.add.graphics();
     rocks.setDepth(5);
-    
-    // Shadow
+
     rocks.fillStyle(0x000000, 0.2);
     rocks.fillEllipse(x + 10, y + 20, 60, 15);
-    
-    // Main rock
+
     rocks.fillStyle(0x7a6855, 1);
     rocks.beginPath();
     rocks.moveTo(x - 25, y + 15);
@@ -91,8 +71,7 @@ export class EnvironmentDecorations {
     rocks.lineTo(x + 30, y + 15);
     rocks.closePath();
     rocks.fillPath();
-    
-    // Highlight
+
     rocks.fillStyle(0x9a8875, 1);
     rocks.beginPath();
     rocks.moveTo(x - 15, y - 5);
@@ -101,8 +80,7 @@ export class EnvironmentDecorations {
     rocks.lineTo(x + 5, y - 5);
     rocks.closePath();
     rocks.fillPath();
-    
-    // Small rocks
+
     rocks.fillStyle(0x6a5845, 1);
     rocks.fillCircle(x + 35, y + 5, 10);
     rocks.fillCircle(x - 35, y + 10, 8);
@@ -110,24 +88,18 @@ export class EnvironmentDecorations {
     rocks.fillCircle(x + 38, y, 6);
   }
 
-  /**
-   * Draw ancient ruins at the specified position
-   */
   static drawRuins(scene: Phaser.Scene, x: number, y: number): void {
     const ruins = scene.add.graphics();
     ruins.setDepth(4);
-    
-    // Shadow
+
     ruins.fillStyle(0x000000, 0.15);
     ruins.fillEllipse(x, y + 40, 100, 25);
-    
-    // Left pillar
+
     ruins.fillStyle(0xc9b896, 1);
     ruins.fillRect(x - 40, y - 30, 18, 60);
     ruins.fillStyle(0xd9c8a6, 1);
     ruins.fillRect(x - 38, y - 28, 14, 55);
-    
-    // Broken top
+
     ruins.fillStyle(0xb9a886, 1);
     ruins.beginPath();
     ruins.moveTo(x - 42, y - 30);
@@ -136,46 +108,36 @@ export class EnvironmentDecorations {
     ruins.lineTo(x - 22, y - 30);
     ruins.closePath();
     ruins.fillPath();
-    
-    // Right pillar
+
     ruins.fillStyle(0xc9b896, 1);
     ruins.fillRect(x + 15, y - 10, 20, 40);
     ruins.fillStyle(0xd9c8a6, 1);
     ruins.fillRect(x + 17, y - 8, 16, 36);
-    
-    // Fallen block
+
     ruins.fillStyle(0xb9a886, 1);
     ruins.fillRect(x - 10, y + 15, 35, 18);
     ruins.fillStyle(0xc9b896, 1);
     ruins.fillRect(x - 8, y + 17, 31, 12);
-    
-    // Cracks
+
     ruins.lineStyle(1, 0xa99876, 0.6);
     ruins.lineBetween(x - 36, y, x - 26, y);
     ruins.lineBetween(x - 36, y + 10, x - 26, y + 10);
     ruins.lineBetween(x + 19, y + 5, x + 31, y + 5);
   }
 
-  /**
-   * Draw an oasis at the specified position
-   */
   static drawOasis(scene: Phaser.Scene, x: number, y: number): void {
     const oasis = scene.add.graphics();
     oasis.setDepth(3);
-    
-    // Water - darker outer
+
     oasis.fillStyle(0x1a4a6b, 0.8);
     oasis.fillEllipse(x, y, 100, 40);
-    
-    // Water - lighter middle
+
     oasis.fillStyle(0x4a90a8, 0.9);
     oasis.fillEllipse(x, y - 3, 95, 35);
-    
-    // Water - highlight
+
     oasis.fillStyle(0x6ab0c8, 0.6);
     oasis.fillEllipse(x - 20, y - 8, 40, 15);
-    
-    // Grass around edge
+
     oasis.fillStyle(0x228b22, 0.8);
     for (let i = 0; i < 12; i++) {
       const angle = (i / 12) * Math.PI * 2;
@@ -185,41 +147,31 @@ export class EnvironmentDecorations {
     }
   }
 
-  /**
-   * Draw a cactus at the specified position
-   */
   static drawCactus(scene: Phaser.Scene, x: number, y: number, scale: number = 1): void {
     const cactus = scene.add.graphics();
     cactus.setDepth(8);
-    
-    // Shadow
+
     cactus.fillStyle(0x000000, 0.2);
     cactus.fillEllipse(x + 10, y + 5, 40 * scale, 12 * scale);
-    
-    // Main body
+
     cactus.fillStyle(0x2d5a27, 1);
     cactus.fillRoundedRect(x - 12 * scale, y - 70 * scale, 24 * scale, 75 * scale, 10 * scale);
-    
-    // Highlight
+
     cactus.fillStyle(0x3d7a37, 1);
     cactus.fillRoundedRect(x - 6 * scale, y - 65 * scale, 12 * scale, 65 * scale, 5 * scale);
-    
-    // Left arm
+
     cactus.fillStyle(0x2d5a27, 1);
     cactus.fillRoundedRect(x - 35 * scale, y - 45 * scale, 25 * scale, 15 * scale, 6 * scale);
     cactus.fillRoundedRect(x - 35 * scale, y - 55 * scale, 15 * scale, 25 * scale, 6 * scale);
-    
-    // Right arm
+
     cactus.fillRoundedRect(x + 10 * scale, y - 35 * scale, 25 * scale, 15 * scale, 6 * scale);
     cactus.fillRoundedRect(x + 22 * scale, y - 50 * scale, 15 * scale, 30 * scale, 6 * scale);
-    
-    // Spines
+
     cactus.fillStyle(0xffffff, 0.6);
     for (let i = 0; i < 8; i++) {
       cactus.fillCircle(x + (Math.random() - 0.5) * 18 * scale, y - 20 - i * 7 * scale, 1.5);
     }
-    
-    // Optional flower
+
     if (Math.random() > 0.5) {
       cactus.fillStyle(0xff69b4, 1);
       cactus.fillCircle(x, y - 72 * scale, 6 * scale);
@@ -228,58 +180,45 @@ export class EnvironmentDecorations {
     }
   }
 
-  /**
-   * Draw a scarab beetle at the specified position
-   */
   static drawScarab(scene: Phaser.Scene, x: number, y: number): void {
     const scarab = scene.add.graphics();
     scarab.setDepth(6);
-    
+
     const scale = 0.8 + Math.random() * 0.4;
-    
-    // Glow
+
     scarab.fillStyle(0xffd700, 0.2);
     scarab.fillCircle(x, y, 18 * scale);
     scarab.fillStyle(0xffd700, 0.1);
     scarab.fillCircle(x, y, 25 * scale);
-    
-    // Shadow
+
     scarab.fillStyle(0x000000, 0.2);
     scarab.fillEllipse(x + 3, y + 8 * scale, 16 * scale, 6 * scale);
-    
-    // Body
+
     scarab.fillStyle(0xdaa520, 1);
     scarab.fillEllipse(x, y, 14 * scale, 10 * scale);
-    
-    // Shell highlight
+
     scarab.fillStyle(0xffd700, 1);
     scarab.fillEllipse(x, y - 2 * scale, 12 * scale, 7 * scale);
-    
-    // Center line
+
     scarab.lineStyle(1, 0xb8860b, 0.8);
     scarab.lineBetween(x, y - 8 * scale, x, y + 8 * scale);
-    
-    // Shell pattern
+
     scarab.lineStyle(1, 0xcd853f, 0.5);
     scarab.lineBetween(x - 5 * scale, y - 3 * scale, x + 5 * scale, y - 3 * scale);
     scarab.lineBetween(x - 6 * scale, y, x + 6 * scale, y);
     scarab.lineBetween(x - 5 * scale, y + 3 * scale, x + 5 * scale, y + 3 * scale);
-    
-    // Head
+
     scarab.fillStyle(0xb8860b, 1);
     scarab.fillCircle(x, y - 10 * scale, 5 * scale);
-    
-    // Eyes
+
     scarab.fillStyle(0x00ffff, 0.9);
     scarab.fillCircle(x - 2 * scale, y - 11 * scale, 1.5 * scale);
     scarab.fillCircle(x + 2 * scale, y - 11 * scale, 1.5 * scale);
-    
-    // Antennae
+
     scarab.lineStyle(1.5, 0x8b6914, 1);
     scarab.lineBetween(x - 2 * scale, y - 14 * scale, x - 5 * scale, y - 17 * scale);
     scarab.lineBetween(x + 2 * scale, y - 14 * scale, x + 5 * scale, y - 17 * scale);
-    
-    // Legs
+
     scarab.lineStyle(1, 0x8b6914, 0.9);
     scarab.lineBetween(x - 6 * scale, y - 4 * scale, x - 12 * scale, y - 8 * scale);
     scarab.lineBetween(x - 7 * scale, y, x - 13 * scale, y - 2 * scale);
@@ -287,31 +226,24 @@ export class EnvironmentDecorations {
     scarab.lineBetween(x + 6 * scale, y - 4 * scale, x + 12 * scale, y - 8 * scale);
     scarab.lineBetween(x + 7 * scale, y, x + 13 * scale, y - 2 * scale);
     scarab.lineBetween(x + 6 * scale, y + 4 * scale, x + 12 * scale, y + 6 * scale);
-    
-    // Shell shine
+
     scarab.fillStyle(0xfffacd, 0.6);
     scarab.fillEllipse(x - 3 * scale, y - 3 * scale, 4 * scale, 3 * scale);
   }
 
-  /**
-   * Draw a desert flower at the specified position
-   */
   static drawDesertFlower(scene: Phaser.Scene, x: number, y: number): void {
     const flower = scene.add.graphics();
     flower.setDepth(5);
-    
-    // Stem
+
     flower.lineStyle(2, 0x3d7a37, 1);
     flower.lineBetween(x, y, x, y - 20);
     flower.lineBetween(x, y - 10, x - 8, y - 5);
     flower.lineBetween(x, y - 10, x + 8, y - 5);
-    
-    // Leaves
+
     flower.fillStyle(0x4a8a44, 1);
     flower.fillEllipse(x - 10, y - 3, 8, 4);
     flower.fillEllipse(x + 10, y - 3, 8, 4);
-    
-    // Petals
+
     const petalColors = [0xff6b6b, 0xffa500, 0xffff00, 0xff69b4, 0x9370db];
     const petalColor = petalColors[Math.floor(Math.random() * petalColors.length)];
     flower.fillStyle(petalColor, 1);
@@ -321,29 +253,22 @@ export class EnvironmentDecorations {
       const py = y - 20 + Math.sin(angle) * 6;
       flower.fillCircle(px, py, 4);
     }
-    
-    // Center
+
     flower.fillStyle(0xffd700, 1);
     flower.fillCircle(x, y - 20, 3);
   }
 
-  /**
-   * Draw a tumbleweed at the specified position
-   */
   static drawTumbleweed(scene: Phaser.Scene, x: number, y: number): void {
     const tumbleweed = scene.add.graphics();
     tumbleweed.setDepth(5);
-    
-    // Shadow
+
     tumbleweed.fillStyle(0x000000, 0.15);
     tumbleweed.fillEllipse(x + 3, y + 12, 25, 8);
-    
-    // Main body
+
     const size = 12 + Math.random() * 8;
     tumbleweed.fillStyle(0x8b7355, 0.9);
     tumbleweed.fillCircle(x, y, size);
-    
-    // Branches
+
     tumbleweed.lineStyle(1, 0x6b5344, 0.8);
     for (let i = 0; i < 12; i++) {
       const angle1 = Math.random() * Math.PI * 2;
@@ -357,24 +282,18 @@ export class EnvironmentDecorations {
         y + Math.sin(angle2) * r2
       );
     }
-    
-    // Highlight
+
     tumbleweed.fillStyle(0xa08060, 0.5);
     tumbleweed.fillCircle(x - 3, y - 3, size * 0.4);
   }
 
-  /**
-   * Draw pottery/amphora at the specified position
-   */
   static drawPottery(scene: Phaser.Scene, x: number, y: number): void {
     const pottery = scene.add.graphics();
     pottery.setDepth(6);
-    
-    // Shadow
+
     pottery.fillStyle(0x000000, 0.2);
     pottery.fillEllipse(x + 5, y + 20, 30, 10);
-    
-    // Main body
+
     pottery.fillStyle(0xb8860b, 1);
     pottery.beginPath();
     pottery.moveTo(x - 12, y + 18);
@@ -387,31 +306,25 @@ export class EnvironmentDecorations {
     pottery.lineTo(x + 12, y + 18);
     pottery.closePath();
     pottery.fillPath();
-    
-    // Neck
+
     pottery.fillStyle(0xa07608, 1);
     pottery.fillRect(x - 6, y - 28, 12, 8);
-    
-    // Rim
+
     pottery.fillStyle(0x8b6914, 1);
     pottery.fillRect(x - 8, y - 30, 16, 4);
-    
-    // Decorative bands
+
     pottery.lineStyle(2, 0x654321, 0.7);
     pottery.lineBetween(x - 16, y - 5, x + 16, y - 5);
     pottery.lineBetween(x - 14, y + 8, x + 14, y + 8);
-    
-    // Dots
+
     pottery.fillStyle(0x4a3520, 0.6);
     for (let i = -12; i <= 12; i += 6) {
       pottery.fillCircle(x + i, y - 10, 2);
     }
-    
-    // Highlight
+
     pottery.fillStyle(0xd4a856, 0.4);
     pottery.fillEllipse(x - 8, y - 5, 6, 12);
-    
-    // Broken shard (random)
+
     if (Math.random() > 0.6) {
       pottery.fillStyle(0xb8860b, 0.8);
       pottery.beginPath();
@@ -424,45 +337,36 @@ export class EnvironmentDecorations {
     }
   }
 
-  /**
-   * Draw a scorpion at the specified position
-   */
   static drawScorpion(scene: Phaser.Scene, x: number, y: number): void {
     const scorpion = scene.add.graphics();
     scorpion.setDepth(7);
-    
+
     const facing = Math.random() > 0.5 ? 1 : -1;
-    
-    // Body
+
     scorpion.fillStyle(0x2a1a0a, 1);
     scorpion.fillEllipse(x, y, 12, 8);
-    
-    // Head
+
     scorpion.fillCircle(x + 8 * facing, y, 5);
-    
-    // Tail segments
+
     scorpion.fillStyle(0x3a2a1a, 1);
     for (let i = 1; i <= 4; i++) {
       scorpion.fillCircle(x - (6 + i * 4) * facing, y - i * 2, 3);
     }
-    
-    // Stinger
+
     scorpion.fillStyle(0x1a0a00, 1);
     scorpion.fillTriangle(
       x - 24 * facing, y - 10,
       x - 22 * facing, y - 6,
       x - 28 * facing, y - 8
     );
-    
-    // Claws
+
     scorpion.lineStyle(2, 0x2a1a0a, 1);
     scorpion.lineBetween(x + 10 * facing, y - 2, x + 18 * facing, y - 6);
     scorpion.lineBetween(x + 10 * facing, y + 2, x + 18 * facing, y + 6);
     scorpion.fillStyle(0x3a2a1a, 1);
     scorpion.fillCircle(x + 20 * facing, y - 6, 3);
     scorpion.fillCircle(x + 20 * facing, y + 6, 3);
-    
-    // Legs
+
     scorpion.lineStyle(1, 0x2a1a0a, 0.8);
     for (let i = -1; i <= 1; i += 2) {
       scorpion.lineBetween(x - 3, y, x - 3 + i * 8, y + 6);
