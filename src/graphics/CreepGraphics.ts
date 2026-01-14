@@ -36,7 +36,8 @@ export class CreepGraphics {
     faceDirection: number,
     isFlashing: boolean = false,
     isJumping: boolean = false,
-    isBurrowed: boolean = false
+    isBurrowed: boolean = false,
+    isPained: boolean = false
   ): void {
     g.clear();
     
@@ -54,7 +55,7 @@ export class CreepGraphics {
       const tier = parseInt(type.replace('boss_guard_', '')) || 1;
       DragonKnightGraphics.draw(g, tier, bounceTime, faceDirection);
     } else if (CreepGraphics.BOSS_TYPES.has(type)) {
-      BossCreepGraphics.draw(g, type, bounceTime, faceDirection);
+      BossCreepGraphics.draw(g, type, bounceTime, faceDirection, isPained);
     } else if (CreepGraphics.SPECIAL_TYPES.has(type)) {
       SpecialCreepGraphics.draw(g, type, bounceTime, faceDirection, isFlashing, isJumping, isBurrowed);
     } else if (CreepGraphics.ELEMENTAL_TYPES.has(type)) {

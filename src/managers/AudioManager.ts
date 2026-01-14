@@ -22,7 +22,13 @@ export type SFXKey =
   | 'victory'
   | 'defeat'
   | 'creep_leak'
-  | 'gold_earn';
+  | 'gold_earn'
+  | 'boss_level_entry'
+  | 'dragon_roar'
+  | 'leaked'
+  | 'tower_place'
+  | 'wavestart'
+  | 'coins';
 
 /**
  * Audio settings stored in localStorage
@@ -35,6 +41,9 @@ interface AudioSettings {
 
 const AUDIO_SETTINGS_KEY = 'tower_defense_audio_settings';
 
+// Maximum volume scale - 100% on slider = 50% actual system volume
+const MAX_VOLUME_SCALE = 0.5;
+
 /**
  * AudioManager handles all game audio using Howler.js
  * Singleton pattern for global access
@@ -42,11 +51,18 @@ const AUDIO_SETTINGS_KEY = 'tower_defense_audio_settings';
 export class AudioManager {
   private static instance: AudioManager | null = null;
   
-  private bgm: Howl | null = null;
+  // Background music tracks (alternating)
+  private bgmTracks: Howl[] = [];
+  private currentBgmIndex: number = 0;
+  private bgmPlaying: boolean = false;
+  private bgmWantToPlay: boolean = false;  // Flag for when playBGM is called before tracks load
+  private bgmTracksLoaded: number = 0;
+  
   private sfxSounds: Map<SFXKey, Howl> = new Map();
   
-  private bgmVolume: number = 0.4;
-  private sfxVolume: number = 0.6;
+  // Volume values are 0-1 representing slider position (will be scaled by MAX_VOLUME_SCALE)
+  private bgmVolume: number = 0.5;   // 50% slider = 25% actual
+  private sfxVolume: number = 0.25;  // 25% slider = 12.5% actual
   private isMuted: boolean = false;
   private isInitialized: boolean = false;
   
@@ -70,57 +86,93 @@ export class AudioManager {
   initialize(): void {
     if (this.isInitialized) return;
     
-    console.log('AudioManager: Initializing...');
+
     
-    // Initialize BGM
-    this.bgm = new Howl({
-      src: ['/assets/audio/desert_theme.mp3', '/assets/audio/desert_theme.ogg'],
-      loop: true,
-      volume: this.bgmVolume,
-      preload: true,
-      onloaderror: (_id, error) => {
-        console.warn('AudioManager: BGM failed to load, audio disabled', error);
-      }
+    // Initialize BGM tracks (two alternating tracks)
+    const bgmFiles = [
+      { src: ['assets/audio/BGS1.mp3'], name: 'BGS1' },
+      { src: ['assets/audio/BGS2.mp3'], name: 'BGS2' }
+    ];
+    
+    this.bgmTracksLoaded = 0;
+    
+    bgmFiles.forEach((bgmDef, _index) => {
+      const track = new Howl({
+        src: bgmDef.src,
+        loop: false, // Don't loop - we'll switch tracks on end
+        volume: this.bgmVolume * MAX_VOLUME_SCALE,
+        preload: true,
+        html5: true, // Use HTML5 Audio for better mobile/browser compatibility
+        onload: () => {
+
+          this.bgmTracksLoaded++;
+          // If playBGM was called before tracks loaded, start playing now
+          if (this.bgmWantToPlay && !this.bgmPlaying && this.bgmTracksLoaded > 0) {
+            this.startBGMPlayback();
+          }
+        },
+        onplay: () => {
+
+        },
+        onend: () => {
+          // When track ends, play the other track
+
+          if (this.bgmPlaying) {
+            this.playNextBgmTrack();
+          }
+        },
+        onloaderror: (_id, error) => {
+          console.error(`AudioManager: BGM ${bgmDef.name} failed to load:`, error);
+        },
+        onplayerror: (_id, error) => {
+          console.warn(`AudioManager: BGM ${bgmDef.name} play blocked (autoplay policy):`, error);
+          // Browser blocked autoplay - will retry on next user interaction
+          this.bgmPlaying = false;
+        }
+      });
+      this.bgmTracks.push(track);
     });
+    
+    // Randomize which track plays first
+    this.currentBgmIndex = Math.random() < 0.5 ? 0 : 1;
+
     
     // Define SFX with procedural generation as fallback
     // Using short synthesized sounds when files don't exist
     this.initializeSFX();
     
     this.isInitialized = true;
-    console.log('AudioManager: Initialized');
+
   }
 
   /**
    * Initialize all SFX sounds
    */
   private initializeSFX(): void {
+    // Only include SFX files that actually exist in public/assets/audio
     const sfxDefinitions: { key: SFXKey; file: string }[] = [
-      { key: 'shoot_arrow', file: 'shoot_arrow.mp3' },
-      { key: 'shoot_rapidfire', file: 'shoot_rapidfire.mp3' },
-      { key: 'shoot_sniper', file: 'shoot_sniper.mp3' },
-      { key: 'shoot_cannon', file: 'shoot_cannon.mp3' },
-      { key: 'shoot_ice', file: 'shoot_ice.mp3' },
-      { key: 'shoot_poison', file: 'shoot_poison.mp3' },
-      { key: 'hit_flesh', file: 'hit_flesh.mp3' },
-      { key: 'hit_armor', file: 'hit_armor.mp3' },
-      { key: 'hit_shield', file: 'hit_shield.mp3' },
-      { key: 'build_thud', file: 'build_thud.mp3' },
-      { key: 'sell_tower', file: 'sell_tower.mp3' },
-      { key: 'upgrade_tower', file: 'upgrade_tower.mp3' },
-      { key: 'ui_click', file: 'ui_click.mp3' },
-      { key: 'wave_start', file: 'wave_start.mp3' },
-      { key: 'wave_complete', file: 'wave_complete.mp3' },
+      // UI sounds
+      { key: 'ui_click', file: 'click.mp3' },
+      { key: 'coins', file: 'coins.mp3' },
+      
+      // Game event sounds
       { key: 'victory', file: 'victory.mp3' },
       { key: 'defeat', file: 'defeat.mp3' },
-      { key: 'creep_leak', file: 'creep_leak.mp3' },
-      { key: 'gold_earn', file: 'gold_earn.mp3' }
+      { key: 'leaked', file: 'leaked.mp3' },
+      { key: 'wavestart', file: 'wavestart.mp3' },
+      
+      // Tower sounds
+      { key: 'tower_place', file: 'tower_place.mp3' },
+      
+      // Boss sounds
+      { key: 'boss_level_entry', file: 'boss_level_entry.mp3' },
+      { key: 'dragon_roar', file: 'dragon.mp3' }
     ];
     
     for (const def of sfxDefinitions) {
       const sound = new Howl({
-        src: [`/assets/audio/${def.file}`],
-        volume: this.sfxVolume,
+        src: [`assets/audio/${def.file}`],
+        volume: this.sfxVolume * MAX_VOLUME_SCALE,
         preload: true,
         onloaderror: () => {
           // Silently fail - audio is optional
@@ -132,14 +184,59 @@ export class AudioManager {
   }
 
   /**
-   * Play background music
+   * Play background music (starts with random track, then alternates)
    */
   playBGM(): void {
-    if (!this.bgm || this.isMuted) return;
+    if (this.bgmTracks.length === 0) return;
     
-    if (!this.bgm.playing()) {
-      this.bgm.play();
-      console.log('AudioManager: BGM started');
+    // Set flag that we want BGM to play
+    this.bgmWantToPlay = true;
+    
+    // If muted, don't actually play but remember we want to
+    if (this.isMuted) return;
+    
+    // Check if any track is already playing
+    const anyPlaying = this.bgmTracks.some(track => track.playing());
+    if (anyPlaying) return;
+    
+    // Try to start playback
+    this.startBGMPlayback();
+  }
+
+  /**
+   * Actually start BGM playback (called when tracks are ready)
+   */
+  private startBGMPlayback(): void {
+    if (this.isMuted || this.bgmPlaying) return;
+    
+    const currentTrack = this.bgmTracks[this.currentBgmIndex];
+    if (currentTrack && currentTrack.state() === 'loaded') {
+      this.bgmPlaying = true;
+      currentTrack.play();
+
+    } else {
+      // Current track not loaded yet, try the other one
+      const otherIndex = this.currentBgmIndex === 0 ? 1 : 0;
+      const otherTrack = this.bgmTracks[otherIndex];
+      if (otherTrack && otherTrack.state() === 'loaded') {
+        this.currentBgmIndex = otherIndex;
+        this.bgmPlaying = true;
+        otherTrack.play();
+      }
+    }
+  }
+
+  /**
+   * Play the next BGM track (alternates between tracks)
+   */
+  private playNextBgmTrack(): void {
+    // Switch to the other track
+    this.currentBgmIndex = this.currentBgmIndex === 0 ? 1 : 0;
+    
+    const nextTrack = this.bgmTracks[this.currentBgmIndex];
+    if (nextTrack && nextTrack.state() === 'loaded') {
+      nextTrack.play();
+
     }
   }
 
@@ -147,24 +244,34 @@ export class AudioManager {
    * Stop background music
    */
   stopBGM(): void {
-    if (!this.bgm) return;
-    this.bgm.stop();
+    this.bgmPlaying = false;
+    for (const track of this.bgmTracks) {
+      track.stop();
+    }
   }
 
   /**
    * Pause background music
    */
   pauseBGM(): void {
-    if (!this.bgm) return;
-    this.bgm.pause();
+    for (const track of this.bgmTracks) {
+      if (track.playing()) {
+        track.pause();
+      }
+    }
   }
 
   /**
    * Resume background music
    */
   resumeBGM(): void {
-    if (!this.bgm || this.isMuted) return;
-    this.bgm.play();
+    if (this.isMuted || !this.bgmPlaying) return;
+    
+    // Resume the current track if it was paused
+    const currentTrack = this.bgmTracks[this.currentBgmIndex];
+    if (currentTrack && !currentTrack.playing()) {
+      currentTrack.play();
+    }
   }
 
   /**
@@ -175,28 +282,54 @@ export class AudioManager {
     
     const sound = this.sfxSounds.get(key);
     if (sound && sound.state() === 'loaded') {
+      // Ensure volume is set to current sfxVolume before playing
+      sound.volume(this.sfxVolume);
       sound.play();
+    }
+    
+    // User interaction detected - try to start BGM if it was blocked by autoplay policy
+    if (this.bgmWantToPlay && !this.bgmPlaying && !this.isMuted) {
+      // Small delay to ensure audio context is unlocked
+      setTimeout(() => {
+        if (!this.bgmPlaying) {
+
+          this.startBGMPlayback();
+        }
+      }, 100);
     }
   }
 
   /**
-   * Set BGM volume (0-1)
+   * Called on any user interaction to unlock audio (for autoplay policy)
+   */
+  unlockAudio(): void {
+    // Try to start BGM if it was blocked by autoplay policy
+    if (this.bgmWantToPlay && !this.bgmPlaying) {
+
+      this.startBGMPlayback();
+    }
+  }
+
+  /**
+   * Set BGM volume (0-1 slider value, scaled to actual volume)
    */
   setBGMVolume(volume: number): void {
     this.bgmVolume = Math.max(0, Math.min(1, volume));
-    if (this.bgm) {
-      this.bgm.volume(this.bgmVolume);
+    const actualVolume = this.bgmVolume * MAX_VOLUME_SCALE;
+    for (const track of this.bgmTracks) {
+      track.volume(actualVolume);
     }
     this.saveSettings();
   }
 
   /**
-   * Set SFX volume (0-1)
+   * Set SFX volume (0-1 slider value, scaled to actual volume)
    */
   setSFXVolume(volume: number): void {
     this.sfxVolume = Math.max(0, Math.min(1, volume));
+    const actualVolume = this.sfxVolume * MAX_VOLUME_SCALE;
     for (const sound of this.sfxSounds.values()) {
-      sound.volume(this.sfxVolume);
+      sound.volume(actualVolume);
     }
     this.saveSettings();
   }
@@ -222,6 +355,12 @@ export class AudioManager {
     this.isMuted = !this.isMuted;
     Howler.mute(this.isMuted);
     this.saveSettings();
+    
+    // If unmuted and we wanted to play BGM, start it
+    if (!this.isMuted && this.bgmWantToPlay && !this.bgmPlaying) {
+      this.startBGMPlayback();
+    }
+    
     return this.isMuted;
   }
 
@@ -232,6 +371,11 @@ export class AudioManager {
     this.isMuted = muted;
     Howler.mute(this.isMuted);
     this.saveSettings();
+    
+    // If unmuted and we wanted to play BGM, start it
+    if (!this.isMuted && this.bgmWantToPlay && !this.bgmPlaying) {
+      this.startBGMPlayback();
+    }
   }
 
   /**
@@ -247,11 +391,13 @@ export class AudioManager {
   private loadSettings(): void {
     try {
       const data = localStorage.getItem(AUDIO_SETTINGS_KEY);
+
       if (data) {
         const settings: AudioSettings = JSON.parse(data);
-        this.bgmVolume = settings.bgmVolume ?? 0.4;
-        this.sfxVolume = settings.sfxVolume ?? 0.6;
+        this.bgmVolume = settings.bgmVolume ?? 0.5;   // Default 50% slider
+        this.sfxVolume = settings.sfxVolume ?? 0.25;  // Default 25% slider
         this.isMuted = settings.muted ?? false;
+
         Howler.mute(this.isMuted);
       }
     } catch (e) {
@@ -280,10 +426,10 @@ export class AudioManager {
    */
   destroy(): void {
     this.stopBGM();
-    if (this.bgm) {
-      this.bgm.unload();
-      this.bgm = null;
+    for (const track of this.bgmTracks) {
+      track.unload();
     }
+    this.bgmTracks = [];
     for (const sound of this.sfxSounds.values()) {
       sound.unload();
     }

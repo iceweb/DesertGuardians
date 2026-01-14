@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { AudioManager } from './AudioManager';
 
 /**
  * GameControlsManager handles game speed and pause controls.
@@ -91,6 +92,7 @@ export class GameControlsManager {
     this.speedHitArea.on('pointerout', () => drawSpeedButton(false));
     this.speedHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation();
+      AudioManager.getInstance().playSFX('ui_click');
       this.toggleGameSpeed();
       drawSpeedButton(true);
     });
@@ -216,6 +218,7 @@ export class GameControlsManager {
     this.pauseHitArea.on('pointerout', () => drawPauseButton(false));
     this.pauseHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation();
+      AudioManager.getInstance().playSFX('ui_click');
       this.togglePause();
       drawPauseButton(true);
     });

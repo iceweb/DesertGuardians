@@ -17,6 +17,8 @@ export class CreepManager {
   public onCreepDied?: (creep: Creep, goldReward: number, deathX: number, deathY: number) => void;
   public onCreepReachedEnd?: (creep: Creep) => void;
   public onBabySpawned?: (count: number) => void;  // Notify WaveManager of extra creeps
+  public onBossFirstHit?: (creep: Creep) => void;  // First hit on boss
+  public onBossPainThreshold?: (creep: Creep) => void;  // Boss at 25% health
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
@@ -38,6 +40,8 @@ export class CreepManager {
       creep.on('died', this.handleCreepDied, this);
       creep.on('reachedEnd', this.handleCreepReachedEnd, this);
       creep.on('spawnOnDeath', this.handleSpawnOnDeath, this);
+      creep.on('bossFirstHit', this.handleBossFirstHit, this);
+      creep.on('bossPainThreshold', this.handleBossPainThreshold, this);
       
       this.pool.push(creep);
     }
@@ -135,6 +139,20 @@ export class CreepManager {
         }
       });
     }
+  }
+
+  /**
+   * Handle first hit on a boss
+   */
+  private handleBossFirstHit(creep: Creep): void {
+    this.onBossFirstHit?.(creep);
+  }
+
+  /**
+   * Handle boss reaching 25% health threshold
+   */
+  private handleBossPainThreshold(creep: Creep): void {
+    this.onBossPainThreshold?.(creep);
   }
 
   /**

@@ -11,32 +11,72 @@ export class BossCreepGraphics {
     g: Phaser.GameObjects.Graphics,
     type: string,
     bounceTime: number,
-    faceDirection: number
+    faceDirection: number,
+    isPained: boolean = false
   ): void {
+    // Apply pain effect: red overlay and shaking
+    if (isPained) {
+      // Add jitter for painful shaking effect
+      const painShake = Math.sin(bounceTime * 30) * 2;
+      g.setPosition(painShake, 0);
+    } else {
+      g.setPosition(0, 0);
+    }
+    
     switch (type) {
       case 'boss':
-        BossCreepGraphics.drawBoss(g, bounceTime, faceDirection);
+        BossCreepGraphics.drawBoss(g, bounceTime, faceDirection, isPained);
         break;
       case 'boss_1':
-        BossCreepGraphics.drawBoss1(g, bounceTime, faceDirection);
+        BossCreepGraphics.drawBoss1(g, bounceTime, faceDirection, isPained);
         break;
       case 'boss_2':
-        BossCreepGraphics.drawBoss2(g, bounceTime, faceDirection);
+        BossCreepGraphics.drawBoss2(g, bounceTime, faceDirection, isPained);
         break;
       case 'boss_3':
-        BossCreepGraphics.drawBoss3(g, bounceTime, faceDirection);
+        BossCreepGraphics.drawBoss3(g, bounceTime, faceDirection, isPained);
         break;
       case 'boss_4':
-        BossCreepGraphics.drawBoss4(g, bounceTime, faceDirection);
+        BossCreepGraphics.drawBoss4(g, bounceTime, faceDirection, isPained);
         break;
       case 'boss_5':
-        BossCreepGraphics.drawBoss5(g, bounceTime, faceDirection);
+        BossCreepGraphics.drawBoss5(g, bounceTime, faceDirection, isPained);
         break;
       // Note: boss_guard_1, boss_guard_2, boss_guard_3 are now handled by DragonKnightGraphics
     }
+    
+    // Draw pain overlay if in pained state
+    if (isPained) {
+      BossCreepGraphics.drawPainOverlay(g, bounceTime);
+    }
+  }
+  
+  /**
+   * Draw pain overlay effect - red pulsing glow
+   */
+  private static drawPainOverlay(g: Phaser.GameObjects.Graphics, bounceTime: number): void {
+    const painPulse = 0.3 + Math.sin(bounceTime * 8) * 0.15;
+    
+    // Red pain aura
+    g.fillStyle(0xff0000, painPulse * 0.4);
+    g.fillCircle(0, 0, 55);
+    
+    // Inner pain glow
+    g.fillStyle(0xff3300, painPulse * 0.3);
+    g.fillCircle(0, 0, 40);
+    
+    // Blood drip particles
+    const numDrips = 3;
+    for (let i = 0; i < numDrips; i++) {
+      const dripY = (bounceTime * 40 + i * 30) % 60 - 10;
+      const dripX = Math.sin(i * 2.5) * 20;
+      const dripAlpha = Math.max(0, 1 - dripY / 50);
+      g.fillStyle(0x8b0000, dripAlpha * 0.7);
+      g.fillCircle(dripX, dripY, 3 - dripY / 30);
+    }
   }
 
-  static drawBoss(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBoss(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 4) * 3;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
     
@@ -110,7 +150,7 @@ export class BossCreepGraphics {
   /**
    * Boss 1: "Giant Gecko" - Small agile lizard with fiery markings
    */
-  static drawBoss1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBoss1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 5) * 2;
     const pulse = 1 + Math.sin(bounceTime * 8) * 0.04;
     
@@ -192,7 +232,7 @@ export class BossCreepGraphics {
   /**
    * Boss 2: "Komodo Warlord" - Armored komodo dragon with thick scales and claws
    */
-  static drawBoss2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBoss2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.03;
     
@@ -306,7 +346,7 @@ export class BossCreepGraphics {
   /**
    * Boss 3: "Drake Champion" - Transitional form with wing stubs and prominent spines
    */
-  static drawBoss3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBoss3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const bounce = Math.sin(bounceTime * 3.5) * 3;
     const wingFlutter = Math.sin(bounceTime * 6) * 0.15;
     const pulse = 1 + Math.sin(bounceTime * 5) * 0.04;
@@ -467,7 +507,7 @@ export class BossCreepGraphics {
   /**
    * Boss 4: "Young Dragon" - Functional wings, longer neck, fire-breathing capability
    */
-  static drawBoss4(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBoss4(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
     const hover = Math.sin(bounceTime * 3) * 3;
     const wingFlap = Math.sin(bounceTime * 4) * 0.25;
     const breathe = 1 + Math.sin(bounceTime * 4) * 0.04;
@@ -668,240 +708,461 @@ export class BossCreepGraphics {
   /**
    * Boss 5: "Elder Dragon Lord" - Massive ancient dragon with crown of horns and fire aura
    */
-  static drawBoss5(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
-    const hover = Math.sin(bounceTime * 2.5) * 4;
-    const wingFlap = Math.sin(bounceTime * 3.5) * 0.3;
-    const pulse = 1 + Math.sin(bounceTime * 5) * 0.05;
-    const fireFlicker = Math.sin(bounceTime * 10) * 0.3 + 0.7;
+  static drawBoss5(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, isPained: boolean = false): void {
+    // Elder Dragon Lord - A terrifying, dark and menacing dragon
+    const hover = Math.sin(bounceTime * 2) * 3;
+    const wingFlap = Math.sin(bounceTime * 3) * 0.4;
+    const breathe = 1 + Math.sin(bounceTime * 2) * 0.03;
+    const fireFlicker = Math.sin(bounceTime * 12) * 0.3 + 0.7;
+    const painShake = isPained ? Math.sin(bounceTime * 25) * 3 : 0;
     
-    // Massive fire aura
-    g.fillStyle(0xFF2200, 0.1 * fireFlicker);
-    g.fillCircle(0, -5 + hover, 80 * pulse);
-    g.fillStyle(0xFF6600, 0.12 * fireFlicker);
-    g.fillCircle(0, -5 + hover, 65 * pulse);
-    g.fillStyle(0xFFAA00, 0.08 * fireFlicker);
-    g.fillCircle(0, -5 + hover, 55 * pulse);
+    // Colors - dark, menacing palette
+    const scalesDark = 0x1a0a0a;       // Near-black scales
+    const scalesMid = 0x2a1515;        // Dark crimson
+    const scalesLight = 0x3a2020;      // Dried blood
+    const underbelly = 0x4a3030;       // Charred flesh
+    const eyeGlow = 0xff2200;          // Hellfire eyes
+    const fireCore = 0xff6600;         // Molten fire
+    const boneColor = 0xccbbaa;        // Aged bone
+    const scarColor = 0x550000;        // Old wounds
     
-    // Large shadow
-    g.fillStyle(0x000000, 0.5);
-    g.fillEllipse(0, 40, 65, 22);
+    // Ominous dark aura - more subtle and menacing
+    g.fillStyle(0x000000, 0.3);
+    g.fillCircle(painShake, hover, 75 * breathe);
+    g.fillStyle(scalesDark, 0.15);
+    g.fillCircle(painShake, hover, 60 * breathe);
     
-    // Massive tail with flame tip
-    g.fillStyle(0x882211, 1);
+    // Heat distortion effect around dragon
+    if (isPained) {
+      g.fillStyle(0xff0000, 0.15 * fireFlicker);
+      g.fillCircle(painShake, hover, 70);
+    }
+    
+    // Ground shadow - large and imposing
+    g.fillStyle(0x000000, 0.6);
+    g.fillEllipse(0, 42, 70, 20);
+    
+    // === TAIL - Long, spiked, dangerous ===
+    g.fillStyle(scalesDark, 1);
+    // Main tail segments
     g.beginPath();
-    g.moveTo(-20 * faceDirection, 12 + hover);
-    g.lineTo(-45 * faceDirection, 24 + hover);
-    g.lineTo(-62 * faceDirection, 18 + hover);
-    g.lineTo(-60 * faceDirection, 10 + hover);
-    g.lineTo(-42 * faceDirection, 14 + hover);
-    g.lineTo(-22 * faceDirection, 4 + hover);
+    g.moveTo(-18 * faceDirection + painShake, 15 + hover);
+    g.lineTo(-35 * faceDirection, 22 + hover);
+    g.lineTo(-55 * faceDirection, 18 + hover);
+    g.lineTo(-72 * faceDirection, 8 + hover);
+    g.lineTo(-70 * faceDirection, 5 + hover);
+    g.lineTo(-52 * faceDirection, 12 + hover);
+    g.lineTo(-32 * faceDirection, 15 + hover);
+    g.lineTo(-16 * faceDirection + painShake, 8 + hover);
     g.closePath();
     g.fillPath();
-    // Tail flame
-    g.fillStyle(0xFF4400, 0.8);
-    g.fillCircle(-64 * faceDirection, 14 + hover, 6);
-    g.fillStyle(0xFFAA00, 0.6);
-    g.fillCircle(-68 * faceDirection, 12 + hover, 4);
-    g.fillStyle(0xFFFF66, 0.5);
-    g.fillCircle(-66 * faceDirection, 14 + hover, 2);
     
-    // Massive wings
-    g.fillStyle(0x661111, 1);
-    // Left wing
+    // Tail spikes - jagged and dangerous
+    g.fillStyle(boneColor, 1);
+    for (let i = 0; i < 5; i++) {
+      const tx = (-25 - i * 10) * faceDirection;
+      const ty = 10 + hover + Math.sin(i * 0.8) * 3;
+      g.beginPath();
+      g.moveTo(tx - 3 * faceDirection, ty + 3);
+      g.lineTo(tx, ty - 8 - i);
+      g.lineTo(tx + 3 * faceDirection, ty + 3);
+      g.closePath();
+      g.fillPath();
+    }
+    
+    // Tail blade tip
+    g.fillStyle(boneColor, 1);
     g.beginPath();
-    g.moveTo(-18, -8 + hover);
-    g.lineTo(-50, -40 + hover + wingFlap * 40);
-    g.lineTo(-70, -30 + hover + wingFlap * 35);
-    g.lineTo(-65, -5 + hover + wingFlap * 25);
-    g.lineTo(-55, 15 + hover + wingFlap * 15);
+    g.moveTo(-68 * faceDirection, 8 + hover);
+    g.lineTo(-82 * faceDirection, 2 + hover);
+    g.lineTo(-80 * faceDirection, 12 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // === MASSIVE WINGS - Tattered, battle-scarred ===
+    const wingAngle = wingFlap * 45;
+    
+    // Left wing
+    g.fillStyle(scalesDark, 1);
+    g.beginPath();
+    g.moveTo(-20 + painShake, -5 + hover);
+    g.lineTo(-55, -45 + hover + wingAngle);
+    g.lineTo(-75, -35 + hover + wingAngle * 0.8);
+    g.lineTo(-72, -10 + hover + wingAngle * 0.5);
+    g.lineTo(-60, 15 + hover + wingAngle * 0.3);
+    g.lineTo(-35, 12 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Right wing
+    g.beginPath();
+    g.moveTo(20 + painShake, -5 + hover);
+    g.lineTo(55, -45 + hover + wingAngle);
+    g.lineTo(75, -35 + hover + wingAngle * 0.8);
+    g.lineTo(72, -10 + hover + wingAngle * 0.5);
+    g.lineTo(60, 15 + hover + wingAngle * 0.3);
+    g.lineTo(35, 12 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Wing membrane - darker, more sinister
+    g.fillStyle(0x0a0505, 0.9);
+    // Left membrane
+    g.beginPath();
+    g.moveTo(-22 + painShake, -3 + hover);
+    g.lineTo(-50, -38 + hover + wingAngle);
+    g.lineTo(-68, -28 + hover + wingAngle * 0.8);
+    g.lineTo(-65, -5 + hover + wingAngle * 0.5);
+    g.lineTo(-55, 12 + hover + wingAngle * 0.3);
     g.lineTo(-30, 10 + hover);
     g.closePath();
     g.fillPath();
-    // Right wing
+    // Right membrane
     g.beginPath();
-    g.moveTo(18, -8 + hover);
-    g.lineTo(50, -40 + hover + wingFlap * 40);
-    g.lineTo(70, -30 + hover + wingFlap * 35);
-    g.lineTo(65, -5 + hover + wingFlap * 25);
-    g.lineTo(55, 15 + hover + wingFlap * 15);
+    g.moveTo(22 + painShake, -3 + hover);
+    g.lineTo(50, -38 + hover + wingAngle);
+    g.lineTo(68, -28 + hover + wingAngle * 0.8);
+    g.lineTo(65, -5 + hover + wingAngle * 0.5);
+    g.lineTo(55, 12 + hover + wingAngle * 0.3);
     g.lineTo(30, 10 + hover);
     g.closePath();
     g.fillPath();
     
-    // Wing membrane veins
-    g.lineStyle(2, 0x440000, 0.9);
+    // Wing bone structure - skeletal, visible
+    g.lineStyle(3, scalesMid, 1);
+    // Left wing bones
     g.beginPath();
-    g.moveTo(-20, -6 + hover);
-    g.lineTo(-52, -28 + hover + wingFlap * 35);
+    g.moveTo(-22 + painShake, -3 + hover);
+    g.lineTo(-55, -42 + hover + wingAngle);
     g.strokePath();
     g.beginPath();
-    g.moveTo(-22, 0 + hover);
-    g.lineTo(-58, -12 + hover + wingFlap * 28);
+    g.moveTo(-26 + painShake, 0 + hover);
+    g.lineTo(-62, -18 + hover + wingAngle * 0.6);
     g.strokePath();
     g.beginPath();
-    g.moveTo(-24, 6 + hover);
-    g.lineTo(-54, 8 + hover + wingFlap * 18);
+    g.moveTo(-28 + painShake, 5 + hover);
+    g.lineTo(-58, 8 + hover + wingAngle * 0.3);
+    g.strokePath();
+    // Right wing bones
+    g.beginPath();
+    g.moveTo(22 + painShake, -3 + hover);
+    g.lineTo(55, -42 + hover + wingAngle);
     g.strokePath();
     g.beginPath();
-    g.moveTo(20, -6 + hover);
-    g.lineTo(52, -28 + hover + wingFlap * 35);
+    g.moveTo(26 + painShake, 0 + hover);
+    g.lineTo(62, -18 + hover + wingAngle * 0.6);
     g.strokePath();
     g.beginPath();
-    g.moveTo(22, 0 + hover);
-    g.lineTo(58, -12 + hover + wingFlap * 28);
-    g.strokePath();
-    g.beginPath();
-    g.moveTo(24, 6 + hover);
-    g.lineTo(54, 8 + hover + wingFlap * 18);
+    g.moveTo(28 + painShake, 5 + hover);
+    g.lineTo(58, 8 + hover + wingAngle * 0.3);
     g.strokePath();
     
-    // Wing claws
-    g.fillStyle(0x332211, 1);
-    g.fillCircle(-50, -38 + hover + wingFlap * 38, 4);
-    g.fillCircle(50, -38 + hover + wingFlap * 38, 4);
+    // Wing claws - sharp bone talons
+    g.fillStyle(boneColor, 1);
+    g.fillCircle(-55, -44 + hover + wingAngle, 4);
+    g.fillCircle(55, -44 + hover + wingAngle, 4);
+    // Claw tips
+    g.beginPath();
+    g.moveTo(-55, -48 + hover + wingAngle);
+    g.lineTo(-52, -55 + hover + wingAngle);
+    g.lineTo(-50, -47 + hover + wingAngle);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(55, -48 + hover + wingAngle);
+    g.lineTo(52, -55 + hover + wingAngle);
+    g.lineTo(50, -47 + hover + wingAngle);
+    g.closePath();
+    g.fillPath();
     
-    // Massive body
-    g.fillStyle(0xAA3322, 1);
-    g.fillEllipse(0, 4 + hover, 46 * pulse, 38 * pulse);
-    
-    // Armored belly plates
-    g.fillStyle(0xDDCC88, 1);
-    g.fillEllipse(0, 12 + hover, 28, 22);
-    g.fillStyle(0xEEDDAA, 0.9);
-    for (let i = 0; i < 6; i++) {
-      g.fillRect(-14, 2 + i * 4 + hover, 28, 2);
+    // Tattered wing edges (battle damage)
+    g.fillStyle(0x000000, 0.8);
+    for (let i = 0; i < 3; i++) {
+      const holeX = -45 + i * 8;
+      const holeY = -15 + hover + wingAngle * 0.4 + i * 5;
+      g.fillCircle(holeX, holeY, 3 + Math.random());
     }
     
-    // Massive back spines
-    g.fillStyle(0x551111, 1);
-    for (let i = 0; i < 8; i++) {
-      const spineX = -18 + i * 5;
-      const spineH = 16 + Math.sin(bounceTime * 3 + i * 0.4) * 3;
+    // === BODY - Massive, armored, scarred ===
+    g.fillStyle(scalesMid, 1);
+    g.fillEllipse(painShake, 5 + hover, 48 * breathe, 40 * breathe);
+    
+    // Armored scale plates on back
+    g.fillStyle(scalesDark, 1);
+    g.fillEllipse(painShake - 5, -8 + hover, 35, 25);
+    g.fillEllipse(painShake + 5, 2 + hover, 38, 28);
+    
+    // Battle scars across body
+    g.lineStyle(2, scarColor, 0.8);
+    g.beginPath();
+    g.moveTo(-15 + painShake, -5 + hover);
+    g.lineTo(10 + painShake, 15 + hover);
+    g.strokePath();
+    g.beginPath();
+    g.moveTo(8 + painShake, -10 + hover);
+    g.lineTo(-5 + painShake, 8 + hover);
+    g.strokePath();
+    
+    // Underbelly - charred and cracked
+    g.fillStyle(underbelly, 1);
+    g.fillEllipse(painShake, 18 + hover, 30, 20);
+    // Belly scale segments
+    g.lineStyle(1, scalesDark, 0.6);
+    for (let i = 0; i < 5; i++) {
       g.beginPath();
-      g.moveTo(spineX - 5, -18 + hover);
-      g.lineTo(spineX, -18 - spineH + hover);
-      g.lineTo(spineX + 5, -18 + hover);
+      g.moveTo(-15 + painShake, 10 + i * 4 + hover);
+      g.lineTo(15 + painShake, 10 + i * 4 + hover);
+      g.strokePath();
+    }
+    
+    // === MASSIVE DORSAL SPINES - Bone-like, terrifying ===
+    g.fillStyle(boneColor, 1);
+    for (let i = 0; i < 7; i++) {
+      const spineX = -14 + i * 5 + painShake;
+      const spineH = 22 + Math.sin(bounceTime * 4 + i * 0.5) * 2;
+      const spineW = 4 - i * 0.3;
+      g.beginPath();
+      g.moveTo(spineX - spineW, -20 + hover);
+      g.lineTo(spineX, -20 - spineH + hover);
+      g.lineTo(spineX + spineW, -20 + hover);
       g.closePath();
       g.fillPath();
     }
+    // Spine ridges (darker base)
+    g.fillStyle(scalesDark, 1);
+    g.fillRect(-18 + painShake, -22 + hover, 36, 5);
     
-    // Powerful hind legs
-    g.fillStyle(0x993322, 1);
-    g.fillEllipse(-18, 24 + hover, 14, 18);
-    g.fillEllipse(18, 24 + hover, 14, 18);
+    // === LEGS - Powerful, clawed ===
+    // Hind legs
+    g.fillStyle(scalesMid, 1);
+    g.fillEllipse(-20 + painShake, 28 + hover, 16, 20);
+    g.fillEllipse(20 + painShake, 28 + hover, 16, 20);
     
     // Front legs
-    g.fillEllipse(-28, 10 + hover, 12, 14);
-    g.fillEllipse(28, 10 + hover, 12, 14);
+    g.fillEllipse(-30 + painShake, 12 + hover, 14, 16);
+    g.fillEllipse(30 + painShake, 12 + hover, 14, 16);
     
     // Massive clawed feet
-    g.fillStyle(0x553322, 1);
-    g.fillEllipse(-18, 40, 14, 8);
-    g.fillEllipse(18, 40, 14, 8);
-    g.fillCircle(-26, 41, 4);
-    g.fillCircle(-10, 42, 4);
-    g.fillCircle(10, 42, 4);
-    g.fillCircle(26, 41, 4);
+    g.fillStyle(scalesDark, 1);
+    g.fillEllipse(-20, 42, 16, 8);
+    g.fillEllipse(20, 42, 16, 8);
     
-    // Long powerful neck
-    g.fillStyle(0xAA3322, 1);
-    g.fillEllipse(18 * faceDirection, -16 + hover, 16, 22);
-    
-    // Majestic dragon head
-    g.fillStyle(0xBB4433, 1);
-    g.fillEllipse(32 * faceDirection, -24 + hover, 22, 20);
-    
-    // Long snout
-    g.fillStyle(0xCC5544, 1);
-    g.fillEllipse(50 * faceDirection, -22 + hover, 14, 12);
-    
-    // Crown of horns
-    g.fillStyle(0xFFD700, 1);
-    // Main crown piece
+    // Claws - bone-white, sharp
+    g.fillStyle(boneColor, 1);
+    // Left foot claws
     g.beginPath();
-    g.moveTo(20 * faceDirection, -42 + hover);
-    g.lineTo(24 * faceDirection, -55 + hover);
-    g.lineTo(28 * faceDirection, -42 + hover);
+    g.moveTo(-28, 44);
+    g.lineTo(-32, 48);
+    g.lineTo(-26, 46);
     g.closePath();
     g.fillPath();
     g.beginPath();
-    g.moveTo(30 * faceDirection, -40 + hover);
-    g.lineTo(36 * faceDirection, -52 + hover);
-    g.lineTo(40 * faceDirection, -40 + hover);
-    g.closePath();
-    g.fillPath();
-    // Crown gems
-    g.fillStyle(0xFF0000, 1);
-    g.fillCircle(24 * faceDirection, -48 + hover, 4);
-    g.fillStyle(0x00FFFF, 1);
-    g.fillCircle(36 * faceDirection, -46 + hover, 3);
-    
-    // Majestic curved horns
-    g.fillStyle(0x332222, 1);
-    g.beginPath();
-    g.moveTo(14 * faceDirection, -38 + hover);
-    g.lineTo(6 * faceDirection, -58 + hover);
-    g.lineTo(4 * faceDirection, -55 + hover);
-    g.lineTo(10 * faceDirection, -38 + hover);
+    g.moveTo(-20, 46);
+    g.lineTo(-20, 52);
+    g.lineTo(-16, 46);
     g.closePath();
     g.fillPath();
     g.beginPath();
-    g.moveTo(46 * faceDirection, -36 + hover);
-    g.lineTo(56 * faceDirection, -52 + hover);
-    g.lineTo(54 * faceDirection, -50 + hover);
-    g.lineTo(42 * faceDirection, -36 + hover);
+    g.moveTo(-12, 44);
+    g.lineTo(-8, 48);
+    g.lineTo(-14, 46);
+    g.closePath();
+    g.fillPath();
+    // Right foot claws
+    g.beginPath();
+    g.moveTo(28, 44);
+    g.lineTo(32, 48);
+    g.lineTo(26, 46);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(20, 46);
+    g.lineTo(20, 52);
+    g.lineTo(16, 46);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(12, 44);
+    g.lineTo(8, 48);
+    g.lineTo(14, 46);
     g.closePath();
     g.fillPath();
     
-    // Head ridges
-    g.fillStyle(0x772222, 1);
-    for (let i = 0; i < 3; i++) {
-      const rx = (26 + i * 8) * faceDirection;
-      g.beginPath();
-      g.moveTo(rx - 3 * faceDirection, -36 + hover);
-      g.lineTo(rx, -42 + hover);
-      g.lineTo(rx + 3 * faceDirection, -36 + hover);
-      g.closePath();
-      g.fillPath();
+    // === NECK - Long, serpentine, armored ===
+    g.fillStyle(scalesMid, 1);
+    g.beginPath();
+    g.moveTo(12 * faceDirection + painShake, -12 + hover);
+    g.lineTo(25 * faceDirection, -22 + hover);
+    g.lineTo(35 * faceDirection, -28 + hover);
+    g.lineTo(38 * faceDirection, -25 + hover);
+    g.lineTo(28 * faceDirection, -18 + hover);
+    g.lineTo(16 * faceDirection + painShake, -5 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Neck scales/ridges
+    g.fillStyle(scalesDark, 1);
+    for (let i = 0; i < 4; i++) {
+      const nx = (15 + i * 6) * faceDirection;
+      const ny = -14 - i * 4 + hover;
+      g.fillCircle(nx, ny, 5 - i * 0.5);
     }
     
-    // Fierce glowing eyes
-    g.fillStyle(0xFF4400, 1);
-    g.fillEllipse(38 * faceDirection, -30 + hover, 6, 7);
+    // === HEAD - Terrifying dragon skull ===
+    g.fillStyle(scalesMid, 1);
+    g.fillEllipse(42 * faceDirection, -30 + hover, 24, 22);
+    
+    // Snout - elongated, predatory
+    g.fillStyle(scalesLight, 1);
+    g.beginPath();
+    g.moveTo(48 * faceDirection, -38 + hover);
+    g.lineTo(68 * faceDirection, -32 + hover);
+    g.lineTo(72 * faceDirection, -28 + hover);
+    g.lineTo(68 * faceDirection, -22 + hover);
+    g.lineTo(48 * faceDirection, -18 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Brow ridges - heavy, intimidating
+    g.fillStyle(scalesDark, 1);
+    g.beginPath();
+    g.moveTo(30 * faceDirection, -42 + hover);
+    g.lineTo(52 * faceDirection, -44 + hover);
+    g.lineTo(56 * faceDirection, -38 + hover);
+    g.lineTo(50 * faceDirection, -36 + hover);
+    g.lineTo(32 * faceDirection, -38 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // === HORNS - Massive, curved, ancient ===
+    g.fillStyle(boneColor, 1);
+    // Main horns - curved back majestically
+    g.beginPath();
+    g.moveTo(28 * faceDirection, -42 + hover);
+    g.lineTo(20 * faceDirection, -52 + hover);
+    g.lineTo(12 * faceDirection, -62 + hover);
+    g.lineTo(8 * faceDirection, -68 + hover);
+    g.lineTo(12 * faceDirection, -66 + hover);
+    g.lineTo(18 * faceDirection, -58 + hover);
+    g.lineTo(26 * faceDirection, -48 + hover);
+    g.lineTo(32 * faceDirection, -40 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Secondary horns
+    g.beginPath();
+    g.moveTo(48 * faceDirection, -44 + hover);
+    g.lineTo(55 * faceDirection, -58 + hover);
+    g.lineTo(58 * faceDirection, -55 + hover);
+    g.lineTo(52 * faceDirection, -42 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Small horn tips (aged, worn)
+    g.fillStyle(0x998877, 1);
+    g.fillCircle(8 * faceDirection, -70 + hover, 3);
+    g.fillCircle(55 * faceDirection, -60 + hover, 2);
+    
+    // === EYES - Hellfire, slitted, terrifying ===
+    // Eye socket - sunken, dark
     g.fillStyle(0x000000, 1);
-    g.fillEllipse(39 * faceDirection, -30 + hover, 2, 6);
-    g.fillStyle(0xFFFF00, 0.8);
-    g.fillCircle(36 * faceDirection, -32 + hover, 2);
+    g.fillEllipse(44 * faceDirection, -34 + hover, 9, 10);
     
-    // Nostrils with fire
-    g.fillStyle(0x332222, 1);
-    g.fillCircle(58 * faceDirection, -24 + hover, 3);
-    g.fillCircle(56 * faceDirection, -18 + hover, 3);
-    g.fillStyle(0xFF4400, 0.6 * fireFlicker);
-    g.fillCircle(62 * faceDirection, -26 + hover, 4);
-    g.fillStyle(0xFFAA00, 0.5 * fireFlicker);
-    g.fillCircle(64 * faceDirection, -28 + hover, 3);
+    // Eye - glowing with inner fire
+    g.fillStyle(eyeGlow, 1);
+    g.fillEllipse(44 * faceDirection, -34 + hover, 7, 8);
     
-    // Open jaw with massive fire breath
-    g.fillStyle(0x993322, 1);
-    g.fillEllipse(50 * faceDirection, -12 + hover, 14, 10);
-    // Fire breath
-    g.fillStyle(0xFF2200, 0.7 * fireFlicker);
-    g.fillEllipse(60 * faceDirection, -12 + hover, 12, 8);
-    g.fillStyle(0xFF6600, 0.6 * fireFlicker);
-    g.fillEllipse(68 * faceDirection, -12 + hover, 10, 6);
-    g.fillStyle(0xFFAA00, 0.5 * fireFlicker);
-    g.fillEllipse(76 * faceDirection, -12 + hover, 8, 5);
-    g.fillStyle(0xFFFF66, 0.4 * fireFlicker);
-    g.fillCircle(82 * faceDirection, -12 + hover, 4);
+    // Slit pupil - pure malevolence
+    g.fillStyle(0x000000, 1);
+    g.fillEllipse(45 * faceDirection, -34 + hover, 2, 7);
     
-    // Massive teeth
-    g.fillStyle(0xFFFFEE, 1);
-    g.fillRect(42 * faceDirection, -18 + hover, 3, 7);
-    g.fillRect(48 * faceDirection, -19 + hover, 3, 8);
-    g.fillRect(54 * faceDirection, -18 + hover, 3, 7);
-    g.fillRect(46 * faceDirection, -6 + hover, 2, 5);
-    g.fillRect(52 * faceDirection, -5 + hover, 2, 4);
+    // Eye glow effect
+    g.fillStyle(0xffaa00, 0.6);
+    g.fillCircle(42 * faceDirection, -36 + hover, 2);
+    
+    // Second eye (slightly visible)
+    g.fillStyle(eyeGlow, 0.5);
+    g.fillEllipse(36 * faceDirection, -32 + hover, 4, 5);
+    g.fillStyle(0x000000, 0.8);
+    g.fillEllipse(36 * faceDirection, -32 + hover, 1, 4);
+    
+    // === NOSTRILS - Smoke and ember ===
+    g.fillStyle(0x000000, 1);
+    g.fillCircle(66 * faceDirection, -30 + hover, 4);
+    g.fillCircle(64 * faceDirection, -24 + hover, 3);
+    
+    // Smoke wisps from nostrils
+    g.fillStyle(0x333333, 0.4 * fireFlicker);
+    g.fillCircle(70 * faceDirection, -34 + hover, 5);
+    g.fillStyle(0x222222, 0.3 * fireFlicker);
+    g.fillCircle(73 * faceDirection, -38 + hover, 4);
+    
+    // === JAW - Powerful, fanged ===
+    g.fillStyle(scalesLight, 1);
+    g.beginPath();
+    g.moveTo(50 * faceDirection, -20 + hover);
+    g.lineTo(70 * faceDirection, -18 + hover);
+    g.lineTo(68 * faceDirection, -10 + hover);
+    g.lineTo(48 * faceDirection, -12 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // Inside of mouth - hellish glow
+    g.fillStyle(0x110000, 1);
+    g.fillEllipse(58 * faceDirection, -14 + hover, 12, 6);
+    g.fillStyle(fireCore, 0.5 * fireFlicker);
+    g.fillEllipse(58 * faceDirection, -14 + hover, 8, 4);
+    
+    // === TEETH - Massive, irregular, predatory ===
+    g.fillStyle(boneColor, 1);
+    // Upper fangs
+    g.beginPath();
+    g.moveTo(52 * faceDirection, -20 + hover);
+    g.lineTo(54 * faceDirection, -8 + hover);
+    g.lineTo(56 * faceDirection, -20 + hover);
+    g.closePath();
+    g.fillPath();
+    g.beginPath();
+    g.moveTo(60 * faceDirection, -19 + hover);
+    g.lineTo(63 * faceDirection, -6 + hover);
+    g.lineTo(66 * faceDirection, -19 + hover);
+    g.closePath();
+    g.fillPath();
+    // Smaller teeth
+    g.fillRect(68 * faceDirection, -18 + hover, 2, 5);
+    g.fillRect(48 * faceDirection, -19 + hover, 2, 4);
+    
+    // Lower fangs
+    g.beginPath();
+    g.moveTo(55 * faceDirection, -10 + hover);
+    g.lineTo(57 * faceDirection, -18 + hover);
+    g.lineTo(59 * faceDirection, -10 + hover);
+    g.closePath();
+    g.fillPath();
+    
+    // === FIRE BREATH - If in combat ===
+    if (isPained) {
+      // Enraged fire breath
+      g.fillStyle(fireCore, 0.9 * fireFlicker);
+      g.fillEllipse(75 * faceDirection, -14 + hover, 15, 10);
+      g.fillStyle(0xffaa00, 0.7 * fireFlicker);
+      g.fillEllipse(88 * faceDirection, -14 + hover, 12, 8);
+      g.fillStyle(0xffff66, 0.5 * fireFlicker);
+      g.fillCircle(98 * faceDirection, -14 + hover, 6);
+    }
+    
+    // === AMBIENT EMBERS - Floating around ===
+    for (let i = 0; i < 6; i++) {
+      const angle = bounceTime * 1.2 + i * 1.1;
+      const dist = 50 + Math.sin(bounceTime * 2 + i) * 15;
+      const ex = Math.cos(angle) * dist * 0.8;
+      const ey = Math.sin(angle) * dist * 0.5 + hover;
+      const emberAlpha = 0.5 + Math.sin(bounceTime * 8 + i * 2) * 0.3;
+      g.fillStyle(fireCore, emberAlpha * 0.6);
+      g.fillCircle(ex, ey, 2);
+      g.fillStyle(0xffff66, emberAlpha * 0.4);
+      g.fillCircle(ex, ey - 2, 1);
+    }
   }
 
   /**

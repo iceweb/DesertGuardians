@@ -117,12 +117,18 @@ export class CombatManager {
     // Ground-only towers cannot target flying creeps
     const isGroundOnly = branch === 'rockcannon' || branch === 'poison';
     
-    // Ice tower special handling: prefer unslowed targets
+    // Special tower handling for smart targeting
     const isIceTower = branch === 'icetower';
+    const isPoisonTower = branch === 'poison';
     
+    // Track best target and fallback (for when all targets are "saturated")
     let bestTarget: Creep | null = null;
     let bestValue = -Infinity;
-    let bestIsSlowed = true; // Assume slowed, prefer unslowed
+    let bestIsSaturated = true; // saturated = slowed (ice) or max poison stacks (poison)
+    
+    // Fallback target - the best among saturated targets (in case all are saturated)
+    let fallbackTarget: Creep | null = null;
+    let fallbackValue = -Infinity;
     
     for (const creep of creeps) {
       if (!creep.getIsActive()) continue;
@@ -142,8 +148,15 @@ export class CombatManager {
         if (branch !== requiredBranch) continue;
       }
       
-      // Ice tower: check slow status
-      const creepIsSlowed = isIceTower ? creep.isSlowed() : false;
+      // Check if creep is "saturated" for this tower type
+      let isSaturated = false;
+      if (isIceTower) {
+        // Ice tower: creep is saturated if already slowed
+        isSaturated = creep.isSlowed();
+      } else if (isPoisonTower) {
+        // Poison tower: creep is saturated if at max poison stacks (3)
+        isSaturated = creep.getPoisonStackCount() >= 3;
+      }
       
       let value: number;
       
@@ -161,17 +174,22 @@ export class CombatManager {
           break;
       }
       
-      // Ice tower targeting priority: unslowed > slowed
-      // Only pick a slowed creep if no unslowed creep is better
-      if (isIceTower) {
-        // If current best is unslowed and this one is slowed, skip
-        if (!bestIsSlowed && creepIsSlowed) continue;
+      // Smart targeting for Ice and Poison towers: prefer unsaturated targets
+      if (isIceTower || isPoisonTower) {
+        // Always track the best fallback in case all targets are saturated
+        if (isSaturated && value > fallbackValue) {
+          fallbackValue = value;
+          fallbackTarget = creep;
+        }
         
-        // If current best is slowed and this one is unslowed, take it
-        if (bestIsSlowed && !creepIsSlowed) {
+        // If current best is unsaturated and this one is saturated, skip
+        if (!bestIsSaturated && isSaturated) continue;
+        
+        // If current best is saturated and this one is unsaturated, take it
+        if (bestIsSaturated && !isSaturated) {
           bestValue = value;
           bestTarget = creep;
-          bestIsSlowed = creepIsSlowed;
+          bestIsSaturated = isSaturated;
           continue;
         }
       }
@@ -179,8 +197,14 @@ export class CombatManager {
       if (value > bestValue) {
         bestValue = value;
         bestTarget = creep;
-        bestIsSlowed = creepIsSlowed;
+        bestIsSaturated = isSaturated;
       }
+    }
+    
+    // If no unsaturated target found but we have a fallback, use it
+    // (better to keep attacking than to do nothing)
+    if (!bestTarget && fallbackTarget) {
+      return fallbackTarget;
     }
     
     return bestTarget;

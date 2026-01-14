@@ -3,6 +3,7 @@ import { GameControlsManager } from './GameControlsManager';
 import { GameOverlayManager } from './GameOverlayManager';
 import { CreepInfoPanel } from './CreepInfoPanel';
 import { NextWavePanel } from './NextWavePanel';
+import { AudioManager } from './AudioManager';
 import { GAME_CONFIG } from '../data/GameConfig';
 import type { WaveType } from '../data/GameData';
 
@@ -28,6 +29,10 @@ export class HUDManager {
   private startWaveButton!: Phaser.GameObjects.Text;
   private startWaveButtonBg!: Phaser.GameObjects.Graphics;
   private startWaveHitArea!: Phaser.GameObjects.Rectangle;
+  
+  // Sound toggle button
+  private soundButtonBg!: Phaser.GameObjects.Graphics;
+  private audioManager!: AudioManager;
   
   // Cached state
   private gold: number = 200;
@@ -64,9 +69,13 @@ export class HUDManager {
     const width = this.scene.cameras.main.width;
     const height = this.scene.cameras.main.height;
     
+    // Get audio manager reference
+    this.audioManager = AudioManager.getInstance();
+    
     this.createHUDBar(width);
     this.createWaveControls(width, height);
     this.createBackButton(height);
+    this.createSoundButton(height);
     this.gameControls.create(width, height);
     this.createHPBar();
     this.createCountdownText(width, height);
@@ -257,7 +266,98 @@ export class HUDManager {
     backButton.on('pointerout', () => drawMenuButton(false));
     backButton.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
       event.stopPropagation();
+      this.audioManager.playSFX('ui_click');
       this.onMenuClicked?.();
+    });
+  }
+
+  /**
+   * Create sound toggle button - Desert themed
+   */
+  private createSoundButton(height: number): void {
+    const btnX = 160;  // Position next to Menu button
+    const btnY = height - 30;
+    const btnSize = 36;
+    
+    // Create background graphics
+    this.soundButtonBg = this.scene.add.graphics();
+    this.soundButtonBg.setDepth(100);
+    
+    const drawSoundButton = (hover: boolean, muted: boolean) => {
+      this.soundButtonBg.clear();
+      
+      // Shadow
+      this.soundButtonBg.fillStyle(0x1a0a00, 0.6);
+      this.soundButtonBg.fillRoundedRect(btnX - btnSize/2 + 2, btnY - btnSize/2 + 2, btnSize, btnSize, 6);
+      
+      // Stone background
+      const bgColor = muted ? 0x4a2a10 : (hover ? 0x8b6914 : 0x6b4914);
+      this.soundButtonBg.fillStyle(bgColor, 1);
+      this.soundButtonBg.fillRoundedRect(btnX - btnSize/2, btnY - btnSize/2, btnSize, btnSize, 6);
+      
+      // Inner fill
+      const innerColor = muted ? 0x5a3a20 : (hover ? 0xc49564 : 0xa07840);
+      this.soundButtonBg.fillStyle(innerColor, 1);
+      this.soundButtonBg.fillRoundedRect(btnX - btnSize/2 + 2, btnY - btnSize/2 + 2, btnSize - 4, btnSize - 4, 5);
+      
+      // Carved border
+      this.soundButtonBg.lineStyle(2, muted ? 0x8b5a34 : 0xd4a574, 0.8);
+      this.soundButtonBg.strokeRoundedRect(btnX - btnSize/2, btnY - btnSize/2, btnSize, btnSize, 6);
+      
+      // Draw speaker icon
+      const iconX = btnX - 4;
+      const iconY = btnY;
+      const iconColor = muted ? 0x666666 : 0xffd700;
+      
+      this.soundButtonBg.fillStyle(iconColor, 1);
+      // Speaker body (small rectangle on left)
+      this.soundButtonBg.fillRect(iconX - 8, iconY - 3, 5, 6);
+      // Speaker cone (trapezoid shape pointing right)
+      this.soundButtonBg.beginPath();
+      this.soundButtonBg.moveTo(iconX - 3, iconY - 3);
+      this.soundButtonBg.lineTo(iconX + 5, iconY - 8);
+      this.soundButtonBg.lineTo(iconX + 5, iconY + 8);
+      this.soundButtonBg.lineTo(iconX - 3, iconY + 3);
+      this.soundButtonBg.closePath();
+      this.soundButtonBg.fillPath();
+      
+      if (!muted) {
+        // Sound waves (arcs emanating to the right)
+        this.soundButtonBg.lineStyle(2, iconColor, 0.8);
+        this.soundButtonBg.beginPath();
+        this.soundButtonBg.arc(iconX + 6, iconY, 5, -0.6, 0.6);
+        this.soundButtonBg.strokePath();
+        this.soundButtonBg.beginPath();
+        this.soundButtonBg.arc(iconX + 6, iconY, 9, -0.5, 0.5);
+        this.soundButtonBg.strokePath();
+      } else {
+        // X mark for muted
+        this.soundButtonBg.lineStyle(3, 0xff4444, 1);
+        this.soundButtonBg.lineBetween(iconX - 10, iconY - 8, iconX + 14, iconY + 8);
+      }
+    };
+    
+    // Initial draw based on current mute state
+    const isMuted = this.audioManager.getMuted();
+    drawSoundButton(false, isMuted);
+    
+    // Create hit area
+    const hitArea = this.scene.add.rectangle(btnX, btnY, btnSize, btnSize, 0xffffff, 0);
+    hitArea.setInteractive({ useHandCursor: true });
+    hitArea.setDepth(102);
+    
+    hitArea.on('pointerover', () => {
+      drawSoundButton(true, this.audioManager.getMuted());
+    });
+    hitArea.on('pointerout', () => {
+      drawSoundButton(false, this.audioManager.getMuted());
+    });
+    hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      this.audioManager.playSFX('ui_click');
+      const newMuted = this.audioManager.toggleMute();
+      drawSoundButton(true, newMuted);
+
     });
   }
 

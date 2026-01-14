@@ -53,63 +53,114 @@ export class CreepEffects {
 
   /**
    * Show dispel effect - boss clears all status effects
+   * Now with larger, more visible animation that scales with boss size
    */
-  showDispelEffect(x: number, y: number): void {
-    // Create expanding magic ring
-    const ring = this.scene.add.graphics();
-    ring.setPosition(x, y);
-    ring.lineStyle(4, 0xFFD700, 1);
-    ring.strokeCircle(0, -5, 20);
-    ring.setDepth(100);
-    ring.setScale(0.5);
+  showDispelEffect(x: number, y: number, sizeScale: number = 1.0): void {
+    const scale = Math.max(1.0, sizeScale);
+    
+    // DISPEL text floating up - very visible
+    const dispelText = this.scene.add.text(x, y - 50 * scale, 'DISPEL!', {
+      fontSize: `${Math.floor(20 * scale)}px`,
+      fontFamily: 'Arial Black',
+      color: '#FFD700',
+      stroke: '#8B4513',
+      strokeThickness: 4
+    }).setOrigin(0.5).setDepth(150);
     
     this.scene.tweens.add({
-      targets: ring,
-      scale: 2,
+      targets: dispelText,
+      y: dispelText.y - 40,
       alpha: 0,
-      duration: 400,
+      scale: 1.3,
+      duration: 1000,
       ease: 'Cubic.easeOut',
-      onComplete: () => ring.destroy()
+      onComplete: () => dispelText.destroy()
     });
     
-    // Create burst particles
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2;
+    // Create large expanding magic ring - multiple rings for visibility
+    for (let ringIndex = 0; ringIndex < 3; ringIndex++) {
+      const ring = this.scene.add.graphics();
+      ring.setPosition(x, y);
+      ring.lineStyle(5 - ringIndex, 0xFFD700, 1);
+      ring.strokeCircle(0, -5, 25 * scale);
+      ring.setDepth(100);
+      ring.setScale(0.3);
+      
+      this.scene.tweens.add({
+        targets: ring,
+        scale: 2.5 * scale,
+        alpha: 0,
+        duration: 600 + ringIndex * 150,
+        delay: ringIndex * 100,
+        ease: 'Cubic.easeOut',
+        onComplete: () => ring.destroy()
+      });
+    }
+    
+    // Create burst particles - more and larger
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * Math.PI * 2;
       const particle = this.scene.add.graphics();
       particle.setPosition(x, y - 5);
       particle.fillStyle(0xFFD700, 1);
-      particle.fillCircle(0, 0, 4);
+      particle.fillCircle(0, 0, 6 * scale);
+      // Add inner glow
+      particle.fillStyle(0xFFFFFF, 0.8);
+      particle.fillCircle(0, 0, 3 * scale);
       particle.setDepth(100);
       
-      const targetX = x + Math.cos(angle) * 40;
-      const targetY = y - 5 + Math.sin(angle) * 30;
+      const targetX = x + Math.cos(angle) * 60 * scale;
+      const targetY = y - 5 + Math.sin(angle) * 45 * scale;
       
       this.scene.tweens.add({
         targets: particle,
         x: targetX,
         y: targetY,
         alpha: 0,
-        scale: 0.5,
-        duration: 350,
+        scale: 0.3,
+        duration: 500,
         ease: 'Quad.easeOut',
         onComplete: () => particle.destroy()
       });
     }
     
-    // Create inner flash
+    // Create inner flash - larger and brighter
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y - 5);
-    flash.fillStyle(0xFFFFFF, 0.8);
-    flash.fillCircle(0, 0, 25);
+    flash.fillStyle(0xFFFFFF, 0.9);
+    flash.fillCircle(0, 0, 35 * scale);
+    flash.fillStyle(0xFFD700, 0.6);
+    flash.fillCircle(0, 0, 45 * scale);
     flash.setDepth(99);
     
     this.scene.tweens.add({
       targets: flash,
       alpha: 0,
-      scale: 1.5,
-      duration: 200,
+      scale: 2,
+      duration: 300,
       onComplete: () => flash.destroy()
     });
+    
+    // Add sparkle particles rising up
+    for (let i = 0; i < 8; i++) {
+      const sparkle = this.scene.add.graphics();
+      const offsetX = (Math.random() - 0.5) * 40 * scale;
+      sparkle.setPosition(x + offsetX, y);
+      sparkle.fillStyle(0xFFFFAA, 1);
+      sparkle.fillCircle(0, 0, 3);
+      sparkle.setDepth(101);
+      
+      this.scene.tweens.add({
+        targets: sparkle,
+        y: y - 60 - Math.random() * 40,
+        x: x + offsetX + (Math.random() - 0.5) * 30,
+        alpha: 0,
+        duration: 800 + Math.random() * 400,
+        delay: Math.random() * 200,
+        ease: 'Quad.easeOut',
+        onComplete: () => sparkle.destroy()
+      });
+    }
   }
 
   /**

@@ -35,6 +35,11 @@ export class Creep extends Phaser.GameObjects.Container {
   private bounceTime: number = 0;
   private faceDirection: number = 1;
   
+  // Boss-specific tracking
+  private bossFirstHit: boolean = false;
+  private bossPainThresholdTriggered: boolean = false;
+  private bossIsPained: boolean = false;
+  
   // Delegated handlers
   private statusEffects!: StatusEffectHandler;
   private abilities!: CreepAbilities;
@@ -112,8 +117,10 @@ export class Creep extends Phaser.GameObjects.Container {
       },
       onDispel: () => {
         // Dispel all status effects with immunity and show visual
-        if (this.statusEffects.dispelAll(GAME_CONFIG.DISPEL_IMMUNITY_DURATION)) {
-          this.effects.showDispelEffect(this.x, this.y);
+        // Use per-boss immunity duration if defined, otherwise fall back to global config
+        const immunityDuration = this.config.dispelImmunity ?? GAME_CONFIG.DISPEL_IMMUNITY_DURATION;
+        if (this.statusEffects.dispelAll(immunityDuration)) {
+          this.effects.showDispelEffect(this.x, this.y, this.config.sizeScale || 1.0);
         }
       }
     });
@@ -139,6 +146,11 @@ export class Creep extends Phaser.GameObjects.Container {
     this.isActive = true;
     this.isDying = false;
     this.bounceTime = Math.random() * Math.PI * 2;
+    
+    // Reset boss-specific tracking
+    this.bossFirstHit = false;
+    this.bossPainThresholdTriggered = false;
+    this.bossIsPained = false;
     
     // Initialize abilities
     this.abilities.initialize(this.config);
@@ -202,7 +214,8 @@ export class Creep extends Phaser.GameObjects.Container {
       1, // Force facing right
       state.jumpWarningTime > 0,
       state.isJumping,
-      state.isBurrowed
+      state.isBurrowed,
+      this.bossIsPained
     );
   }
 
@@ -410,7 +423,28 @@ export class Creep extends Phaser.GameObjects.Container {
     // Apply armor (reduced by armor reduction from Corrosive Acid)
     const effectiveArmor = Math.max(0, this.config.armor - this.statusEffects.getArmorReduction());
     const actualDamage = isMagic ? amount : Math.max(1, amount - effectiveArmor);
+    const previousHealth = this.currentHealth;
     this.currentHealth -= actualDamage;
+    
+    // Boss-specific events: dragon roar on first hit and at 25% health
+    if (this.isBoss() && actualDamage > 0) {
+      // First hit
+      if (!this.bossFirstHit) {
+        this.bossFirstHit = true;
+        this.emit('bossFirstHit', this);
+      }
+      
+      // 25% health threshold - dragon roar and enter pained state
+      const healthPercent = this.currentHealth / this.config.maxHealth;
+      const previousHealthPercent = previousHealth / this.config.maxHealth;
+      if (!this.bossPainThresholdTriggered && previousHealthPercent > 0.25 && healthPercent <= 0.25) {
+        this.bossPainThresholdTriggered = true;
+        this.bossIsPained = true;
+        this.emit('bossPainThreshold', this);
+        // Redraw to show pain state visual
+        this.redraw();
+      }
+    }
     
     this.updateHealthBar();
     this.effects.flashGraphics(this.bodyGraphics);
@@ -499,4 +533,9 @@ export class Creep extends Phaser.GameObjects.Container {
    * Check if this creep is a boss (immune to instant-kill abilities and strong CC)
    */
   isBoss(): boolean { return this.config.type.startsWith('boss'); }
+  
+  /**
+   * Check if boss is in pained state (below 25% health)
+   */
+  isPained(): boolean { return this.bossIsPained; }
 }

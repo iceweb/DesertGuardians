@@ -531,6 +531,7 @@ export class ResultsScene extends Phaser.Scene {
     
     hitArea.on('pointerup', () => {
       drawButton(true);
+      AudioManager.getInstance().playSFX('ui_click');
       onClick();
     });
   }
@@ -603,6 +604,7 @@ export class ResultsScene extends Phaser.Scene {
     
     hitArea.on('pointerup', () => {
       drawButton(true);
+      AudioManager.getInstance().playSFX('ui_click');
       onClick();
     });
     

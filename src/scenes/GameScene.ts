@@ -68,6 +68,7 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize creep manager with object pooling
     this.creepManager = new CreepManager(this, this.pathSystem);
+    this.setupCreepCallbacks();
 
     // Initialize wave manager
     this.waveManager = new WaveManager(this, this.creepManager);
@@ -122,7 +123,7 @@ export class GameScene extends Phaser.Scene {
     // Request a session token for global highscore submission
     HighscoreAPI.requestSession().then(token => {
       if (token) {
-        console.log('GameScene: Highscore session ready');
+
       } else {
         console.warn('GameScene: Could not get highscore session (offline mode)');
       }
@@ -137,7 +138,7 @@ export class GameScene extends Phaser.Scene {
     // Show initial next wave preview (wave 1)
     this.updateNextWavePreview();
 
-    console.log('GameScene: Desert Guardians initialized - Click anywhere to place towers!');
+
   }
 
   /**
@@ -151,16 +152,18 @@ export class GameScene extends Phaser.Scene {
     this.goldMineManager.onMineBuild = (_mine, cost) => {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
-      this.audioManager.playSFX('build_thud');
-      console.log(`Gold mine built! Cost: ${cost}g, Remaining gold: ${this.gameController.gold}`);
+      this.audioManager.playSFX('tower_place');
+      this.audioManager.playSFX('coins');
+
     };
 
     // Handle mine upgraded
     this.goldMineManager.onMineUpgraded = (_mine, cost) => {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
-      this.audioManager.playSFX('upgrade_tower');
-      console.log(`Gold mine upgraded! Cost: ${cost}g, Remaining gold: ${this.gameController.gold}`);
+      this.audioManager.playSFX('tower_place');
+      this.audioManager.playSFX('coins');
+
     };
   }
 
@@ -175,8 +178,8 @@ export class GameScene extends Phaser.Scene {
     this.towerManager.onTowerBuilt = (_tower, cost) => {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
-      this.audioManager.playSFX('build_thud');
-      console.log(`Tower built! Cost: ${cost}g, Remaining gold: ${this.gameController.gold}`);
+      this.audioManager.playSFX('tower_place');
+
     };
 
     // Handle tower sold
@@ -184,15 +187,15 @@ export class GameScene extends Phaser.Scene {
       this.gameController.addGold(refund);
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('sell_tower');
-      console.log(`Tower sold! Refund: ${refund}g, Total gold: ${this.gameController.gold}`);
+
     };
 
     // Handle tower upgraded
     this.towerManager.onTowerUpgraded = (_tower, cost) => {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
-      this.audioManager.playSFX('upgrade_tower');
-      console.log(`Tower upgraded! Cost: ${cost}g, Remaining gold: ${this.gameController.gold}`);
+      this.audioManager.playSFX('tower_place');
+
     };
   }
 
@@ -223,13 +226,13 @@ export class GameScene extends Phaser.Scene {
     this.waveManager.getGameSpeed = () => this.hudManager.getGameSpeed();
     
     this.waveManager.on('waveStart', (waveNumber: number) => {
-      console.log(`Wave ${waveNumber} started!`);
+
       this.gameController.setWave(waveNumber);
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
       // Update preview to show the NEXT wave (waveNumber + 1)
       this.updateNextWavePreview();
-      this.audioManager.playSFX('wave_start');
+      this.audioManager.playSFX('wavestart');
       
       // Track game start time when wave 1 begins
       if (waveNumber === 1) {
@@ -242,17 +245,17 @@ export class GameScene extends Phaser.Scene {
 
     // Final wave dramatic effects
     this.waveManager.on('finalWaveStarted', () => {
-      console.log('GameScene: Final wave started - notifying UIScene');
+
       this.registry.events.emit('final-wave-started');
     });
 
     this.waveManager.on('finalBossSpawning', () => {
-      console.log('GameScene: Final boss spawning - notifying UIScene');
+
       this.registry.events.emit('final-boss-spawning');
     });
 
     this.waveManager.on('waveComplete', async (waveNumber: number) => {
-      console.log(`GameScene.onWaveComplete: Wave ${waveNumber} complete!`);
+
       this.audioManager.playSFX('wave_complete');
       
       // Calculate wave bonus using centralized config
@@ -275,12 +278,13 @@ export class GameScene extends Phaser.Scene {
       if (mineIncome > 0) {
         this.gameController.addGold(mineIncome);
         this.hudManager.updateGold(this.gameController.gold);
-        console.log(`GameScene: Collected ${mineIncome}g from gold mines`);
+        this.audioManager.playSFX('coins');
+
       }
       
       // Automatically start next wave after a countdown (unless all waves done)
       if (waveNumber < this.waveManager.getTotalWaves()) {
-        console.log(`GameScene.onWaveComplete: Showing countdown for wave ${waveNumber + 1}`);
+
         this.hudManager.showCountdown(waveNumber + 1, () => {
           if (!this.gameController.gameOver) {
             this.waveManager.startWave();
@@ -290,7 +294,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('allWavesComplete', () => {
-      console.log('All waves complete! Victory!');
+
       this.gameController.markGameOver();
       this.audioManager.playSFX('victory');
       this.goToResults(true);
@@ -300,7 +304,6 @@ export class GameScene extends Phaser.Scene {
       this.gameController.addGold(goldReward);
       this.hudManager.showFloatingText(`+${goldReward}`, deathX, deathY, 0xffd700);
       this.hudManager.updateGold(this.gameController.gold);
-      this.audioManager.playSFX('gold_earn');
       
       // Emit event to UIScene
       this.registry.events.emit('creep-killed', goldReward);
@@ -311,7 +314,7 @@ export class GameScene extends Phaser.Scene {
       const damage = creep.isBoss() ? 2 : 1;
       const destroyed = this.gameController.takeDamage(damage);
       this.hudManager.updateCastleHP(this.gameController.castleHP);
-      this.audioManager.playSFX('creep_leak');
+      this.audioManager.playSFX('leaked');
       
       // Update castle damage visuals
       this.environment.updateCastleDamage(this.gameController.castleHP);
@@ -502,6 +505,23 @@ export class GameScene extends Phaser.Scene {
   private setupCombatCallbacks(): void {
     this.combatManager.onTowerFire = (branch: string) => {
       this.playTowerShootSound(branch);
+    };
+  }
+
+  /**
+   * Setup creep manager callbacks for boss events
+   */
+  private setupCreepCallbacks(): void {
+    // Dragon roar on first hit
+    this.creepManager.onBossFirstHit = (_creep) => {
+
+      this.audioManager.playSFX('dragon_roar');
+    };
+    
+    // Dragon roar and pain state at 25% health
+    this.creepManager.onBossPainThreshold = (_creep) => {
+
+      this.audioManager.playSFX('dragon_roar');
     };
   }
 

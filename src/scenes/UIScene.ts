@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from '../data/GameConfig';
 import { FinalWaveEffects } from '../managers/FinalWaveEffects';
+import { AudioManager } from '../managers/AudioManager';
+import { Creep } from '../objects/Creep';
 
 /**
  * UIScene - Overlay scene that runs parallel to GameScene
@@ -27,6 +29,9 @@ export class UIScene extends Phaser.Scene {
 
     // Create final wave effects manager
     this.finalWaveEffects = new FinalWaveEffects(this);
+    
+    // Wire up creeps getter for boss spotlight tracking
+    this.finalWaveEffects.getCreeps = () => this.getCreepsFromGameScene();
 
     // Listen for game events via registry
     this.registry.events.on('castle-damaged', this.onCastleDamaged, this);
@@ -37,6 +42,17 @@ export class UIScene extends Phaser.Scene {
     this.registry.events.on('game-over', this.onGameOver, this);
     
     console.log('UIScene: UI overlay ready');
+  }
+  
+  /**
+   * Get creeps from the GameScene for boss tracking
+   */
+  private getCreepsFromGameScene(): Creep[] {
+    const gameScene = this.scene.get('GameScene') as { getCreepManager?: () => { getActiveCreeps(): Creep[] } };
+    if (gameScene && gameScene.getCreepManager) {
+      return gameScene.getCreepManager().getActiveCreeps();
+    }
+    return [];
   }
 
   /**
@@ -72,10 +88,11 @@ export class UIScene extends Phaser.Scene {
 
   /**
    * Start dramatic visual effects for the final wave
+   * Note: Visual effects now start when boss spawns, not when wave starts
    */
   private onFinalWaveStarted(): void {
-    console.log('UIScene: Final wave started - activating dramatic effects');
-    this.finalWaveEffects.startFinalWaveEffects();
+    console.log('UIScene: Final wave started - waiting for boss spawn');
+    // Visual effects now start when boss spawns via onFinalBossSpawning
   }
 
   /**
@@ -83,6 +100,9 @@ export class UIScene extends Phaser.Scene {
    */
   private onFinalBossSpawning(): void {
     console.log('UIScene: Final boss spawning - intensifying effects');
+    // Play boss entry sound and start visual effects
+    AudioManager.getInstance().playSFX('boss_level_entry');
+    this.finalWaveEffects.startFinalWaveEffects();
     this.finalWaveEffects.playBossSpawnEffect();
   }
 
@@ -95,7 +115,8 @@ export class UIScene extends Phaser.Scene {
   }
 
   update(_time: number, _delta: number): void {
-    // Update UI elements if needed
+    // Update final wave effects (for boss spotlight tracking)
+    this.finalWaveEffects.update();
   }
 
   shutdown(): void {

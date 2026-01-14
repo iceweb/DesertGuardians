@@ -37,9 +37,15 @@ export class MenuScene extends Phaser.Scene {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
-    // Initialize audio manager
+    // Initialize audio manager and start background music
     this.audioManager = AudioManager.getInstance();
     this.audioManager.initialize();
+    this.audioManager.playBGM();
+    
+    // Add global click listener to unlock audio (browser autoplay policy)
+    this.input.once('pointerdown', () => {
+      this.audioManager.unlockAudio();
+    });
 
     // Draw elaborate background
     this.drawBackground(width, height);
@@ -654,6 +660,8 @@ export class MenuScene extends Phaser.Scene {
 
   private startGame(): void {
     console.log('MenuScene: Starting new game...');
+    // Unlock audio on user interaction (browser autoplay policy)
+    this.audioManager.unlockAudio();
     // Stop any existing game scene first
     if (this.scene.isActive('GameScene')) {
       this.scene.stop('GameScene');
@@ -1022,6 +1030,17 @@ export class MenuScene extends Phaser.Scene {
     this.settingsContainer = this.add.container(width / 2, height / 2);
     this.settingsContainer.setDepth(100);
     
+    // Invisible click blocker to prevent clicks from reaching buttons behind the modal
+    const clickBlocker = this.add.rectangle(0, 0, 420, 320, 0x000000, 0);
+    clickBlocker.setInteractive();
+    clickBlocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+    });
+    clickBlocker.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+    });
+    this.settingsContainer.add(clickBlocker);
+    
     // Background panel with 3D effect
     const bg = this.add.graphics();
     
@@ -1251,37 +1270,10 @@ export class MenuScene extends Phaser.Scene {
     };
     updateFill(initialValue);
     
-    // Drag handling
+    // Drag handling - allow dragging from anywhere on the slider
     let isDragging = false;
     
-    handle.on('pointerdown', () => {
-      isDragging = true;
-    });
-    
-    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (!isDragging || !this.settingsContainer) return;
-      
-      // Convert to container-local coordinates
-      const localX = pointer.x - this.settingsContainer.x;
-      const clampedX = Phaser.Math.Clamp(localX, trackX, trackX + trackWidth);
-      const value = (clampedX - trackX) / trackWidth;
-      
-      handle.setX(clampedX);
-      valueText.setText(`${Math.round(value * 100)}%`);
-      updateFill(value);
-      onChange(value);
-    });
-    
-    this.input.on('pointerup', () => {
-      isDragging = false;
-    });
-    
-    // Click on track to jump
-    const trackHitArea = this.add.rectangle(trackX + trackWidth / 2, y, trackWidth, 30, 0x000000, 0);
-    trackHitArea.setInteractive({ useHandCursor: true });
-    this.settingsContainer.add(trackHitArea);
-    
-    trackHitArea.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    const updateSliderFromPointer = (pointer: Phaser.Input.Pointer) => {
       if (!this.settingsContainer) return;
       const localX = pointer.x - this.settingsContainer.x;
       const clampedX = Phaser.Math.Clamp(localX, trackX, trackX + trackWidth);
@@ -1291,7 +1283,47 @@ export class MenuScene extends Phaser.Scene {
       valueText.setText(`${Math.round(value * 100)}%`);
       updateFill(value);
       onChange(value);
-      this.audioManager.playSFX('ui_click');
+    };
+    
+    // Start drag on handle - stop propagation to prevent clicks on elements behind
+    handle.on('pointerdown', (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      isDragging = true;
+      updateSliderFromPointer(pointer);
+    });
+    
+    // Track pointer movement anywhere in the scene
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (!isDragging) return;
+      updateSliderFromPointer(pointer);
+    });
+    
+    // Stop dragging on pointer up anywhere - but block the event from propagating if we were dragging
+    this.input.on('pointerup', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+      if (isDragging) {
+        isDragging = false;
+        // If we were dragging and released over any interactive object, 
+        // we need to prevent that object from receiving a click
+        // This is handled by tracking the drag state
+      } else {
+        isDragging = false;
+      }
+    });
+    
+    // Also stop dragging if pointer leaves the game
+    this.input.on('pointerupoutside', () => {
+      isDragging = false;
+    });
+    
+    // Click on track to jump AND start dragging - stop propagation
+    const trackHitArea = this.add.rectangle(trackX + trackWidth / 2, y, trackWidth, 30, 0x000000, 0);
+    trackHitArea.setInteractive({ useHandCursor: true });
+    this.settingsContainer.add(trackHitArea);
+    
+    trackHitArea.on('pointerdown', (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
+      event.stopPropagation();
+      isDragging = true;
+      updateSliderFromPointer(pointer);
     });
   }
 
