@@ -3,6 +3,19 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   // Use relative paths so the game works from any subdirectory
   base: './',
+  
+  // Vitest configuration
+  test: {
+    globals: true,
+    environment: 'node',
+    include: ['src/**/*.{test,spec}.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov', 'html'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.{test,spec}.ts', 'src/main.ts'],
+    },
+  },
   server: {
     // Keep the server running even if there are errors
     hmr: {

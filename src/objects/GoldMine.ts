@@ -110,6 +110,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
     return MINE_CONFIGS[nextLevel].buildCost;
   }
 
+  /* eslint-disable max-lines-per-function */
   playIncomeAnimation(): Promise<void> {
     return new Promise((resolve) => {
       const income = this.getIncomePerWave();
@@ -142,7 +143,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
         targets: rails,
         alpha: 0.8,
         duration: 200,
-        ease: 'Quad.Out'
+        ease: 'Quad.Out',
       });
 
       this.scene.tweens.add({
@@ -153,23 +154,24 @@ export class GoldMine extends Phaser.GameObjects.Container {
         duration: 200,
         ease: 'Quad.Out',
         onComplete: () => {
-
           this.scene.tweens.add({
             targets: wagon,
             y: this.y + 55,
             duration: 600,
             ease: 'Quad.Out',
             onComplete: () => {
-
               this.createWagonGoldBurst(wagon.x, wagon.y);
 
-              const text = this.scene.add.text(wagon.x, wagon.y - 25, `+${income}g`, {
-                fontFamily: 'Arial Black',
-                fontSize: '22px',
-                color: '#ffd700',
-                stroke: '#000000',
-                strokeThickness: 4
-              }).setOrigin(0.5).setDepth(301);
+              const text = this.scene.add
+                .text(wagon.x, wagon.y - 25, `+${income}g`, {
+                  fontFamily: 'Arial Black',
+                  fontSize: '22px',
+                  color: '#ffd700',
+                  stroke: '#000000',
+                  strokeThickness: 4,
+                })
+                .setOrigin(0.5)
+                .setDepth(301);
 
               this.scene.tweens.add({
                 targets: text,
@@ -181,7 +183,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
                 ease: 'Cubic.Out',
                 onComplete: () => {
                   text.destroy();
-                }
+                },
               });
 
               this.scene.time.delayedCall(400, () => {
@@ -195,7 +197,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
                   ease: 'Quad.In',
                   onComplete: () => {
                     wagon.destroy();
-                  }
+                  },
                 });
 
                 this.scene.tweens.add({
@@ -207,7 +209,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
                   onComplete: () => {
                     rails.destroy();
                     resolve();
-                  }
+                  },
                 });
               });
 
@@ -217,11 +219,11 @@ export class GoldMine extends Phaser.GameObjects.Container {
                 scaleY: 1.1,
                 duration: 100,
                 yoyo: true,
-                ease: 'Quad.Out'
+                ease: 'Quad.Out',
               });
-            }
+            },
           });
-        }
+        },
       });
     });
   }
@@ -252,7 +254,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
         targets: coin,
         x: targetX,
         duration: 600 + Math.random() * 200,
-        ease: 'Quad.Out'
+        ease: 'Quad.Out',
       });
 
       this.scene.tweens.add({
@@ -267,9 +269,9 @@ export class GoldMine extends Phaser.GameObjects.Container {
             alpha: 0,
             duration: 400,
             ease: 'Quad.In',
-            onComplete: () => coin.destroy()
+            onComplete: () => coin.destroy(),
           });
-        }
+        },
       });
 
       this.scene.tweens.add({
@@ -278,7 +280,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
         duration: 150,
         yoyo: true,
         repeat: 3,
-        ease: 'Linear'
+        ease: 'Linear',
       });
     }
 
@@ -291,10 +293,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
         sparkle.fillTriangle(-3, 0, 0, 5, 3, 0);
         sparkle.fillTriangle(0, -3, -5, 0, 0, 3);
         sparkle.fillTriangle(0, -3, 5, 0, 0, 3);
-        sparkle.setPosition(
-          x + (Math.random() - 0.5) * 40,
-          y - Math.random() * 30
-        );
+        sparkle.setPosition(x + (Math.random() - 0.5) * 40, y - Math.random() * 30);
         sparkle.setDepth(299);
         sparkle.setScale(0.5 + Math.random() * 0.5);
 
@@ -306,35 +305,33 @@ export class GoldMine extends Phaser.GameObjects.Container {
           scaleY: 0,
           duration: 400,
           ease: 'Quad.Out',
-          onComplete: () => sparkle.destroy()
+          onComplete: () => sparkle.destroy(),
         });
       });
     }
   }
 
   private playBuildAnimation(): void {
-
     this.graphics.setScale(0);
     this.scene.tweens.add({
       targets: this.graphics,
       scaleX: 1,
       scaleY: 1,
       duration: 300,
-      ease: 'Back.Out'
+      ease: 'Back.Out',
     });
 
     this.createDustCloud();
   }
 
   private playUpgradeAnimation(): void {
-
     this.scene.tweens.add({
       targets: this.graphics,
       scaleX: 1.2,
       scaleY: 1.2,
       duration: 150,
       yoyo: true,
-      ease: 'Quad.Out'
+      ease: 'Quad.Out',
     });
 
     this.createSparkles();
@@ -345,10 +342,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
       const dust = this.scene.add.graphics();
       dust.fillStyle(0x8b7355, 0.6);
       dust.fillCircle(0, 0, 6 + Math.random() * 4);
-      dust.setPosition(
-        this.x + (Math.random() - 0.5) * 40,
-        this.y + Math.random() * 20
-      );
+      dust.setPosition(this.x + (Math.random() - 0.5) * 40, this.y + Math.random() * 20);
       dust.setDepth(14);
 
       this.scene.tweens.add({
@@ -359,7 +353,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
         scaleY: 1.5,
         duration: 500 + Math.random() * 200,
         ease: 'Quad.Out',
-        onComplete: () => dust.destroy()
+        onComplete: () => dust.destroy(),
       });
     }
   }
@@ -371,10 +365,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
 
       sparkle.fillTriangle(-3, 0, 0, -4, 3, 0);
       sparkle.fillTriangle(-3, 0, 0, 4, 3, 0);
-      sparkle.setPosition(
-        this.x + (Math.random() - 0.5) * 50,
-        this.y + (Math.random() - 0.5) * 50
-      );
+      sparkle.setPosition(this.x + (Math.random() - 0.5) * 50, this.y + (Math.random() - 0.5) * 50);
       sparkle.setDepth(296);
 
       this.scene.tweens.add({
@@ -384,7 +375,7 @@ export class GoldMine extends Phaser.GameObjects.Container {
         scaleY: 0,
         duration: 400 + Math.random() * 200,
         ease: 'Quad.Out',
-        onComplete: () => sparkle.destroy()
+        onComplete: () => sparkle.destroy(),
       });
     }
   }

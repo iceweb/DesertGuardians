@@ -6,14 +6,13 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   preload(): void {
-
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
     const loadingText = this.add.text(width / 2, height / 2 - 50, 'Loading...', {
       fontFamily: 'Arial',
       fontSize: '24px',
-      color: '#ffffff'
+      color: '#ffffff',
     });
     loadingText.setOrigin(0.5);
 
@@ -41,7 +40,6 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   private createPlaceholderAssets(): void {
-
     const towerGraphics = this.make.graphics({ x: 0, y: 0 });
     towerGraphics.fillStyle(0x8b4513);
     towerGraphics.fillRect(0, 64, 64, 64);
@@ -72,12 +70,9 @@ export class PreloadScene extends Phaser.Scene {
     buildPadGraphics.strokeRect(2, 2, 60, 60);
     buildPadGraphics.generateTexture('buildpad_placeholder', 64, 64);
     buildPadGraphics.destroy();
-
-    console.log('PreloadScene: Placeholder assets created');
   }
 
   create(): void {
-    console.log('PreloadScene: All assets loaded, transitioning to MenuScene');
     this.scene.start('MenuScene');
   }
 }

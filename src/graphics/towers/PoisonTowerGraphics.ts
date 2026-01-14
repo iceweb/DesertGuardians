@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export function drawPoisonTower(g: Phaser.GameObjects.Graphics, level: number): void {
-
   if (level === 1) {
     g.fillStyle(0x00ff00, 0.05);
     g.fillCircle(0, -25, 40);
@@ -26,7 +25,6 @@ export function drawPoisonTower(g: Phaser.GameObjects.Graphics, level: number): 
   const towerHeight = 40;
 
   if (level === 1) {
-
     g.fillStyle(0x4a3a2a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 20);
     g.fillStyle(0x3a2a1a, 1);
@@ -67,7 +65,6 @@ export function drawPoisonTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillCircle(-4, -towerHeight - 8, 2);
     g.fillCircle(3, -towerHeight - 10, 1.5);
   } else if (level === 2) {
-
     g.fillStyle(0x4a3a2a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 22);
     g.fillStyle(0x3a2a1a, 1);
@@ -144,7 +141,6 @@ export function drawPoisonTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.lineTo(25, -25);
     g.strokePath();
   } else {
-
     g.fillStyle(0x4a3a2a, 1);
     g.fillRect(-baseWidth, 3, baseWidth * 2, 26);
     g.fillStyle(0x3a2a1a, 1);

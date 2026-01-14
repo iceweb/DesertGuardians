@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export function drawRockCannonTower(g: Phaser.GameObjects.Graphics, level: number): void {
-
   g.fillStyle(0x000000, 0.3);
   g.fillEllipse(0, 28, 55, 20);
 
@@ -9,7 +8,6 @@ export function drawRockCannonTower(g: Phaser.GameObjects.Graphics, level: numbe
   const towerHeight = 35;
 
   if (level === 1) {
-
     g.fillStyle(0x6a5a4a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 22);
     g.fillStyle(0x7a6a5a, 1);
@@ -34,7 +32,6 @@ export function drawRockCannonTower(g: Phaser.GameObjects.Graphics, level: numbe
     g.fillCircle(-12, -8, 5);
     g.fillCircle(-6, -10, 4);
   } else if (level === 2) {
-
     g.fillStyle(0x6a5a4a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 26);
     g.fillStyle(0x7a6a5a, 1);
@@ -73,7 +70,6 @@ export function drawRockCannonTower(g: Phaser.GameObjects.Graphics, level: numbe
     g.fillCircle(14, -8, 5);
     g.fillCircle(9, -11, 4);
   } else {
-
     g.fillStyle(0x7a6a5a, 1);
     g.fillRect(-baseWidth, 3, baseWidth * 2, 30);
     g.fillStyle(0x8a7a6a, 1);

@@ -1,5 +1,3 @@
-
-
 const API_URL = 'https://iceweb.ch/dg/api.php';
 const SECRET_KEY = 'DesertGuardians2026SecretKey!@#$';
 
@@ -55,7 +53,7 @@ export class HighscoreAPI {
     try {
       const response = await fetch(`${API_URL}?action=session`, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       });
 
       if (!response.ok) {
@@ -69,7 +67,6 @@ export class HighscoreAPI {
       if (data.success && data.session_token) {
         this.sessionToken = data.session_token;
         this.isOnline = true;
-        console.log('HighscoreAPI: Session token received');
         return this.sessionToken;
       } else {
         console.warn('HighscoreAPI: Session request failed:', data.error);
@@ -86,7 +83,7 @@ export class HighscoreAPI {
     try {
       const response = await fetch(API_URL, {
         method: 'GET',
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       });
 
       if (!response.ok) {
@@ -110,7 +107,9 @@ export class HighscoreAPI {
     }
   }
 
-  static async submitScore(submission: ScoreSubmission): Promise<{ success: boolean; error?: string }> {
+  static async submitScore(
+    submission: ScoreSubmission
+  ): Promise<{ success: boolean; error?: string }> {
     if (!this.sessionToken) {
       console.warn('HighscoreAPI: No session token, cannot submit score');
       return { success: false, error: 'No session token. Score saved locally only.' };
@@ -127,16 +126,16 @@ export class HighscoreAPI {
       const payload = {
         ...submission,
         sessionToken: this.sessionToken,
-        hash
+        hash,
       };
 
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          Accept: 'application/json',
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       const data: SubmitResponse = await response.json();
@@ -145,7 +144,6 @@ export class HighscoreAPI {
 
       if (data.success) {
         this.isOnline = true;
-        console.log('HighscoreAPI: Score submitted successfully, id:', data.id);
         return { success: true };
       } else {
         console.warn('HighscoreAPI: Score submission failed:', data.error);
@@ -171,7 +169,7 @@ export class HighscoreAPI {
 
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
   static getSessionToken(): string | null {

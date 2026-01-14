@@ -43,11 +43,7 @@ export class ArcherAnimator {
     this.bowGraphics = scene.add.graphics();
     this.arrowGraphics = scene.add.graphics();
 
-    this.archerContainer.add([
-      this.archerGraphics,
-      this.bowGraphics,
-      this.arrowGraphics
-    ]);
+    this.archerContainer.add([this.archerGraphics, this.bowGraphics, this.arrowGraphics]);
 
     this.container.add([this.baseGraphics, this.archerContainer]);
 
@@ -72,7 +68,8 @@ export class ArcherAnimator {
       const rotationSpeed = 6.0;
 
       if (Math.abs(angleDiff) > 0.01) {
-        this.archerAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
+        this.archerAngle +=
+          Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
         this.archerAngle = Phaser.Math.Angle.Wrap(this.archerAngle);
       }
     }
@@ -80,7 +77,6 @@ export class ArcherAnimator {
     if (this.isDrawing) {
       this.bowDrawProgress = Math.min(1, this.bowDrawProgress + this.drawSpeed * dt);
     } else {
-
       this.bowDrawProgress = Math.max(0, this.bowDrawProgress - 2.0 * dt);
     }
 
@@ -122,7 +118,6 @@ export class ArcherAnimator {
   }
 
   onFire(): { x: number; y: number } {
-
     this.arrowReleaseTimer = 0.15;
     this.bowDrawProgress = 0;
 
@@ -137,7 +132,6 @@ export class ArcherAnimator {
   }
 
   getProjectileSpawnOffset(): { x: number; y: number } {
-
     const bowLocalX = this.BOW_LOCAL_X;
     const bowLocalY = this.BOW_LOCAL_Y;
 
@@ -151,7 +145,7 @@ export class ArcherAnimator {
 
     return {
       x: rotatedX,
-      y: rotatedY + archerY
+      y: rotatedY + archerY,
     };
   }
 
@@ -174,7 +168,6 @@ export class ArcherAnimator {
     const towerHeight = 42;
 
     if (level === 1) {
-
       g.fillStyle(0x8b5a2b, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 18);
       g.fillStyle(0x9a6a3b, 1);
@@ -184,7 +177,6 @@ export class ArcherAnimator {
         g.lineBetween(i, 10, i, 24);
       }
     } else if (level === 2) {
-
       g.fillStyle(0x8b7355, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 22);
       g.fillStyle(0x9a8265, 1);
@@ -194,7 +186,6 @@ export class ArcherAnimator {
       g.lineBetween(-10, 10, -10, 28);
       g.lineBetween(10, 10, 10, 28);
     } else {
-
       g.fillStyle(0xa89375, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 26);
       g.fillStyle(0xc8b395, 1);
@@ -321,25 +312,20 @@ export class ArcherAnimator {
 
     const bodyY = 10;
 
-    const cloakColor = this.level === 1 ? 0x2d5016 :
-                       this.level === 2 ? 0x1a4d1a : 0x0d3d0d;
-    const cloakDark = this.level === 1 ? 0x1d4010 :
-                      this.level === 2 ? 0x0d3d0d : 0x062d06;
-    const cloakLight = this.level === 1 ? 0x3d6026 :
-                       this.level === 2 ? 0x2a5d2a : 0x1d4d1d;
+    const cloakColor = this.level === 1 ? 0x2d5016 : this.level === 2 ? 0x1a4d1a : 0x0d3d0d;
+    const cloakDark = this.level === 1 ? 0x1d4010 : this.level === 2 ? 0x0d3d0d : 0x062d06;
+    const cloakLight = this.level === 1 ? 0x3d6026 : this.level === 2 ? 0x2a5d2a : 0x1d4d1d;
     const skinColor = 0xdeb887;
     const leatherColor = 0x5c4033;
     const leatherDark = 0x3a2820;
     const metalColor = 0x6a6a6a;
 
     if (this.isCheeringActive) {
-
       this.drawCheeringArcher(g, bodyY, cloakColor, cloakDark, cloakLight, skinColor);
       return;
     }
 
     if (this.level === 1) {
-
       g.fillStyle(cloakColor, 1);
       g.fillRect(-18, bodyY - 6, 12, 8);
       g.fillStyle(skinColor, 1);
@@ -372,9 +358,7 @@ export class ArcherAnimator {
 
       g.fillStyle(cloakLight, 1);
       g.fillCircle(-2, bodyY - 6, 4);
-
     } else if (this.level === 2) {
-
       g.fillStyle(leatherColor, 1);
       g.fillRect(-20, bodyY - 7, 14, 9);
       g.fillStyle(leatherDark, 1);
@@ -418,9 +402,7 @@ export class ArcherAnimator {
       g.fillPath();
       g.fillStyle(cloakLight, 1);
       g.fillCircle(-3, bodyY - 8, 5);
-
     } else {
-
       g.fillStyle(cloakColor, 1);
       g.fillRect(-22, bodyY - 8, 16, 10);
       g.fillStyle(metalColor, 1);
@@ -479,11 +461,9 @@ export class ArcherAnimator {
     _cloakLight: number,
     skinColor: number
   ): void {
-
     const pumpOffset = this.cheerArmAngle * 8;
 
-    const bowWood = this.level === 1 ? 0x8b4513 :
-                    this.level === 2 ? 0x654321 : 0x4a3728;
+    const bowWood = this.level === 1 ? 0x8b4513 : this.level === 2 ? 0x654321 : 0x4a3728;
 
     g.fillStyle(cloakColor, 1);
     g.fillEllipse(0, bodyY + 6, 28, 18);
@@ -555,7 +535,6 @@ export class ArcherAnimator {
     yEnd: number,
     curveDepth: number
   ): void {
-
     const segments = 8;
     const points: { x: number; y: number }[] = [];
 
@@ -580,17 +559,14 @@ export class ArcherAnimator {
     g.clear();
 
     if (this.isCheeringActive) {
-
       return;
     }
 
     const bodyY = 10;
     const bowX = -20;
 
-    const bowWood = this.level === 1 ? 0x8b4513 :
-                    this.level === 2 ? 0x654321 : 0x4a3728;
-    const bowLight = this.level === 1 ? 0xa05a23 :
-                     this.level === 2 ? 0x755331 : 0x5a4738;
+    const bowWood = this.level === 1 ? 0x8b4513 : this.level === 2 ? 0x654321 : 0x4a3728;
+    const bowLight = this.level === 1 ? 0xa05a23 : this.level === 2 ? 0x755331 : 0x5a4738;
     const stringColor = this.level >= 3 ? 0xffd700 : 0xcccccc;
 
     const bowLength = 18 + this.level * 4;

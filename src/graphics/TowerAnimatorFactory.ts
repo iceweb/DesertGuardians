@@ -26,13 +26,13 @@ type AnimatorConstructor = new (
 ) => TowerAnimator;
 
 const ANIMATOR_MAP: Record<string, AnimatorConstructor> = {
-  'rapidfire': RapidFireAnimator,
-  'archer': ArcherAnimator,
-  'rockcannon': CannonAnimator,
-  'sniper': SniperAnimator,
-  'icetower': IceAnimator,
-  'poison': PoisonAnimator,
-  'aura': AuraAnimator,
+  rapidfire: RapidFireAnimator,
+  archer: ArcherAnimator,
+  rockcannon: CannonAnimator,
+  sniper: SniperAnimator,
+  icetower: IceAnimator,
+  poison: PoisonAnimator,
+  aura: AuraAnimator,
 };
 
 export class TowerAnimatorFactory {
@@ -42,7 +42,11 @@ export class TowerAnimatorFactory {
     this.scene = scene;
   }
 
-  create(branch: TowerBranch, container: Phaser.GameObjects.Container, level: number): TowerAnimator | null {
+  create(
+    branch: TowerBranch,
+    container: Phaser.GameObjects.Container,
+    level: number
+  ): TowerAnimator | null {
     const AnimatorClass = ANIMATOR_MAP[branch];
 
     if (!AnimatorClass) {

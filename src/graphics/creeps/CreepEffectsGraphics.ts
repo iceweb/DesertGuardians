@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export class CreepEffectsGraphics {
-
   static drawShield(
     g: Phaser.GameObjects.Graphics,
     bounceTime: number,
@@ -14,21 +13,21 @@ export class CreepEffectsGraphics {
     const shimmer = Math.sin(bounceTime * 10) * 0.15;
     const pulse = 1 + Math.sin(bounceTime * 5) * 0.05;
 
-    g.fillStyle(0x00BFFF, 0.15 + shimmer);
+    g.fillStyle(0x00bfff, 0.15 + shimmer);
     g.fillCircle(0, -5, 38 * pulse);
 
-    g.lineStyle(3, 0x00BFFF, 0.6 + shimmer);
+    g.lineStyle(3, 0x00bfff, 0.6 + shimmer);
     g.strokeCircle(0, -5, 32 * pulse);
 
-    g.lineStyle(2, 0x87CEEB, 0.4);
+    g.lineStyle(2, 0x87ceeb, 0.4);
     g.strokeCircle(0, -5, 28 * pulse);
 
     const indicatorY = -42;
     for (let i = 0; i < shieldHitsRemaining; i++) {
       const indicatorX = (i - 1) * 10;
-      g.fillStyle(0x00FFFF, 0.9);
+      g.fillStyle(0x00ffff, 0.9);
       g.fillCircle(indicatorX, indicatorY, 4);
-      g.fillStyle(0xFFFFFF, 0.7);
+      g.fillStyle(0xffffff, 0.7);
       g.fillCircle(indicatorX - 1, indicatorY - 1, 1.5);
     }
   }
@@ -46,7 +45,7 @@ export class CreepEffectsGraphics {
       const intensity = slowAmount;
       const pulse = Math.sin(currentTime * 0.005) * 0.2;
 
-      g.fillStyle(0x87CEEB, 0.3 + pulse);
+      g.fillStyle(0x87ceeb, 0.3 + pulse);
       g.fillCircle(0, -5, 30);
 
       const numCrystals = Math.floor(intensity * 6) + 2;
@@ -56,7 +55,7 @@ export class CreepEffectsGraphics {
         const crystalX = Math.cos(angle) * dist;
         const crystalY = -5 + Math.sin(angle) * dist * 0.6;
 
-        g.fillStyle(0xADD8E6, 0.8);
+        g.fillStyle(0xadd8e6, 0.8);
         g.beginPath();
         g.moveTo(crystalX, crystalY - 6);
         g.lineTo(crystalX + 3, crystalY);
@@ -65,16 +64,16 @@ export class CreepEffectsGraphics {
         g.closePath();
         g.fillPath();
 
-        g.fillStyle(0xFFFFFF, 0.6);
+        g.fillStyle(0xffffff, 0.6);
         g.fillCircle(crystalX - 1, crystalY - 2, 1.5);
       }
     }
 
-    const activePoisonStacks = poisonStacks.filter(s => currentTime < s.endTime);
+    const activePoisonStacks = poisonStacks.filter((s) => currentTime < s.endTime);
     if (activePoisonStacks.length > 0) {
       const intensity = Math.min(activePoisonStacks.length / 3, 1);
 
-      g.fillStyle(0x00FF00, 0.1 + intensity * 0.1);
+      g.fillStyle(0x00ff00, 0.1 + intensity * 0.1);
       g.fillCircle(0, -5, 25);
 
       const numBubbles = activePoisonStacks.length * 2 + 2;
@@ -86,14 +85,14 @@ export class CreepEffectsGraphics {
         const bubbleAlpha = 0.7 - ((bubbleTime * 10) % 35) / 50;
 
         if (bubbleAlpha > 0) {
-          g.fillStyle(0x32CD32, bubbleAlpha);
+          g.fillStyle(0x32cd32, bubbleAlpha);
           g.fillCircle(bubbleX, bubbleY, bubbleSize);
-          g.fillStyle(0x90EE90, bubbleAlpha * 0.7);
+          g.fillStyle(0x90ee90, bubbleAlpha * 0.7);
           g.fillCircle(bubbleX - 1, bubbleY - 1, bubbleSize * 0.4);
         }
       }
 
-      g.fillStyle(0x228B22, 0.5);
+      g.fillStyle(0x228b22, 0.5);
       for (let i = 0; i < activePoisonStacks.length; i++) {
         const dripX = -10 + i * 10;
         const dripPhase = (currentTime * 0.004 + i) % 1;
@@ -110,26 +109,49 @@ export class CreepEffectsGraphics {
   ): void {
     g.clear();
 
-    let baseColor = 0x8B4513;
+    let baseColor = 0x8b4513;
     switch (creepType) {
-      case 'runner': baseColor = 0x6495ED; break;
-      case 'tank': baseColor = 0x696969; break;
+      case 'runner':
+        baseColor = 0x6495ed;
+        break;
+      case 'tank':
+        baseColor = 0x696969;
+        break;
       case 'boss':
       case 'boss_1':
       case 'boss_2':
       case 'boss_3':
       case 'boss_4':
       case 'boss_5':
-        baseColor = 0x4B0082; break;
-      case 'jumper': baseColor = 0x32CD32; break;
-      case 'shielded': baseColor = 0x9400D3; break;
-      case 'flying': baseColor = 0x4169E1; break;
-      case 'digger': baseColor = 0x8B4513; break;
-      case 'ghost': baseColor = 0x9370DB; break;
-      case 'broodmother': baseColor = 0x228B22; break;
-      case 'baby': baseColor = 0x90EE90; break;
-      case 'flame': baseColor = 0xFF4500; break;
-      case 'plaguebearer': baseColor = 0x00FF88; break;
+        baseColor = 0x4b0082;
+        break;
+      case 'jumper':
+        baseColor = 0x32cd32;
+        break;
+      case 'shielded':
+        baseColor = 0x9400d3;
+        break;
+      case 'flying':
+        baseColor = 0x4169e1;
+        break;
+      case 'digger':
+        baseColor = 0x8b4513;
+        break;
+      case 'ghost':
+        baseColor = 0x9370db;
+        break;
+      case 'broodmother':
+        baseColor = 0x228b22;
+        break;
+      case 'baby':
+        baseColor = 0x90ee90;
+        break;
+      case 'flame':
+        baseColor = 0xff4500;
+        break;
+      case 'plaguebearer':
+        baseColor = 0x00ff88;
+        break;
     }
 
     const numParticles = 12;
@@ -145,14 +167,14 @@ export class CreepEffectsGraphics {
         g.fillStyle(baseColor, alpha);
         g.fillCircle(x, y, size);
 
-        g.fillStyle(0xFFFFFF, alpha * 0.7);
+        g.fillStyle(0xffffff, alpha * 0.7);
         g.fillCircle(x, y, size * 0.4);
       }
     }
 
     const flashSize = (1 - deathProgress) * 20;
     if (flashSize > 0) {
-      g.fillStyle(0xFFFFFF, (1 - deathProgress) * 0.8);
+      g.fillStyle(0xffffff, (1 - deathProgress) * 0.8);
       g.fillCircle(0, -5, flashSize);
     }
   }

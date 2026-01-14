@@ -28,7 +28,6 @@ export class CombatManager {
     const creeps = this.creepManager.getActiveCreeps();
 
     for (const tower of towers) {
-
       if (tower.isAuraTower()) {
         tower.update(delta);
         continue;
@@ -51,7 +50,6 @@ export class CombatManager {
     const creeps = this.creepManager.getActiveCreeps();
 
     for (const tower of towers) {
-
       if (tower.isAuraTower()) continue;
 
       if (!tower.canFire(currentTime)) continue;
@@ -59,7 +57,6 @@ export class CombatManager {
       const target = this.findTarget(tower, creeps);
 
       if (target) {
-
         tower.onFire();
 
         const spawnOffset = tower.getProjectileSpawnOffset();
@@ -72,7 +69,7 @@ export class CombatManager {
           isMagic: tower.isMagic(),
           branch: tower.getBranch(),
           stats: tower.getConfig().stats,
-          level: tower.getLevel()
+          level: tower.getLevel(),
         };
 
         const projectile = this.projectileManager.fire(spawnX, spawnY, target, config, tower);
@@ -85,8 +82,16 @@ export class CombatManager {
     }
   }
 
+  /* eslint-disable complexity */
   private findTarget(
-    tower: { x: number; y: number; isInRange: (x: number, y: number) => boolean; getTargetPriority: () => string; getBranch?: () => string; getConfig?: () => { stats: { maxSlowTargets?: number } } },
+    tower: {
+      x: number;
+      y: number;
+      isInRange: (x: number, y: number) => boolean;
+      getTargetPriority: () => string;
+      getBranch?: () => string;
+      getConfig?: () => { stats: { maxSlowTargets?: number } };
+    },
     creeps: Creep[]
   ): Creep | null {
     const priority = tower.getTargetPriority();
@@ -122,10 +127,8 @@ export class CombatManager {
 
       let isSaturated = false;
       if (isIceTower) {
-
         isSaturated = creep.isSlowed();
       } else if (isPoisonTower) {
-
         isSaturated = creep.getPoisonStackCount() >= 3;
       }
 
@@ -140,13 +143,11 @@ export class CombatManager {
           break;
         case 'closest':
         default:
-
           value = -Phaser.Math.Distance.Between(tower.x, tower.y, creep.x, creep.y);
           break;
       }
 
       if (isIceTower || isPoisonTower) {
-
         if (isSaturated && value > fallbackValue) {
           fallbackValue = value;
           fallbackTarget = creep;

@@ -28,7 +28,6 @@ export class GoldMineManager {
   }
 
   initializeFromPads(minePads: MinePadData[]): void {
-
     const sortedPads = [...minePads].sort((a, b) => a.x - b.x);
 
     for (let i = 0; i < sortedPads.length; i++) {
@@ -49,8 +48,6 @@ export class GoldMineManager {
       this.mines.push(mine);
     }
 
-    console.log(`GoldMineManager: Initialized ${this.mines.length} mine slots`);
-
     this.createTutorialArrow();
   }
 
@@ -69,24 +66,26 @@ export class GoldMineManager {
     arrow.fillStyle(0x000000, 0.3);
     arrow.fillTriangle(-12, -22, 12, -22, 0, 2);
 
-    arrow.fillStyle(0xD4A84B, 1);
+    arrow.fillStyle(0xd4a84b, 1);
     arrow.fillTriangle(-10, -25, 10, -25, 0, 0);
 
-    arrow.fillStyle(0xF5D980, 1);
+    arrow.fillStyle(0xf5d980, 1);
     arrow.fillTriangle(-6, -23, 4, -23, 0, -8);
 
-    arrow.lineStyle(2, 0x8B6914, 1);
+    arrow.lineStyle(2, 0x8b6914, 1);
     arrow.strokeTriangle(-10, -25, 10, -25, 0, 0);
 
     this.tutorialArrow.add(arrow);
 
-    const text = this.scene.add.text(0, -45, '💰 Gold Mine', {
-      fontFamily: 'Arial Black',
-      fontSize: '14px',
-      color: '#FFD700',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5);
+    const text = this.scene.add
+      .text(0, -45, '💰 Gold Mine', {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: '#FFD700',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
     this.tutorialArrow.add(text);
 
     this.tutorialArrowTween = this.scene.tweens.add({
@@ -95,7 +94,7 @@ export class GoldMineManager {
       duration: 500,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
   }
 
@@ -115,7 +114,7 @@ export class GoldMineManager {
         onComplete: () => {
           this.tutorialArrow?.destroy();
           this.tutorialArrow = null;
-        }
+        },
       });
     }
   }
@@ -136,16 +135,12 @@ export class GoldMineManager {
     const playerGold = this.getPlayerGold?.() || 0;
 
     if (playerGold < cost) {
-      console.log('GoldMineManager: Not enough gold to build mine');
       return false;
     }
 
     if (mine.build()) {
       this.onMineBuild?.(mine, cost);
-      console.log(`GoldMineManager: Built mine at slot ${slotId}, cost: ${cost}g`);
-
       this.hideTutorialArrow();
-
       return true;
     }
 
@@ -161,14 +156,11 @@ export class GoldMineManager {
     const playerGold = this.getPlayerGold?.() || 0;
 
     if (playerGold < cost) {
-      console.log('GoldMineManager: Not enough gold to upgrade mine');
       return false;
     }
 
-    const previousLevel = mine.getLevel();
     if (mine.upgrade()) {
       this.onMineUpgraded?.(mine, cost);
-      console.log(`GoldMineManager: Upgraded mine from level ${previousLevel} to ${mine.getLevel()}, cost: ${cost}g`);
       return true;
     }
 
@@ -180,7 +172,7 @@ export class GoldMineManager {
   }
 
   async collectIncomeWithAnimation(onMineCollected?: (income: number) => void): Promise<number> {
-    const activeMines = this.mines.filter(m => m.isBuilt());
+    const activeMines = this.mines.filter((m) => m.isBuilt());
 
     if (activeMines.length === 0) {
       return 0;
@@ -196,7 +188,7 @@ export class GoldMineManager {
       const mine = activeMines[i];
       const mineIncome = mine.getIncomePerWave();
 
-      await new Promise<void>(resolve => {
+      await new Promise<void>((resolve) => {
         let resolved = false;
         const safeResolve = () => {
           if (!resolved) {
@@ -220,7 +212,6 @@ export class GoldMineManager {
 
   getMineAtPosition(x: number, y: number): GoldMine | null {
     for (const mine of this.mines) {
-
       const dx = Math.abs(x - mine.x);
       const dy = Math.abs(y - mine.y);
 
@@ -240,7 +231,7 @@ export class GoldMineManager {
   }
 
   getMineBySlotId(slotId: number): GoldMine | null {
-    return this.mines.find(m => m.getSlotId() === slotId) || null;
+    return this.mines.find((m) => m.getSlotId() === slotId) || null;
   }
 
   getAllMines(): GoldMine[] {
@@ -248,7 +239,7 @@ export class GoldMineManager {
   }
 
   getActiveMines(): GoldMine[] {
-    return this.mines.filter(m => m.isBuilt());
+    return this.mines.filter((m) => m.isBuilt());
   }
 
   getSelectedMine(): GoldMine | null {
@@ -260,7 +251,6 @@ export class GoldMineManager {
   }
 
   destroy(): void {
-
     if (this.tutorialArrowTween) {
       this.tutorialArrowTween.stop();
       this.tutorialArrowTween = null;

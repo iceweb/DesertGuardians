@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export class DragonKnightGraphics {
-
   static draw(
     g: Phaser.GameObjects.Graphics,
     tier: number,
@@ -23,19 +22,22 @@ export class DragonKnightGraphics {
     }
   }
 
-  static drawTier1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
-
+  static drawTier1(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const walkCycle = bounceTime * 5;
     const leftLegAngle = Math.sin(walkCycle) * 0.3;
     const rightLegAngle = Math.sin(walkCycle + Math.PI) * 0.3;
     const bodyBob = Math.abs(Math.sin(walkCycle)) * 2;
     const armSwing = Math.sin(walkCycle) * 0.2;
 
-    const armorPrimary = 0x8B7355;
-    const armorSecondary = 0x6B5344;
-    const armorHighlight = 0xA89070;
-    const accentColor = 0x4A7C59;
-    const capeColor = 0x2D4A3E;
+    const armorPrimary = 0x8b7355;
+    const armorSecondary = 0x6b5344;
+    const armorHighlight = 0xa89070;
+    const accentColor = 0x4a7c59;
+    const capeColor = 0x2d4a3e;
 
     g.fillStyle(0x000000, 0.35);
     g.fillEllipse(0, 28, 28, 10);
@@ -65,7 +67,7 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillRect(-3, 10, 6, 10);
 
-    g.fillStyle(0x3A3A3A, 1);
+    g.fillStyle(0x3a3a3a, 1);
     g.fillEllipse(2 * faceDirection, 22, 6, 4);
     g.restore();
 
@@ -82,7 +84,7 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillRect(-3, 10, 6, 10);
 
-    g.fillStyle(0x3A3A3A, 1);
+    g.fillStyle(0x3a3a3a, 1);
     g.fillEllipse(2 * faceDirection, 22, 6, 4);
     g.restore();
 
@@ -95,13 +97,13 @@ export class DragonKnightGraphics {
     g.fillStyle(armorSecondary, 1);
     g.fillRect(-1, -8 + bodyBob, 2, 14);
 
-    g.fillStyle(0x4A3A2A, 1);
+    g.fillStyle(0x4a3a2a, 1);
     g.fillRect(-12, 8 + bodyBob, 24, 4);
     g.fillStyle(accentColor, 1);
     g.fillCircle(0, 10 + bodyBob, 3);
 
     const shieldX = -14 * faceDirection;
-    g.fillStyle(0x5A4A3A, 1);
+    g.fillStyle(0x5a4a3a, 1);
     g.beginPath();
     g.moveTo(shieldX, -12 + bodyBob);
     g.lineTo(shieldX - 8 * faceDirection, -2 + bodyBob);
@@ -115,7 +117,7 @@ export class DragonKnightGraphics {
 
     g.fillStyle(accentColor, 1);
     g.fillCircle(shieldX - 1 * faceDirection, 0 + bodyBob, 5);
-    g.fillStyle(0x6A9C69, 1);
+    g.fillStyle(0x6a9c69, 1);
     g.beginPath();
     g.moveTo(shieldX - 1 * faceDirection, -4 + bodyBob);
     g.lineTo(shieldX + 3 * faceDirection, 2 + bodyBob);
@@ -139,7 +141,7 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillEllipse(0, 12, 5, 4);
 
-    g.fillStyle(0x3A2A1A, 1);
+    g.fillStyle(0x3a2a1a, 1);
     g.fillRect(-2, 14, 4, 8);
 
     g.fillStyle(armorHighlight, 1);
@@ -148,12 +150,12 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillRect(-6, 12, 12, 3);
 
-    g.fillStyle(0x9999AA, 1);
+    g.fillStyle(0x9999aa, 1);
     g.fillRect(-2, -18, 4, 30);
-    g.fillStyle(0xBBBBCC, 1);
+    g.fillStyle(0xbbbbcc, 1);
     g.fillRect(-1, -18, 2, 30);
 
-    g.fillStyle(0xCCCCDD, 1);
+    g.fillStyle(0xccccdd, 1);
     g.beginPath();
     g.moveTo(-2, -18);
     g.lineTo(0, -26);
@@ -172,11 +174,11 @@ export class DragonKnightGraphics {
     g.fillStyle(armorSecondary, 1);
     g.fillRect(6 * faceDirection, -18 + bodyBob, 8, 10);
 
-    g.fillStyle(0x1A1A1A, 1);
+    g.fillStyle(0x1a1a1a, 1);
     g.fillRect(8 * faceDirection, -16 + bodyBob, 6, 2);
     g.fillRect(10 * faceDirection, -16 + bodyBob, 2, 6);
 
-    g.fillStyle(0x66AA66, 0.8);
+    g.fillStyle(0x66aa66, 0.8);
     g.fillCircle(9 * faceDirection, -15 + bodyBob, 1.5);
     g.fillCircle(12 * faceDirection, -15 + bodyBob, 1.5);
 
@@ -192,8 +194,11 @@ export class DragonKnightGraphics {
     g.fillRect(-2, -6 + bodyBob, 4, 4);
   }
 
-  static drawTier2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
-
+  static drawTier2(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const walkCycle = bounceTime * 4.5;
     const leftLegAngle = Math.sin(walkCycle) * 0.28;
     const rightLegAngle = Math.sin(walkCycle + Math.PI) * 0.28;
@@ -201,12 +206,12 @@ export class DragonKnightGraphics {
     const armSwing = Math.sin(walkCycle) * 0.18;
     const runeGlow = 0.5 + Math.sin(bounceTime * 4) * 0.3;
 
-    const armorPrimary = 0x8899AA;
+    const armorPrimary = 0x8899aa;
     const armorSecondary = 0x667788;
-    const armorHighlight = 0xAABBCC;
-    const goldAccent = 0xCCAA44;
-    const runeColor = 0x44AAFF;
-    const capeColor = 0x8B0000;
+    const armorHighlight = 0xaabbcc;
+    const goldAccent = 0xccaa44;
+    const runeColor = 0x44aaff;
+    const capeColor = 0x8b0000;
 
     g.fillStyle(runeColor, 0.1 * runeGlow);
     g.fillCircle(0, 0, 38);
@@ -291,7 +296,7 @@ export class DragonKnightGraphics {
     g.fillStyle(runeColor, runeGlow);
     g.fillCircle(0, -4 + bodyBob, 3);
 
-    g.fillStyle(0x4A3A2A, 1);
+    g.fillStyle(0x4a3a2a, 1);
     g.fillRect(-14, 10 + bodyBob, 28, 5);
     g.fillStyle(goldAccent, 1);
     g.fillRect(-14, 10 + bodyBob, 28, 1);
@@ -361,7 +366,7 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillEllipse(0, 14, 6, 5);
 
-    g.fillStyle(0x2A1A0A, 1);
+    g.fillStyle(0x2a1a0a, 1);
     g.fillRect(-2, 16, 4, 10);
 
     g.fillStyle(goldAccent, 0.8);
@@ -389,9 +394,9 @@ export class DragonKnightGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0x8899AA, 1);
+    g.fillStyle(0x8899aa, 1);
     g.fillRect(-3, -24, 6, 37);
-    g.fillStyle(0xAABBCC, 1);
+    g.fillStyle(0xaabbcc, 1);
     g.fillRect(-1, -24, 2, 37);
 
     g.fillStyle(armorSecondary, 1);
@@ -400,7 +405,7 @@ export class DragonKnightGraphics {
     g.fillStyle(runeColor, runeGlow * 0.5);
     g.fillRect(-1, -18, 2, 24);
 
-    g.fillStyle(0xCCDDEE, 1);
+    g.fillStyle(0xccddee, 1);
     g.beginPath();
     g.moveTo(-3, -24);
     g.lineTo(0, -34);
@@ -428,7 +433,7 @@ export class DragonKnightGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0x1A1A1A, 1);
+    g.fillStyle(0x1a1a1a, 1);
     g.fillEllipse(10 * faceDirection, -16 + bodyBob, 4, 2);
     g.fillEllipse(14 * faceDirection, -14 + bodyBob, 3, 2);
 
@@ -458,8 +463,11 @@ export class DragonKnightGraphics {
     g.fillPath();
   }
 
-  static drawTier3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
-
+  static drawTier3(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const walkCycle = bounceTime * 4;
     const leftLegAngle = Math.sin(walkCycle) * 0.25;
     const rightLegAngle = Math.sin(walkCycle + Math.PI) * 0.25;
@@ -470,13 +478,13 @@ export class DragonKnightGraphics {
     const flameFlicker = 0.6 + Math.sin(bounceTime * 10) * 0.4;
     const flameWave = Math.sin(bounceTime * 8);
 
-    const armorPrimary = 0x2A2A2A;
-    const armorSecondary = 0x1A1A1A;
-    const armorHighlight = 0x3A3A3A;
-    const goldAccent = 0xFFD700;
-    const flameOrange = 0xFF6600;
-    const flameYellow = 0xFFAA00;
-    const flameCore = 0xFFFF66;
+    const armorPrimary = 0x2a2a2a;
+    const armorSecondary = 0x1a1a1a;
+    const armorHighlight = 0x3a3a3a;
+    const goldAccent = 0xffd700;
+    const flameOrange = 0xff6600;
+    const flameYellow = 0xffaa00;
+    const flameCore = 0xffff66;
 
     g.fillStyle(flameOrange, 0.15 * flameFlicker);
     g.fillCircle(0, 0, 48);
@@ -498,7 +506,7 @@ export class DragonKnightGraphics {
     g.fillStyle(0x000000, 0.5);
     g.fillEllipse(0, 32, 36, 14);
 
-    g.fillStyle(0x1A0A0A, 1);
+    g.fillStyle(0x1a0a0a, 1);
     g.beginPath();
     g.moveTo(-10 * faceDirection, -10 + bodyBob);
     g.lineTo(-32 * faceDirection, 30 + Math.sin(bounceTime * 2) * 5);
@@ -627,7 +635,7 @@ export class DragonKnightGraphics {
     g.fillStyle(flameCore, flameFlicker * 0.6);
     g.fillCircle(0, -4 + bodyBob, 1.5);
 
-    g.fillStyle(0x2A2A1A, 1);
+    g.fillStyle(0x2a2a1a, 1);
     g.fillRect(-16, 12 + bodyBob, 32, 6);
     g.fillStyle(goldAccent, 1);
     g.fillRect(-16, 12 + bodyBob, 32, 2);
@@ -668,18 +676,18 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillEllipse(0, 14, 6, 5);
 
-    g.fillStyle(0x1A1A1A, 1);
+    g.fillStyle(0x1a1a1a, 1);
     g.fillRect(-2, 16, 4, 10);
     g.fillStyle(goldAccent, 1);
     g.fillCircle(0, 28, 4);
     g.fillStyle(flameOrange, flameFlicker);
     g.fillCircle(0, 28, 2);
-    g.fillStyle(0x1A1A1A, 1);
+    g.fillStyle(0x1a1a1a, 1);
     g.fillRect(-8, 13, 16, 4);
 
-    g.fillStyle(0x3A3A3A, 1);
+    g.fillStyle(0x3a3a3a, 1);
     g.fillRect(-3, -26, 6, 39);
-    g.fillStyle(0x4A4A4A, 1);
+    g.fillStyle(0x4a4a4a, 1);
     g.fillRect(-1, -26, 2, 39);
 
     for (let i = 0; i < 8; i++) {
@@ -741,13 +749,13 @@ export class DragonKnightGraphics {
     g.fillStyle(armorPrimary, 1);
     g.fillEllipse(0, 14, 6, 5);
 
-    g.fillStyle(0x1A1A1A, 1);
+    g.fillStyle(0x1a1a1a, 1);
     g.fillRect(-2, 16, 4, 12);
     g.fillStyle(goldAccent, 1);
     g.fillCircle(0, 30, 5);
     g.fillStyle(flameOrange, flameFlicker);
     g.fillCircle(0, 30, 3);
-    g.fillStyle(0x1A1A1A, 1);
+    g.fillStyle(0x1a1a1a, 1);
     g.fillRect(-10, 13, 20, 4);
 
     g.beginPath();
@@ -763,9 +771,9 @@ export class DragonKnightGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0x3A3A3A, 1);
+    g.fillStyle(0x3a3a3a, 1);
     g.fillRect(-3, -30, 6, 43);
-    g.fillStyle(0x4A4A4A, 1);
+    g.fillStyle(0x4a4a4a, 1);
     g.fillRect(-1, -30, 2, 43);
 
     for (let i = 0; i < 9; i++) {
@@ -812,7 +820,7 @@ export class DragonKnightGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xDDDDCC, 1);
+    g.fillStyle(0xddddcc, 1);
     for (let i = 0; i < 4; i++) {
       const tx = (8 + i * 3) * faceDirection;
       g.beginPath();
@@ -823,7 +831,7 @@ export class DragonKnightGraphics {
       g.fillPath();
     }
 
-    g.fillStyle(0x0A0A0A, 1);
+    g.fillStyle(0x0a0a0a, 1);
     g.fillEllipse(12 * faceDirection, -18 + bodyBob, 5, 3);
     g.fillEllipse(18 * faceDirection, -16 + bodyBob, 4, 3);
 

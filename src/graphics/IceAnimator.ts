@@ -51,7 +51,7 @@ export class IceAnimator {
       this.staffGraphics,
       this.mageGraphics,
       this.effectGraphics,
-      this.particleGraphics
+      this.particleGraphics,
     ]);
 
     this.container.add([this.baseGraphics, this.mageContainer]);
@@ -139,7 +139,6 @@ export class IceAnimator {
   }
 
   getProjectileSpawnOffset(): { x: number; y: number } {
-
     const tipOffset = this.CRYSTAL_TIP_OFFSET[this.level - 1];
     const localX = this.STAFF_LOCAL_X - tipOffset;
     const localY = this.STAFF_LOCAL_Y;
@@ -152,7 +151,7 @@ export class IceAnimator {
 
     return {
       x: rotatedX,
-      y: rotatedY + this.MAGE_Y[this.level - 1]
+      y: rotatedY + this.MAGE_Y[this.level - 1],
     };
   }
 
@@ -173,7 +172,7 @@ export class IceAnimator {
       y: (Math.random() - 0.5) * 30,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed - 10,
-      life: 0.8 + Math.random() * 0.4
+      life: 0.8 + Math.random() * 0.4,
     });
 
     if (this.particles.length > 15) {
@@ -310,12 +309,9 @@ export class IceAnimator {
 
     const bodyY = 10;
 
-    const robeColor = this.level === 1 ? 0x4466aa :
-                      this.level === 2 ? 0x3355aa : 0x2244aa;
-    const robeDark = this.level === 1 ? 0x335599 :
-                     this.level === 2 ? 0x224499 : 0x113388;
-    const robeLight = this.level === 1 ? 0x5577bb :
-                      this.level === 2 ? 0x4466bb : 0x3355bb;
+    const robeColor = this.level === 1 ? 0x4466aa : this.level === 2 ? 0x3355aa : 0x2244aa;
+    const robeDark = this.level === 1 ? 0x335599 : this.level === 2 ? 0x224499 : 0x113388;
+    const robeLight = this.level === 1 ? 0x5577bb : this.level === 2 ? 0x4466bb : 0x3355bb;
     const skinColor = 0xc9d9e9;
 
     if (this.isCheeringActive) {
@@ -371,7 +367,6 @@ export class IceAnimator {
       g.fillStyle(0xaaddff, 0.6);
       g.fillTriangle(-4, bodyY - 18, 0, bodyY - 24, 4, bodyY - 18);
     } else {
-
       g.fillStyle(robeColor, 1);
       g.fillCircle(0, bodyY - 6, 14);
       g.fillStyle(robeDark, 1);
@@ -439,7 +434,6 @@ export class IceAnimator {
     const staffY = this.STAFF_LOCAL_Y;
 
     if (this.isCheeringActive) {
-
       const raiseOffset = this.cheerArmAngle * 8;
       const cheerY = bodyY - 24 - raiseOffset;
       const staffLength = this.CRYSTAL_TIP_OFFSET[this.level - 1];
@@ -492,20 +486,44 @@ export class IceAnimator {
 
     g.fillStyle(0xccffff, 0.9);
     g.fillTriangle(
-      crystalX - 4, crystalY - 2,
-      crystalX, crystalY - 4 - this.level / 2,
-      crystalX + 1, crystalY
+      crystalX - 4,
+      crystalY - 2,
+      crystalX,
+      crystalY - 4 - this.level / 2,
+      crystalX + 1,
+      crystalY
     );
 
     if (this.level >= 2) {
       g.fillStyle(crystalColor, 0.6);
-      g.fillTriangle(crystalX - 6, crystalY - 4, crystalX - 10, crystalY - 8, crystalX - 4, crystalY - 8);
-      g.fillTriangle(crystalX - 6, crystalY + 4, crystalX - 10, crystalY + 8, crystalX - 4, crystalY + 8);
+      g.fillTriangle(
+        crystalX - 6,
+        crystalY - 4,
+        crystalX - 10,
+        crystalY - 8,
+        crystalX - 4,
+        crystalY - 8
+      );
+      g.fillTriangle(
+        crystalX - 6,
+        crystalY + 4,
+        crystalX - 10,
+        crystalY + 8,
+        crystalX - 4,
+        crystalY + 8
+      );
     }
 
     if (this.level >= 3) {
       g.fillStyle(0xaaddff, 0.7);
-      g.fillTriangle(crystalX - 12, crystalY, crystalX - 18, crystalY - 5, crystalX - 18, crystalY + 5);
+      g.fillTriangle(
+        crystalX - 12,
+        crystalY,
+        crystalX - 18,
+        crystalY - 5,
+        crystalX - 18,
+        crystalY + 5
+      );
     }
   }
 

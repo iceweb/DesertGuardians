@@ -61,7 +61,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     this.creepManager.onCreepDied = this.handleCreepDied.bind(this);
     this.creepManager.onCreepReachedEnd = this.handleCreepReachedEnd.bind(this);
     this.creepManager.onBabySpawned = this.handleBabySpawned.bind(this);
-
   }
 
   setPathSystem(pathSystem: PathSystem): void {
@@ -75,7 +74,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     }
 
     if (this.currentWave >= WAVE_CONFIGS.length) {
-
       this.emit('allWavesComplete');
       return false;
     }
@@ -94,7 +92,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     this.emit('waveStart', this.currentWave);
 
     if (this.currentWave === WAVE_CONFIGS.length) {
-
       this.emit('finalWaveStarted');
     }
 
@@ -104,25 +101,23 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     this.isParallelMode = waveDef.parallelSpawn === true;
 
-    const allGroups = waveDef.creeps.map(group => ({
+    const allGroups = waveDef.creeps.map((group) => ({
       group,
       spawned: 0,
       finished: false,
       creepType: group.type,
-      lastSpawnedCreep: null
+      lastSpawnedCreep: null,
     }));
 
     if (this.isParallelMode) {
-
       this.parallelGroups = allGroups;
       this.groupQueue = [];
       this.startParallelSpawning();
     } else {
-
       const isBossOrGuard = (type: string) => type.includes('boss');
 
-      const sequentialGroups = allGroups.filter(g => !isBossOrGuard(g.creepType));
-      const bossGuardGroups = allGroups.filter(g => isBossOrGuard(g.creepType));
+      const sequentialGroups = allGroups.filter((g) => !isBossOrGuard(g.creepType));
+      const bossGuardGroups = allGroups.filter((g) => isBossOrGuard(g.creepType));
 
       this.groupQueue = sequentialGroups;
       this.parallelGroups = [];
@@ -135,14 +130,16 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   }
 
   private startParallelSpawning(): void {
-
-    const immediateGroups = this.parallelGroups.filter(g => !g.group.delayStart || g.group.delayStart === 0);
-    const delayedGroups = this.parallelGroups.filter(g => g.group.delayStart && g.group.delayStart > 0);
+    const immediateGroups = this.parallelGroups.filter(
+      (g) => !g.group.delayStart || g.group.delayStart === 0
+    );
+    const delayedGroups = this.parallelGroups.filter(
+      (g) => g.group.delayStart && g.group.delayStart > 0
+    );
 
     if (immediateGroups.length < 2 && delayedGroups.length > 0) {
       const firstDelayed = delayedGroups.shift()!;
       immediateGroups.push(firstDelayed);
-
     }
 
     for (const group of immediateGroups) {
@@ -153,9 +150,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       const gameSpeed = this.getGameSpeed?.() || 1;
       const scaledDelay = group.group.delayStart! / gameSpeed;
       this.scene.time.delayedCall(scaledDelay, () => {
-
         if (group.creepType === 'boss_5') {
-
           this.emit('finalBossSpawning');
         }
 
@@ -194,7 +189,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
   private startNextGroup(): void {
     if (this.groupQueue.length === 0) {
-
       return;
     }
 
@@ -209,7 +203,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     const group = this.currentGroup;
     if (group.spawned >= group.group.count) {
-
       group.finished = true;
 
       return;
@@ -231,9 +224,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       const scaledInterval = group.group.intervalMs / gameSpeed;
       this.spawnTimer = this.scene.time.delayedCall(scaledInterval, () => this.spawnNextInGroup());
     } else {
-
       group.finished = true;
-
     }
   }
 
@@ -255,10 +246,8 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     if (this.shouldStartNextGroup()) {
       if (this.groupQueue.length > 0) {
-
         this.startNextGroup();
       } else if (this.pendingBossGroups.length > 0) {
-
         for (const bossGroup of this.pendingBossGroups) {
           this.startParallelGroup(bossGroup);
         }
@@ -272,12 +261,11 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     if (!this.currentGroup) return true;
 
     const activeCreeps = this.creepManager.getActiveCreeps();
-    const groupTypeCreeps = activeCreeps.filter(c =>
-      c.getConfig().type === this.currentGroup!.creepType && this.groupCreeps.has(c)
+    const groupTypeCreeps = activeCreeps.filter(
+      (c) => c.getConfig().type === this.currentGroup!.creepType && this.groupCreeps.has(c)
     );
 
     if (groupTypeCreeps.length === 0) {
-
       return true;
     }
 
@@ -293,7 +281,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
           return true;
         }
       } else {
-
         if (groupTypeCreeps.length === 0) {
           return true;
         }
@@ -318,7 +305,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   }
 
   private handleCreepReachedEnd(creep: Creep): void {
-
     this.creepsLeaked++;
 
     this.emit('creepLeaked', creep);
@@ -329,9 +315,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   }
 
   private handleBabySpawned(count: number): void {
-
     this.creepsToSpawn += count;
-
   }
 
   private checkWaveComplete(): void {
@@ -339,7 +323,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     const activeCount = this.creepManager.getActiveCount();
 
     if (!this.waveInProgress) {
-
       return;
     }
 
@@ -352,7 +335,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
         this.emit('allWavesComplete');
       }
     } else {
-
       if (activeCount <= 3 && activeCount > 0) {
         this.creepManager.debugActiveCreeps();
       }
@@ -380,14 +362,14 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       spawned: this.creepsSpawned,
       total: this.creepsToSpawn,
       killed: this.creepsKilled,
-      leaked: this.creepsLeaked
+      leaked: this.creepsLeaked,
     };
   }
 
   getTotalStats(): { killed: number; goldEarned: number } {
     return {
       killed: this.totalCreepsKilled,
-      goldEarned: this.totalGoldEarned
+      goldEarned: this.totalGoldEarned,
     };
   }
 
@@ -402,17 +384,17 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     const waveDef = WAVE_CONFIGS[nextWaveIndex];
 
-    const uniqueTypes = [...new Set(waveDef.creeps.map(g => g.type))];
-    const typesWithDescriptions = uniqueTypes.map(type => ({
+    const uniqueTypes = [...new Set(waveDef.creeps.map((g) => g.type))];
+    const typesWithDescriptions = uniqueTypes.map((type) => ({
       type,
-      description: CREEP_TYPES[type]?.description || 'Unknown creep type.'
+      description: CREEP_TYPES[type]?.description || 'Unknown creep type.',
     }));
 
     return {
       types: typesWithDescriptions,
       waveNumber: waveDef.waveNumber,
       waveType: waveDef.waveType,
-      isBossWave: waveDef.waveType === 'boss'
+      isBossWave: waveDef.waveType === 'boss',
     };
   }
 
@@ -459,7 +441,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       stroke: '#000000',
       strokeThickness: 5,
       align: 'center',
-      wordWrap: { width: 500 }
+      wordWrap: { width: 500 },
     });
     announcement.setOrigin(0.5);
 
@@ -478,7 +460,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       alpha: 1,
       scale: 1,
       duration: 400,
-      ease: 'Back.easeOut'
+      ease: 'Back.easeOut',
     });
 
     if (waveType === 'boss') {
@@ -489,7 +471,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
         yoyo: true,
         repeat: 2,
         ease: 'Sine.easeInOut',
-        delay: 400
+        delay: 400,
       });
     }
 
@@ -505,7 +487,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
         ease: 'Cubic.easeIn',
         onComplete: () => {
           container.destroy();
-        }
+        },
       });
     });
   }
@@ -513,23 +495,23 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   private getAnnouncementColors(waveType: WaveType): { text: string; border: number } {
     switch (waveType) {
       case 'boss':
-        return { text: '#FF4444', border: 0xFF0000 };
+        return { text: '#FF4444', border: 0xff0000 };
       case 'flying':
-        return { text: '#FFD700', border: 0xFFAA00 };
+        return { text: '#FFD700', border: 0xffaa00 };
       case 'digger':
-        return { text: '#D2691E', border: 0x8B4513 };
+        return { text: '#D2691E', border: 0x8b4513 };
       case 'ghost':
-        return { text: '#9370DB', border: 0x8A2BE2 };
+        return { text: '#9370DB', border: 0x8a2be2 };
       case 'broodmother':
-        return { text: '#32CD32', border: 0x228B22 };
+        return { text: '#32CD32', border: 0x228b22 };
       case 'chaos':
-        return { text: '#FF6347', border: 0xFF4500 };
+        return { text: '#FF6347', border: 0xff4500 };
       case 'flame':
-        return { text: '#FF6600', border: 0xFF4400 };
+        return { text: '#FF6600', border: 0xff4400 };
       case 'plaguebearer':
-        return { text: '#00FF88', border: 0x00CC66 };
+        return { text: '#00FF88', border: 0x00cc66 };
       default:
-        return { text: '#FFFFFF', border: 0xFFFFFF };
+        return { text: '#FFFFFF', border: 0xffffff };
     }
   }
 

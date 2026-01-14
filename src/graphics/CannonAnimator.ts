@@ -41,11 +41,7 @@ export class CannonAnimator {
     this.cannonGraphics = scene.add.graphics();
     this.effectGraphics = scene.add.graphics();
 
-    this.cannonContainer.add([
-      this.cannonGraphics,
-      this.operatorGraphics,
-      this.effectGraphics
-    ]);
+    this.cannonContainer.add([this.cannonGraphics, this.operatorGraphics, this.effectGraphics]);
 
     this.container.add([this.baseGraphics, this.cannonContainer]);
 
@@ -70,7 +66,8 @@ export class CannonAnimator {
       const rotationSpeed = 4.0;
 
       if (Math.abs(angleDiff) > 0.01) {
-        this.cannonAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
+        this.cannonAngle +=
+          Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
         this.cannonAngle = Phaser.Math.Angle.Wrap(this.cannonAngle);
       }
     }
@@ -106,7 +103,8 @@ export class CannonAnimator {
     this.hasTarget = true;
 
     const operatorWorldY = towerY + this.OPERATOR_Y[this.level - 1];
-    this.targetAngle = Phaser.Math.Angle.Between(towerX, operatorWorldY, targetX, targetY) + Math.PI / 2;
+    this.targetAngle =
+      Phaser.Math.Angle.Between(towerX, operatorWorldY, targetX, targetY) + Math.PI / 2;
   }
 
   clearTarget(): void {
@@ -114,7 +112,6 @@ export class CannonAnimator {
   }
 
   onFire(): { x: number; y: number } {
-
     this.isRecoiling = true;
     this.recoilProgress = 1.0;
 
@@ -127,7 +124,6 @@ export class CannonAnimator {
   }
 
   getProjectileSpawnOffset(): { x: number; y: number } {
-
     const barrelLength = this.BARREL_LENGTH[this.level - 1];
     const localX = 0;
     const localY = -barrelLength;
@@ -140,7 +136,7 @@ export class CannonAnimator {
 
     return {
       x: rotatedX,
-      y: rotatedY + this.OPERATOR_Y[this.level - 1]
+      y: rotatedY + this.OPERATOR_Y[this.level - 1],
     };
   }
 
@@ -162,7 +158,6 @@ export class CannonAnimator {
     const towerHeight = 38;
 
     if (level === 1) {
-
       g.fillStyle(0x6b5344, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 20);
       g.fillStyle(0x7b6354, 1);
@@ -172,7 +167,6 @@ export class CannonAnimator {
       g.fillRect(-baseWidth, 8, baseWidth * 2, 3);
       g.fillRect(-baseWidth, 25, baseWidth * 2, 3);
     } else if (level === 2) {
-
       g.fillStyle(0x4a4a4a, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 24);
       g.fillStyle(0x5a5a5a, 1);
@@ -184,7 +178,6 @@ export class CannonAnimator {
         g.fillCircle(i, 26, 2);
       }
     } else {
-
       g.fillStyle(0x3a3a3a, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 28);
       g.fillStyle(0x4a4a4a, 1);
@@ -285,13 +278,10 @@ export class CannonAnimator {
 
     const bodyY = 10;
 
-    const uniformColor = this.level === 1 ? 0x5c4033 :
-                         this.level === 2 ? 0x4a5a3a : 0x3a3a3a;
-    const uniformDark = this.level === 1 ? 0x3a2820 :
-                        this.level === 2 ? 0x3a4a2a : 0x2a2a2a;
+    const uniformColor = this.level === 1 ? 0x5c4033 : this.level === 2 ? 0x4a5a3a : 0x3a3a3a;
+    const uniformDark = this.level === 1 ? 0x3a2820 : this.level === 2 ? 0x3a4a2a : 0x2a2a2a;
     const skinColor = 0xdeb887;
-    const helmetColor = this.level === 1 ? 0xc9a06c :
-                        this.level === 2 ? 0x4a5a3a : 0x2a2a2a;
+    const helmetColor = this.level === 1 ? 0xc9a06c : this.level === 2 ? 0x4a5a3a : 0x2a2a2a;
 
     if (this.isCheeringActive) {
       this.drawCheeringOperator(g, bodyY, uniformColor, uniformDark, skinColor, helmetColor);
@@ -319,13 +309,11 @@ export class CannonAnimator {
     }
 
     if (this.level === 1) {
-
       g.fillStyle(helmetColor, 1);
       g.fillCircle(0, bodyY - 4, 10);
       g.fillStyle(0xd9b07c, 1);
       g.fillCircle(-2, bodyY - 6, 4);
     } else if (this.level === 2) {
-
       g.fillStyle(helmetColor, 1);
       g.fillCircle(0, bodyY - 5, 12);
       g.fillStyle(0x3a4a2a, 1);
@@ -334,7 +322,6 @@ export class CannonAnimator {
       g.lineStyle(2, 0x2a3a1a, 1);
       g.strokeCircle(0, bodyY - 5, 10);
     } else {
-
       g.fillStyle(helmetColor, 1);
       g.fillCircle(0, bodyY - 6, 14);
 
@@ -404,10 +391,8 @@ export class CannonAnimator {
     const bodyY = 10;
     const recoilOffset = this.recoilProgress * 8;
 
-    const barrelColor = this.level === 1 ? 0x4a4a4a :
-                        this.level === 2 ? 0x3a3a3a : 0x2a2a2a;
-    const barrelHighlight = this.level === 1 ? 0x5a5a5a :
-                            this.level === 2 ? 0x4a4a4a : 0x3a3a3a;
+    const barrelColor = this.level === 1 ? 0x4a4a4a : this.level === 2 ? 0x3a3a3a : 0x2a2a2a;
+    const barrelHighlight = this.level === 1 ? 0x5a5a5a : this.level === 2 ? 0x4a4a4a : 0x3a3a3a;
     const brassColor = 0xb8860b;
 
     const barrelLength = this.BARREL_LENGTH[this.level - 1];
@@ -419,7 +404,12 @@ export class CannonAnimator {
     g.fillCircle(-2, bodyY - 8, 4 + this.level);
 
     g.fillStyle(barrelColor, 1);
-    g.fillRect(-barrelWidth / 2, bodyY - barrelLength + recoilOffset, barrelWidth, barrelLength - 4);
+    g.fillRect(
+      -barrelWidth / 2,
+      bodyY - barrelLength + recoilOffset,
+      barrelWidth,
+      barrelLength - 4
+    );
 
     g.fillStyle(barrelHighlight, 1);
     g.fillRect(-barrelWidth / 2 + 2, bodyY - barrelLength + 4 + recoilOffset, 3, barrelLength - 10);
@@ -437,12 +427,16 @@ export class CannonAnimator {
     }
 
     if (this.level >= 3) {
-
       g.fillStyle(0x1a1a1a, 1);
       g.fillRect(-2, bodyY - barrelLength / 2 - 4 + recoilOffset, 4, 8);
 
       g.fillStyle(brassColor, 1);
-      g.fillRect(-barrelWidth / 2 - 1, bodyY - barrelLength / 2 - 2 + recoilOffset, barrelWidth + 2, 2);
+      g.fillRect(
+        -barrelWidth / 2 - 1,
+        bodyY - barrelLength / 2 - 2 + recoilOffset,
+        barrelWidth + 2,
+        2
+      );
     }
 
     g.fillStyle(0x3a3a3a, 1);

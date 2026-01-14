@@ -36,13 +36,10 @@ export class CreepManager {
 
       this.pool.push(creep);
     }
-
-    console.log(`CreepManager: Initialized pool with ${this.POOL_SIZE} creeps`);
   }
 
   private getFromPool(): Creep | null {
-
-    const creep = this.pool.find(c => c.canBeReused());
+    const creep = this.pool.find((c) => c.canBeReused());
     return creep || null;
   }
 
@@ -61,7 +58,13 @@ export class CreepManager {
     return creep;
   }
 
-  private spawnAtPosition(creepType: string, deathX: number, deathY: number, distanceTraveled: number, waveNumber: number): Creep | null {
+  private spawnAtPosition(
+    creepType: string,
+    deathX: number,
+    deathY: number,
+    distanceTraveled: number,
+    waveNumber: number
+  ): Creep | null {
     const creep = this.getFromPool();
 
     if (!creep) {
@@ -75,7 +78,8 @@ export class CreepManager {
     const offsetY = (Math.random() - 0.5) * 30;
     creep.setPosition(deathX + offsetX, deathY + offsetY);
 
-    (creep as any).distanceTraveled = distanceTraveled;
+    // Set distance traveled for proper path position
+    creep.setDistanceTraveled(distanceTraveled);
 
     this.activeCreeps.push(creep);
 
@@ -83,7 +87,6 @@ export class CreepManager {
   }
 
   private handleCreepDied(creep: Creep, goldReward: number): void {
-
     const deathX = creep.x;
     const deathY = creep.y;
     this.removeFromActive(creep);
@@ -91,21 +94,28 @@ export class CreepManager {
   }
 
   private handleCreepReachedEnd(creep: Creep): void {
-    console.log(`CreepManager.handleCreepReachedEnd called, activeCreeps before: ${this.activeCreeps.length}`);
     this.removeFromActive(creep);
-    console.log(`CreepManager.handleCreepReachedEnd, activeCreeps after: ${this.activeCreeps.length}, calling onCreepReachedEnd: ${!!this.onCreepReachedEnd}`);
     this.onCreepReachedEnd?.(creep);
   }
 
-  private handleSpawnOnDeath(_parentCreep: Creep, babyType: string, count: number, deathX: number, deathY: number, distanceTraveled: number): void {
-    console.log(`CreepManager.handleSpawnOnDeath: Spawning ${count} ${babyType} at (${deathX}, ${deathY})`);
-
+  private handleSpawnOnDeath(
+    _parentCreep: Creep,
+    babyType: string,
+    count: number,
+    deathX: number,
+    deathY: number,
+    distanceTraveled: number
+  ): void {
     for (let i = 0; i < count; i++) {
-
       this.scene.time.delayedCall(i * 100, () => {
-        const baby = this.spawnAtPosition(babyType, deathX, deathY, distanceTraveled, this.currentWaveNumber);
+        const baby = this.spawnAtPosition(
+          babyType,
+          deathX,
+          deathY,
+          distanceTraveled,
+          this.currentWaveNumber
+        );
         if (baby) {
-
           this.onBabySpawned?.(1);
         }
       });
@@ -141,13 +151,17 @@ export class CreepManager {
     return this.activeCreeps.length;
   }
 
+  /* eslint-disable no-console */
   debugActiveCreeps(): void {
     console.log(`CreepManager DEBUG: ${this.activeCreeps.length} active creeps:`);
     for (let i = 0; i < this.activeCreeps.length; i++) {
       const creep = this.activeCreeps[i];
-      console.log(`  [${i}] type=${creep.getConfig().type}, pos=(${creep.x.toFixed(0)}, ${creep.y.toFixed(0)}), isActive=${creep.getIsActive()}, visible=${creep.visible}, hp=${creep.getCurrentHealth()}`);
+      console.log(
+        `  [${i}] type=${creep.getConfig().type}, pos=(${creep.x.toFixed(0)}, ${creep.y.toFixed(0)}), isActive=${creep.getIsActive()}, visible=${creep.visible}, hp=${creep.getCurrentHealth()}`
+      );
     }
   }
+  /* eslint-enable no-console */
 
   clearAll(): void {
     for (const creep of [...this.activeCreeps]) {

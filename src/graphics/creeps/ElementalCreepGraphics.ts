@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export class ElementalCreepGraphics {
-
   static draw(
     g: Phaser.GameObjects.Graphics,
     type: string,
@@ -18,29 +17,33 @@ export class ElementalCreepGraphics {
     }
   }
 
-  static drawFlame(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawFlame(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const flicker = Math.sin(bounceTime * 15) * 2;
     const pulse = 1 + Math.sin(bounceTime * 10) * 0.15;
 
     g.fillStyle(0x000000, 0.2 + Math.sin(bounceTime * 20) * 0.1);
     g.fillEllipse(0, 18, 22, 8);
 
-    g.fillStyle(0xFF4500, 0.4);
+    g.fillStyle(0xff4500, 0.4);
     g.fillCircle(0, -5 + flicker, 22 * pulse);
 
-    g.fillStyle(0xFF6600, 1);
+    g.fillStyle(0xff6600, 1);
     g.fillEllipse(0, -3 + flicker, 18 * pulse, 16 * pulse);
 
-    g.fillStyle(0xFFAA00, 1);
+    g.fillStyle(0xffaa00, 1);
     g.fillEllipse(0, -5 + flicker, 12, 10);
 
-    g.fillStyle(0xFFDD00, 1);
+    g.fillStyle(0xffdd00, 1);
     g.fillCircle(0, -6 + flicker, 6);
 
-    g.fillStyle(0xFFFFAA, 0.9);
+    g.fillStyle(0xffffaa, 0.9);
     g.fillCircle(0, -7 + flicker, 3);
 
-    const flameColors = [0xFF4500, 0xFF6600, 0xFFAA00];
+    const flameColors = [0xff4500, 0xff6600, 0xffaa00];
     for (let i = 0; i < 5; i++) {
       const angle = (bounceTime * 8 + i * 1.2) % (Math.PI * 2);
       const flameHeight = 8 + Math.sin(angle) * 6;
@@ -56,15 +59,19 @@ export class ElementalCreepGraphics {
       g.fill();
     }
 
-    g.fillStyle(0xFFFFFF, 1);
+    g.fillStyle(0xffffff, 1);
     g.fillCircle(-4 * faceDirection, -6 + flicker, 3);
     g.fillCircle(4 * faceDirection, -6 + flicker, 3);
-    g.fillStyle(0xFF0000, 1);
+    g.fillStyle(0xff0000, 1);
     g.fillCircle(-4 * faceDirection, -6 + flicker, 2);
     g.fillCircle(4 * faceDirection, -6 + flicker, 2);
   }
 
-  static drawPlaguebearer(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawPlaguebearer(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const bounce = Math.sin(bounceTime * 6) * 2;
     const sway = Math.sin(bounceTime * 4) * 0.1;
 
@@ -72,7 +79,7 @@ export class ElementalCreepGraphics {
     g.fillEllipse(0, 20, 20, 6);
 
     const legPhase = Math.sin(bounceTime * 6);
-    g.fillStyle(0x556B2F, 1);
+    g.fillStyle(0x556b2f, 1);
     g.fillRect(-6 + legPhase * 2, 5, 4, 15);
     g.fillRect(2 - legPhase * 2, 5, 4, 15);
 
@@ -110,7 +117,7 @@ export class ElementalCreepGraphics {
     g.fillStyle(0xc8b896, 1);
     g.fillCircle(2 * faceDirection, -17 + bounce, 5);
 
-    g.fillStyle(0x00FF88, 1);
+    g.fillStyle(0x00ff88, 1);
     g.fillCircle(-1 * faceDirection + 2 * faceDirection, -19 + bounce, 2);
     g.fillCircle(3 * faceDirection + 2 * faceDirection, -19 + bounce, 2);
 
@@ -121,7 +128,7 @@ export class ElementalCreepGraphics {
       const py = Math.sin(angle + bounceTime) * dist * 0.5 - 5 + bounce;
       const alpha = 0.3 + Math.sin(angle) * 0.2;
 
-      g.fillStyle(0x00FF88, alpha);
+      g.fillStyle(0x00ff88, alpha);
       g.fillCircle(px, py, 2);
     }
   }

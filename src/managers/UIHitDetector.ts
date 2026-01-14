@@ -78,10 +78,12 @@ export class UIHitDetector {
   }
 
   private isPointInBounds(x: number, y: number, bounds: UIBounds): boolean {
-    return x >= bounds.x &&
-           x <= bounds.x + bounds.width &&
-           y >= bounds.y &&
-           y <= bounds.y + bounds.height;
+    return (
+      x >= bounds.x &&
+      x <= bounds.x + bounds.width &&
+      y >= bounds.y &&
+      y <= bounds.y + bounds.height
+    );
   }
 
   clearAllBounds(): void {

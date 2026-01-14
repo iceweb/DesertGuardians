@@ -43,11 +43,7 @@ export class SniperAnimator {
     this.rifleGraphics = scene.add.graphics();
     this.effectGraphics = scene.add.graphics();
 
-    this.sniperContainer.add([
-      this.rifleGraphics,
-      this.sniperGraphics,
-      this.effectGraphics
-    ]);
+    this.sniperContainer.add([this.rifleGraphics, this.sniperGraphics, this.effectGraphics]);
 
     this.container.add([this.baseGraphics, this.sniperContainer]);
 
@@ -72,7 +68,8 @@ export class SniperAnimator {
       const rotationSpeed = 3.0;
 
       if (Math.abs(angleDiff) > 0.01) {
-        this.sniperAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
+        this.sniperAngle +=
+          Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
         this.sniperAngle = Phaser.Math.Angle.Wrap(this.sniperAngle);
       }
 
@@ -115,7 +112,8 @@ export class SniperAnimator {
     this.hasTarget = true;
 
     const sniperWorldY = towerY + this.SNIPER_Y[this.level - 1];
-    this.targetAngle = Phaser.Math.Angle.Between(towerX, sniperWorldY, targetX, targetY) + Math.PI / 2;
+    this.targetAngle =
+      Phaser.Math.Angle.Between(towerX, sniperWorldY, targetX, targetY) + Math.PI / 2;
   }
 
   clearTarget(): void {
@@ -148,7 +146,7 @@ export class SniperAnimator {
 
     return {
       x: rotatedX,
-      y: rotatedY + this.SNIPER_Y[this.level - 1]
+      y: rotatedY + this.SNIPER_Y[this.level - 1],
     };
   }
 
@@ -170,7 +168,6 @@ export class SniperAnimator {
     const towerHeight = 40;
 
     if (level === 1) {
-
       g.fillStyle(0x6b5a44, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 18);
       g.fillStyle(0x7b6a54, 1);
@@ -180,7 +177,6 @@ export class SniperAnimator {
       g.fillCircle(-baseWidth + 5, 12, 5);
       g.fillCircle(baseWidth - 5, 12, 5);
     } else if (level === 2) {
-
       g.fillStyle(0x4a5a3a, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 20);
       g.fillStyle(0x5a6a4a, 1);
@@ -191,7 +187,6 @@ export class SniperAnimator {
         g.fillCircle(i, 14 + (i % 3), 4);
       }
     } else {
-
       g.fillStyle(0x3a4a3a, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 24);
       g.fillStyle(0x4a5a4a, 1);
@@ -274,10 +269,8 @@ export class SniperAnimator {
 
     const bodyY = 10;
 
-    const ghillieColor = this.level === 1 ? 0x5a6a4a :
-                         this.level === 2 ? 0x4a5a3a : 0x3a4a2a;
-    const ghillieDark = this.level === 1 ? 0x4a5a3a :
-                        this.level === 2 ? 0x3a4a2a : 0x2a3a1a;
+    const ghillieColor = this.level === 1 ? 0x5a6a4a : this.level === 2 ? 0x4a5a3a : 0x3a4a2a;
+    const ghillieDark = this.level === 1 ? 0x4a5a3a : this.level === 2 ? 0x3a4a2a : 0x2a3a1a;
     const skinColor = 0xc9a07c;
 
     if (this.isCheeringActive) {
@@ -304,14 +297,12 @@ export class SniperAnimator {
     g.fillCircle(4, bodyY - 16, 4);
 
     if (this.level === 1) {
-
       g.fillStyle(0x5a5a4a, 1);
       g.fillCircle(0, bodyY - 6, 9);
 
       g.fillStyle(0x4a4a3a, 1);
       g.fillRect(-8, bodyY - 12, 16, 4);
     } else if (this.level === 2) {
-
       g.fillStyle(ghillieColor, 1);
       g.fillCircle(0, bodyY - 6, 11);
 
@@ -321,7 +312,6 @@ export class SniperAnimator {
         g.fillCircle(Math.cos(angle) * 10, bodyY - 6 + Math.sin(angle) * 10, 3);
       }
     } else {
-
       g.fillStyle(ghillieColor, 1);
       g.fillCircle(0, bodyY - 7, 13);
 
@@ -381,7 +371,6 @@ export class SniperAnimator {
     g.clear();
 
     if (this.isCheeringActive) {
-
       const raiseOffset = this.cheerArmAngle * 10;
       const bodyY = 10;
       const rifleY = bodyY - 24 - raiseOffset;

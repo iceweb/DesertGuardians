@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { GAME_CONFIG } from '../data/GameConfig';
 
 export class GameController extends Phaser.Events.EventEmitter {
-
   private _gold: number;
   private _castleHP: number;
   private _maxCastleHP: number;
@@ -183,7 +182,7 @@ export class GameController extends Phaser.Events.EventEmitter {
       maxCastleHP: this._maxCastleHP,
       currentWave: this._currentWave,
       totalWaves: this._totalWaves,
-      runTimeSeconds: this.getElapsedRealTime()
+      runTimeSeconds: this.getElapsedRealTime(),
     };
   }
 }

@@ -62,7 +62,8 @@ export abstract class AnimatorBase {
       const angleDiff = Phaser.Math.Angle.Wrap(this.targetAngle - this.currentAngle);
 
       if (Math.abs(angleDiff) > 0.01) {
-        this.currentAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), this.rotationSpeed * dt);
+        this.currentAngle +=
+          Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), this.rotationSpeed * dt);
         this.currentAngle = Phaser.Math.Angle.Wrap(this.currentAngle);
       }
     }
@@ -91,7 +92,9 @@ export abstract class AnimatorBase {
   setTarget(targetX: number, targetY: number, towerX: number, towerY: number): void {
     this.hasTarget = true;
     const rotatingElementWorldY = towerY + this.getRotatingElementY(this.level);
-    this.targetAngle = Phaser.Math.Angle.Between(towerX, rotatingElementWorldY, targetX, targetY) + this.getAngleOffset();
+    this.targetAngle =
+      Phaser.Math.Angle.Between(towerX, rotatingElementWorldY, targetX, targetY) +
+      this.getAngleOffset();
   }
 
   clearTarget(): void {
@@ -116,7 +119,7 @@ export abstract class AnimatorBase {
 
     return {
       x: rotatedX,
-      y: rotatedY + this.getRotatingElementY(this.level)
+      y: rotatedY + this.getRotatingElementY(this.level),
     };
   }
 

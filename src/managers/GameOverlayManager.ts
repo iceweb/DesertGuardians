@@ -20,39 +20,51 @@ export class GameOverlayManager {
     const width = this.scene.cameras.main.width;
     const height = this.scene.cameras.main.height;
 
-    const bonusText = this.scene.add.text(width / 2, height / 2 - 50, `Wave ${waveNumber} Complete!`, {
-      fontFamily: 'Arial Black',
-      fontSize: '32px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5).setDepth(250).setAlpha(0);
+    const bonusText = this.scene.add
+      .text(width / 2, height / 2 - 50, `Wave ${waveNumber} Complete!`, {
+        fontFamily: 'Arial Black',
+        fontSize: '32px',
+        color: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5)
+      .setDepth(250)
+      .setAlpha(0);
 
-    const goldText = this.scene.add.text(width / 2, height / 2, `+${bonusGold}g Bonus!`, {
-      fontFamily: 'Arial Black',
-      fontSize: '28px',
-      color: '#ffff00',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(250).setAlpha(0);
+    const goldText = this.scene.add
+      .text(width / 2, height / 2, `+${bonusGold}g Bonus!`, {
+        fontFamily: 'Arial Black',
+        fontSize: '28px',
+        color: '#ffff00',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(250)
+      .setAlpha(0);
 
     this.scene.tweens.add({
       targets: [bonusText, goldText],
       alpha: 1,
       duration: 300,
-      ease: 'Power2'
+      ease: 'Power2',
     });
 
     const coinCount = Math.min(8, Math.max(3, Math.floor(bonusGold / 10)));
     const coins: Phaser.GameObjects.Text[] = [];
 
     for (let i = 0; i < coinCount; i++) {
-      const coin = this.scene.add.text(
-        width / 2 + Phaser.Math.Between(-50, 50),
-        height / 2 + 30 + Phaser.Math.Between(-20, 20),
-        '💰',
-        { fontSize: '24px' }
-      ).setOrigin(0.5).setDepth(251).setAlpha(0);
+      const coin = this.scene.add
+        .text(
+          width / 2 + Phaser.Math.Between(-50, 50),
+          height / 2 + 30 + Phaser.Math.Between(-20, 20),
+          '💰',
+          { fontSize: '24px' }
+        )
+        .setOrigin(0.5)
+        .setDepth(251)
+        .setAlpha(0);
       coins.push(coin);
     }
 
@@ -62,7 +74,7 @@ export class GameOverlayManager {
           targets: coin,
           alpha: 1,
           duration: 100,
-          delay: index * 50
+          delay: index * 50,
         });
 
         this.scene.tweens.add({
@@ -81,10 +93,10 @@ export class GameOverlayManager {
                 targets: this.goldTextRef,
                 scale: 1,
                 duration: 150,
-                ease: 'Power2'
+                ease: 'Power2',
               });
             }
-          }
+          },
         });
       });
 
@@ -99,7 +111,7 @@ export class GameOverlayManager {
           bonusText.destroy();
           goldText.destroy();
           onComplete();
-        }
+        },
       });
     });
   }
@@ -107,35 +119,53 @@ export class GameOverlayManager {
   showVictory(gold: number, castleHP: number): void {
     const scene = this.scene;
 
-    scene.add.rectangle(
-      scene.cameras.main.centerX,
-      scene.cameras.main.centerY,
-      scene.cameras.main.width,
-      scene.cameras.main.height,
-      0x000000, 0.7
-    ).setDepth(300);
+    scene.add
+      .rectangle(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY,
+        scene.cameras.main.width,
+        scene.cameras.main.height,
+        0x000000,
+        0.7
+      )
+      .setDepth(300);
 
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY - 50, '🏆 VICTORY! 🏆', {
-      fontFamily: 'Arial Black',
-      fontSize: '64px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 6
-    }).setOrigin(0.5).setDepth(301);
+    scene.add
+      .text(scene.cameras.main.centerX, scene.cameras.main.centerY - 50, '🏆 VICTORY! 🏆', {
+        fontFamily: 'Arial Black',
+        fontSize: '64px',
+        color: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setDepth(301);
 
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 30, `Castle HP: ${castleHP}/${GAME_CONFIG.MAX_CASTLE_HP} | Gold: ${gold}`, {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setDepth(301);
+    scene.add
+      .text(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY + 30,
+        `Castle HP: ${castleHP}/${GAME_CONFIG.MAX_CASTLE_HP} | Gold: ${gold}`,
+        {
+          fontFamily: 'Arial',
+          fontSize: '24px',
+          color: '#ffffff',
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(301);
 
-    const menuBtn = scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 100, '← Back to Menu', {
-      fontFamily: 'Arial',
-      fontSize: '28px',
-      color: '#ffffff',
-      backgroundColor: '#4a3520',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
+    const menuBtn = scene.add
+      .text(scene.cameras.main.centerX, scene.cameras.main.centerY + 100, '← Back to Menu', {
+        fontFamily: 'Arial',
+        fontSize: '28px',
+        color: '#ffffff',
+        backgroundColor: '#4a3520',
+        padding: { x: 20, y: 10 },
+      })
+      .setOrigin(0.5)
+      .setDepth(301)
+      .setInteractive({ useHandCursor: true });
 
     menuBtn.on('pointerdown', () => {
       this.onMenuClicked?.();
@@ -145,36 +175,53 @@ export class GameOverlayManager {
   showDefeat(currentWave: number, totalWaves: number, creepsKilled: number): void {
     const scene = this.scene;
 
-    scene.add.rectangle(
-      scene.cameras.main.centerX,
-      scene.cameras.main.centerY,
-      scene.cameras.main.width,
-      scene.cameras.main.height,
-      0x000000, 0.7
-    ).setDepth(300);
+    scene.add
+      .rectangle(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY,
+        scene.cameras.main.width,
+        scene.cameras.main.height,
+        0x000000,
+        0.7
+      )
+      .setDepth(300);
 
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY - 50, '💀 DEFEAT 💀', {
-      fontFamily: 'Arial Black',
-      fontSize: '64px',
-      color: '#ff4444',
-      stroke: '#000000',
-      strokeThickness: 6
-    }).setOrigin(0.5).setDepth(301);
+    scene.add
+      .text(scene.cameras.main.centerX, scene.cameras.main.centerY - 50, '💀 DEFEAT 💀', {
+        fontFamily: 'Arial Black',
+        fontSize: '64px',
+        color: '#ff4444',
+        stroke: '#000000',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setDepth(301);
 
-    scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 30,
-      `Wave: ${currentWave}/${totalWaves} | Creeps Killed: ${creepsKilled}`, {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffffff'
-    }).setOrigin(0.5).setDepth(301);
+    scene.add
+      .text(
+        scene.cameras.main.centerX,
+        scene.cameras.main.centerY + 30,
+        `Wave: ${currentWave}/${totalWaves} | Creeps Killed: ${creepsKilled}`,
+        {
+          fontFamily: 'Arial',
+          fontSize: '24px',
+          color: '#ffffff',
+        }
+      )
+      .setOrigin(0.5)
+      .setDepth(301);
 
-    const menuBtn = scene.add.text(scene.cameras.main.centerX, scene.cameras.main.centerY + 100, '← Back to Menu', {
-      fontFamily: 'Arial',
-      fontSize: '28px',
-      color: '#ffffff',
-      backgroundColor: '#4a3520',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setDepth(301).setInteractive({ useHandCursor: true });
+    const menuBtn = scene.add
+      .text(scene.cameras.main.centerX, scene.cameras.main.centerY + 100, '← Back to Menu', {
+        fontFamily: 'Arial',
+        fontSize: '28px',
+        color: '#ffffff',
+        backgroundColor: '#4a3520',
+        padding: { x: 20, y: 10 },
+      })
+      .setOrigin(0.5)
+      .setDepth(301)
+      .setInteractive({ useHandCursor: true });
 
     menuBtn.on('pointerdown', () => {
       this.onMenuClicked?.();
@@ -182,13 +229,16 @@ export class GameOverlayManager {
   }
 
   showFloatingText(text: string, x: number, y: number, color: number): void {
-    const floatText = this.scene.add.text(x, y, text, {
-      fontFamily: 'Arial Black',
-      fontSize: '20px',
-      color: `#${color.toString(16).padStart(6, '0')}`,
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(200);
+    const floatText = this.scene.add
+      .text(x, y, text, {
+        fontFamily: 'Arial Black',
+        fontSize: '20px',
+        color: `#${color.toString(16).padStart(6, '0')}`,
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(200);
 
     this.scene.tweens.add({
       targets: floatText,
@@ -196,7 +246,7 @@ export class GameOverlayManager {
       alpha: 0,
       duration: 1000,
       ease: 'Power2',
-      onComplete: () => floatText.destroy()
+      onComplete: () => floatText.destroy(),
     });
   }
 }

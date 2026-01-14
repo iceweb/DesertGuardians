@@ -12,7 +12,14 @@ export interface AbilityContext {
   damage: number;
   isMagic: boolean;
   allCreeps: Creep[];
-  onSplash?: (x: number, y: number, radius: number, damage: number, isMagic: boolean, branch: string) => void;
+  onSplash?: (
+    x: number,
+    y: number,
+    radius: number,
+    damage: number,
+    isMagic: boolean,
+    branch: string
+  ) => void;
 }
 
 export interface AbilityResult {
@@ -37,7 +44,10 @@ export class TowerAbilityEffects {
     this.visuals = visuals;
   }
 
-  executeAftershock(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeAftershock(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { hitPosition, damage, isMagic, onSplash } = context;
     const count = params.count || 3;
     const radius = params.radius || 50;
@@ -61,7 +71,11 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'cannon_aftershock', message: 'AFTERSHOCK!' };
   }
 
-  executeEarthquake(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  /* eslint-disable max-lines-per-function */
+  executeEarthquake(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { scene, hitPosition, allCreeps, tower } = context;
     const radius = params.radius || 85;
     const duration = params.duration || 3000;
@@ -103,7 +117,8 @@ export class TowerAbilityEffects {
         cracks.beginPath();
         cracks.moveTo(0, 0);
 
-        let x = 0, y = 0;
+        let x = 0,
+          y = 0;
         const segments = 4;
         for (let s = 1; s <= segments; s++) {
           const progress = s / segments;
@@ -159,7 +174,7 @@ export class TowerAbilityEffects {
           x: debris.x + (Math.random() - 0.5) * 20,
           alpha: 0,
           duration: 400 + Math.random() * 300,
-          onComplete: () => debris.destroy()
+          onComplete: () => debris.destroy(),
         });
       }
     };
@@ -174,8 +189,8 @@ export class TowerAbilityEffects {
           { x: hitPosition.x + 5, y: hitPosition.y + 3, duration: 40 },
           { x: hitPosition.x - 3, y: hitPosition.y + 4, duration: 40 },
           { x: hitPosition.x + 4, y: hitPosition.y - 4, duration: 40 },
-          { x: hitPosition.x, y: hitPosition.y, duration: 40 }
-        ]
+          { x: hitPosition.x, y: hitPosition.y, duration: 40 },
+        ],
       });
     };
 
@@ -204,7 +219,7 @@ export class TowerAbilityEffects {
 
         const intensity = 1 - (tickCount / maxTicks) * 0.3;
         drawEarthquakeZone(intensity);
-      }
+      },
     });
 
     scene.time.delayedCall(duration, () => {
@@ -224,7 +239,7 @@ export class TowerAbilityEffects {
           y: hitPosition.y + Math.sin(angle) * (radius * 0.5 + Math.random() * 20) - 10,
           alpha: 0,
           duration: 400,
-          onComplete: () => debris.destroy()
+          onComplete: () => debris.destroy(),
         });
       }
 
@@ -234,14 +249,17 @@ export class TowerAbilityEffects {
         scaleX: 1.1,
         scaleY: 1.1,
         duration: 400,
-        onComplete: () => zoneContainer.destroy()
+        onComplete: () => zoneContainer.destroy(),
       });
     });
 
     return { triggered: true, abilityId: 'cannon_earthquake', message: 'EARTHQUAKE!' };
   }
 
-  executeShrapnel(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeShrapnel(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { hitPosition, damage, allCreeps } = context;
     const count = params.count || 6;
     const damageMultiplier = params.damageMultiplier || 0.25;
@@ -266,7 +284,7 @@ export class TowerAbilityEffects {
         y: endY,
         alpha: 0,
         duration: 200,
-        onComplete: () => shard.destroy()
+        onComplete: () => shard.destroy(),
       });
 
       for (const creep of allCreeps) {
@@ -281,7 +299,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'cannon_shrapnel', message: 'SHRAPNEL!' };
   }
 
-  executeCriticalStrike(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeCriticalStrike(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const damageMultiplier = params.damageMultiplier || 2.0;
     this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'CRIT HIT!', 0xff0000);
 
@@ -289,22 +310,33 @@ export class TowerAbilityEffects {
       triggered: true,
       abilityId: 'sniper_critical',
       extraDamage: context.damage * (damageMultiplier - 1),
-      message: 'CRITICAL STRIKE!'
+      message: 'CRITICAL STRIKE!',
     };
   }
 
-  executeArmorPierce(context: AbilityContext, _params: AbilityDefinition['effectParams']): AbilityResult {
+  executeArmorPierce(
+    context: AbilityContext,
+    _params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'PIERCE!', 0x00bfff);
-    this.visuals.showArmorPierceTrail(context.tower.x, context.tower.y, context.hitPosition.x, context.hitPosition.y);
+    this.visuals.showArmorPierceTrail(
+      context.tower.x,
+      context.tower.y,
+      context.hitPosition.x,
+      context.hitPosition.y
+    );
 
     return {
       triggered: true,
       abilityId: 'sniper_pierce',
-      message: 'ARMOR PIERCE!'
+      message: 'ARMOR PIERCE!',
     };
   }
 
-  executeHeadshot(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeHeadshot(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target, damage } = context;
     const hpThreshold = params.hpThreshold || 0.25;
     const damageMultiplier = params.damageMultiplier || 1.5;
@@ -319,19 +351,24 @@ export class TowerAbilityEffects {
         triggered: true,
         abilityId: 'sniper_headshot',
         extraDamage: damage * (damageMultiplier - 1),
-        message: 'HEADSHOT!'
+        message: 'HEADSHOT!',
       };
     }
 
     if (healthPercent <= hpThreshold) {
-      this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, '💀 HEADSHOT!', 0xff0000);
+      this.visuals.showFloatingText(
+        context.tower.x,
+        context.tower.y - 40,
+        '💀 HEADSHOT!',
+        0xff0000
+      );
       this.visuals.showSkullEffect(context.hitPosition.x, context.hitPosition.y);
 
       return {
         triggered: true,
         abilityId: 'sniper_headshot',
         extraDamage: target.getCurrentHealth() * 10,
-        message: 'HEADSHOT!'
+        message: 'HEADSHOT!',
       };
     } else {
       this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'HEADSHOT!', 0xff6666);
@@ -340,12 +377,15 @@ export class TowerAbilityEffects {
         triggered: true,
         abilityId: 'sniper_headshot',
         extraDamage: damage * (damageMultiplier - 1),
-        message: 'HEADSHOT!'
+        message: 'HEADSHOT!',
       };
     }
   }
 
-  executeIceTrap(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeIceTrap(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target } = context;
     let duration = params.duration || 2000;
 
@@ -360,7 +400,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'ice_trap', message: 'FROZEN!' };
   }
 
-  executeFrostNova(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeFrostNova(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target, allCreeps, tower } = context;
     const radius = params.radius || 80;
 
@@ -380,7 +423,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'ice_frostnova', message: 'FROST NOVA!' };
   }
 
-  executeShatter(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeShatter(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target, damage } = context;
     let damageMultiplier = params.damageMultiplier || 2.0;
 
@@ -400,11 +446,14 @@ export class TowerAbilityEffects {
       triggered: true,
       abilityId: 'ice_shatter',
       extraDamage: damage * (damageMultiplier - 1),
-      message: 'SHATTER!'
+      message: 'SHATTER!',
     };
   }
 
-  executePlagueSpread(context: AbilityContext, _params: AbilityDefinition['effectParams']): AbilityResult {
+  executePlagueSpread(
+    context: AbilityContext,
+    _params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target } = context;
 
     this.plagueMarkedTargets.add(target);
@@ -413,7 +462,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'poison_plague', message: 'PLAGUE!' };
   }
 
-  executeToxicExplosion(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeToxicExplosion(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target, allCreeps } = context;
     const damage = params.damage || 40;
     const radius = params.radius || 60;
@@ -435,7 +487,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'poison_explosion', message: 'TOXIC EXPLOSION!' };
   }
 
-  executeCorrosiveAcid(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeCorrosiveAcid(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target } = context;
     let armorReduction = params.armorReduction || 2;
 
@@ -450,7 +505,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'poison_corrosive', message: 'CORRODE!' };
   }
 
-  executeBulletStorm(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeBulletStorm(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const count = params.count || 5;
     this.bulletStormCount = count;
     this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'BULLET STORM!', 0xffcc00);
@@ -458,7 +516,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'rapid_bulletstorm', message: 'BULLET STORM!' };
   }
 
-  executeRicochet(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeRicochet(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target, damage, allCreeps } = context;
     const bounceRange = params.bounceRange || 100;
     const bounceDamageMultiplier = params.bounceDamageMultiplier || 0.5;
@@ -483,7 +544,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'rapid_ricochet', message: 'RICOCHET!' };
   }
 
-  executeIncendiary(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executeIncendiary(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target } = context;
     const burnDamage = params.burnDamage || 5;
     const burnDuration = params.burnDuration || 3000;
@@ -494,12 +558,18 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'rapid_incendiary', message: 'BURN!' };
   }
 
-  executeMultiShot(context: AbilityContext, _params: AbilityDefinition['effectParams']): AbilityResult {
+  executeMultiShot(
+    context: AbilityContext,
+    _params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'MULTI-SHOT!', 0xffd700);
     return { triggered: true, abilityId: 'archer_multishot', message: 'MULTI-SHOT!' };
   }
 
-  executePiercingArrow(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
+  executePiercingArrow(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     const { target, damage, allCreeps } = context;
     const count = params.count || 2;
     const damageMultiplier = params.damageMultiplier || 1.0;
@@ -514,8 +584,18 @@ export class TowerAbilityEffects {
       const angleDiff = Math.abs(Phaser.Math.Angle.Wrap(creepAngle - angle));
 
       if (angleDiff < 0.3) {
-        const distFromTower = Phaser.Math.Distance.Between(context.tower.x, context.tower.y, creep.x, creep.y);
-        const targetDist = Phaser.Math.Distance.Between(context.tower.x, context.tower.y, target.x, target.y);
+        const distFromTower = Phaser.Math.Distance.Between(
+          context.tower.x,
+          context.tower.y,
+          creep.x,
+          creep.y
+        );
+        const targetDist = Phaser.Math.Distance.Between(
+          context.tower.x,
+          context.tower.y,
+          target.x,
+          target.y
+        );
 
         if (distFromTower > targetDist) {
           creep.takeDamage(damage * damageMultiplier, false, 'archer');
@@ -529,7 +609,10 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'archer_piercing', message: 'PIERCE!' };
   }
 
-  executeQuickDraw(context: AbilityContext, _params: AbilityDefinition['effectParams']): AbilityResult {
+  executeQuickDraw(
+    context: AbilityContext,
+    _params: AbilityDefinition['effectParams']
+  ): AbilityResult {
     this.quickDrawActive = true;
     this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'QUICK DRAW!', 0xffd700);
 

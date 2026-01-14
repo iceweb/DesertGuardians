@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): void {
-
   g.fillStyle(0x000000, 0.3);
   g.fillEllipse(0, 25, 50, 18);
 
@@ -9,7 +8,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
   const towerHeight = level === 4 ? 50 : 42;
 
   if (level === 1) {
-
     g.fillStyle(0x8b5a2b, 1);
     g.fillRect(-baseWidth, 8, baseWidth * 2, 18);
     g.fillStyle(0x9a6a3b, 1);
@@ -20,7 +18,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
       g.lineBetween(i, 10, i, 24);
     }
   } else if (level === 2) {
-
     g.fillStyle(0x8b7355, 1);
     g.fillRect(-baseWidth, 8, baseWidth * 2, 22);
     g.fillStyle(0x9a8265, 1);
@@ -31,7 +28,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.lineBetween(-10, 10, -10, 28);
     g.lineBetween(10, 10, 10, 28);
   } else {
-
     g.fillStyle(level === 4 ? 0xb8a385 : 0xa89375, 1);
     g.fillRect(-baseWidth, 8, baseWidth * 2, 26);
     g.fillStyle(level === 4 ? 0xd8c8a5 : 0xc8b395, 1);
@@ -53,7 +49,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
   }
 
   if (level === 1) {
-
     g.fillStyle(0xb88a5c, 1);
     g.beginPath();
     g.moveTo(-22, 10);
@@ -67,7 +62,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.lineBetween(-20, -15, 20, -15);
     g.lineBetween(-19, -35, 19, -35);
   } else if (level === 2) {
-
     g.fillStyle(0xd4a574, 1);
     g.beginPath();
     g.moveTo(-26, 10);
@@ -86,7 +80,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillStyle(0xe8c896, 1);
     g.fillRect(-10, -38, 20, 4);
   } else {
-
     g.fillStyle(level === 4 ? 0xf4c594 : 0xe4b584, 1);
     g.beginPath();
     g.moveTo(-32, 10);
@@ -160,7 +153,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillCircle(-26, battY + 7, 10);
     g.fillCircle(26, battY + 7, 10);
   } else {
-
     g.fillStyle(level === 4 ? 0xe9c08c : 0xd9b07c, 1);
     g.fillRect(-32, battY, 14, 16);
     g.fillRect(-12, battY, 24, 16);
@@ -190,7 +182,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillPath();
 
     if (level === 4) {
-
       g.fillStyle(0xffd700, 1);
       g.beginPath();
       g.moveTo(-35, battY - 18);
@@ -212,7 +203,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
   }
 
   if (level === 1) {
-
     g.fillStyle(0x4a3020, 1);
     g.fillCircle(0, battY - 12, 7);
     g.fillStyle(0x8b4513, 1);
@@ -223,7 +213,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.arc(8, battY - 3, 14, -1.5, 1.5, false);
     g.strokePath();
   } else if (level === 2) {
-
     g.fillStyle(0x5a4030, 1);
     g.fillCircle(0, battY - 14, 9);
     g.fillStyle(0x6a6a6a, 1);
@@ -238,7 +227,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.lineStyle(1, 0xc0c0c0, 1);
     g.lineBetween(10, battY - 20, 10, battY + 10);
   } else {
-
     g.fillStyle(0x5a4030, 1);
     g.fillCircle(0, battY - 16, 10);
     g.fillStyle(0xffd700, 1);
@@ -289,7 +277,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillStyle(0xffffff, 1);
     g.fillCircle(-32, -towerHeight + 17, 4);
   } else {
-
     g.fillStyle(0xffd700, 1);
     g.fillRect(-38, -towerHeight - 25, 4, 50);
     g.fillRect(34, -towerHeight - 25, 4, 50);
@@ -318,7 +305,6 @@ export function drawArcherTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillTriangle(12, battY - 35, 8, battY - 45, 4, battY - 35);
 
     if (level === 4) {
-
       g.fillStyle(0xffd700, 1);
       g.fillRect(-14, battY - 38, 28, 12);
       g.fillTriangle(-14, battY - 38, -10, battY - 55, -6, battY - 38);

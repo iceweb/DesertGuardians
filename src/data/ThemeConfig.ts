@@ -1,9 +1,5 @@
-
-
 export const THEME = {
-
   colors: {
-
     gold: 0xffd700,
     goldLight: 0xfffacd,
     goldDark: 0x8b6914,

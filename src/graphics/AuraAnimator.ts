@@ -144,13 +144,9 @@ export class AuraAnimator {
     }
   }
 
-  setTarget(_targetX: number, _targetY: number, _towerX: number, _towerY: number): void {
+  setTarget(_targetX: number, _targetY: number, _towerX: number, _towerY: number): void {}
 
-  }
-
-  clearTarget(): void {
-
-  }
+  clearTarget(): void {}
 
   onFire(): { x: number; y: number } {
     return { x: 0, y: 0 };
@@ -160,9 +156,7 @@ export class AuraAnimator {
     return { x: 0, y: 0 };
   }
 
-  onKill(): void {
-
-  }
+  onKill(): void {}
 
   destroy(): void {
     this.baseGraphics.destroy();

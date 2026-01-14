@@ -39,11 +39,11 @@ export class GoldMineUIManager {
     if (mine.isBuilt()) {
       this.showUpgradeMenu(mine);
     } else if (!this.reviewMode) {
-
       this.showBuildMenu(mine);
     }
   }
 
+  /* eslint-disable max-lines-per-function */
   showBuildMenu(mine: GoldMine): void {
     this.currentMine = mine;
     this.lastKnownGold = this.getPlayerGold?.() || 0;
@@ -65,14 +65,23 @@ export class GoldMineUIManager {
       -y + this.scene.cameras.main.height / 2,
       this.scene.cameras.main.width,
       this.scene.cameras.main.height,
-      0x000000, 0
+      0x000000,
+      0
     );
     blocker.setInteractive();
-    blocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
+    blocker.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
 
-      this.closeMenus();
-    });
+        this.closeMenus();
+      }
+    );
     this.buildMenuContainer.add(blocker);
 
     const bg = this.scene.add.graphics();
@@ -84,17 +93,26 @@ export class GoldMineUIManager {
 
     const menuHitArea = this.scene.add.rectangle(0, 0, 260, 140, 0xffffff, 0);
     menuHitArea.setInteractive();
-    menuHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-
-    });
+    menuHitArea.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
     this.buildMenuContainer.add(menuHitArea);
 
-    const title = this.scene.add.text(0, -52, 'Build Gold Mine', {
-      fontFamily: 'Arial Black',
-      fontSize: '18px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
+    const title = this.scene.add
+      .text(0, -52, 'Build Gold Mine', {
+        fontFamily: 'Arial Black',
+        fontSize: '18px',
+        color: '#ffd700',
+      })
+      .setOrigin(0.5);
     this.buildMenuContainer.add(title);
 
     const btnBg = this.scene.add.graphics();
@@ -114,36 +132,50 @@ export class GoldMineUIManager {
     icon.fillCircle(-70, 12, 10);
     this.buildMenuContainer.add(icon);
 
-    const nameText = this.scene.add.text(20, -12, 'Gold Mine', {
-      fontFamily: 'Arial Black',
-      fontSize: '16px',
-      color: canAfford ? '#ffffff' : '#666666'
-    }).setOrigin(0.5);
+    const nameText = this.scene.add
+      .text(20, -12, 'Gold Mine', {
+        fontFamily: 'Arial Black',
+        fontSize: '16px',
+        color: canAfford ? '#ffffff' : '#666666',
+      })
+      .setOrigin(0.5);
     this.buildMenuContainer.add(nameText);
 
-    const descText = this.scene.add.text(20, 12, `Produces ${income}g per wave`, {
-      fontFamily: 'Arial',
-      fontSize: '12px',
-      color: canAfford ? '#aaffaa' : '#556655'
-    }).setOrigin(0.5);
+    const descText = this.scene.add
+      .text(20, 12, `Produces ${income}g per wave`, {
+        fontFamily: 'Arial',
+        fontSize: '12px',
+        color: canAfford ? '#aaffaa' : '#556655',
+      })
+      .setOrigin(0.5);
     this.buildMenuContainer.add(descText);
 
-    const costText = this.scene.add.text(20, 32, `Cost: ${buildCost}g`, {
-      fontFamily: 'Arial Black',
-      fontSize: '14px',
-      color: canAfford ? '#ffd700' : '#ff4444'
-    }).setOrigin(0.5);
+    const costText = this.scene.add
+      .text(20, 32, `Cost: ${buildCost}g`, {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: canAfford ? '#ffd700' : '#ff4444',
+      })
+      .setOrigin(0.5);
     this.buildMenuContainer.add(costText);
 
     if (canAfford) {
       const hitArea = this.scene.add.rectangle(0, 12, 220, 80, 0xffffff, 0);
       hitArea.setInteractive({ useHandCursor: true });
-      hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-        event.stopPropagation();
-        const slotId = mine.getSlotId();
-        this.goldMineManager.buildMine(slotId);
-        this.closeMenus();
-      });
+      hitArea.on(
+        'pointerdown',
+        (
+          _pointer: Phaser.Input.Pointer,
+          _localX: number,
+          _localY: number,
+          event: Phaser.Types.Input.EventData
+        ) => {
+          event.stopPropagation();
+          const slotId = mine.getSlotId();
+          this.goldMineManager.buildMine(slotId);
+          this.closeMenus();
+        }
+      );
       hitArea.on('pointerover', () => {
         btnBg.clear();
         btnBg.fillStyle(0x5a5a3a, 1);
@@ -163,27 +195,47 @@ export class GoldMineUIManager {
 
     const closeBtnBg = this.scene.add.rectangle(115, -58, 36, 36, 0x000000, 0.01);
     closeBtnBg.setInteractive({ useHandCursor: true });
-    closeBtnBg.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-    });
-    closeBtnBg.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.closeMenus();
-    });
+    closeBtnBg.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
+    closeBtnBg.on(
+      'pointerup',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.closeMenus();
+      }
+    );
     this.buildMenuContainer.add(closeBtnBg);
 
-    const closeBtn = this.scene.add.text(115, -58, '✕', {
-      fontFamily: 'Arial',
-      fontSize: '22px',
-      color: '#ff6666'
-    }).setOrigin(0.5);
+    const closeBtn = this.scene.add
+      .text(115, -58, '✕', {
+        fontFamily: 'Arial',
+        fontSize: '22px',
+        color: '#ff6666',
+      })
+      .setOrigin(0.5);
     closeBtnBg.on('pointerover', () => closeBtn.setColor('#ff9999'));
     closeBtnBg.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.buildMenuContainer.add(closeBtn);
 
     this.uiHelper.clampToScreen(this.buildMenuContainer, 260, 140, 0.5, 0.5);
   }
+  /* eslint-enable max-lines-per-function */
 
+  /* eslint-disable max-lines-per-function */
   showUpgradeMenu(mine: GoldMine): void {
     this.currentMine = mine;
     this.lastKnownGold = this.getPlayerGold?.() || 0;
@@ -208,14 +260,23 @@ export class GoldMineUIManager {
       -y + this.scene.cameras.main.height / 2,
       this.scene.cameras.main.width,
       this.scene.cameras.main.height,
-      0x000000, 0
+      0x000000,
+      0
     );
     blocker.setInteractive();
-    blocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
+    blocker.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
 
-      this.closeMenus();
-    });
+        this.closeMenus();
+      }
+    );
     this.upgradeMenuContainer.add(blocker);
 
     const bg = this.scene.add.graphics();
@@ -227,32 +288,45 @@ export class GoldMineUIManager {
 
     const menuHitArea = this.scene.add.rectangle(0, 0, menuWidth, menuHeight, 0xffffff, 0);
     menuHitArea.setInteractive();
-    menuHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-
-    });
+    menuHitArea.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
     this.upgradeMenuContainer.add(menuHitArea);
 
     const levelStars = '★'.repeat(mine.getLevel());
-    const title = this.scene.add.text(0, -menuHeight / 2 + 22, `${config.name} ${levelStars}`, {
-      fontFamily: 'Arial Black',
-      fontSize: '18px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
+    const title = this.scene.add
+      .text(0, -menuHeight / 2 + 22, `${config.name} ${levelStars}`, {
+        fontFamily: 'Arial Black',
+        fontSize: '18px',
+        color: '#ffd700',
+      })
+      .setOrigin(0.5);
     this.upgradeMenuContainer.add(title);
 
-    const incomeText = this.scene.add.text(0, -menuHeight / 2 + 48, `Income: +${config.incomePerWave}g per wave`, {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#aaffaa'
-    }).setOrigin(0.5);
+    const incomeText = this.scene.add
+      .text(0, -menuHeight / 2 + 48, `Income: +${config.incomePerWave}g per wave`, {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#aaffaa',
+      })
+      .setOrigin(0.5);
     this.upgradeMenuContainer.add(incomeText);
 
-    const investedText = this.scene.add.text(0, -menuHeight / 2 + 70, `Total Invested: ${mine.getTotalInvested()}g`, {
-      fontFamily: 'Arial',
-      fontSize: '12px',
-      color: '#aaaaaa'
-    }).setOrigin(0.5);
+    const investedText = this.scene.add
+      .text(0, -menuHeight / 2 + 70, `Total Invested: ${mine.getTotalInvested()}g`, {
+        fontFamily: 'Arial',
+        fontSize: '12px',
+        color: '#aaaaaa',
+      })
+      .setOrigin(0.5);
     this.upgradeMenuContainer.add(investedText);
 
     if (canUpgrade) {
@@ -271,28 +345,40 @@ export class GoldMineUIManager {
       upgradeBtnBg.strokeRoundedRect(-btnW / 2, btnY - btnH / 2, btnW, btnH, 8);
       this.upgradeMenuContainer.add(upgradeBtnBg);
 
-      const upgradeText = this.scene.add.text(0, btnY - 8, `⬆ Upgrade to Level ${nextLevel}`, {
-        fontFamily: 'Arial Black',
-        fontSize: '14px',
-        color: canAffordUpgrade ? '#00ff00' : '#666666'
-      }).setOrigin(0.5);
+      const upgradeText = this.scene.add
+        .text(0, btnY - 8, `⬆ Upgrade to Level ${nextLevel}`, {
+          fontFamily: 'Arial Black',
+          fontSize: '14px',
+          color: canAffordUpgrade ? '#00ff00' : '#666666',
+        })
+        .setOrigin(0.5);
       this.upgradeMenuContainer.add(upgradeText);
 
-      const upgradeDetails = this.scene.add.text(0, btnY + 12, `${upgradeCost}g • +${incomeGain}g/wave`, {
-        fontFamily: 'Arial',
-        fontSize: '12px',
-        color: canAffordUpgrade ? '#aaffaa' : '#555555'
-      }).setOrigin(0.5);
+      const upgradeDetails = this.scene.add
+        .text(0, btnY + 12, `${upgradeCost}g • +${incomeGain}g/wave`, {
+          fontFamily: 'Arial',
+          fontSize: '12px',
+          color: canAffordUpgrade ? '#aaffaa' : '#555555',
+        })
+        .setOrigin(0.5);
       this.upgradeMenuContainer.add(upgradeDetails);
 
       if (canAffordUpgrade) {
         const upgradeHitArea = this.scene.add.rectangle(0, btnY, btnW, btnH, 0xffffff, 0);
         upgradeHitArea.setInteractive({ useHandCursor: true });
-        upgradeHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-          event.stopPropagation();
-          this.goldMineManager.upgradeMine(mine);
-          this.closeMenus();
-        });
+        upgradeHitArea.on(
+          'pointerdown',
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData
+          ) => {
+            event.stopPropagation();
+            this.goldMineManager.upgradeMine(mine);
+            this.closeMenus();
+          }
+        );
         upgradeHitArea.on('pointerover', () => {
           upgradeBtnBg.clear();
           upgradeBtnBg.fillStyle(0x3a6a3a, 1);
@@ -310,33 +396,59 @@ export class GoldMineUIManager {
         this.upgradeMenuContainer.add(upgradeHitArea);
       }
     } else {
-
-      const maxText = this.scene.add.text(0, 35, '★ MAX LEVEL ★', {
-        fontFamily: 'Arial Black',
-        fontSize: '14px',
-        color: '#ffd700',
-        backgroundColor: '#3a3a2a',
-        padding: { x: 12, y: 10 }
-      }).setOrigin(0.5);
+      const maxText = this.scene.add
+        .text(0, 35, '★ MAX LEVEL ★', {
+          fontFamily: 'Arial Black',
+          fontSize: '14px',
+          color: '#ffd700',
+          backgroundColor: '#3a3a2a',
+          padding: { x: 12, y: 10 },
+        })
+        .setOrigin(0.5);
       this.upgradeMenuContainer.add(maxText);
     }
 
-    const closeBtnBg = this.scene.add.rectangle(menuWidth / 2 - 20, -menuHeight / 2 + 18, 36, 36, 0x000000, 0.01);
+    const closeBtnBg = this.scene.add.rectangle(
+      menuWidth / 2 - 20,
+      -menuHeight / 2 + 18,
+      36,
+      36,
+      0x000000,
+      0.01
+    );
     closeBtnBg.setInteractive({ useHandCursor: true });
-    closeBtnBg.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-    });
-    closeBtnBg.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.closeMenus();
-    });
+    closeBtnBg.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
+    closeBtnBg.on(
+      'pointerup',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.closeMenus();
+      }
+    );
     this.upgradeMenuContainer.add(closeBtnBg);
 
-    const closeBtn = this.scene.add.text(menuWidth / 2 - 20, -menuHeight / 2 + 18, '✕', {
-      fontFamily: 'Arial',
-      fontSize: '22px',
-      color: '#ff6666'
-    }).setOrigin(0.5);
+    const closeBtn = this.scene.add
+      .text(menuWidth / 2 - 20, -menuHeight / 2 + 18, '✕', {
+        fontFamily: 'Arial',
+        fontSize: '22px',
+        color: '#ff6666',
+      })
+      .setOrigin(0.5);
     closeBtnBg.on('pointerover', () => closeBtn.setColor('#ff9999'));
     closeBtnBg.on('pointerout', () => closeBtn.setColor('#ff6666'));
     this.upgradeMenuContainer.add(closeBtnBg);

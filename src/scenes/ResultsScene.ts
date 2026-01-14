@@ -108,14 +108,12 @@ export class ResultsScene extends Phaser.Scene {
       waveScore,
       goldScore,
       hpBonus,
-      timeMultiplier
+      timeMultiplier,
     };
 
     // Store for review mode
     lastGameResult = this.resultData;
     lastGameScore = this.finalScore;
-
-    console.log('ResultsScene: Score calculated', this.scoreBreakdown, 'Final:', this.finalScore);
   }
 
   create(): void {
@@ -132,13 +130,15 @@ export class ResultsScene extends Phaser.Scene {
     const titleText = this.resultData.isVictory ? 'VICTORY!' : 'DEFEAT';
     const titleColor = this.resultData.isVictory ? '#ffd700' : '#ff4444';
 
-    this.add.text(width / 2, 60, titleText, {
-      fontFamily: 'Arial Black',
-      fontSize: '56px',
-      color: titleColor,
-      stroke: '#000000',
-      strokeThickness: 6
-    }).setOrigin(0.5);
+    this.add
+      .text(width / 2, 60, titleText, {
+        fontFamily: 'Arial Black',
+        fontSize: '56px',
+        color: titleColor,
+        stroke: '#000000',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5);
 
     this.createStatsDisplay(width);
 
@@ -149,26 +149,23 @@ export class ResultsScene extends Phaser.Scene {
     this.setupKeyboardInput();
 
     this.checkTop20Qualification(width, height);
-
-    console.log('ResultsScene: Results screen ready');
   }
 
   private async checkTop20Qualification(width: number, height: number): Promise<void> {
-
-    const loadingText = this.add.text(width / 2, height - 180, 'Checking leaderboard...', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#888888'
-    }).setOrigin(0.5);
+    const loadingText = this.add
+      .text(width / 2, height - 180, 'Checking leaderboard...', {
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#888888',
+      })
+      .setOrigin(0.5);
 
     try {
       this.currentScores = await HighscoreAPI.fetchScores();
 
       if (this.currentScores.length < 20) {
-
         this.qualifiesForTop20 = true;
       } else {
-
         const lowestScore = this.currentScores[this.currentScores.length - 1].score;
         this.qualifiesForTop20 = this.finalScore > lowestScore;
       }
@@ -203,7 +200,14 @@ export class ResultsScene extends Phaser.Scene {
     bg.fillTriangle(20, 20, 20 + cornerSize, 20, 20, 20 + cornerSize);
     bg.fillTriangle(width - 20, 20, width - 20 - cornerSize, 20, width - 20, 20 + cornerSize);
     bg.fillTriangle(20, height - 20, 20 + cornerSize, height - 20, 20, height - 20 - cornerSize);
-    bg.fillTriangle(width - 20, height - 20, width - 20 - cornerSize, height - 20, width - 20, height - 20 - cornerSize);
+    bg.fillTriangle(
+      width - 20,
+      height - 20,
+      width - 20 - cornerSize,
+      height - 20,
+      width - 20,
+      height - 20 - cornerSize
+    );
   }
 
   private createStatsDisplay(width: number): void {
@@ -214,27 +218,39 @@ export class ResultsScene extends Phaser.Scene {
     const valueOffset = 120;
 
     const stats = [
-      { label: 'Wave Reached', value: `${this.resultData.waveReached} / ${this.resultData.totalWaves}`, color: '#ffffff' },
-      { label: 'Castle HP', value: `${this.resultData.castleHP} / ${this.resultData.maxCastleHP}`, color: this.resultData.castleHP > 0 ? '#00ff00' : '#ff0000' },
+      {
+        label: 'Wave Reached',
+        value: `${this.resultData.waveReached} / ${this.resultData.totalWaves}`,
+        color: '#ffffff',
+      },
+      {
+        label: 'Castle HP',
+        value: `${this.resultData.castleHP} / ${this.resultData.maxCastleHP}`,
+        color: this.resultData.castleHP > 0 ? '#00ff00' : '#ff0000',
+      },
       { label: 'Creeps Killed', value: `${this.resultData.creepsKilled}`, color: '#ff8844' },
       { label: 'Gold Earned', value: `${this.resultData.totalGoldEarned}`, color: '#ffd700' },
-      { label: 'Time', value: this.formatTime(this.resultData.runTimeSeconds), color: '#88ccff' }
+      { label: 'Time', value: this.formatTime(this.resultData.runTimeSeconds), color: '#88ccff' },
     ];
 
     stats.forEach((stat, index) => {
       const y = startY + index * lineHeight;
 
-      this.add.text(centerX - labelOffset, y, stat.label + ':', {
-        fontFamily: 'Arial',
-        fontSize: '20px',
-        color: '#c9a86c'
-      }).setOrigin(1, 0.5);
+      this.add
+        .text(centerX - labelOffset, y, stat.label + ':', {
+          fontFamily: 'Arial',
+          fontSize: '20px',
+          color: '#c9a86c',
+        })
+        .setOrigin(1, 0.5);
 
-      this.add.text(centerX + valueOffset, y, stat.value, {
-        fontFamily: 'Arial Black',
-        fontSize: '20px',
-        color: stat.color
-      }).setOrigin(1, 0.5);
+      this.add
+        .text(centerX + valueOffset, y, stat.value, {
+          fontFamily: 'Arial Black',
+          fontSize: '20px',
+          color: stat.color,
+        })
+        .setOrigin(1, 0.5);
     });
   }
 
@@ -245,68 +261,91 @@ export class ResultsScene extends Phaser.Scene {
     const labelOffset = 100;
     const valueOffset = 130;
 
-    this.add.text(centerX, startY - 10, '─── Score Breakdown ───', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#888888'
-    }).setOrigin(0.5);
+    this.add
+      .text(centerX, startY - 10, '─── Score Breakdown ───', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#888888',
+      })
+      .setOrigin(0.5);
 
     const breakdown = [
-      { label: 'Wave Bonus', value: `${this.resultData.waveReached} × ${GAME_CONFIG.WAVE_BONUS_POINTS} = ${this.scoreBreakdown.waveScore}` },
-      { label: 'Gold Bonus', value: `${this.resultData.totalGoldEarned} × ${GAME_CONFIG.GOLD_BONUS_MULTIPLIER} = ${this.scoreBreakdown.goldScore}` },
-      { label: 'HP Bonus', value: `${this.resultData.castleHP} × ${GAME_CONFIG.HP_BONUS_POINTS} = ${this.scoreBreakdown.hpBonus}` },
-      { label: 'Time Multiplier', value: `× ${this.scoreBreakdown.timeMultiplier.toFixed(2)}` }
+      {
+        label: 'Wave Bonus',
+        value: `${this.resultData.waveReached} × ${GAME_CONFIG.WAVE_BONUS_POINTS} = ${this.scoreBreakdown.waveScore}`,
+      },
+      {
+        label: 'Gold Bonus',
+        value: `${this.resultData.totalGoldEarned} × ${GAME_CONFIG.GOLD_BONUS_MULTIPLIER} = ${this.scoreBreakdown.goldScore}`,
+      },
+      {
+        label: 'HP Bonus',
+        value: `${this.resultData.castleHP} × ${GAME_CONFIG.HP_BONUS_POINTS} = ${this.scoreBreakdown.hpBonus}`,
+      },
+      { label: 'Time Multiplier', value: `× ${this.scoreBreakdown.timeMultiplier.toFixed(2)}` },
     ];
 
     breakdown.forEach((item, index) => {
       const y = startY + 20 + index * lineHeight;
 
-      this.add.text(centerX - labelOffset, y, item.label + ':', {
-        fontFamily: 'Arial',
-        fontSize: '16px',
-        color: '#999999'
-      }).setOrigin(1, 0.5);
+      this.add
+        .text(centerX - labelOffset, y, item.label + ':', {
+          fontFamily: 'Arial',
+          fontSize: '16px',
+          color: '#999999',
+        })
+        .setOrigin(1, 0.5);
 
-      this.add.text(centerX + valueOffset, y, item.value, {
-        fontFamily: 'Arial',
-        fontSize: '16px',
-        color: '#cccccc'
-      }).setOrigin(1, 0.5);
+      this.add
+        .text(centerX + valueOffset, y, item.value, {
+          fontFamily: 'Arial',
+          fontSize: '16px',
+          color: '#cccccc',
+        })
+        .setOrigin(1, 0.5);
     });
 
     const finalY = startY + 20 + breakdown.length * lineHeight + 30;
 
-    this.add.text(centerX, finalY, 'FINAL SCORE', {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#d4a574'
-    }).setOrigin(0.5);
+    this.add
+      .text(centerX, finalY, 'FINAL SCORE', {
+        fontFamily: 'Arial',
+        fontSize: '24px',
+        color: '#d4a574',
+      })
+      .setOrigin(0.5);
 
-    this.add.text(centerX, finalY + 45, this.finalScore.toLocaleString(), {
-      fontFamily: 'Arial Black',
-      fontSize: '48px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5);
+    this.add
+      .text(centerX, finalY + 45, this.finalScore.toLocaleString(), {
+        fontFamily: 'Arial Black',
+        fontSize: '48px',
+        color: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
   }
 
   private createNameInput(width: number, height: number): void {
     const centerY = height - 180;
     this.nameInputContainer = this.add.container(width / 2, centerY);
 
-    const newHighScore = this.add.text(0, -70, '- NEW HIGH SCORE -', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '20px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
+    const newHighScore = this.add
+      .text(0, -70, '- NEW HIGH SCORE -', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '20px',
+        color: '#ffd700',
+      })
+      .setOrigin(0.5);
     this.nameInputContainer.add(newHighScore);
 
-    const label = this.add.text(0, -30, 'Enter Your Name:', {
-      fontFamily: 'Arial',
-      fontSize: '20px',
-      color: '#c9a86c'
-    }).setOrigin(0.5);
+    const label = this.add
+      .text(0, -30, 'Enter Your Name:', {
+        fontFamily: 'Arial',
+        fontSize: '20px',
+        color: '#c9a86c',
+      })
+      .setOrigin(0.5);
     this.nameInputContainer.add(label);
 
     const inputBg = this.add.graphics();
@@ -316,11 +355,13 @@ export class ResultsScene extends Phaser.Scene {
     inputBg.strokeRoundedRect(-150, -15, 300, 40, 8);
     this.nameInputContainer.add(inputBg);
 
-    this.nameInputText = this.add.text(0, 5, '|', {
-      fontFamily: 'Arial',
-      fontSize: '24px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+    this.nameInputText = this.add
+      .text(0, 5, '|', {
+        fontFamily: 'Arial',
+        fontSize: '24px',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5);
     this.nameInputContainer.add(this.nameInputText);
 
     const saveBtn = this.createThemedButtonForContainer(0, 50, 'Save Score', 150, () => {
@@ -335,7 +376,7 @@ export class ResultsScene extends Phaser.Scene {
       callback: () => {
         this.cursorVisible = !this.cursorVisible;
         this.updateNameDisplay();
-      }
+      },
     });
   }
 
@@ -343,18 +384,22 @@ export class ResultsScene extends Phaser.Scene {
     const centerY = height - 180;
     this.leaderboardContainer = this.add.container(width / 2, centerY);
 
-    const message = this.add.text(0, -80, 'Score not in top 20', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#888888'
-    }).setOrigin(0.5);
+    const message = this.add
+      .text(0, -80, 'Score not in top 20', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#888888',
+      })
+      .setOrigin(0.5);
     this.leaderboardContainer.add(message);
 
-    const title = this.add.text(0, -50, 'Top Scores', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '16px',
-      color: '#d4a574'
-    }).setOrigin(0.5);
+    const title = this.add
+      .text(0, -50, 'Top Scores', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '16px',
+        color: '#d4a574',
+      })
+      .setOrigin(0.5);
     this.leaderboardContainer.add(title);
 
     const startY = -20;
@@ -364,25 +409,31 @@ export class ResultsScene extends Phaser.Scene {
       const y = startY + i * rowHeight;
       const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32', '#888888', '#888888'];
 
-      const rank = this.add.text(-120, y, `${i + 1}.`, {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: rankColors[i]
-      }).setOrigin(0, 0.5);
+      const rank = this.add
+        .text(-120, y, `${i + 1}.`, {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: rankColors[i],
+        })
+        .setOrigin(0, 0.5);
       this.leaderboardContainer.add(rank);
 
-      const name = this.add.text(-90, y, score.player_name, {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#cccccc'
-      }).setOrigin(0, 0.5);
+      const name = this.add
+        .text(-90, y, score.player_name, {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#cccccc',
+        })
+        .setOrigin(0, 0.5);
       this.leaderboardContainer.add(name);
 
-      const scoreText = this.add.text(120, y, score.score.toLocaleString(), {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#ffd700'
-      }).setOrigin(1, 0.5);
+      const scoreText = this.add
+        .text(120, y, score.score.toLocaleString(), {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#ffd700',
+        })
+        .setOrigin(1, 0.5);
       this.leaderboardContainer.add(scoreText);
     });
   }
@@ -401,11 +452,14 @@ export class ResultsScene extends Phaser.Scene {
       this.scene.start('GameScene');
     });
 
-    const menuBtn = this.add.text(width / 2, buttonY + 50, '← Back to Menu', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#888888'
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const menuBtn = this.add
+      .text(width / 2, buttonY + 50, '← Back to Menu', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#888888',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
     menuBtn.on('pointerover', () => menuBtn.setColor('#d4a574'));
     menuBtn.on('pointerout', () => menuBtn.setColor('#888888'));
@@ -415,7 +469,13 @@ export class ResultsScene extends Phaser.Scene {
     });
   }
 
-  private createThemedButton(x: number, y: number, text: string, btnWidth: number, onClick: () => void): void {
+  private createThemedButton(
+    x: number,
+    y: number,
+    text: string,
+    btnWidth: number,
+    onClick: () => void
+  ): void {
     const container = this.add.container(x, y);
     const btnHeight = 42;
 
@@ -437,7 +497,13 @@ export class ResultsScene extends Phaser.Scene {
       bg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2 + offsetY, btnWidth, btnHeight - 3, 10);
 
       bg.fillStyle(hover ? 0xa08050 : 0x8b6914, 0.5);
-      bg.fillRoundedRect(-btnWidth / 2 + 3, -btnHeight / 2 + 3 + offsetY, btnWidth - 6, btnHeight / 3, 8);
+      bg.fillRoundedRect(
+        -btnWidth / 2 + 3,
+        -btnHeight / 2 + 3 + offsetY,
+        btnWidth - 6,
+        btnHeight / 3,
+        8
+      );
 
       bg.lineStyle(2, 0xd4a574, 1);
       bg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2 + offsetY, btnWidth, btnHeight - 3, 10);
@@ -445,14 +511,16 @@ export class ResultsScene extends Phaser.Scene {
     drawButton(false);
     container.add(bg);
 
-    const label = this.add.text(0, -2, text, {
-      fontFamily: 'Georgia, serif',
-      fontSize: '16px',
-      color: '#fff8dc',
-      fontStyle: 'bold',
-      stroke: '#4a3520',
-      strokeThickness: 2
-    }).setOrigin(0.5);
+    const label = this.add
+      .text(0, -2, text, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '16px',
+        color: '#fff8dc',
+        fontStyle: 'bold',
+        stroke: '#4a3520',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5);
     container.add(label);
 
     const hitArea = this.add.rectangle(0, 0, btnWidth, btnHeight, 0x000000, 0);
@@ -480,7 +548,13 @@ export class ResultsScene extends Phaser.Scene {
     });
   }
 
-  private createThemedButtonForContainer(x: number, y: number, text: string, btnWidth: number, onClick: () => void): Phaser.GameObjects.Container {
+  private createThemedButtonForContainer(
+    x: number,
+    y: number,
+    text: string,
+    btnWidth: number,
+    onClick: () => void
+  ): Phaser.GameObjects.Container {
     const container = this.add.container(x, y);
     const btnHeight = 42;
 
@@ -502,7 +576,13 @@ export class ResultsScene extends Phaser.Scene {
       bg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2 + offsetY, btnWidth, btnHeight - 3, 10);
 
       bg.fillStyle(hover ? 0xa08050 : 0x8b6914, 0.5);
-      bg.fillRoundedRect(-btnWidth / 2 + 3, -btnHeight / 2 + 3 + offsetY, btnWidth - 6, btnHeight / 3, 8);
+      bg.fillRoundedRect(
+        -btnWidth / 2 + 3,
+        -btnHeight / 2 + 3 + offsetY,
+        btnWidth - 6,
+        btnHeight / 3,
+        8
+      );
 
       bg.lineStyle(2, 0xd4a574, 1);
       bg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2 + offsetY, btnWidth, btnHeight - 3, 10);
@@ -510,14 +590,16 @@ export class ResultsScene extends Phaser.Scene {
     drawButton(false);
     container.add(bg);
 
-    const label = this.add.text(0, -2, text, {
-      fontFamily: 'Georgia, serif',
-      fontSize: '16px',
-      color: '#fff8dc',
-      fontStyle: 'bold',
-      stroke: '#4a3520',
-      strokeThickness: 2
-    }).setOrigin(0.5);
+    const label = this.add
+      .text(0, -2, text, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '16px',
+        color: '#fff8dc',
+        fontStyle: 'bold',
+        stroke: '#4a3520',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5);
     container.add(label);
 
     const hitArea = this.add.rectangle(0, 0, btnWidth, btnHeight, 0x000000, 0);
@@ -556,7 +638,6 @@ export class ResultsScene extends Phaser.Scene {
       } else if (event.key === 'Enter') {
         this.saveScore();
       } else if (event.key.length === 1 && this.playerName.length < 10) {
-
         if (/^[a-zA-Z0-9 _-]$/.test(event.key)) {
           this.playerName += event.key;
         }
@@ -585,11 +666,13 @@ export class ResultsScene extends Phaser.Scene {
     this.updateNameDisplay();
 
     const width = this.cameras.main.width;
-    this.globalSubmitStatus = this.add.text(width / 2, this.cameras.main.height - 115, '📡 Submitting to global leaderboard...', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#88ccff'
-    }).setOrigin(0.5);
+    this.globalSubmitStatus = this.add
+      .text(width / 2, this.cameras.main.height - 115, '📡 Submitting to global leaderboard...', {
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#88ccff',
+      })
+      .setOrigin(0.5);
 
     try {
       const result = await HighscoreAPI.submitScore({
@@ -601,13 +684,12 @@ export class ResultsScene extends Phaser.Scene {
         goldEarned: this.resultData.totalGoldEarned,
         creepsKilled: this.resultData.creepsKilled,
         timeSeconds: this.resultData.runTimeSeconds,
-        isVictory: this.resultData.isVictory
+        isVictory: this.resultData.isVictory,
       });
 
       if (result.success) {
         this.globalSubmitStatus.setText('✓ Score Submitted to Leaderboard!');
         this.globalSubmitStatus.setColor('#00ff00');
-        console.log('ResultsScene: Score submitted to global leaderboard');
       } else {
         this.globalSubmitStatus.setText('⚠ ' + (result.error || 'Could not submit score'));
         this.globalSubmitStatus.setColor('#ffaa00');
@@ -623,7 +705,7 @@ export class ResultsScene extends Phaser.Scene {
       targets: this.globalSubmitStatus,
       alpha: 0,
       duration: 2000,
-      delay: 3000
+      delay: 3000,
     });
   }
 

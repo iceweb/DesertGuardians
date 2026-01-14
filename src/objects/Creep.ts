@@ -43,7 +43,13 @@ export class Creep extends Phaser.GameObjects.Container {
     this.statusGraphics = scene.add.graphics();
     this.shieldGraphics = scene.add.graphics();
 
-    this.add([this.bodyGraphics, this.healthBarBg, this.healthBarFg, this.statusGraphics, this.shieldGraphics]);
+    this.add([
+      this.bodyGraphics,
+      this.healthBarBg,
+      this.healthBarFg,
+      this.statusGraphics,
+      this.shieldGraphics,
+    ]);
 
     this.statusEffects = new StatusEffectHandler(scene, this.statusGraphics);
     this.abilities = new CreepAbilities(scene);
@@ -71,7 +77,6 @@ export class Creep extends Phaser.GameObjects.Container {
         this.distanceTraveled = newDistance;
       },
       onDiggerStop: () => {
-
         this.effects.showDiggerPrepare(this.x, this.y);
       },
       onBurrow: () => {
@@ -82,7 +87,6 @@ export class Creep extends Phaser.GameObjects.Container {
         this.healthBarFg.setAlpha(0);
       },
       onResurfaceStart: () => {
-
         this.effects.showResurfaceStart(this.x, this.y);
       },
       onSurface: () => {
@@ -99,12 +103,11 @@ export class Creep extends Phaser.GameObjects.Container {
         this.setAlpha(1);
       },
       onDispel: () => {
-
         const immunityDuration = this.config.dispelImmunity ?? GAME_CONFIG.DISPEL_IMMUNITY_DURATION;
         if (this.statusEffects.dispelAll(immunityDuration)) {
           this.effects.showDispelEffect(this.x, this.y, this.config.sizeScale || 1.0);
         }
-      }
+      },
     });
   }
 
@@ -138,7 +141,6 @@ export class Creep extends Phaser.GameObjects.Container {
     this.statusEffects.reset();
     this.statusEffects.setOnPoisonDamage((damage: number) => {
       if (this.isActive) {
-
         if (this.abilities.isImmune()) {
           return;
         }
@@ -150,7 +152,6 @@ export class Creep extends Phaser.GameObjects.Container {
     });
     this.statusEffects.setOnBurnDamage((damage: number) => {
       if (this.isActive) {
-
         if (this.abilities.isImmune()) {
           return;
         }
@@ -197,11 +198,12 @@ export class Creep extends Phaser.GameObjects.Container {
     this.healthBarFg.clear();
 
     if (this.currentHealth >= this.config.maxHealth) {
-
-        return;
+      return;
     }
 
-    const barWidth = 30, barHeight = 4, yOffset = -35;
+    const barWidth = 30,
+      barHeight = 4,
+      yOffset = -35;
 
     this.healthBarBg.fillStyle(0x000000, 0.7);
     this.healthBarBg.fillRect(-barWidth / 2 - 1, yOffset - 1, barWidth + 2, barHeight + 2);
@@ -225,7 +227,7 @@ export class Creep extends Phaser.GameObjects.Container {
     this.abilities.updateDispel(delta);
 
     if (state.isBurrowed !== wasBurrowed) {
-        this.redraw();
+      this.redraw();
     }
 
     if (state.isGhostPhase) {
@@ -259,10 +261,10 @@ export class Creep extends Phaser.GameObjects.Container {
 
     this.bodyGraphics.y = -bounceAmount;
 
-    const squash = 1 + (bounceSine * 0.05);
+    const squash = 1 + bounceSine * 0.05;
     this.bodyGraphics.scaleY = squash;
 
-    this.bodyGraphics.scaleX = (this.faceDirection) * (1 / squash);
+    this.bodyGraphics.scaleX = this.faceDirection * (1 / squash);
 
     if (state.shieldHitsRemaining > 0) this.updateShieldVisual();
     this.statusEffects.draw(this.scene.time.now);
@@ -308,6 +310,7 @@ export class Creep extends Phaser.GameObjects.Container {
     return this.statusEffects.isSlowed();
   }
 
+  /* eslint-disable complexity */
   takeDamage(amount: number, isMagic: boolean = false, towerBranch?: string): number {
     if (!this.isActive) return 0;
 
@@ -342,7 +345,6 @@ export class Creep extends Phaser.GameObjects.Container {
     this.currentHealth -= actualDamage;
 
     if (this.isBoss() && actualDamage > 0) {
-
       if (!this.bossFirstHit) {
         this.bossFirstHit = true;
         this.emit('bossFirstHit', this);
@@ -350,7 +352,11 @@ export class Creep extends Phaser.GameObjects.Container {
 
       const healthPercent = this.currentHealth / this.config.maxHealth;
       const previousHealthPercent = previousHealth / this.config.maxHealth;
-      if (!this.bossPainThresholdTriggered && previousHealthPercent > 0.25 && healthPercent <= 0.25) {
+      if (
+        !this.bossPainThresholdTriggered &&
+        previousHealthPercent > 0.25 &&
+        healthPercent <= 0.25
+      ) {
         this.bossPainThresholdTriggered = true;
         this.bossIsPained = true;
 
@@ -394,8 +400,15 @@ export class Creep extends Phaser.GameObjects.Container {
     this.emit('died', this, goldReward);
 
     if (this.config.spawnOnDeath) {
-
-      this.emit('spawnOnDeath', this, this.config.spawnOnDeath.type, this.config.spawnOnDeath.count, this.x, this.y, this.distanceTraveled);
+      this.emit(
+        'spawnOnDeath',
+        this,
+        this.config.spawnOnDeath.type,
+        this.config.spawnOnDeath.count,
+        this.x,
+        this.y,
+        this.distanceTraveled
+      );
       this.effects.showSpawnEffect(this.x, this.y, this.config.spawnOnDeath.count);
     }
 
@@ -421,20 +434,51 @@ export class Creep extends Phaser.GameObjects.Container {
     this.abilities.reset();
   }
 
-  getConfig(): CreepConfig { return this.config; }
-  getDistanceTraveled(): number { return this.distanceTraveled; }
-  getDistanceRemaining(): number { return this.pathSystem.getDistanceRemaining(this.distanceTraveled); }
-  getIsActive(): boolean { return this.isActive; }
-  canBeReused(): boolean { return !this.isActive && !this.isDying; }
-  getCurrentHealth(): number { return this.currentHealth; }
-  getShieldHitsRemaining(): number { return this.abilities.getState().shieldHitsRemaining; }
-  isFlying(): boolean { return this.config.isFlying === true; }
-  getIsBurrowed(): boolean { return this.abilities.getState().isBurrowed; }
-  getIsGhostPhase(): boolean { return this.abilities.getState().isGhostPhase; }
-  getDiggerPhase(): 'walking' | 'stopping' | 'burrowed' | 'resurfacing' { return this.abilities.getState().diggerPhase; }
-  canBeTargeted(): boolean { return this.isActive && this.abilities.canBeTargeted(); }
+  getConfig(): CreepConfig {
+    return this.config;
+  }
+  getDistanceTraveled(): number {
+    return this.distanceTraveled;
+  }
+  setDistanceTraveled(distance: number): void {
+    this.distanceTraveled = distance;
+  }
+  getDistanceRemaining(): number {
+    return this.pathSystem.getDistanceRemaining(this.distanceTraveled);
+  }
+  getIsActive(): boolean {
+    return this.isActive;
+  }
+  canBeReused(): boolean {
+    return !this.isActive && !this.isDying;
+  }
+  getCurrentHealth(): number {
+    return this.currentHealth;
+  }
+  getShieldHitsRemaining(): number {
+    return this.abilities.getState().shieldHitsRemaining;
+  }
+  isFlying(): boolean {
+    return this.config.isFlying === true;
+  }
+  getIsBurrowed(): boolean {
+    return this.abilities.getState().isBurrowed;
+  }
+  getIsGhostPhase(): boolean {
+    return this.abilities.getState().isGhostPhase;
+  }
+  getDiggerPhase(): 'walking' | 'stopping' | 'burrowed' | 'resurfacing' {
+    return this.abilities.getState().diggerPhase;
+  }
+  canBeTargeted(): boolean {
+    return this.isActive && this.abilities.canBeTargeted();
+  }
 
-  isBoss(): boolean { return this.config.type.startsWith('boss'); }
+  isBoss(): boolean {
+    return this.config.type.startsWith('boss');
+  }
 
-  isPained(): boolean { return this.bossIsPained; }
+  isPained(): boolean {
+    return this.bossIsPained;
+  }
 }

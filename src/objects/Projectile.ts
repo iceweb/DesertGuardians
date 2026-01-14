@@ -88,7 +88,6 @@ export class Projectile extends Phaser.GameObjects.Container {
         break;
 
       default:
-
         this.graphics.fillStyle(0xffff00, 1);
         this.graphics.fillCircle(0, 0, 5 * scale);
     }
@@ -103,19 +102,38 @@ export class Projectile extends Phaser.GameObjects.Container {
 
     const headSize = 4 + level * 2;
     this.graphics.fillStyle(level >= 3 ? 0xcccccc : 0xaaaaaa, 1);
-    this.graphics.fillTriangle(arrowLength / 2, 0, arrowLength / 2 + headSize, -headSize, arrowLength / 2 + headSize, headSize);
+    this.graphics.fillTriangle(
+      arrowLength / 2,
+      0,
+      arrowLength / 2 + headSize,
+      -headSize,
+      arrowLength / 2 + headSize,
+      headSize
+    );
 
     this.graphics.fillStyle(level >= 3 ? 0xff6633 : 0xcc6633, 1);
-    this.graphics.fillTriangle(-arrowLength / 2, 0, -arrowLength / 2 - 4 * scale, -3 * scale, -arrowLength / 2 - 4 * scale, 3 * scale);
+    this.graphics.fillTriangle(
+      -arrowLength / 2,
+      0,
+      -arrowLength / 2 - 4 * scale,
+      -3 * scale,
+      -arrowLength / 2 - 4 * scale,
+      3 * scale
+    );
 
     if (level >= 2) {
-
       this.graphics.fillStyle(level >= 3 ? 0xffd700 : 0xaa5522, 1);
-      this.graphics.fillTriangle(-arrowLength / 2 + 3, 0, -arrowLength / 2 - 2 * scale, -2 * scale, -arrowLength / 2 - 2 * scale, 2 * scale);
+      this.graphics.fillTriangle(
+        -arrowLength / 2 + 3,
+        0,
+        -arrowLength / 2 - 2 * scale,
+        -2 * scale,
+        -arrowLength / 2 - 2 * scale,
+        2 * scale
+      );
     }
 
     if (level >= 3) {
-
       this.graphics.fillStyle(0xffd700, 0.3);
       this.graphics.fillCircle(arrowLength / 2 + headSize / 2, 0, headSize);
     }
@@ -130,13 +148,11 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.graphics.fillCircle(0, 0, bulletSize * 0.5);
 
     if (level >= 2) {
-
       this.graphics.fillStyle(0xffffff, 0.6);
       this.graphics.fillCircle(-bulletSize, 0, bulletSize * 0.4);
     }
 
     if (level >= 3) {
-
       this.graphics.fillStyle(0xff6600, 0.5);
       this.graphics.fillCircle(0, 0, bulletSize * 1.5);
       this.graphics.fillStyle(0xff0000, 0.3);
@@ -151,18 +167,28 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.graphics.fillStyle(level >= 3 ? 0x6495ed : 0x4169e1, 1);
     this.graphics.fillRect(-bulletLength / 2, -bulletWidth / 2, bulletLength, bulletWidth);
     this.graphics.fillStyle(level >= 3 ? 0x87ceeb : 0x6495ed, 1);
-    this.graphics.fillRect(-bulletLength / 2 + 2, -bulletWidth / 4, bulletLength - 4, bulletWidth / 2);
+    this.graphics.fillRect(
+      -bulletLength / 2 + 2,
+      -bulletWidth / 4,
+      bulletLength - 4,
+      bulletWidth / 2
+    );
 
     if (level >= 2) {
-
       this.graphics.fillStyle(0x4169e1, 0.5);
       this.graphics.fillRect(-bulletLength, -bulletWidth / 4, bulletLength / 2, bulletWidth / 2);
     }
 
     if (level >= 3) {
-
       this.graphics.fillStyle(0xffd700, 1);
-      this.graphics.fillTriangle(bulletLength / 2, 0, bulletLength / 2 + 6, -2, bulletLength / 2 + 6, 2);
+      this.graphics.fillTriangle(
+        bulletLength / 2,
+        0,
+        bulletLength / 2 + 6,
+        -2,
+        bulletLength / 2 + 6,
+        2
+      );
 
       this.graphics.fillStyle(0x00ffff, 0.3);
       this.graphics.fillCircle(bulletLength / 2, 0, bulletWidth * 2);
@@ -180,13 +206,11 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.graphics.fillCircle(3 * scale, 3 * scale, rockSize * 0.4);
 
     if (level >= 2) {
-
       this.graphics.lineStyle(1, 0x4a4a4a, 0.5);
       this.graphics.lineBetween(-rockSize * 0.5, -rockSize * 0.3, rockSize * 0.3, rockSize * 0.2);
     }
 
     if (level >= 3) {
-
       this.graphics.fillStyle(0xff6600, 0.4);
       this.graphics.fillCircle(0, 0, rockSize * 1.3);
       this.graphics.fillStyle(0xff0000, 0.3);
@@ -205,14 +229,26 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.graphics.fillTriangle(-shardSize * 0.5, 0, 0, -shardSize * 0.4, shardSize * 0.5, 0);
 
     if (level >= 2) {
-
       this.graphics.fillStyle(0xc0e0ff, 0.6);
-      this.graphics.fillTriangle(0, -shardSize * 0.4, shardSize * 0.3, -shardSize * 0.8, shardSize * 0.5, -shardSize * 0.3);
-      this.graphics.fillTriangle(0, shardSize * 0.4, shardSize * 0.3, shardSize * 0.8, shardSize * 0.5, shardSize * 0.3);
+      this.graphics.fillTriangle(
+        0,
+        -shardSize * 0.4,
+        shardSize * 0.3,
+        -shardSize * 0.8,
+        shardSize * 0.5,
+        -shardSize * 0.3
+      );
+      this.graphics.fillTriangle(
+        0,
+        shardSize * 0.4,
+        shardSize * 0.3,
+        shardSize * 0.8,
+        shardSize * 0.5,
+        shardSize * 0.3
+      );
     }
 
     if (level >= 3) {
-
       this.graphics.fillStyle(0xffffff, 0.3);
       this.graphics.fillCircle(0, 0, shardSize * 1.2);
 
@@ -232,14 +268,12 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.graphics.fillCircle(-2 * scale, -2 * scale, globSize * 0.35);
 
     if (level >= 2) {
-
       this.graphics.fillStyle(0x00ff00, 0.6);
       this.graphics.fillCircle(globSize * 0.5, globSize * 0.3, globSize * 0.3);
       this.graphics.fillCircle(-globSize * 0.4, globSize * 0.4, globSize * 0.25);
     }
 
     if (level >= 3) {
-
       this.graphics.fillStyle(0x00ff00, 0.2);
       this.graphics.fillCircle(0, 0, globSize * 1.5);
 
@@ -296,7 +330,7 @@ export class Projectile extends Phaser.GameObjects.Container {
     const color = this.getTrailColor();
 
     for (let i = 0; i < this.trailPositions.length; i++) {
-      const alpha = (i + 1) / this.trailPositions.length * 0.5;
+      const alpha = ((i + 1) / this.trailPositions.length) * 0.5;
       const size = ((i + 1) / this.trailPositions.length) * 3;
 
       this.trail.fillStyle(color, alpha);
@@ -308,16 +342,24 @@ export class Projectile extends Phaser.GameObjects.Container {
     if (!this.config) return 0xffffff;
 
     switch (this.config.branch) {
-      case 'archer': return 0x8b4513;
-      case 'rapidfire': return 0xffd700;
-      case 'sniper': return 0x4169e1;
-      case 'rockcannon': return 0x696969;
-      case 'icetower': return 0x87ceeb;
-      case 'poison': return 0x00ff00;
-      default: return 0xffffff;
+      case 'archer':
+        return 0x8b4513;
+      case 'rapidfire':
+        return 0xffd700;
+      case 'sniper':
+        return 0x4169e1;
+      case 'rockcannon':
+        return 0x696969;
+      case 'icetower':
+        return 0x87ceeb;
+      case 'poison':
+        return 0x00ff00;
+      default:
+        return 0xffffff;
     }
   }
 
+  /* eslint-disable complexity */
   private hitTarget(): void {
     if (!this.target || !this.config) {
       this.deactivate();
@@ -343,9 +385,16 @@ export class Projectile extends Phaser.GameObjects.Container {
         damage: damage,
         isMagic: isMagic,
         allCreeps: [],
-        onSplash: (x: number, y: number, radius: number, splashDamage: number, splashMagic: boolean, branch: string) => {
+        onSplash: (
+          x: number,
+          y: number,
+          radius: number,
+          splashDamage: number,
+          splashMagic: boolean,
+          branch: string
+        ) => {
           this.emit('splash', x, y, radius, splashDamage, splashMagic, branch);
-        }
+        },
       };
 
       this.emit('getCreeps', context);
@@ -353,7 +402,6 @@ export class Projectile extends Phaser.GameObjects.Container {
       abilityResult = this.sourceTower.tryTriggerAbility(context);
 
       if (abilityResult.triggered) {
-
         if (abilityResult.extraDamage) {
           damage += abilityResult.extraDamage;
         }
@@ -373,9 +421,12 @@ export class Projectile extends Phaser.GameObjects.Container {
       }
     }
 
-    const hitType = this.target.getShieldHitsRemaining() > 0 ? 'shield'
-      : this.target.getConfig().armor > 0 ? 'armor'
-      : 'flesh';
+    const hitType =
+      this.target.getShieldHitsRemaining() > 0
+        ? 'shield'
+        : this.target.getConfig().armor > 0
+          ? 'armor'
+          : 'flesh';
     this.emit('hit', hitType);
 
     const wasAlive = this.target.getIsActive();
@@ -391,7 +442,15 @@ export class Projectile extends Phaser.GameObjects.Container {
     this.applySpecialEffects();
 
     if (this.config.branch === 'rockcannon' && stats.splashRadius) {
-      this.emit('splash', this.target.x, this.target.y, stats.splashRadius, damage * 0.5, this.config.isMagic, this.config.branch);
+      this.emit(
+        'splash',
+        this.target.x,
+        this.target.y,
+        stats.splashRadius,
+        damage * 0.5,
+        this.config.isMagic,
+        this.config.branch
+      );
     }
 
     this.deactivate();
@@ -430,16 +489,19 @@ export class Projectile extends Phaser.GameObjects.Container {
       scaleX: 2,
       scaleY: 2,
       duration: 200,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
-    const critText = this.scene.add.text(x, y - 20, isAuraCrit ? '⚡CRIT!' : 'CRIT!', {
-      fontFamily: 'Arial Black',
-      fontSize: '16px',
-      color: textColor,
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(100);
+    const critText = this.scene.add
+      .text(x, y - 20, isAuraCrit ? '⚡CRIT!' : 'CRIT!', {
+        fontFamily: 'Arial Black',
+        fontSize: '16px',
+        color: textColor,
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(100);
 
     this.scene.tweens.add({
       targets: critText,
@@ -447,7 +509,7 @@ export class Projectile extends Phaser.GameObjects.Container {
       alpha: 0,
       scale: 1.3,
       duration: 600,
-      onComplete: () => critText.destroy()
+      onComplete: () => critText.destroy(),
     });
 
     if (isAuraCrit) {
@@ -466,7 +528,7 @@ export class Projectile extends Phaser.GameObjects.Container {
           alpha: 0,
           scale: 0.5,
           duration: 250,
-          onComplete: () => spark.destroy()
+          onComplete: () => spark.destroy(),
         });
       }
     }
@@ -487,7 +549,7 @@ export class Projectile extends Phaser.GameObjects.Container {
       scaleX: 1.8,
       scaleY: 1.8,
       duration: 150,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
   }
 

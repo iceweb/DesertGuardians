@@ -34,7 +34,13 @@ export class Tower extends Phaser.GameObjects.Container {
   private abilityHandler: TowerAbilityHandler | null = null;
   private selectedAbilityId: string | null = null;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, towerKey: string = 'archer_1', animatorFactory?: TowerAnimatorFactory) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    towerKey: string = 'archer_1',
+    animatorFactory?: TowerAnimatorFactory
+  ) {
     super(scene, x, y);
 
     this.animatorFactory = animatorFactory || null;
@@ -77,7 +83,7 @@ export class Tower extends Phaser.GameObjects.Container {
     }
 
     if (this.damageMultiplier > 1.0) {
-      this.buffGlowPhase += delta / 1000 * 3;
+      this.buffGlowPhase += (delta / 1000) * 3;
       if (this.buffGlowPhase > Math.PI * 2) {
         this.buffGlowPhase -= Math.PI * 2;
       }
@@ -164,28 +170,28 @@ export class Tower extends Phaser.GameObjects.Container {
 
     g.fillStyle(0x1a1a1a, 0.95);
     g.beginPath();
-    g.moveTo(badgeX - badgeWidth/2, badgeY - badgeHeight/2);
-    g.lineTo(badgeX + badgeWidth/2, badgeY - badgeHeight/2);
-    g.lineTo(badgeX + badgeWidth/2, badgeY + badgeHeight/4);
-    g.lineTo(badgeX, badgeY + badgeHeight/2);
-    g.lineTo(badgeX - badgeWidth/2, badgeY + badgeHeight/4);
+    g.moveTo(badgeX - badgeWidth / 2, badgeY - badgeHeight / 2);
+    g.lineTo(badgeX + badgeWidth / 2, badgeY - badgeHeight / 2);
+    g.lineTo(badgeX + badgeWidth / 2, badgeY + badgeHeight / 4);
+    g.lineTo(badgeX, badgeY + badgeHeight / 2);
+    g.lineTo(badgeX - badgeWidth / 2, badgeY + badgeHeight / 4);
     g.closePath();
     g.fillPath();
 
     g.lineStyle(1.5, 0xd4a574, 1);
     g.beginPath();
-    g.moveTo(badgeX - badgeWidth/2, badgeY - badgeHeight/2);
-    g.lineTo(badgeX + badgeWidth/2, badgeY - badgeHeight/2);
-    g.lineTo(badgeX + badgeWidth/2, badgeY + badgeHeight/4);
-    g.lineTo(badgeX, badgeY + badgeHeight/2);
-    g.lineTo(badgeX - badgeWidth/2, badgeY + badgeHeight/4);
+    g.moveTo(badgeX - badgeWidth / 2, badgeY - badgeHeight / 2);
+    g.lineTo(badgeX + badgeWidth / 2, badgeY - badgeHeight / 2);
+    g.lineTo(badgeX + badgeWidth / 2, badgeY + badgeHeight / 4);
+    g.lineTo(badgeX, badgeY + badgeHeight / 2);
+    g.lineTo(badgeX - badgeWidth / 2, badgeY + badgeHeight / 4);
     g.closePath();
     g.strokePath();
 
     const chevronWidth = 10;
     const chevronHeight = 4;
     const chevronSpacing = 5;
-    const chevronsStartY = badgeY - (rank - 1) * chevronSpacing / 2;
+    const chevronsStartY = badgeY - ((rank - 1) * chevronSpacing) / 2;
 
     g.fillStyle(0xd4a574, 1);
 
@@ -193,35 +199,30 @@ export class Tower extends Phaser.GameObjects.Container {
       const cy = chevronsStartY + i * chevronSpacing - 2;
 
       g.beginPath();
-      g.moveTo(badgeX - chevronWidth/2, cy);
+      g.moveTo(badgeX - chevronWidth / 2, cy);
       g.lineTo(badgeX, cy + chevronHeight);
-      g.lineTo(badgeX + chevronWidth/2, cy);
-      g.lineTo(badgeX + chevronWidth/2, cy + 2);
+      g.lineTo(badgeX + chevronWidth / 2, cy);
+      g.lineTo(badgeX + chevronWidth / 2, cy + 2);
       g.lineTo(badgeX, cy + chevronHeight + 2);
-      g.lineTo(badgeX - chevronWidth/2, cy + 2);
+      g.lineTo(badgeX - chevronWidth / 2, cy + 2);
       g.closePath();
       g.fillPath();
     }
   }
 
   private drawTower(): void {
-
     const hasAnimator = this.animatorFactory?.hasAnimator(this.currentBranch) ?? false;
 
     if (hasAnimator && this.animatorFactory) {
-
       if (this.animatorBranch !== this.currentBranch) {
-
         this.animator?.destroy();
         this.graphics.clear();
         this.animator = this.animatorFactory.create(this.currentBranch, this, this.currentLevel);
         this.animatorBranch = this.currentBranch;
       } else if (this.animator) {
-
         this.animator.setLevel(this.currentLevel);
       }
     } else {
-
       if (this.animator) {
         this.animator.destroy();
         this.animator = null;
@@ -287,7 +288,7 @@ export class Tower extends Phaser.GameObjects.Container {
 
     if (this.damageMultiplier <= 1.0 && this.auraCritBonus <= 0) return;
 
-    const buffStrength = (this.damageMultiplier - 1.0) + this.auraCritBonus;
+    const buffStrength = this.damageMultiplier - 1.0 + this.auraCritBonus;
     const pulseIntensity = (Math.sin(this.buffGlowPhase) + 1) * 0.5;
     const baseAlpha = 0.15 + pulseIntensity * 0.15 + buffStrength * 0.2;
 
@@ -306,18 +307,20 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   canUpgradeLevel(): boolean {
-
     return this.currentLevel < 4;
   }
 
-  getUpgradeOptions(): { branches?: TowerBranch[]; levelUp?: string; needsAbilitySelection?: boolean } {
-    const options: { branches?: TowerBranch[]; levelUp?: string; needsAbilitySelection?: boolean } = {};
+  getUpgradeOptions(): {
+    branches?: TowerBranch[];
+    levelUp?: string;
+    needsAbilitySelection?: boolean;
+  } {
+    const options: { branches?: TowerBranch[]; levelUp?: string; needsAbilitySelection?: boolean } =
+      {};
 
     if (this.currentBranch === 'archer' && this.currentLevel === 1) {
-
       options.branches = BRANCH_OPTIONS;
     } else {
-
       if (this.currentLevel < 4) {
         options.levelUp = `${this.currentBranch}_${this.currentLevel + 1}`;
 
@@ -343,15 +346,17 @@ export class Tower extends Phaser.GameObjects.Container {
     if (!newConfig) return false;
 
     if (this.currentBranch === 'archer' && this.currentLevel === 1) {
-
       const validUpgrade =
         (newConfig.branch === 'archer' && newConfig.level === 2) ||
         (newConfig.branch !== 'archer' && newConfig.level === 1);
 
       if (!validUpgrade) return false;
     } else {
-
-      if (newConfig.branch !== this.currentBranch || newConfig.level !== this.currentLevel + 1 || this.currentLevel >= 4) {
+      if (
+        newConfig.branch !== this.currentBranch ||
+        newConfig.level !== this.currentLevel + 1 ||
+        this.currentLevel >= 4
+      ) {
         return false;
       }
     }

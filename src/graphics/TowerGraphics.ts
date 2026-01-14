@@ -13,12 +13,7 @@ import {
 } from './towers';
 
 export class TowerGraphics {
-
-  static drawTower(
-    g: Phaser.GameObjects.Graphics,
-    branch: TowerBranch,
-    level: number
-  ): void {
+  static drawTower(g: Phaser.GameObjects.Graphics, branch: TowerBranch, level: number): void {
     g.clear();
 
     switch (branch) {
@@ -52,10 +47,7 @@ export class TowerGraphics {
     }
   }
 
-  static drawRangeCircle(
-    g: Phaser.GameObjects.Graphics,
-    range: number
-  ): void {
+  static drawRangeCircle(g: Phaser.GameObjects.Graphics, range: number): void {
     drawRangeCircle(g, range);
   }
 }

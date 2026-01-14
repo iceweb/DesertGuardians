@@ -23,7 +23,12 @@ export class GameSceneResultsUI {
   private resultsPopup: Phaser.GameObjects.Container | null = null;
   private resultData: GameResultData | null = null;
   private finalScore: number = 0;
-  private scoreBreakdown: { waveScore: number; goldScore: number; hpBonus: number; timeMultiplier: number } | null = null;
+  private scoreBreakdown: {
+    waveScore: number;
+    goldScore: number;
+    hpBonus: number;
+    timeMultiplier: number;
+  } | null = null;
   private playerName: string = '';
   private nameInputText: Phaser.GameObjects.Text | null = null;
   private cursorVisible: boolean = true;
@@ -110,6 +115,7 @@ export class GameSceneResultsUI {
   /**
    * Show the results popup overlay
    */
+  /* eslint-disable max-lines-per-function */
   showResultsPopup(): void {
     if (this.resultsPopup) {
       this.resultsPopup.destroy();
@@ -155,15 +161,21 @@ export class GameSceneResultsUI {
     panel.lineStyle(3, 0xd4a574, 1);
     panel.strokeRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
     panel.lineStyle(1, 0x8b6914, 1);
-    panel.strokeRoundedRect(-panelWidth / 2 + 6, -panelHeight / 2 + 6, panelWidth - 12, panelHeight - 12, 12);
+    panel.strokeRoundedRect(
+      -panelWidth / 2 + 6,
+      -panelHeight / 2 + 6,
+      panelWidth - 12,
+      panelHeight - 12,
+      12
+    );
 
     const corners = [
       { x: -panelWidth / 2 + 20, y: -panelHeight / 2 + 20 },
       { x: panelWidth / 2 - 20, y: -panelHeight / 2 + 20 },
       { x: -panelWidth / 2 + 20, y: panelHeight / 2 - 20 },
-      { x: panelWidth / 2 - 20, y: panelHeight / 2 - 20 }
+      { x: panelWidth / 2 - 20, y: panelHeight / 2 - 20 },
     ];
-    corners.forEach(c => {
+    corners.forEach((c) => {
       panel.fillStyle(0xd4a574, 1);
       panel.fillCircle(c.x, c.y, 4);
     });
@@ -171,58 +183,71 @@ export class GameSceneResultsUI {
 
     const titleText = this.isDefeatReview ? '💀 DEFEAT' : '🏆 VICTORY!';
     const titleColor = this.isDefeatReview ? '#ff6666' : '#ffd700';
-    const title = this.host.add.text(0, -panelHeight / 2 + 45, titleText, {
-      fontFamily: 'Arial Black',
-      fontSize: '32px',
-      color: titleColor,
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5);
+    const title = this.host.add
+      .text(0, -panelHeight / 2 + 45, titleText, {
+        fontFamily: 'Arial Black',
+        fontSize: '32px',
+        color: titleColor,
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
     this.resultsPopup.add(title);
 
     if (this.resultData) {
       const result = this.resultData;
 
-      const waveText = this.host.add.text(0, -panelHeight / 2 + 95,
-        `Wave ${result.waveReached}/${result.totalWaves}`, {
-        fontFamily: 'Arial',
-        fontSize: '20px',
-        color: '#c9a86c'
-      }).setOrigin(0.5);
+      const waveText = this.host.add
+        .text(0, -panelHeight / 2 + 95, `Wave ${result.waveReached}/${result.totalWaves}`, {
+          fontFamily: 'Arial',
+          fontSize: '20px',
+          color: '#c9a86c',
+        })
+        .setOrigin(0.5);
       this.resultsPopup.add(waveText);
 
       const statsY = -panelHeight / 2 + 140;
       const statsGap = 28;
 
       const stats = [
-        { label: 'Castle HP', value: `${result.castleHP}/${result.maxCastleHP}`, color: result.castleHP > 0 ? '#66ff66' : '#ff6666' },
+        {
+          label: 'Castle HP',
+          value: `${result.castleHP}/${result.maxCastleHP}`,
+          color: result.castleHP > 0 ? '#66ff66' : '#ff6666',
+        },
         { label: 'Gold Earned', value: `${result.totalGoldEarned}`, color: '#ffd700' },
-        { label: 'Time', value: this.formatTime(result.runTimeSeconds), color: '#88ccff' }
+        { label: 'Time', value: this.formatTime(result.runTimeSeconds), color: '#88ccff' },
       ];
 
       stats.forEach((stat, i) => {
-        const labelText = this.host.add.text(-100, statsY + i * statsGap, stat.label + ':', {
-          fontFamily: 'Arial',
-          fontSize: '16px',
-          color: '#888888'
-        }).setOrigin(0, 0.5);
+        const labelText = this.host.add
+          .text(-100, statsY + i * statsGap, stat.label + ':', {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            color: '#888888',
+          })
+          .setOrigin(0, 0.5);
         this.resultsPopup?.add(labelText);
 
-        const valueText = this.host.add.text(100, statsY + i * statsGap, stat.value, {
-          fontFamily: 'Arial',
-          fontSize: '16px',
-          color: stat.color
-        }).setOrigin(1, 0.5);
+        const valueText = this.host.add
+          .text(100, statsY + i * statsGap, stat.value, {
+            fontFamily: 'Arial',
+            fontSize: '16px',
+            color: stat.color,
+          })
+          .setOrigin(1, 0.5);
         this.resultsPopup?.add(valueText);
       });
 
       const scoreY = statsY + stats.length * statsGap + 30;
 
-      const scoreTitle = this.host.add.text(0, scoreY, '── Score Breakdown ──', {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#8b6914'
-      }).setOrigin(0.5);
+      const scoreTitle = this.host.add
+        .text(0, scoreY, '── Score Breakdown ──', {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#8b6914',
+        })
+        .setOrigin(0.5);
       this.resultsPopup.add(scoreTitle);
 
       if (this.scoreBreakdown) {
@@ -230,42 +255,50 @@ export class GameSceneResultsUI {
           { label: 'Wave Progress', value: `+${this.scoreBreakdown.waveScore}` },
           { label: 'Gold Efficiency', value: `+${this.scoreBreakdown.goldScore}` },
           { label: 'HP Bonus', value: `+${this.scoreBreakdown.hpBonus}` },
-          { label: 'Time Multiplier', value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}` }
+          { label: 'Time Multiplier', value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}` },
         ];
 
         breakdown.forEach((item, i) => {
           const y = scoreY + 25 + i * 22;
-          const labelText = this.host.add.text(-80, y, item.label, {
-            fontFamily: 'Arial',
-            fontSize: '13px',
-            color: '#666666'
-          }).setOrigin(0, 0.5);
+          const labelText = this.host.add
+            .text(-80, y, item.label, {
+              fontFamily: 'Arial',
+              fontSize: '13px',
+              color: '#666666',
+            })
+            .setOrigin(0, 0.5);
           this.resultsPopup?.add(labelText);
 
-          const valueText = this.host.add.text(80, y, item.value, {
-            fontFamily: 'Arial',
-            fontSize: '13px',
-            color: '#aaaaaa'
-          }).setOrigin(1, 0.5);
+          const valueText = this.host.add
+            .text(80, y, item.value, {
+              fontFamily: 'Arial',
+              fontSize: '13px',
+              color: '#aaaaaa',
+            })
+            .setOrigin(1, 0.5);
           this.resultsPopup?.add(valueText);
         });
       }
 
       const finalScoreY = scoreY + 120;
-      const finalScoreLabel = this.host.add.text(0, finalScoreY, 'FINAL SCORE', {
-        fontFamily: 'Arial Black',
-        fontSize: '16px',
-        color: '#d4a574'
-      }).setOrigin(0.5);
+      const finalScoreLabel = this.host.add
+        .text(0, finalScoreY, 'FINAL SCORE', {
+          fontFamily: 'Arial Black',
+          fontSize: '16px',
+          color: '#d4a574',
+        })
+        .setOrigin(0.5);
       this.resultsPopup.add(finalScoreLabel);
 
-      const finalScoreValue = this.host.add.text(0, finalScoreY + 35, `${this.finalScore}`, {
-        fontFamily: 'Arial Black',
-        fontSize: '40px',
-        color: '#ffd700',
-        stroke: '#000000',
-        strokeThickness: 3
-      }).setOrigin(0.5);
+      const finalScoreValue = this.host.add
+        .text(0, finalScoreY + 35, `${this.finalScore}`, {
+          fontFamily: 'Arial Black',
+          fontSize: '40px',
+          color: '#ffd700',
+          stroke: '#000000',
+          strokeThickness: 3,
+        })
+        .setOrigin(0.5);
       this.resultsPopup.add(finalScoreValue);
     }
 
@@ -282,11 +315,14 @@ export class GameSceneResultsUI {
     });
     this.resultsPopup.add(playAgainBtn);
 
-    const menuBtn = this.host.add.text(0, buttonY + 40, '← Back to Menu', {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const menuBtn = this.host.add
+      .text(0, buttonY + 40, '← Back to Menu', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#888888',
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
     menuBtn.on('pointerover', () => menuBtn.setColor('#d4a574'));
     menuBtn.on('pointerout', () => menuBtn.setColor('#888888'));
@@ -303,7 +339,7 @@ export class GameSceneResultsUI {
     this.host.tweens.add({
       targets: this.resultsPopup,
       alpha: 1,
-      duration: 300
+      duration: 300,
     });
   }
 
@@ -312,11 +348,13 @@ export class GameSceneResultsUI {
 
     const nameY = panelHeight / 2 - 210;
 
-    const loadingText = this.host.add.text(0, nameY, 'Checking leaderboard...', {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5);
+    const loadingText = this.host.add
+      .text(0, nameY, 'Checking leaderboard...', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#888888',
+      })
+      .setOrigin(0.5);
     this.resultsPopup.add(loadingText);
 
     try {
@@ -349,18 +387,22 @@ export class GameSceneResultsUI {
 
     this.saveSection = this.host.add.container(0, nameY);
 
-    const newHighScore = this.host.add.text(0, -25, '- NEW HIGH SCORE -', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '16px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
+    const newHighScore = this.host.add
+      .text(0, -25, '- NEW HIGH SCORE -', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '16px',
+        color: '#ffd700',
+      })
+      .setOrigin(0.5);
     this.saveSection.add(newHighScore);
 
-    const nameLabel = this.host.add.text(0, 5, 'Enter your name:', {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5);
+    const nameLabel = this.host.add
+      .text(0, 5, 'Enter your name:', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#888888',
+      })
+      .setOrigin(0.5);
     this.saveSection.add(nameLabel);
 
     const inputBg = this.host.add.graphics();
@@ -370,11 +412,13 @@ export class GameSceneResultsUI {
     inputBg.strokeRoundedRect(-100, 25, 200, 30, 6);
     this.saveSection.add(inputBg);
 
-    this.nameInputText = this.host.add.text(0, 40, '|', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+    this.nameInputText = this.host.add
+      .text(0, 40, '|', {
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5);
     this.saveSection.add(this.nameInputText);
 
     this.cursorVisible = true;
@@ -384,7 +428,7 @@ export class GameSceneResultsUI {
       callback: () => {
         this.cursorVisible = !this.cursorVisible;
         this.updateNameDisplay();
-      }
+      },
     });
 
     const saveBtn = this.createThemedButton(0, 85, 'Save Score', 130, () => {
@@ -401,11 +445,13 @@ export class GameSceneResultsUI {
     if (!this.resultsPopup) return;
 
     this.savedConfirmation = this.host.add.container(0, nameY);
-    const savedText = this.host.add.text(0, 0, '✓ Score Submitted!', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#66ff66'
-    }).setOrigin(0.5);
+    const savedText = this.host.add
+      .text(0, 0, '✓ Score Submitted!', {
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#66ff66',
+      })
+      .setOrigin(0.5);
     this.savedConfirmation.add(savedText);
     this.resultsPopup.add(this.savedConfirmation);
   }
@@ -415,18 +461,22 @@ export class GameSceneResultsUI {
 
     const container = this.host.add.container(0, nameY - 20);
 
-    const message = this.host.add.text(0, -40, 'Score not in top 20', {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#888888'
-    }).setOrigin(0.5);
+    const message = this.host.add
+      .text(0, -40, 'Score not in top 20', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#888888',
+      })
+      .setOrigin(0.5);
     container.add(message);
 
-    const title = this.host.add.text(0, -15, '🏆 Top Scores', {
-      fontFamily: 'Arial Black',
-      fontSize: '14px',
-      color: '#d4a574'
-    }).setOrigin(0.5);
+    const title = this.host.add
+      .text(0, -15, '🏆 Top Scores', {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: '#d4a574',
+      })
+      .setOrigin(0.5);
     container.add(title);
 
     const startY = 10;
@@ -436,32 +486,44 @@ export class GameSceneResultsUI {
       const y = startY + i * rowHeight;
       const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32', '#888888', '#888888'];
 
-      const rank = this.host.add.text(-100, y, `${i + 1}.`, {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: rankColors[i]
-      }).setOrigin(0, 0.5);
+      const rank = this.host.add
+        .text(-100, y, `${i + 1}.`, {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: rankColors[i],
+        })
+        .setOrigin(0, 0.5);
       container.add(rank);
 
-      const name = this.host.add.text(-75, y, score.player_name.slice(0, 10), {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: '#cccccc'
-      }).setOrigin(0, 0.5);
+      const name = this.host.add
+        .text(-75, y, score.player_name.slice(0, 10), {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: '#cccccc',
+        })
+        .setOrigin(0, 0.5);
       container.add(name);
 
-      const scoreText = this.host.add.text(100, y, score.score.toLocaleString(), {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: '#ffd700'
-      }).setOrigin(1, 0.5);
+      const scoreText = this.host.add
+        .text(100, y, score.score.toLocaleString(), {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: '#ffd700',
+        })
+        .setOrigin(1, 0.5);
       container.add(scoreText);
     });
 
     this.resultsPopup.add(container);
   }
 
-  private createThemedButton(x: number, y: number, text: string, width: number, onClick: () => void): Phaser.GameObjects.Container {
+  private createThemedButton(
+    x: number,
+    y: number,
+    text: string,
+    width: number,
+    onClick: () => void
+  ): Phaser.GameObjects.Container {
     const container = this.host.add.container(x, y);
     const height = 40;
 
@@ -491,14 +553,16 @@ export class GameSceneResultsUI {
     drawButton(false);
     container.add(bg);
 
-    const label = this.host.add.text(0, -1, text, {
-      fontFamily: 'Georgia, serif',
-      fontSize: '14px',
-      color: '#fff8dc',
-      fontStyle: 'bold',
-      stroke: '#4a3520',
-      strokeThickness: 2
-    }).setOrigin(0.5);
+    const label = this.host.add
+      .text(0, -1, text, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '14px',
+        color: '#fff8dc',
+        fontStyle: 'bold',
+        stroke: '#4a3520',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5);
     container.add(label);
 
     const hitArea = this.host.add.rectangle(0, 0, width, height, 0x000000, 0);
@@ -542,7 +606,6 @@ export class GameSceneResultsUI {
   }
 
   private setupNameInput(): void {
-
     this.host.input.keyboard?.off('keydown');
 
     this.host.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
@@ -588,11 +651,14 @@ export class GameSceneResultsUI {
     }
 
     const width = this.host.cameras.main.width;
-    const submitStatus = this.host.add.text(width / 2, this.host.cameras.main.height / 2 + 180, '📡 Submitting to leaderboard...', {
-      fontFamily: 'Arial',
-      fontSize: '16px',
-      color: '#88ccff'
-    }).setOrigin(0.5).setDepth(300);
+    const submitStatus = this.host.add
+      .text(width / 2, this.host.cameras.main.height / 2 + 180, '📡 Submitting to leaderboard...', {
+        fontFamily: 'Arial',
+        fontSize: '16px',
+        color: '#88ccff',
+      })
+      .setOrigin(0.5)
+      .setDepth(300);
 
     try {
       const result = await HighscoreAPI.submitScore({
@@ -604,13 +670,12 @@ export class GameSceneResultsUI {
         goldEarned: this.resultData.totalGoldEarned,
         creepsKilled: this.resultData.creepsKilled,
         timeSeconds: this.resultData.runTimeSeconds,
-        isVictory: this.resultData.isVictory
+        isVictory: this.resultData.isVictory,
       });
 
       if (result.success) {
         submitStatus.setText('✓ Score Submitted!');
         submitStatus.setColor('#00ff00');
-        console.log('GameScene: Score submitted to global leaderboard');
       } else {
         submitStatus.setText('⚠ ' + (result.error || 'Could not submit'));
         submitStatus.setColor('#ffaa00');
@@ -626,7 +691,7 @@ export class GameSceneResultsUI {
       targets: submitStatus,
       alpha: 0,
       duration: 2000,
-      delay: 2000
+      delay: 2000,
     });
   }
 
@@ -646,32 +711,46 @@ export class GameSceneResultsUI {
     this.reviewModeUI.add(bg);
 
     const modeText = this.isDefeatReview ? '💀 DEFEAT REVIEW' : '🏆 VICTORY REVIEW';
-    const modeLabel = this.host.add.text(width / 2, height - bgHeight / 2 - 10, modeText, {
-      fontFamily: 'Arial Black',
-      fontSize: '20px',
-      color: this.isDefeatReview ? '#ff6666' : '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5);
+    const modeLabel = this.host.add
+      .text(width / 2, height - bgHeight / 2 - 10, modeText, {
+        fontFamily: 'Arial Black',
+        fontSize: '20px',
+        color: this.isDefeatReview ? '#ff6666' : '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
     this.reviewModeUI.add(modeLabel);
 
-    const hintText = this.host.add.text(width / 2, height - bgHeight / 2 + 15, 'Click on towers to review stats and strategy', {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#c9a86c'
-    }).setOrigin(0.5);
+    const hintText = this.host.add
+      .text(width / 2, height - bgHeight / 2 + 15, 'Click on towers to review stats and strategy', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#c9a86c',
+      })
+      .setOrigin(0.5);
     this.reviewModeUI.add(hintText);
 
-    const scoresBtn = this.createReviewButton(width / 2 - 200, height - bgHeight / 2, '🏆 My Score', () => {
-      this.cleanupReviewMode();
-      this.showResultsPopup();
-    });
+    const scoresBtn = this.createReviewButton(
+      width / 2 - 200,
+      height - bgHeight / 2,
+      '🏆 My Score',
+      () => {
+        this.cleanupReviewMode();
+        this.showResultsPopup();
+      }
+    );
     this.reviewModeUI.add(scoresBtn);
 
-    const playAgainBtn = this.createReviewButton(width / 2 + 200, height - bgHeight / 2, '🔄 Play Again', () => {
-      this.cleanupReviewMode();
-      this.host.scene.start('GameScene');
-    });
+    const playAgainBtn = this.createReviewButton(
+      width / 2 + 200,
+      height - bgHeight / 2,
+      '🔄 Play Again',
+      () => {
+        this.cleanupReviewMode();
+        this.host.scene.start('GameScene');
+      }
+    );
     this.reviewModeUI.add(playAgainBtn);
 
     const menuBtn = this.createReviewButton(width - 80, height - bgHeight / 2, '☰ Menu', () => {
@@ -688,7 +767,12 @@ export class GameSceneResultsUI {
     }
   }
 
-  private createReviewButton(x: number, y: number, text: string, onClick: () => void): Phaser.GameObjects.Container {
+  private createReviewButton(
+    x: number,
+    y: number,
+    text: string,
+    onClick: () => void
+  ): Phaser.GameObjects.Container {
     const container = this.host.add.container(x, y);
 
     const btnWidth = 100;
@@ -701,11 +785,13 @@ export class GameSceneResultsUI {
     bg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
     container.add(bg);
 
-    const label = this.host.add.text(0, 0, text, {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
+    const label = this.host.add
+      .text(0, 0, text, {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5);
     container.add(label);
 
     const hitArea = this.host.add.rectangle(0, 0, btnWidth, btnHeight, 0x000000, 0);

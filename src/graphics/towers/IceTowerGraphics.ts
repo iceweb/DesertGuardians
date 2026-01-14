@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): void {
-
   if (level === 1) {
     g.fillStyle(0x87ceeb, 0.1);
     g.fillCircle(0, 0, 42);
@@ -23,7 +22,6 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
   g.fillEllipse(0, 4, 50 + level * 6, 20 + level * 2);
 
   if (level === 1) {
-
     g.fillStyle(0x88c8e8, 1);
     g.beginPath();
     for (let i = 0; i < 8; i++) {
@@ -84,9 +82,7 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.lineTo(28, -6);
     g.closePath();
     g.fillPath();
-
   } else if (level === 2) {
-
     g.fillStyle(0x70b8d8, 1);
     g.beginPath();
     for (let i = 0; i < 12; i++) {
@@ -173,9 +169,7 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
     g.fillCircle(20, -15, 2.5);
     g.fillCircle(-22, 12, 2);
     g.fillCircle(18, 18, 2.5);
-
   } else {
-
     g.fillStyle(0x5898c8, 1);
     g.beginPath();
     for (let i = 0; i < 16; i++) {
@@ -325,9 +319,16 @@ export function drawIceTower(g: Phaser.GameObjects.Graphics, level: number): voi
 
     g.fillStyle(0xccffff, 0.9);
     const particles = [
-      [-28, -26, 4], [30, -22, 3.5], [-32, 8, 3], [28, 14, 3],
-      [-20, 26, 2.5], [24, 28, 2.5], [-36, -10, 2], [38, -8, 2],
-      [-8, -32, 3], [10, -30, 2.5]
+      [-28, -26, 4],
+      [30, -22, 3.5],
+      [-32, 8, 3],
+      [28, 14, 3],
+      [-20, 26, 2.5],
+      [24, 28, 2.5],
+      [-36, -10, 2],
+      [38, -8, 2],
+      [-8, -32, 3],
+      [10, -30, 2.5],
     ];
     particles.forEach(([px, py, size]) => {
       g.fillCircle(px as number, py as number, size as number);

@@ -10,24 +10,26 @@ export class TowerAbilityVisuals {
 
   showFloatingText(x: number, y: number, text: string, color: number): void {
     const colorStr = '#' + color.toString(16).padStart(6, '0');
-    const textObj = this.scene.add.text(x, y, text, {
-      fontSize: '16px',
-      color: colorStr,
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(100);
+    const textObj = this.scene.add
+      .text(x, y, text, {
+        fontSize: '16px',
+        color: colorStr,
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(100);
 
     this.scene.tweens.add({
       targets: textObj,
       y: y - 30,
       alpha: 0,
       duration: 800,
-      onComplete: () => textObj.destroy()
+      onComplete: () => textObj.destroy(),
     });
   }
 
   showExplosionEffect(x: number, y: number, color: number): void {
-
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y);
     flash.setDepth(26);
@@ -40,7 +42,7 @@ export class TowerAbilityVisuals {
       scaleX: 1.5,
       scaleY: 1.5,
       duration: 100,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
     const explosion = this.scene.add.graphics();
@@ -59,7 +61,7 @@ export class TowerAbilityVisuals {
       scaleY: 2.5,
       duration: 350,
       ease: 'Cubic.easeOut',
-      onComplete: () => explosion.destroy()
+      onComplete: () => explosion.destroy(),
     });
 
     for (let i = 0; i < 8; i++) {
@@ -78,13 +80,12 @@ export class TowerAbilityVisuals {
         alpha: 0,
         duration: 300 + Math.random() * 100,
         ease: 'Quad.easeOut',
-        onComplete: () => debris.destroy()
+        onComplete: () => debris.destroy(),
       });
     }
   }
 
   showSkullEffect(x: number, y: number): void {
-
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y - 20);
     flash.setDepth(99);
@@ -97,12 +98,15 @@ export class TowerAbilityVisuals {
       scaleX: 1.5,
       scaleY: 1.5,
       duration: 200,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
-    const skull = this.scene.add.text(x, y - 30, '💀', {
-      fontSize: '36px'
-    }).setOrigin(0.5).setDepth(100);
+    const skull = this.scene.add
+      .text(x, y - 30, '💀', {
+        fontSize: '36px',
+      })
+      .setOrigin(0.5)
+      .setDepth(100);
     skull.setScale(0.5);
 
     this.scene.tweens.add({
@@ -112,7 +116,7 @@ export class TowerAbilityVisuals {
       scale: 1.8,
       duration: 700,
       ease: 'Cubic.easeOut',
-      onComplete: () => skull.destroy()
+      onComplete: () => skull.destroy(),
     });
 
     for (let i = 0; i < 8; i++) {
@@ -131,11 +135,12 @@ export class TowerAbilityVisuals {
         alpha: 0,
         scale: 0.3,
         duration: 400,
-        onComplete: () => particle.destroy()
+        onComplete: () => particle.destroy(),
       });
     }
   }
 
+  /* eslint-disable max-lines-per-function */
   showIceBlockEffect(x: number, y: number, duration: number): void {
     const container = this.scene.add.container(x, y);
     container.setDepth(35);
@@ -248,7 +253,7 @@ export class TowerAbilityVisuals {
       callback: () => {
         phase += 0.15;
         drawIcePrison(phase);
-      }
+      },
     });
 
     this.scene.time.delayedCall(duration - 300, () => {
@@ -279,7 +284,7 @@ export class TowerAbilityVisuals {
           rotation: angle + Math.random() * 2,
           scale: 0.5,
           duration: 300,
-          onComplete: () => shard.destroy()
+          onComplete: () => shard.destroy(),
         });
       }
 
@@ -289,13 +294,12 @@ export class TowerAbilityVisuals {
         scaleX: 1.2,
         scaleY: 1.2,
         duration: 300,
-        onComplete: () => container.destroy()
+        onComplete: () => container.destroy(),
       });
     });
   }
 
   showFrostNovaEffect(x: number, y: number, radius: number): void {
-
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y);
     flash.setDepth(26);
@@ -308,7 +312,7 @@ export class TowerAbilityVisuals {
       scaleX: 1.5,
       scaleY: 1.5,
       duration: 150,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
     const ring = this.scene.add.graphics();
@@ -326,7 +330,7 @@ export class TowerAbilityVisuals {
       alpha: 0,
       duration: 450,
       ease: 'Cubic.easeOut',
-      onComplete: () => ring.destroy()
+      onComplete: () => ring.destroy(),
     });
 
     const innerRing = this.scene.add.graphics();
@@ -342,7 +346,7 @@ export class TowerAbilityVisuals {
       alpha: 0,
       duration: 350,
       ease: 'Cubic.easeOut',
-      onComplete: () => innerRing.destroy()
+      onComplete: () => innerRing.destroy(),
     });
 
     for (let i = 0; i < 12; i++) {
@@ -369,7 +373,7 @@ export class TowerAbilityVisuals {
         rotation: angle + 1,
         duration: 450,
         ease: 'Quad.easeOut',
-        onComplete: () => crystal.destroy()
+        onComplete: () => crystal.destroy(),
       });
     }
 
@@ -385,12 +389,11 @@ export class TowerAbilityVisuals {
       scaleY: radius / 10,
       alpha: 0,
       duration: 800,
-      onComplete: () => frostGround.destroy()
+      onComplete: () => frostGround.destroy(),
     });
   }
 
   showShatterEffect(x: number, y: number): void {
-
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y);
     flash.setDepth(36);
@@ -403,7 +406,7 @@ export class TowerAbilityVisuals {
       scaleX: 2,
       scaleY: 2,
       duration: 150,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
     for (let i = 0; i < 12; i++) {
@@ -439,7 +442,7 @@ export class TowerAbilityVisuals {
         scale: 0.3,
         duration: 400,
         ease: 'Quad.easeOut',
-        onComplete: () => shard.destroy()
+        onComplete: () => shard.destroy(),
       });
     }
 
@@ -459,7 +462,7 @@ export class TowerAbilityVisuals {
         alpha: 0,
         duration: 350 + Math.random() * 150,
         ease: 'Quad.easeOut',
-        onComplete: () => frost.destroy()
+        onComplete: () => frost.destroy(),
       });
     }
 
@@ -475,12 +478,11 @@ export class TowerAbilityVisuals {
       scaleY: 4,
       alpha: 0,
       duration: 500,
-      onComplete: () => mist.destroy()
+      onComplete: () => mist.destroy(),
     });
   }
 
   showPlagueMarkEffect(x: number, y: number): void {
-
     const container = this.scene.add.container(x, y - 30);
     container.setDepth(35);
 
@@ -521,7 +523,7 @@ export class TowerAbilityVisuals {
           alpha: 0,
           scale: 0.5,
           duration: 400,
-          onComplete: () => drip.destroy()
+          onComplete: () => drip.destroy(),
         });
       });
     }
@@ -533,12 +535,11 @@ export class TowerAbilityVisuals {
       duration: 400,
       yoyo: true,
       repeat: 4,
-      onComplete: () => container.destroy()
+      onComplete: () => container.destroy(),
     });
   }
 
   showToxicExplosionEffect(x: number, y: number, radius: number): void {
-
     const burst = this.scene.add.graphics();
     burst.setPosition(x, y);
     burst.setDepth(25);
@@ -554,7 +555,7 @@ export class TowerAbilityVisuals {
       alpha: 0,
       duration: 450,
       ease: 'Cubic.easeOut',
-      onComplete: () => burst.destroy()
+      onComplete: () => burst.destroy(),
     });
 
     const ring = this.scene.add.graphics();
@@ -569,7 +570,7 @@ export class TowerAbilityVisuals {
       scaleY: radius / 20,
       alpha: 0,
       duration: 400,
-      onComplete: () => ring.destroy()
+      onComplete: () => ring.destroy(),
     });
 
     for (let i = 0; i < 14; i++) {
@@ -597,7 +598,7 @@ export class TowerAbilityVisuals {
         scale: 0.5,
         duration: 400 + Math.random() * 100,
         ease: 'Quad.easeOut',
-        onComplete: () => droplet.destroy()
+        onComplete: () => droplet.destroy(),
       });
     }
 
@@ -620,14 +621,13 @@ export class TowerAbilityVisuals {
           scaleX: 1.5,
           scaleY: 1.5,
           duration: 600 + Math.random() * 200,
-          onComplete: () => fume.destroy()
+          onComplete: () => fume.destroy(),
         });
       });
     }
   }
 
   showRicochetEffect(fromX: number, fromY: number, toX: number, toY: number): void {
-
     const sparkBurst = this.scene.add.graphics();
     sparkBurst.setPosition(fromX, fromY);
     sparkBurst.setDepth(26);
@@ -642,7 +642,7 @@ export class TowerAbilityVisuals {
       scaleX: 2,
       scaleY: 2,
       duration: 150,
-      onComplete: () => sparkBurst.destroy()
+      onComplete: () => sparkBurst.destroy(),
     });
 
     for (let i = 0; i < 6; i++) {
@@ -661,7 +661,7 @@ export class TowerAbilityVisuals {
         alpha: 0,
         scale: 0.3,
         duration: 200,
-        onComplete: () => spark.destroy()
+        onComplete: () => spark.destroy(),
       });
     }
 
@@ -679,7 +679,7 @@ export class TowerAbilityVisuals {
       targets: trail,
       alpha: 0,
       duration: 250,
-      onComplete: () => trail.destroy()
+      onComplete: () => trail.destroy(),
     });
 
     const impactFlash = this.scene.add.graphics();
@@ -695,12 +695,11 @@ export class TowerAbilityVisuals {
       scaleY: 1.5,
       duration: 200,
       delay: 100,
-      onComplete: () => impactFlash.destroy()
+      onComplete: () => impactFlash.destroy(),
     });
   }
 
   showBurnEffect(x: number, y: number): void {
-
     const flameColors = [0xff3300, 0xff6600, 0xffaa00, 0xffcc00];
 
     for (let i = 0; i < 8; i++) {
@@ -730,7 +729,7 @@ export class TowerAbilityVisuals {
           scaleX: 0.3,
           scaleY: 0.5,
           duration: 350 + Math.random() * 200,
-          onComplete: () => flame.destroy()
+          onComplete: () => flame.destroy(),
         });
       });
     }
@@ -748,12 +747,11 @@ export class TowerAbilityVisuals {
       scaleX: 2,
       scaleY: 2,
       duration: 600,
-      onComplete: () => smoke.destroy()
+      onComplete: () => smoke.destroy(),
     });
   }
 
   showPlagueCloudEffect(x: number, y: number, radius: number): void {
-
     const burst = this.scene.add.graphics();
     burst.setPosition(x, y);
     burst.setDepth(25);
@@ -767,7 +765,7 @@ export class TowerAbilityVisuals {
       alpha: 0,
       duration: 700,
       ease: 'Cubic.easeOut',
-      onComplete: () => burst.destroy()
+      onComplete: () => burst.destroy(),
     });
 
     for (let layer = 0; layer < 3; layer++) {
@@ -786,7 +784,7 @@ export class TowerAbilityVisuals {
         duration: 600 + layer * 100,
         delay: layer * 50,
         ease: 'Quad.easeOut',
-        onComplete: () => cloud.destroy()
+        onComplete: () => cloud.destroy(),
       });
     }
 
@@ -806,7 +804,7 @@ export class TowerAbilityVisuals {
         alpha: 0,
         duration: 500 + Math.random() * 200,
         ease: 'Quad.easeOut',
-        onComplete: () => particle.destroy()
+        onComplete: () => particle.destroy(),
       });
     }
 
@@ -823,7 +821,7 @@ export class TowerAbilityVisuals {
       alpha: 0,
       scale: 1.5,
       duration: 500,
-      onComplete: () => skullMark.destroy()
+      onComplete: () => skullMark.destroy(),
     });
   }
 
@@ -840,7 +838,7 @@ export class TowerAbilityVisuals {
       targets: outerTrail,
       alpha: 0,
       duration: 400,
-      onComplete: () => outerTrail.destroy()
+      onComplete: () => outerTrail.destroy(),
     });
 
     const trail = this.scene.add.graphics();
@@ -853,7 +851,7 @@ export class TowerAbilityVisuals {
       targets: trail,
       alpha: 0,
       duration: 350,
-      onComplete: () => trail.destroy()
+      onComplete: () => trail.destroy(),
     });
 
     const coreLine = this.scene.add.graphics();
@@ -866,7 +864,7 @@ export class TowerAbilityVisuals {
       targets: coreLine,
       alpha: 0,
       duration: 300,
-      onComplete: () => coreLine.destroy()
+      onComplete: () => coreLine.destroy(),
     });
 
     for (let i = 0; i < 6; i++) {
@@ -886,7 +884,7 @@ export class TowerAbilityVisuals {
         scale: 0.3,
         duration: 250 + i * 30,
         delay: i * 30,
-        onComplete: () => particle.destroy()
+        onComplete: () => particle.destroy(),
       });
     }
   }
@@ -905,7 +903,7 @@ export class TowerAbilityVisuals {
       targets: outerGlow,
       alpha: 0,
       duration: 350,
-      onComplete: () => outerGlow.destroy()
+      onComplete: () => outerGlow.destroy(),
     });
 
     const trail = this.scene.add.graphics();
@@ -918,7 +916,7 @@ export class TowerAbilityVisuals {
       targets: trail,
       alpha: 0,
       duration: 300,
-      onComplete: () => trail.destroy()
+      onComplete: () => trail.destroy(),
     });
 
     const core = this.scene.add.graphics();
@@ -931,7 +929,7 @@ export class TowerAbilityVisuals {
       targets: core,
       alpha: 0,
       duration: 250,
-      onComplete: () => core.destroy()
+      onComplete: () => core.destroy(),
     });
 
     const impact = this.scene.add.graphics();
@@ -948,7 +946,7 @@ export class TowerAbilityVisuals {
       scaleX: 2,
       scaleY: 2,
       duration: 200,
-      onComplete: () => impact.destroy()
+      onComplete: () => impact.destroy(),
     });
 
     for (let i = 0; i < 6; i++) {
@@ -966,7 +964,7 @@ export class TowerAbilityVisuals {
         y: hitY + Math.sin(angle) * distance,
         alpha: 0,
         duration: 200 + Math.random() * 100,
-        onComplete: () => spark.destroy()
+        onComplete: () => spark.destroy(),
       });
     }
   }

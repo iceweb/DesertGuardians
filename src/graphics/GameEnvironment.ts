@@ -37,7 +37,7 @@ export class GameEnvironment {
 
   update(delta: number): void {
     if (this.flagGraphics && this.castlePosition) {
-      this.flagPhase += delta / 1000 * 1.5;
+      this.flagPhase += (delta / 1000) * 1.5;
       if (this.flagPhase > Math.PI * 2) this.flagPhase -= Math.PI * 2;
       this.drawFlag(this.castlePosition.x, this.castlePosition.y);
     }
@@ -105,7 +105,7 @@ export class GameEnvironment {
         ease: 'Power2',
         onComplete: () => {
           particle.destroy();
-        }
+        },
       });
     }
 
@@ -114,17 +114,15 @@ export class GameEnvironment {
       x: { from: -5, to: 5 },
       duration: 50,
       repeat: 10,
-      yoyo: true
+      yoyo: true,
     });
 
     this.scene.time.delayedCall(500, () => {
-
       this.scene.tweens.add({
         targets: this.castleContainer,
         alpha: 0,
         duration: 300,
         onComplete: () => {
-
           this.drawDestroyedCastle();
 
           this.scene.cameras.main.shake(500, 0.02);
@@ -132,7 +130,7 @@ export class GameEnvironment {
           this.scene.time.delayedCall(800, () => {
             onComplete?.();
           });
-        }
+        },
       });
     });
   }
@@ -292,7 +290,7 @@ export class GameEnvironment {
       { y: 0.3, color: 0xb0d4e8 },
       { y: 0.6, color: 0xffd4a3 },
       { y: 0.85, color: 0xffb366 },
-      { y: 1, color: 0xe8c896 }
+      { y: 1, color: 0xe8c896 },
     ];
 
     for (let i = 0; i < colors.length - 1; i++) {
@@ -365,7 +363,13 @@ export class GameEnvironment {
     }
   }
 
-  private drawDune(graphics: Phaser.GameObjects.Graphics, x: number, baseY: number, w: number, h: number): void {
+  private drawDune(
+    graphics: Phaser.GameObjects.Graphics,
+    x: number,
+    baseY: number,
+    w: number,
+    h: number
+  ): void {
     graphics.beginPath();
     graphics.moveTo(x, baseY + h);
 
@@ -394,14 +398,27 @@ export class GameEnvironment {
     };
 
     const palmPositions = [
-      { x: 480, y: 180 }, { x: 680, y: 160 }, { x: 880, y: 200 },
-      { x: 1380, y: 170 }, { x: 1580, y: 190 },
-      { x: 150, y: 350 }, { x: 380, y: 400 }, { x: 580, y: 480 },
-      { x: 920, y: 380 }, { x: 1100, y: 450 }, { x: 1300, y: 380 },
-      { x: 1700, y: 420 }, { x: 1850, y: 350 },
-      { x: 100, y: 650 }, { x: 320, y: 720 }, { x: 600, y: 680 },
-      { x: 850, y: 750 }, { x: 1150, y: 700 }, { x: 1400, y: 750 },
-      { x: 1650, y: 680 }, { x: 1850, y: 720 }
+      { x: 480, y: 180 },
+      { x: 680, y: 160 },
+      { x: 880, y: 200 },
+      { x: 1380, y: 170 },
+      { x: 1580, y: 190 },
+      { x: 150, y: 350 },
+      { x: 380, y: 400 },
+      { x: 580, y: 480 },
+      { x: 920, y: 380 },
+      { x: 1100, y: 450 },
+      { x: 1300, y: 380 },
+      { x: 1700, y: 420 },
+      { x: 1850, y: 350 },
+      { x: 100, y: 650 },
+      { x: 320, y: 720 },
+      { x: 600, y: 680 },
+      { x: 850, y: 750 },
+      { x: 1150, y: 700 },
+      { x: 1400, y: 750 },
+      { x: 1650, y: 680 },
+      { x: 1850, y: 720 },
     ];
     for (const pos of palmPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -410,11 +427,24 @@ export class GameEnvironment {
     }
 
     const rockPositions = [
-      { x: 550, y: 200 }, { x: 780, y: 180 }, { x: 1200, y: 190 }, { x: 1500, y: 170 },
-      { x: 200, y: 400 }, { x: 450, y: 350 }, { x: 700, y: 420 },
-      { x: 1000, y: 380 }, { x: 1250, y: 420 }, { x: 1550, y: 380 }, { x: 1800, y: 450 },
-      { x: 150, y: 680 }, { x: 400, y: 750 }, { x: 650, y: 700 },
-      { x: 950, y: 780 }, { x: 1200, y: 720 }, { x: 1500, y: 780 }, { x: 1750, y: 700 }
+      { x: 550, y: 200 },
+      { x: 780, y: 180 },
+      { x: 1200, y: 190 },
+      { x: 1500, y: 170 },
+      { x: 200, y: 400 },
+      { x: 450, y: 350 },
+      { x: 700, y: 420 },
+      { x: 1000, y: 380 },
+      { x: 1250, y: 420 },
+      { x: 1550, y: 380 },
+      { x: 1800, y: 450 },
+      { x: 150, y: 680 },
+      { x: 400, y: 750 },
+      { x: 650, y: 700 },
+      { x: 950, y: 780 },
+      { x: 1200, y: 720 },
+      { x: 1500, y: 780 },
+      { x: 1750, y: 700 },
     ];
     for (const pos of rockPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -423,9 +453,13 @@ export class GameEnvironment {
     }
 
     const ruinPositions = [
-      { x: 620, y: 200 }, { x: 1450, y: 180 },
-      { x: 300, y: 450 }, { x: 1650, y: 400 },
-      { x: 500, y: 750 }, { x: 1100, y: 720 }, { x: 1750, y: 780 }
+      { x: 620, y: 200 },
+      { x: 1450, y: 180 },
+      { x: 300, y: 450 },
+      { x: 1650, y: 400 },
+      { x: 500, y: 750 },
+      { x: 1100, y: 720 },
+      { x: 1750, y: 780 },
     ];
     for (const pos of ruinPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -434,11 +468,23 @@ export class GameEnvironment {
     }
 
     const cactiPositions = [
-      { x: 420, y: 170 }, { x: 750, y: 190 }, { x: 1050, y: 160 }, { x: 1320, y: 200 },
-      { x: 180, y: 420 }, { x: 500, y: 380 }, { x: 780, y: 450 },
-      { x: 1150, y: 400 }, { x: 1400, y: 450 }, { x: 1720, y: 380 },
-      { x: 250, y: 700 }, { x: 550, y: 750 }, { x: 800, y: 700 },
-      { x: 1050, y: 780 }, { x: 1350, y: 720 }, { x: 1600, y: 750 }, { x: 1850, y: 680 }
+      { x: 420, y: 170 },
+      { x: 750, y: 190 },
+      { x: 1050, y: 160 },
+      { x: 1320, y: 200 },
+      { x: 180, y: 420 },
+      { x: 500, y: 380 },
+      { x: 780, y: 450 },
+      { x: 1150, y: 400 },
+      { x: 1400, y: 450 },
+      { x: 1720, y: 380 },
+      { x: 250, y: 700 },
+      { x: 550, y: 750 },
+      { x: 800, y: 700 },
+      { x: 1050, y: 780 },
+      { x: 1350, y: 720 },
+      { x: 1600, y: 750 },
+      { x: 1850, y: 680 },
     ];
     for (const pos of cactiPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -447,9 +493,17 @@ export class GameEnvironment {
     }
 
     const scarabPositions = [
-      { x: 520, y: 170 }, { x: 1280, y: 180 },
-      { x: 280, y: 380 }, { x: 650, y: 420 }, { x: 1000, y: 350 }, { x: 1500, y: 420 },
-      { x: 180, y: 720 }, { x: 480, y: 680 }, { x: 900, y: 750 }, { x: 1250, y: 700 }, { x: 1650, y: 750 }
+      { x: 520, y: 170 },
+      { x: 1280, y: 180 },
+      { x: 280, y: 380 },
+      { x: 650, y: 420 },
+      { x: 1000, y: 350 },
+      { x: 1500, y: 420 },
+      { x: 180, y: 720 },
+      { x: 480, y: 680 },
+      { x: 900, y: 750 },
+      { x: 1250, y: 700 },
+      { x: 1650, y: 750 },
     ];
     for (const pos of scarabPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -458,11 +512,28 @@ export class GameEnvironment {
     }
 
     const flowerPositions = [
-      { x: 450, y: 200 }, { x: 700, y: 170 }, { x: 950, y: 190 }, { x: 1180, y: 170 }, { x: 1420, y: 200 },
-      { x: 220, y: 380 }, { x: 420, y: 420 }, { x: 620, y: 350 }, { x: 850, y: 400 },
-      { x: 1080, y: 380 }, { x: 1300, y: 450 }, { x: 1520, y: 380 }, { x: 1780, y: 420 },
-      { x: 130, y: 700 }, { x: 350, y: 750 }, { x: 580, y: 720 }, { x: 780, y: 780 },
-      { x: 1000, y: 700 }, { x: 1220, y: 750 }, { x: 1450, y: 700 }, { x: 1700, y: 780 }, { x: 1880, y: 720 }
+      { x: 450, y: 200 },
+      { x: 700, y: 170 },
+      { x: 950, y: 190 },
+      { x: 1180, y: 170 },
+      { x: 1420, y: 200 },
+      { x: 220, y: 380 },
+      { x: 420, y: 420 },
+      { x: 620, y: 350 },
+      { x: 850, y: 400 },
+      { x: 1080, y: 380 },
+      { x: 1300, y: 450 },
+      { x: 1520, y: 380 },
+      { x: 1780, y: 420 },
+      { x: 130, y: 700 },
+      { x: 350, y: 750 },
+      { x: 580, y: 720 },
+      { x: 780, y: 780 },
+      { x: 1000, y: 700 },
+      { x: 1220, y: 750 },
+      { x: 1450, y: 700 },
+      { x: 1700, y: 780 },
+      { x: 1880, y: 720 },
     ];
     for (const pos of flowerPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -475,9 +546,15 @@ export class GameEnvironment {
     }
 
     const potteryPositions = [
-      { x: 580, y: 180 }, { x: 1350, y: 190 },
-      { x: 350, y: 400 }, { x: 900, y: 380 }, { x: 1600, y: 450 },
-      { x: 200, y: 750 }, { x: 700, y: 700 }, { x: 1150, y: 780 }, { x: 1550, y: 720 }
+      { x: 580, y: 180 },
+      { x: 1350, y: 190 },
+      { x: 350, y: 400 },
+      { x: 900, y: 380 },
+      { x: 1600, y: 450 },
+      { x: 200, y: 750 },
+      { x: 700, y: 700 },
+      { x: 1150, y: 780 },
+      { x: 1550, y: 720 },
     ];
     for (const pos of potteryPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -486,9 +563,18 @@ export class GameEnvironment {
     }
 
     const scorpionPositions = [
-      { x: 480, y: 190 }, { x: 1100, y: 170 },
-      { x: 250, y: 420 }, { x: 550, y: 380 }, { x: 950, y: 450 }, { x: 1450, y: 400 }, { x: 1750, y: 380 },
-      { x: 300, y: 720 }, { x: 650, y: 750 }, { x: 1000, y: 720 }, { x: 1350, y: 780 }, { x: 1680, y: 700 }
+      { x: 480, y: 190 },
+      { x: 1100, y: 170 },
+      { x: 250, y: 420 },
+      { x: 550, y: 380 },
+      { x: 950, y: 450 },
+      { x: 1450, y: 400 },
+      { x: 1750, y: 380 },
+      { x: 300, y: 720 },
+      { x: 650, y: 750 },
+      { x: 1000, y: 720 },
+      { x: 1350, y: 780 },
+      { x: 1680, y: 700 },
     ];
     for (const pos of scorpionPositions) {
       if (isValidDecoPosition(pos.x, pos.y)) {
@@ -507,14 +593,20 @@ export class GameEnvironment {
   private isNearPath(x: number, y: number, margin: number): boolean {
     const segments = this.pathSystem.getSegments();
     for (const segment of segments) {
-      const dist = this.pointToSegmentDistance(x, y, segment.start.x, segment.start.y, segment.end.x, segment.end.y);
+      const dist = this.pointToSegmentDistance(
+        x,
+        y,
+        segment.start.x,
+        segment.start.y,
+        segment.end.x,
+        segment.end.y
+      );
       if (dist < margin) return true;
     }
     return false;
   }
 
   private isInsidePathLoop(x: number, y: number): boolean {
-
     const loop1 = [
       { x: 820, y: 210 },
       { x: 1100, y: 210 },
@@ -523,7 +615,7 @@ export class GameEnvironment {
       { x: 1050, y: 450 },
       { x: 900, y: 450 },
       { x: 820, y: 380 },
-      { x: 820, y: 260 }
+      { x: 820, y: 260 },
     ];
 
     const loop2 = [
@@ -534,7 +626,7 @@ export class GameEnvironment {
       { x: 1100, y: 700 },
       { x: 1100, y: 600 },
       { x: 1050, y: 550 },
-      { x: 910, y: 550 }
+      { x: 910, y: 550 },
     ];
 
     const loop3 = [
@@ -545,12 +637,14 @@ export class GameEnvironment {
       { x: 1380, y: 770 },
       { x: 1270, y: 770 },
       { x: 1220, y: 720 },
-      { x: 1220, y: 600 }
+      { x: 1220, y: 600 },
     ];
 
-    return this.isPointInPolygon(x, y, loop1) ||
-           this.isPointInPolygon(x, y, loop2) ||
-           this.isPointInPolygon(x, y, loop3);
+    return (
+      this.isPointInPolygon(x, y, loop1) ||
+      this.isPointInPolygon(x, y, loop2) ||
+      this.isPointInPolygon(x, y, loop3)
+    );
   }
 
   private isPointInPolygon(x: number, y: number, polygon: { x: number; y: number }[]): boolean {
@@ -563,7 +657,7 @@ export class GameEnvironment {
       const xj = polygon[j].x;
       const yj = polygon[j].y;
 
-      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
         inside = !inside;
       }
     }
@@ -571,7 +665,14 @@ export class GameEnvironment {
     return inside;
   }
 
-  private pointToSegmentDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+  private pointToSegmentDistance(
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): number {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const lengthSquared = dx * dx + dy * dy;
@@ -624,7 +725,6 @@ export class GameEnvironment {
   }
 
   private drawCastle(x: number, y: number): void {
-
     this.castleContainer = this.scene.add.container(0, 0);
     this.castleContainer.setDepth(15);
 
@@ -654,7 +754,7 @@ export class GameEnvironment {
       const widthHalf = baseWidthHalf - (baseWidthHalf - topWidthHalf) * progress;
       const nextWidthHalf = baseWidthHalf - (baseWidthHalf - topWidthHalf) * ((i + 1) / numSteps);
 
-      const topColor = 0xd8ccb8 + (i * 0x010101);
+      const topColor = 0xd8ccb8 + i * 0x010101;
       castle.fillStyle(Math.min(topColor, 0xe8dcd0), 1);
       castle.beginPath();
       castle.moveTo(cx - widthHalf, stepY - stepHeight + 2);
@@ -668,10 +768,20 @@ export class GameEnvironment {
       castle.fillRect(cx - widthHalf, stepY - stepHeight + 2, widthHalf * 2, stepHeight - 2);
 
       castle.lineStyle(1, 0xa89888, 1);
-      castle.lineBetween(cx - widthHalf, stepY - stepHeight + 2, cx + widthHalf, stepY - stepHeight + 2);
+      castle.lineBetween(
+        cx - widthHalf,
+        stepY - stepHeight + 2,
+        cx + widthHalf,
+        stepY - stepHeight + 2
+      );
 
       castle.lineStyle(1, 0xe8dcd0, 0.6);
-      castle.lineBetween(cx - widthHalf + 2, stepY - stepHeight + 3, cx + widthHalf - 2, stepY - stepHeight + 3);
+      castle.lineBetween(
+        cx - widthHalf + 2,
+        stepY - stepHeight + 3,
+        cx + widthHalf - 2,
+        stepY - stepHeight + 3
+      );
     }
 
     castle.fillStyle(0xa89878, 1);
@@ -848,7 +958,7 @@ export class GameEnvironment {
 
     castle.lineStyle(2, 0xb08050, 1);
     for (let i = 0; i < 9; i++) {
-      const angle = Math.PI + (i * Math.PI / 8);
+      const angle = Math.PI + (i * Math.PI) / 8;
       const innerR = 8;
       const outerR = 18;
       castle.lineBetween(
@@ -985,7 +1095,6 @@ export class GameEnvironment {
     const crackColor = 0x2a1a0a;
 
     if (this.currentDamageState >= 1) {
-
       this.castleDamageGraphics.lineStyle(3, crackColor, 0.8);
 
       this.castleDamageGraphics.beginPath();
@@ -1006,7 +1115,6 @@ export class GameEnvironment {
     }
 
     if (this.currentDamageState >= 2) {
-
       this.castleDamageGraphics.lineStyle(4, crackColor, 0.9);
 
       this.castleDamageGraphics.beginPath();

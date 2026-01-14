@@ -46,7 +46,6 @@ export class StatusEffectHandler {
   }
 
   applySlow(percent: number, durationMs: number): void {
-
     if (this.isImmune()) return;
 
     const currentTime = this.scene.time.now;
@@ -55,7 +54,6 @@ export class StatusEffectHandler {
   }
 
   applyFreeze(durationMs: number): void {
-
     if (this.isImmune()) return;
 
     const currentTime = this.scene.time.now;
@@ -68,38 +66,34 @@ export class StatusEffectHandler {
   }
 
   applyPoison(damagePerSecond: number, durationMs: number): void {
-
     if (this.isImmune()) return;
 
     const currentTime = this.scene.time.now;
 
     if (this.poisonStacks.length >= 3) {
-
       this.poisonStacks[0] = {
         damage: damagePerSecond,
-        endTime: currentTime + durationMs
+        endTime: currentTime + durationMs,
       };
     } else {
       this.poisonStacks.push({
         damage: damagePerSecond,
-        endTime: currentTime + durationMs
+        endTime: currentTime + durationMs,
       });
     }
   }
 
   applyBurn(damagePerSecond: number, durationMs: number): void {
-
     if (this.isImmune()) return;
 
     const currentTime = this.scene.time.now;
     this.burnEffect = {
       damage: damagePerSecond,
-      endTime: currentTime + durationMs
+      endTime: currentTime + durationMs,
     };
   }
 
   applyArmorReduction(amount: number): void {
-
     if (this.isImmune()) return;
 
     this.armorReduction = Math.min(6, this.armorReduction + amount);
@@ -119,7 +113,7 @@ export class StatusEffectHandler {
       if (this.poisonTickTimer >= 1000) {
         this.poisonTickTimer = 0;
 
-        this.poisonStacks = this.poisonStacks.filter(stack => {
+        this.poisonStacks = this.poisonStacks.filter((stack) => {
           if (currentTime < stack.endTime) {
             poisonDamage += stack.damage;
             return true;
@@ -168,7 +162,6 @@ export class StatusEffectHandler {
     const isBurning = this.burnEffect !== null && this.burnEffect.endTime > currentTime;
 
     if (isFrozen) {
-
       this.statusGraphics.fillStyle(0x87ceeb, 0.4);
       this.statusGraphics.fillRect(-15, -20, 30, 30);
       this.statusGraphics.lineStyle(2, 0xadd8e6, 0.8);
@@ -180,10 +173,9 @@ export class StatusEffectHandler {
       this.statusGraphics.fillCircle(-5, 5, 2);
       this.statusGraphics.fillCircle(8, 0, 3);
     } else if (isSlowed) {
-
       this.statusGraphics.fillStyle(0x87ceeb, 0.6);
       for (let i = 0; i < 4; i++) {
-        const angle = (currentTime / 500 + i * Math.PI / 2) % (Math.PI * 2);
+        const angle = (currentTime / 500 + (i * Math.PI) / 2) % (Math.PI * 2);
         const x = Math.cos(angle) * 18;
         const y = Math.sin(angle) * 10 - 5;
         this.statusGraphics.fillCircle(x, y, 3);
@@ -191,11 +183,10 @@ export class StatusEffectHandler {
     }
 
     if (isPoisoned) {
-
       this.statusGraphics.fillStyle(0x00ff00, 0.5);
       const stackCount = Math.min(this.poisonStacks.length, 3);
       for (let i = 0; i < stackCount; i++) {
-        const angle = (currentTime / 400 + i * Math.PI * 2 / 3) % (Math.PI * 2);
+        const angle = (currentTime / 400 + (i * Math.PI * 2) / 3) % (Math.PI * 2);
         const x = Math.cos(angle) * 15;
         const y = Math.sin(angle) * 8 + 5;
         this.statusGraphics.fillCircle(x, y, 2 + i);
@@ -203,7 +194,6 @@ export class StatusEffectHandler {
     }
 
     if (isBurning) {
-
       this.statusGraphics.fillStyle(0xff6600, 0.7);
       for (let i = 0; i < 3; i++) {
         const offset = (currentTime / 100 + i * 100) % 300;
@@ -230,7 +220,7 @@ export class StatusEffectHandler {
       return 0;
     }
 
-    return this.slowEndTime > currentTime ? (1 - this.slowAmount) : 1;
+    return this.slowEndTime > currentTime ? 1 - this.slowAmount : 1;
   }
 
   isSlowed(): boolean {

@@ -3,7 +3,6 @@ import type { TowerBranch } from '../data';
 import type { AbilityDefinition } from '../objects/TowerAbilities';
 
 export class TowerIconRenderer {
-
   static drawArcherTowerIcon(g: Phaser.GameObjects.Graphics, canAfford: boolean): void {
     const alpha = canAfford ? 1 : 0.5;
 
@@ -54,7 +53,14 @@ export class TowerIconRenderer {
     g.lineBetween(0, -43, 0, -27);
   }
 
-  static drawMiniTowerIcon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, branch: TowerBranch, canAfford: boolean): void {
+  /* eslint-disable max-lines-per-function */
+  static drawMiniTowerIcon(
+    graphics: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    branch: TowerBranch,
+    canAfford: boolean
+  ): void {
     const alpha = canAfford ? 1 : 0.4;
     const scale = 0.7;
 
@@ -96,9 +102,23 @@ export class TowerIconRenderer {
         graphics.fillStyle(0x87ceeb, alpha);
         graphics.fillRect(x - 12 * scale, y + 8 * scale, 24 * scale, 12 * scale);
         graphics.fillStyle(0xb0e0e6, alpha * 0.9);
-        graphics.fillTriangle(x - 10 * scale, y + 8 * scale, x, y - 40 * scale, x + 10 * scale, y + 8 * scale);
+        graphics.fillTriangle(
+          x - 10 * scale,
+          y + 8 * scale,
+          x,
+          y - 40 * scale,
+          x + 10 * scale,
+          y + 8 * scale
+        );
         graphics.fillStyle(0xe0ffff, alpha * 0.7);
-        graphics.fillTriangle(x - 6 * scale, y + 5 * scale, x, y - 35 * scale, x + 6 * scale, y + 5 * scale);
+        graphics.fillTriangle(
+          x - 6 * scale,
+          y + 5 * scale,
+          x,
+          y - 35 * scale,
+          x + 6 * scale,
+          y + 5 * scale
+        );
         graphics.fillStyle(0xffffff, alpha * 0.8);
         graphics.fillCircle(x - 4 * scale, y - 15 * scale, 2 * scale);
         graphics.fillCircle(x + 3 * scale, y - 25 * scale, 2 * scale);
@@ -174,7 +194,7 @@ export const TOWER_HINTS: Record<TowerBranch, string> = {
   rockcannon: '💥 Splash damage hits multiple enemies. Great for swarms.',
   icetower: '❄️ Slows enemies so other towers deal more damage. Essential support.',
   poison: '☠️ Damage over time ignores armor. Best counter to armored units!',
-  aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.'
+  aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.',
 };
 
 export const BRANCH_NAMES: Record<TowerBranch, string> = {
@@ -184,7 +204,7 @@ export const BRANCH_NAMES: Record<TowerBranch, string> = {
   rockcannon: 'Cannon',
   icetower: 'Ice',
   poison: 'Poison',
-  aura: 'Aura'
+  aura: 'Aura',
 };
 
 export const BRANCH_DESCRIPTIONS: Record<TowerBranch, string> = {
@@ -194,5 +214,5 @@ export const BRANCH_DESCRIPTIONS: Record<TowerBranch, string> = {
   rockcannon: 'AOE splash damage',
   icetower: 'Slows enemies for allies',
   poison: 'Best vs armored units',
-  aura: 'Buffs nearby towers'
+  aura: 'Buffs nearby towers',
 };

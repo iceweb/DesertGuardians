@@ -64,13 +64,11 @@ export class PathSystem {
         start: start.clone(),
         end: end.clone(),
         length,
-        direction
+        direction,
       });
 
       this.totalLength += length;
     }
-
-    console.log(`PathSystem: Created ${this.segments.length} segments, total length: ${this.totalLength.toFixed(0)}px`);
   }
 
   getTotalLength(): number {
@@ -90,11 +88,17 @@ export class PathSystem {
   }
 
   getEndPoint(): Phaser.Math.Vector2 {
-    return this.points.length > 0 ? this.points[this.points.length - 1].clone() : new Phaser.Math.Vector2(0, 0);
+    return this.points.length > 0
+      ? this.points[this.points.length - 1].clone()
+      : new Phaser.Math.Vector2(0, 0);
   }
 
-  getPositionAt(distance: number): { position: Phaser.Math.Vector2; direction: Phaser.Math.Vector2; progress: number; segmentIndex: number } {
-
+  getPositionAt(distance: number): {
+    position: Phaser.Math.Vector2;
+    direction: Phaser.Math.Vector2;
+    progress: number;
+    segmentIndex: number;
+  } {
     distance = Phaser.Math.Clamp(distance, 0, this.totalLength);
 
     if (this.segments.length === 0) {
@@ -102,7 +106,7 @@ export class PathSystem {
         position: new Phaser.Math.Vector2(0, 0),
         direction: new Phaser.Math.Vector2(1, 0),
         progress: 0,
-        segmentIndex: 0
+        segmentIndex: 0,
       };
     }
 
@@ -112,7 +116,6 @@ export class PathSystem {
       const segment = this.segments[i];
 
       if (accumulatedLength + segment.length >= distance || i === this.segments.length - 1) {
-
         const distanceIntoSegment = distance - accumulatedLength;
         const t = segment.length > 0 ? distanceIntoSegment / segment.length : 0;
 
@@ -125,7 +128,7 @@ export class PathSystem {
           position,
           direction: segment.direction.clone(),
           progress: distance / this.totalLength,
-          segmentIndex: i
+          segmentIndex: i,
         };
       }
 
@@ -137,7 +140,7 @@ export class PathSystem {
       position: lastSegment.end.clone(),
       direction: lastSegment.direction.clone(),
       progress: 1,
-      segmentIndex: this.segments.length - 1
+      segmentIndex: this.segments.length - 1,
     };
   }
 
@@ -149,8 +152,11 @@ export class PathSystem {
     return distance >= this.totalLength;
   }
 
-  drawDebug(graphics: Phaser.GameObjects.Graphics, lineColor: number = 0xffff00, pointColor: number = 0xff0000): void {
-
+  drawDebug(
+    graphics: Phaser.GameObjects.Graphics,
+    lineColor: number = 0xffff00,
+    pointColor: number = 0xff0000
+  ): void {
     graphics.lineStyle(4, lineColor, 0.8);
 
     if (this.points.length > 0) {
@@ -170,26 +176,29 @@ export class PathSystem {
     }
 
     if (this.points.length > 0) {
-
       graphics.fillStyle(0x00ff00, 1);
       graphics.fillCircle(this.points[0].x, this.points[0].y, 16);
 
       graphics.fillStyle(0xff0000, 1);
-      graphics.fillCircle(this.points[this.points.length - 1].x, this.points[this.points.length - 1].y, 16);
+      graphics.fillCircle(
+        this.points[this.points.length - 1].x,
+        this.points[this.points.length - 1].y,
+        16
+      );
     }
   }
 
   isInBuildableZone(x: number, y: number): boolean {
-
     const distanceToPath = this.getDistanceToPath(x, y);
 
-    if (distanceToPath >= this.BUILD_ZONE_MIN_DISTANCE &&
-        distanceToPath <= this.BUILD_ZONE_MAX_DISTANCE) {
+    if (
+      distanceToPath >= this.BUILD_ZONE_MIN_DISTANCE &&
+      distanceToPath <= this.BUILD_ZONE_MAX_DISTANCE
+    ) {
       return true;
     }
 
     if (this.isInsidePathLoop(x, y)) {
-
       return distanceToPath >= this.BUILD_ZONE_MIN_DISTANCE;
     }
 
@@ -203,9 +212,12 @@ export class PathSystem {
 
     for (const segment of this.segments) {
       const dist = this.pointToSegmentDistance(
-        x, y,
-        segment.start.x, segment.start.y,
-        segment.end.x, segment.end.y
+        x,
+        y,
+        segment.start.x,
+        segment.start.y,
+        segment.end.x,
+        segment.end.y
       );
       if (dist < minDistance) {
         minDistance = dist;
@@ -215,7 +227,14 @@ export class PathSystem {
     return minDistance;
   }
 
-  private pointToSegmentDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+  private pointToSegmentDistance(
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): number {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const lengthSquared = dx * dx + dy * dy;
@@ -234,14 +253,12 @@ export class PathSystem {
   }
 
   private isInsidePathLoop(x: number, y: number): boolean {
-
     if (this.points.length < 3) return false;
 
     const firstPoint = this.points[0];
     const lastPoint = this.points[this.points.length - 1];
     const loopDistance = Math.sqrt(
-      (lastPoint.x - firstPoint.x) ** 2 +
-      (lastPoint.y - firstPoint.y) ** 2
+      (lastPoint.x - firstPoint.x) ** 2 + (lastPoint.y - firstPoint.y) ** 2
     );
 
     let inside = false;
@@ -253,8 +270,7 @@ export class PathSystem {
       const xj = this.points[j].x;
       const yj = this.points[j].y;
 
-      if (((yi > y) !== (yj > y)) &&
-          (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
         inside = !inside;
       }
     }
@@ -275,6 +291,7 @@ export class MapManager {
     this.scene = scene;
   }
 
+  /* eslint-disable complexity, max-depth */
   loadMap(mapKey: string): MapData {
     const jsonData = this.scene.cache.json.get(mapKey);
 
@@ -291,7 +308,6 @@ export class MapManager {
     for (const layer of jsonData.layers) {
       if (layer.type === 'objectgroup') {
         for (const obj of layer.objects) {
-
           if (obj.type === 'spawn') {
             spawn.set(obj.x, obj.y);
           }
@@ -302,11 +318,7 @@ export class MapManager {
 
           if (obj.type === 'path' && obj.polyline) {
             for (const point of obj.polyline) {
-
-              pathPoints.push(new Phaser.Math.Vector2(
-                obj.x + point.x,
-                obj.y + point.y
-              ));
+              pathPoints.push(new Phaser.Math.Vector2(obj.x + point.x, obj.y + point.y));
             }
           }
 
@@ -318,7 +330,7 @@ export class MapManager {
               y: obj.y,
               width: obj.width,
               height: obj.height,
-              occupied: false
+              occupied: false,
             });
           }
 
@@ -329,7 +341,7 @@ export class MapManager {
               y: obj.y,
               width: obj.width || 60,
               height: obj.height || 60,
-              occupied: false
+              occupied: false,
             });
           }
         }
@@ -337,14 +349,6 @@ export class MapManager {
     }
 
     this.mapData = { spawn, goal, pathPoints, buildPads, minePads };
-
-    console.log('MapManager: Map loaded', {
-      spawn: `(${spawn.x}, ${spawn.y})`,
-      goal: `(${goal.x}, ${goal.y})`,
-      pathPoints: pathPoints.length,
-      buildPads: buildPads.length,
-      minePads: minePads.length
-    });
 
     return this.mapData;
   }
@@ -354,7 +358,7 @@ export class MapManager {
   }
 
   getBuildPad(id: number): BuildPadData | undefined {
-    return this.mapData?.buildPads.find(pad => pad.id === id);
+    return this.mapData?.buildPads.find((pad) => pad.id === id);
   }
 
   isPadAvailable(id: number): boolean {

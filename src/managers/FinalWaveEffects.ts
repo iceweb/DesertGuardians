@@ -19,7 +19,12 @@ export class FinalWaveEffects {
   private emberParticles: Phaser.GameObjects.Graphics[] = [];
   private particleTimers: Phaser.Time.TimerEvent[] = [];
 
-  private lightRays: { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number }[] = [];
+  private lightRays: {
+    graphics: Phaser.GameObjects.Graphics;
+    baseX: number;
+    angle: number;
+    speed: number;
+  }[] = [];
 
   private activeTweens: Phaser.Tweens.Tween[] = [];
 
@@ -62,8 +67,6 @@ export class FinalWaveEffects {
     this.startEmberParticles(width, height);
 
     this.playTransitionIn();
-
-    console.log('FinalWaveEffects: Started apocalyptic visual effects');
   }
 
   private createDarknessOverlay(width: number, height: number): void {
@@ -84,19 +87,19 @@ export class FinalWaveEffects {
 
     for (let i = 0; i < 6; i++) {
       const alpha = 0.08 - i * 0.012;
-      this.redTintOverlay.fillStyle(0x8B0000, alpha);
+      this.redTintOverlay.fillStyle(0x8b0000, alpha);
       this.redTintOverlay.fillRect(0, i * 30, width, 30);
     }
 
     for (let i = 0; i < 4; i++) {
       const alpha = 0.06 - i * 0.012;
-      this.redTintOverlay.fillStyle(0x8B0000, alpha);
+      this.redTintOverlay.fillStyle(0x8b0000, alpha);
       this.redTintOverlay.fillRect(0, height - (i + 1) * 30, width, 30);
     }
 
     for (let i = 0; i < 4; i++) {
       const alpha = 0.05 - i * 0.01;
-      this.redTintOverlay.fillStyle(0x8B0000, alpha);
+      this.redTintOverlay.fillStyle(0x8b0000, alpha);
       this.redTintOverlay.fillRect(i * 25, 0, 25, height);
       this.redTintOverlay.fillRect(width - (i + 1) * 25, 0, 25, height);
     }
@@ -109,7 +112,7 @@ export class FinalWaveEffects {
       duration: 3000,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
     this.activeTweens.push(pulseTween);
   }
@@ -135,7 +138,7 @@ export class FinalWaveEffects {
         duration: 15000 + Math.random() * 10000,
         yoyo: true,
         repeat: -1,
-        ease: 'Sine.easeInOut'
+        ease: 'Sine.easeInOut',
       });
       this.activeTweens.push(driftTween);
 
@@ -145,7 +148,7 @@ export class FinalWaveEffects {
         duration: 4000 + Math.random() * 3000,
         yoyo: true,
         repeat: -1,
-        ease: 'Sine.easeInOut'
+        ease: 'Sine.easeInOut',
       });
       this.activeTweens.push(alphaTween);
     }
@@ -203,7 +206,7 @@ export class FinalWaveEffects {
         ease: 'Sine.easeInOut',
         onUpdate: () => {
           this.updateLightRay(ray, this.scene.cameras.main.height);
-        }
+        },
       });
       this.activeTweens.push(swayTween);
 
@@ -213,20 +216,23 @@ export class FinalWaveEffects {
         duration: 3000 + Math.random() * 2000,
         yoyo: true,
         repeat: -1,
-        ease: 'Sine.easeInOut'
+        ease: 'Sine.easeInOut',
       });
       this.activeTweens.push(intensityTween);
     });
   }
 
-  private createLightRay(x: number, height: number): { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number } {
+  private createLightRay(
+    x: number,
+    height: number
+  ): { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number } {
     const graphics = this.scene.add.graphics();
     const angle = -5 + Math.random() * 10;
     const ray = {
       graphics,
       baseX: x,
       angle,
-      speed: 0.5 + Math.random() * 0.5
+      speed: 0.5 + Math.random() * 0.5,
     };
 
     this.updateLightRay(ray, height);
@@ -235,7 +241,10 @@ export class FinalWaveEffects {
     return ray;
   }
 
-  private updateLightRay(ray: { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number }, height: number): void {
+  private updateLightRay(
+    ray: { graphics: Phaser.GameObjects.Graphics; baseX: number; angle: number; speed: number },
+    height: number
+  ): void {
     const g = ray.graphics;
     g.clear();
 
@@ -249,14 +258,14 @@ export class FinalWaveEffects {
       const layerAlpha = 0.03 + (i / layers) * 0.08;
       const widthMult = 1 + (layers - i) * 0.3;
 
-      const color = i === 0 ? 0xFFAA44 : 0xFF8833;
+      const color = i === 0 ? 0xffaa44 : 0xff8833;
       g.fillStyle(color, layerAlpha);
 
       g.beginPath();
-      g.moveTo(ray.baseX - topWidth * widthMult / 2, -20);
-      g.lineTo(ray.baseX + topWidth * widthMult / 2, -20);
-      g.lineTo(ray.baseX + xOffset + bottomWidth * widthMult / 2, height + 20);
-      g.lineTo(ray.baseX + xOffset - bottomWidth * widthMult / 2, height + 20);
+      g.moveTo(ray.baseX - (topWidth * widthMult) / 2, -20);
+      g.lineTo(ray.baseX + (topWidth * widthMult) / 2, -20);
+      g.lineTo(ray.baseX + xOffset + (bottomWidth * widthMult) / 2, height + 20);
+      g.lineTo(ray.baseX + xOffset - (bottomWidth * widthMult) / 2, height + 20);
       g.closePath();
       g.fillPath();
     }
@@ -264,14 +273,13 @@ export class FinalWaveEffects {
     const numMotes = 3;
     for (let i = 0; i < numMotes; i++) {
       const moteY = Math.random() * height;
-      const moteX = ray.baseX + (xOffset * moteY / height) + (Math.random() - 0.5) * 40;
-      g.fillStyle(0xFFDD88, 0.4 + Math.random() * 0.3);
+      const moteX = ray.baseX + (xOffset * moteY) / height + (Math.random() - 0.5) * 40;
+      g.fillStyle(0xffdd88, 0.4 + Math.random() * 0.3);
       g.fillCircle(moteX, moteY, 1 + Math.random() * 2);
     }
   }
 
   private createBossSpotlight(): void {
-
     this.bossSpotlightGlow = this.scene.add.graphics();
     this.bossSpotlightGlow.setScrollFactor(0);
     this.bossSpotlightGlow.setDepth(this.DEPTH_SPOTLIGHT);
@@ -296,7 +304,7 @@ export class FinalWaveEffects {
     for (let i = 5; i >= 0; i--) {
       const radius = 80 + i * 25;
       const alpha = 0.02 - i * 0.003;
-      this.bossSpotlightGlow.fillStyle(0xFF4400, alpha);
+      this.bossSpotlightGlow.fillStyle(0xff4400, alpha);
       this.bossSpotlightGlow.fillCircle(screenX, screenY, radius);
     }
 
@@ -309,10 +317,10 @@ export class FinalWaveEffects {
     for (let i = 3; i >= 0; i--) {
       const widthMult = 1 + i * 0.4;
       const alpha = 0.03 + i * 0.02;
-      this.bossSpotlight.fillStyle(0xFFAA44, alpha);
+      this.bossSpotlight.fillStyle(0xffaa44, alpha);
       this.bossSpotlight.beginPath();
-      this.bossSpotlight.moveTo(screenX - coneWidth * widthMult / 2, coneTopY);
-      this.bossSpotlight.lineTo(screenX + coneWidth * widthMult / 2, coneTopY);
+      this.bossSpotlight.moveTo(screenX - (coneWidth * widthMult) / 2, coneTopY);
+      this.bossSpotlight.lineTo(screenX + (coneWidth * widthMult) / 2, coneTopY);
       this.bossSpotlight.lineTo(screenX + spotRadius * widthMult, screenY);
       this.bossSpotlight.lineTo(screenX - spotRadius * widthMult, screenY);
       this.bossSpotlight.closePath();
@@ -322,7 +330,7 @@ export class FinalWaveEffects {
     for (let i = 3; i >= 0; i--) {
       const radius = 50 + i * 15;
       const alpha = 0.04 - i * 0.008;
-      this.bossSpotlight.fillStyle(0xFFCC66, alpha);
+      this.bossSpotlight.fillStyle(0xffcc66, alpha);
       this.bossSpotlight.fillEllipse(screenX, screenY + 10, radius * 2, radius);
     }
   }
@@ -357,14 +365,14 @@ export class FinalWaveEffects {
           ash.destroy();
           const index = this.ashParticles.indexOf(ash);
           if (index > -1) this.ashParticles.splice(index, 1);
-        }
+        },
       });
     };
 
     const timer = this.scene.time.addEvent({
       delay: 100,
       callback: createAsh,
-      loop: true
+      loop: true,
     });
     this.particleTimers.push(timer);
   }
@@ -377,7 +385,7 @@ export class FinalWaveEffects {
       const startX = Math.random() * width;
       const startY = height + 20;
 
-      const colors = [0xFF6600, 0xFF4400, 0xFF2200, 0xFFAA00];
+      const colors = [0xff6600, 0xff4400, 0xff2200, 0xffaa00];
       const color = colors[Math.floor(Math.random() * colors.length)];
       const size = 2 + Math.random() * 3;
 
@@ -385,7 +393,7 @@ export class FinalWaveEffects {
       ember.fillCircle(0, 0, size * 2);
       ember.fillStyle(color, 0.7);
       ember.fillCircle(0, 0, size);
-      ember.fillStyle(0xFFFF88, 0.9);
+      ember.fillStyle(0xffff88, 0.9);
       ember.fillCircle(0, 0, size * 0.4);
 
       ember.setPosition(startX, startY);
@@ -406,7 +414,7 @@ export class FinalWaveEffects {
           ember.destroy();
           const index = this.emberParticles.indexOf(ember);
           if (index > -1) this.emberParticles.splice(index, 1);
-        }
+        },
       });
 
       this.scene.tweens.add({
@@ -416,14 +424,14 @@ export class FinalWaveEffects {
         duration: 200 + Math.random() * 200,
         yoyo: true,
         repeat: 10,
-        ease: 'Sine.easeInOut'
+        ease: 'Sine.easeInOut',
       });
     };
 
     const timer = this.scene.time.addEvent({
       delay: 200,
       callback: createEmber,
-      loop: true
+      loop: true,
     });
     this.particleTimers.push(timer);
   }
@@ -436,7 +444,7 @@ export class FinalWaveEffects {
       targets: this.container,
       alpha: 1,
       duration: 2000,
-      ease: 'Cubic.easeIn'
+      ease: 'Cubic.easeIn',
     });
 
     const flash = this.scene.add.rectangle(
@@ -444,7 +452,7 @@ export class FinalWaveEffects {
       camera.height / 2,
       camera.width,
       camera.height,
-      0xFF4400,
+      0xff4400,
       0.3
     );
     flash.setScrollFactor(0);
@@ -455,7 +463,7 @@ export class FinalWaveEffects {
       alpha: 0,
       duration: 1500,
       ease: 'Power2',
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
     camera.shake(500, 0.01);
@@ -463,8 +471,6 @@ export class FinalWaveEffects {
 
   playBossSpawnEffect(): void {
     if (!this.isActive) return;
-
-    console.log('FinalWaveEffects: Playing apocalyptic boss spawn effect');
 
     const camera = this.scene.cameras.main;
 
@@ -475,7 +481,7 @@ export class FinalWaveEffects {
       camera.height / 2,
       camera.width,
       camera.height,
-      0xFF0000,
+      0xff0000,
       0.5
     );
     flash.setScrollFactor(0);
@@ -486,7 +492,7 @@ export class FinalWaveEffects {
       alpha: 0,
       duration: 1200,
       ease: 'Power2',
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
     this.scene.tweens.add({
@@ -494,7 +500,7 @@ export class FinalWaveEffects {
       alpha: 1.5,
       duration: 500,
       yoyo: true,
-      ease: 'Quad.easeOut'
+      ease: 'Quad.easeOut',
     });
 
     this.bossSpotlight.setVisible(true);
@@ -506,7 +512,7 @@ export class FinalWaveEffects {
       targets: [this.bossSpotlight, this.bossSpotlightGlow],
       alpha: 1,
       duration: 1000,
-      ease: 'Cubic.easeOut'
+      ease: 'Cubic.easeOut',
     });
 
     for (let i = 0; i < 40; i++) {
@@ -519,9 +525,9 @@ export class FinalWaveEffects {
         const angle = Math.random() * Math.PI * 2;
         const distance = 20 + Math.random() * 50;
 
-        ember.fillStyle(0xFF4400, 1);
+        ember.fillStyle(0xff4400, 1);
         ember.fillCircle(0, 0, 3 + Math.random() * 4);
-        ember.fillStyle(0xFFFF88, 0.8);
+        ember.fillStyle(0xffff88, 0.8);
         ember.fillCircle(0, 0, 2);
 
         ember.setPosition(
@@ -539,7 +545,7 @@ export class FinalWaveEffects {
           scale: 0.2,
           duration: 1200,
           ease: 'Power2',
-          onComplete: () => ember.destroy()
+          onComplete: () => ember.destroy(),
         });
       });
     }
@@ -560,7 +566,7 @@ export class FinalWaveEffects {
         color: '#FF4444',
         stroke: '#000000',
         strokeThickness: 8,
-        align: 'center'
+        align: 'center',
       }
     );
     text.setOrigin(0.5);
@@ -576,7 +582,6 @@ export class FinalWaveEffects {
       duration: 600,
       ease: 'Back.easeOut',
       onComplete: () => {
-
         this.scene.tweens.add({
           targets: text,
           scale: 1.1,
@@ -585,18 +590,17 @@ export class FinalWaveEffects {
           repeat: 3,
           ease: 'Sine.easeInOut',
           onComplete: () => {
-
             this.scene.tweens.add({
               targets: text,
               alpha: 0,
               y: text.y - 50,
               duration: 800,
               ease: 'Power2',
-              onComplete: () => text.destroy()
+              onComplete: () => text.destroy(),
             });
-          }
+          },
         });
-      }
+      },
     });
   }
 
@@ -605,13 +609,12 @@ export class FinalWaveEffects {
 
     if (this.getCreeps && this.bossSpotlight.visible) {
       const creeps = this.getCreeps();
-      const boss = creeps.find(c => c.isBoss() && c.active);
+      const boss = creeps.find((c) => c.isBoss() && c.active);
 
       if (boss) {
         this.trackedBoss = boss;
         this.drawBossSpotlight(boss.x, boss.y);
       } else if (this.trackedBoss) {
-
         this.trackedBoss = null;
         this.scene.tweens.add({
           targets: [this.bossSpotlight, this.bossSpotlightGlow],
@@ -620,7 +623,7 @@ export class FinalWaveEffects {
           onComplete: () => {
             this.bossSpotlight.setVisible(false);
             this.bossSpotlightGlow.setVisible(false);
-          }
+          },
         });
       }
     }
@@ -630,16 +633,14 @@ export class FinalWaveEffects {
     if (!this.isActive) return;
     this.isActive = false;
 
-    console.log('FinalWaveEffects: Stopping apocalyptic effects');
-
-    this.activeTweens.forEach(tween => {
+    this.activeTweens.forEach((tween) => {
       if (tween && tween.isPlaying()) {
         tween.stop();
       }
     });
     this.activeTweens = [];
 
-    this.particleTimers.forEach(timer => timer.destroy());
+    this.particleTimers.forEach((timer) => timer.destroy());
     this.particleTimers = [];
 
     if (this.container) {
@@ -649,13 +650,13 @@ export class FinalWaveEffects {
         duration: 1500,
         onComplete: () => {
           this.container.destroy();
-        }
+        },
       });
     }
 
-    this.ashParticles.forEach(p => p.destroy());
+    this.ashParticles.forEach((p) => p.destroy());
     this.ashParticles = [];
-    this.emberParticles.forEach(p => p.destroy());
+    this.emberParticles.forEach((p) => p.destroy());
     this.emberParticles = [];
 
     this.lightRays = [];

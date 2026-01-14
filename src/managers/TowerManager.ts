@@ -43,12 +43,9 @@ export class TowerManager {
     this.setupUICallbacks();
 
     this.setupInput();
-
-    console.log('TowerManager: Initialized');
   }
 
   private setupUICallbacks(): void {
-
     this.uiManager.getPlayerGold = () => this.getPlayerGold?.() || 0;
 
     this.uiManager.canPlaceAt = (x: number, y: number) => this.canPlaceAt(x, y);
@@ -75,7 +72,6 @@ export class TowerManager {
   }
 
   private setupInput(): void {
-
     this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       const towerAt = this.getTowerAt(pointer.x, pointer.y);
       this.uiManager.updatePlacementPreview(pointer.x, pointer.y, towerAt);
@@ -87,7 +83,6 @@ export class TowerManager {
   }
 
   private handleClick(x: number, y: number): void {
-
     if (this.uiManager.wasMenuJustClosed()) {
       return;
     }
@@ -119,7 +114,6 @@ export class TowerManager {
   }
 
   canPlaceAt(x: number, y: number): boolean {
-
     if (y < this.HUD_HEIGHT + 20) return false;
 
     if (x < 30 || x > this.scene.cameras.main.width - 30) return false;
@@ -138,9 +132,12 @@ export class TowerManager {
 
     for (const segment of segments) {
       const dist = this.pointToSegmentDistance(
-        x, y,
-        segment.start.x, segment.start.y,
-        segment.end.x, segment.end.y
+        x,
+        y,
+        segment.start.x,
+        segment.start.y,
+        segment.end.x,
+        segment.end.y
       );
 
       if (dist < minDist) {
@@ -152,7 +149,6 @@ export class TowerManager {
   }
 
   private isOverlappingTower(x: number, y: number, excludeTower?: Tower): boolean {
-
     const minDist = this.TOWER_RADIUS * 2 + this.TOWER_SPACING;
 
     for (const tower of this.towers) {
@@ -177,7 +173,14 @@ export class TowerManager {
     return null;
   }
 
-  private pointToSegmentDistance(px: number, py: number, x1: number, y1: number, x2: number, y2: number): number {
+  private pointToSegmentDistance(
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): number {
     const dx = x2 - x1;
     const dy = y2 - y1;
     const lengthSquared = dx * dx + dy * dy;
@@ -202,22 +205,27 @@ export class TowerManager {
     const tower = new Tower(this.scene, x, y, towerKey, this.animatorFactory);
     this.towers.push(tower);
 
-    tower.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.selectTower(tower);
-    });
+    tower.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.selectTower(tower);
+      }
+    );
 
     this.onTowerBuilt?.(tower, config.buildCost || 0);
 
     this.updateAuraBuffs();
 
     this.uiManager.closeMenus();
-
-    console.log(`TowerManager: Built ${config.name} at (${x}, ${y})`);
   }
 
   private selectTower(tower: Tower): void {
-
     this.deselectTower();
 
     this.selectedTower = tower;
@@ -247,12 +255,9 @@ export class TowerManager {
 
     this.uiManager.closeMenus();
     this.deselectTower();
-
-    console.log(`TowerManager: Upgraded to ${newConfig.name}`);
   }
 
   private sellTower(tower: Tower): void {
-
     const index = this.towers.indexOf(tower);
     if (index > -1) {
       this.towers.splice(index, 1);
@@ -268,12 +273,9 @@ export class TowerManager {
 
     this.uiManager.closeMenus();
     this.deselectTower();
-
-    console.log(`TowerManager: Sold tower for ${refund}g`);
   }
 
   update(): void {
-
     this.uiManager.update();
   }
 
@@ -309,13 +311,12 @@ export class TowerManager {
   }
 
   updateAuraBuffs(): void {
-
     for (const tower of this.towers) {
       tower.setDamageMultiplier(1.0);
       tower.setAuraCritBonus(0);
     }
 
-    const auraTowers = this.towers.filter(t => t.isAuraTower());
+    const auraTowers = this.towers.filter((t) => t.isAuraTower());
 
     for (const tower of this.towers) {
       if (tower.isAuraTower()) continue;
@@ -324,10 +325,7 @@ export class TowerManager {
       let hasCritAura = false;
 
       for (const auraTower of auraTowers) {
-        const distance = Phaser.Math.Distance.Between(
-          tower.x, tower.y,
-          auraTower.x, auraTower.y
-        );
+        const distance = Phaser.Math.Distance.Between(tower.x, tower.y, auraTower.x, auraTower.y);
 
         const auraRange = auraTower.getRange();
 
@@ -357,7 +355,7 @@ export class TowerManager {
   }
 
   getTowersInRange(x: number, y: number, range: number, excludeAura: boolean = true): Tower[] {
-    return this.towers.filter(tower => {
+    return this.towers.filter((tower) => {
       if (excludeAura && tower.isAuraTower()) return false;
       const distance = Phaser.Math.Distance.Between(x, y, tower.x, tower.y);
       return distance <= range;

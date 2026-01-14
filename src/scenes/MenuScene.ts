@@ -50,18 +50,16 @@ export class MenuScene extends Phaser.Scene {
     const version = this.add.text(width - 15, height - 15, 'v1.0.0', {
       fontFamily: 'Georgia, serif',
       fontSize: '12px',
-      color: '#8b6914'
+      color: '#8b6914',
     });
     version.setOrigin(1, 1).setDepth(50);
 
     const credits = this.add.text(width / 2, height - 15, '© 2026 Created by Mike Blöchlinger', {
       fontFamily: 'Georgia, serif',
       fontSize: '14px',
-      color: '#c9a86c'
+      color: '#c9a86c',
     });
     credits.setOrigin(0.5, 1).setDepth(50);
-
-    console.log('MenuScene: Menu created');
   }
 
   private drawBackground(width: number, height: number): void {
@@ -85,7 +83,7 @@ export class MenuScene extends Phaser.Scene {
 
     bg.lineStyle(1, 0x2a1808, 0.15);
     for (let y = 0; y < height; y += 8) {
-      const offset = (y % 16 === 0) ? 4 : 0;
+      const offset = y % 16 === 0 ? 4 : 0;
       for (let x = offset; x < width; x += 20) {
         bg.lineBetween(x, y, x + 10, y);
       }
@@ -131,11 +129,10 @@ export class MenuScene extends Phaser.Scene {
       { cx: x + 25, cy: y + 25 },
       { cx: x + frameWidth - 25, cy: y + 25 },
       { cx: x + 25, cy: y + frameHeight - 25 },
-      { cx: x + frameWidth - 25, cy: y + frameHeight - 25 }
+      { cx: x + frameWidth - 25, cy: y + frameHeight - 25 },
     ];
 
-    corners.forEach(c => {
-
+    corners.forEach((c) => {
       frame.fillStyle(0xd4a574, 1);
       frame.fillCircle(c.cx, c.cy, 15);
 
@@ -158,7 +155,12 @@ export class MenuScene extends Phaser.Scene {
     this.drawOrnament(frame, x + frameWidth - 15, height / 2, false);
   }
 
-  private drawOrnament(graphics: Phaser.GameObjects.Graphics, x: number, y: number, horizontal: boolean): void {
+  private drawOrnament(
+    graphics: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    horizontal: boolean
+  ): void {
     const size = 40;
 
     graphics.fillStyle(0xd4a574, 1);
@@ -216,7 +218,12 @@ export class MenuScene extends Phaser.Scene {
     this.drawRocks(this.decorations, width - 140, height / 2 + 120);
   }
 
-  private drawPyramidSilhouette(g: Phaser.GameObjects.Graphics, x: number, y: number, size: number): void {
+  private drawPyramidSilhouette(
+    g: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    size: number
+  ): void {
     g.fillStyle(0x2a1a08, 0.8);
     g.beginPath();
     g.moveTo(x - size, y);
@@ -247,13 +254,19 @@ export class MenuScene extends Phaser.Scene {
 
   private drawStars(g: Phaser.GameObjects.Graphics, width: number, _maxY: number): void {
     const starPositions = [
-      { x: 100, y: 100 }, { x: 200, y: 80 }, { x: 350, y: 110 },
-      { x: 500, y: 90 }, { x: 650, y: 105 }, { x: 800, y: 85 },
-      { x: width - 100, y: 100 }, { x: width - 200, y: 85 },
-      { x: width - 350, y: 95 }, { x: width - 500, y: 110 }
+      { x: 100, y: 100 },
+      { x: 200, y: 80 },
+      { x: 350, y: 110 },
+      { x: 500, y: 90 },
+      { x: 650, y: 105 },
+      { x: 800, y: 85 },
+      { x: width - 100, y: 100 },
+      { x: width - 200, y: 85 },
+      { x: width - 350, y: 95 },
+      { x: width - 500, y: 110 },
     ];
 
-    starPositions.forEach(pos => {
+    starPositions.forEach((pos) => {
       const size = 1 + Math.random() * 2;
       const alpha = 0.4 + Math.random() * 0.4;
       g.fillStyle(0xffffff, alpha);
@@ -265,7 +278,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private drawMoon(g: Phaser.GameObjects.Graphics, x: number, y: number): void {
-
     g.fillStyle(0xffd700, 0.1);
     g.fillCircle(x, y, 40);
     g.fillStyle(0xffd700, 0.15);
@@ -288,7 +300,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private drawCactus(g: Phaser.GameObjects.Graphics, x: number, y: number): void {
-
     g.fillStyle(0x2d5a1e, 0.85);
     g.fillRoundedRect(x - 8, y - 40, 16, 60, 6);
 
@@ -311,7 +322,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private drawRocks(g: Phaser.GameObjects.Graphics, x: number, y: number): void {
-
     g.fillStyle(0x4a3a2a, 0.9);
     g.beginPath();
     g.moveTo(x - 20, y + 10);
@@ -350,20 +360,26 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private createTitle(width: number, _height: number): void {
+    this.add
+      .text(width / 2 + 4, 165, 'Desert Guardians', {
+        fontFamily: 'Papyrus, Copperplate, Georgia, serif',
+        fontSize: '80px',
+        color: '#000000',
+      })
+      .setOrigin(0.5)
+      .setDepth(19)
+      .setAlpha(0.5);
 
-    this.add.text(width / 2 + 4, 165, 'Desert Guardians', {
-      fontFamily: 'Papyrus, Copperplate, Georgia, serif',
-      fontSize: '80px',
-      color: '#000000'
-    }).setOrigin(0.5).setDepth(19).setAlpha(0.5);
-
-    const title = this.add.text(width / 2, 160, 'Desert Guardians', {
-      fontFamily: 'Papyrus, Copperplate, Georgia, serif',
-      fontSize: '80px',
-      color: '#ffd700',
-      stroke: '#8b4513',
-      strokeThickness: 6
-    }).setOrigin(0.5).setDepth(20);
+    const title = this.add
+      .text(width / 2, 160, 'Desert Guardians', {
+        fontFamily: 'Papyrus, Copperplate, Georgia, serif',
+        fontSize: '80px',
+        color: '#ffd700',
+        stroke: '#8b4513',
+        strokeThickness: 6,
+      })
+      .setOrigin(0.5)
+      .setDepth(20);
 
     this.tweens.add({
       targets: title,
@@ -371,7 +387,7 @@ export class MenuScene extends Phaser.Scene {
       duration: 2000,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
 
     const titleDeco = this.add.graphics();
@@ -390,12 +406,15 @@ export class MenuScene extends Phaser.Scene {
     titleDeco.lineStyle(1, 0x8b6914, 0.8);
     titleDeco.lineBetween(width / 2 - 150, 225, width / 2 + 150, 225);
 
-    this.add.text(width / 2, 255, '~ Tower Defense ~', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '26px',
-      color: '#c9a86c',
-      fontStyle: 'italic'
-    }).setOrigin(0.5).setDepth(20);
+    this.add
+      .text(width / 2, 255, '~ Tower Defense ~', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '26px',
+        color: '#c9a86c',
+        fontStyle: 'italic',
+      })
+      .setOrigin(0.5)
+      .setDepth(20);
   }
 
   private createMenuButtons(width: number, height: number): void {
@@ -403,23 +422,19 @@ export class MenuScene extends Phaser.Scene {
     const hasGameInProgress = MenuScene.isGameInProgress();
 
     if (hasGameInProgress) {
-      this.createStyledButton(
-        width / 2, buttonY - 80,
-        '▶  RESUME',
-        220, 65,
-        true,
-        () => {
-          this.audioManager.playSFX('ui_click');
-          this.resumeGame();
-        }
-      );
+      this.createStyledButton(width / 2, buttonY - 80, '▶  RESUME', 220, 65, true, () => {
+        this.audioManager.playSFX('ui_click');
+        this.resumeGame();
+      });
     }
 
     const startButtonText = hasGameInProgress ? 'RESTART' : 'START';
     this.createStyledButton(
-      width / 2, buttonY,
+      width / 2,
+      buttonY,
       startButtonText,
-      220, 65,
+      220,
+      65,
       !hasGameInProgress,
       () => {
         this.audioManager.playSFX('ui_click');
@@ -430,33 +445,24 @@ export class MenuScene extends Phaser.Scene {
     const bottomY = buttonY + 100;
     const spacing = 160;
 
-    this.createStyledButton(
-      width / 2 - spacing, bottomY,
-      '🏆  SCORES',
-      180, 50,
-      false,
-      () => {
-        this.audioManager.playSFX('ui_click');
-        this.showHighscores();
-      }
-    );
+    this.createStyledButton(width / 2 - spacing, bottomY, '🏆  SCORES', 180, 50, false, () => {
+      this.audioManager.playSFX('ui_click');
+      this.showHighscores();
+    });
 
-    this.createStyledButton(
-      width / 2 + spacing, bottomY,
-      '⚙  SETTINGS',
-      180, 50,
-      false,
-      () => {
-        this.audioManager.playSFX('ui_click');
-        this.showSettings();
-      }
-    );
+    this.createStyledButton(width / 2 + spacing, bottomY, '⚙  SETTINGS', 180, 50, false, () => {
+      this.audioManager.playSFX('ui_click');
+      this.showSettings();
+    });
   }
 
+  /* eslint-disable max-lines-per-function */
   private createStyledButton(
-    x: number, y: number,
+    x: number,
+    y: number,
     text: string,
-    btnWidth: number, btnHeight: number,
+    btnWidth: number,
+    btnHeight: number,
     isPrimary: boolean,
     onClick: () => void
   ): void {
@@ -470,53 +476,94 @@ export class MenuScene extends Phaser.Scene {
 
       if (!pressed) {
         btnGraphics.fillStyle(0x000000, 0.5);
-        btnGraphics.fillRoundedRect(x - btnWidth/2 + 4, y - btnHeight/2 + 4, btnWidth, btnHeight, 12);
+        btnGraphics.fillRoundedRect(
+          x - btnWidth / 2 + 4,
+          y - btnHeight / 2 + 4,
+          btnWidth,
+          btnHeight,
+          12
+        );
       }
 
       btnGraphics.fillStyle(isPrimary ? 0x6b4914 : 0x4a3520, 1);
-      btnGraphics.fillRoundedRect(x - btnWidth/2, y - btnHeight/2 + 4 + offsetY, btnWidth, btnHeight, 12);
+      btnGraphics.fillRoundedRect(
+        x - btnWidth / 2,
+        y - btnHeight / 2 + 4 + offsetY,
+        btnWidth,
+        btnHeight,
+        12
+      );
 
-      const baseColor = isPrimary
-        ? (hover ? 0xd4a574 : 0xc49564)
-        : (hover ? 0x8b6914 : 0x6b4914);
+      const baseColor = isPrimary ? (hover ? 0xd4a574 : 0xc49564) : hover ? 0x8b6914 : 0x6b4914;
       btnGraphics.fillStyle(baseColor, 1);
-      btnGraphics.fillRoundedRect(x - btnWidth/2, y - btnHeight/2 + offsetY, btnWidth, btnHeight - 4, 12);
+      btnGraphics.fillRoundedRect(
+        x - btnWidth / 2,
+        y - btnHeight / 2 + offsetY,
+        btnWidth,
+        btnHeight - 4,
+        12
+      );
 
       const highlightColor = isPrimary
-        ? (hover ? 0xebd4a4 : 0xd4b584)
-        : (hover ? 0xa08050 : 0x8b6914);
+        ? hover
+          ? 0xebd4a4
+          : 0xd4b584
+        : hover
+          ? 0xa08050
+          : 0x8b6914;
       btnGraphics.fillStyle(highlightColor, 0.6);
-      btnGraphics.fillRoundedRect(x - btnWidth/2 + 4, y - btnHeight/2 + 4 + offsetY, btnWidth - 8, btnHeight/3, 8);
+      btnGraphics.fillRoundedRect(
+        x - btnWidth / 2 + 4,
+        y - btnHeight / 2 + 4 + offsetY,
+        btnWidth - 8,
+        btnHeight / 3,
+        8
+      );
 
       const borderColor = isPrimary ? 0xffd700 : 0xd4a574;
       btnGraphics.lineStyle(2, borderColor, 1);
-      btnGraphics.strokeRoundedRect(x - btnWidth/2, y - btnHeight/2 + offsetY, btnWidth, btnHeight - 4, 12);
+      btnGraphics.strokeRoundedRect(
+        x - btnWidth / 2,
+        y - btnHeight / 2 + offsetY,
+        btnWidth,
+        btnHeight - 4,
+        12
+      );
 
       btnGraphics.lineStyle(1, hover ? 0xffd700 : 0x8b6914, 0.5);
-      btnGraphics.strokeRoundedRect(x - btnWidth/2 + 3, y - btnHeight/2 + 3 + offsetY, btnWidth - 6, btnHeight - 10, 10);
+      btnGraphics.strokeRoundedRect(
+        x - btnWidth / 2 + 3,
+        y - btnHeight / 2 + 3 + offsetY,
+        btnWidth - 6,
+        btnHeight - 10,
+        10
+      );
 
       if (isPrimary) {
-        const gemY = y - btnHeight/2 + 12;
+        const gemY = y - btnHeight / 2 + 12;
         btnGraphics.fillStyle(0xffd700, 1);
-        btnGraphics.fillCircle(x - btnWidth/2 + 16, gemY + offsetY, 4);
-        btnGraphics.fillCircle(x + btnWidth/2 - 16, gemY + offsetY, 4);
+        btnGraphics.fillCircle(x - btnWidth / 2 + 16, gemY + offsetY, 4);
+        btnGraphics.fillCircle(x + btnWidth / 2 - 16, gemY + offsetY, 4);
         btnGraphics.fillStyle(0xfffacd, 0.8);
-        btnGraphics.fillCircle(x - btnWidth/2 + 15, gemY - 1 + offsetY, 2);
-        btnGraphics.fillCircle(x + btnWidth/2 - 17, gemY - 1 + offsetY, 2);
+        btnGraphics.fillCircle(x - btnWidth / 2 + 15, gemY - 1 + offsetY, 2);
+        btnGraphics.fillCircle(x + btnWidth / 2 - 17, gemY - 1 + offsetY, 2);
       }
     };
 
     drawButton(false);
 
     const fontSize = isPrimary ? '26px' : '18px';
-    const btnText = this.add.text(x, y - 2, text, {
-      fontFamily: 'Georgia, serif',
-      fontSize: fontSize,
-      color: '#fff8dc',
-      fontStyle: 'bold',
-      stroke: '#4a3520',
-      strokeThickness: isPrimary ? 3 : 2
-    }).setOrigin(0.5).setDepth(26);
+    const btnText = this.add
+      .text(x, y - 2, text, {
+        fontFamily: 'Georgia, serif',
+        fontSize: fontSize,
+        color: '#fff8dc',
+        fontStyle: 'bold',
+        stroke: '#4a3520',
+        strokeThickness: isPrimary ? 3 : 2,
+      })
+      .setOrigin(0.5)
+      .setDepth(26);
 
     const hitArea = this.add.rectangle(x, y, btnWidth, btnHeight, 0x000000, 0);
     hitArea.setDepth(27).setInteractive({ useHandCursor: true });
@@ -544,8 +591,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private startGame(): void {
-    console.log('MenuScene: Starting new game...');
-
     this.audioManager.unlockAudio();
 
     if (this.scene.isActive('GameScene')) {
@@ -559,15 +604,12 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private resumeGame(): void {
-    console.log('MenuScene: Resuming game...');
-
     this.scene.stop('MenuScene');
     this.scene.wake('GameScene');
     this.scene.wake('UIScene');
   }
 
   private showHighscores(): void {
-
     if (this.highscoreContainer) {
       this.closeHighscores();
       return;
@@ -585,51 +627,73 @@ export class MenuScene extends Phaser.Scene {
     const bg = this.add.graphics();
 
     bg.fillStyle(0x000000, 0.6);
-    bg.fillRoundedRect(-panelWidth/2 + 5, -panelHeight/2 + 5, panelWidth, panelHeight, 18);
+    bg.fillRoundedRect(-panelWidth / 2 + 5, -panelHeight / 2 + 5, panelWidth, panelHeight, 18);
 
     bg.fillStyle(0x1a0a00, 0.98);
-    bg.fillRoundedRect(-panelWidth/2, -panelHeight/2, panelWidth, panelHeight, 16);
+    bg.fillRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
 
     bg.lineStyle(4, 0x0a0400, 1);
-    bg.strokeRoundedRect(-panelWidth/2, -panelHeight/2, panelWidth, panelHeight, 16);
+    bg.strokeRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
 
     bg.lineStyle(2, 0xd4a574, 1);
-    bg.strokeRoundedRect(-panelWidth/2 + 5, -panelHeight/2 + 5, panelWidth - 10, panelHeight - 10, 14);
+    bg.strokeRoundedRect(
+      -panelWidth / 2 + 5,
+      -panelHeight / 2 + 5,
+      panelWidth - 10,
+      panelHeight - 10,
+      14
+    );
 
     bg.lineStyle(1, 0x8b6914, 0.6);
-    bg.strokeRoundedRect(-panelWidth/2 + 10, -panelHeight/2 + 10, panelWidth - 20, panelHeight - 20, 12);
+    bg.strokeRoundedRect(
+      -panelWidth / 2 + 10,
+      -panelHeight / 2 + 10,
+      panelWidth - 20,
+      panelHeight - 20,
+      12
+    );
 
-    this.drawModalCorner(bg, -panelWidth/2 + 20, -panelHeight/2 + 20);
-    this.drawModalCorner(bg, panelWidth/2 - 20, -panelHeight/2 + 20);
-    this.drawModalCorner(bg, -panelWidth/2 + 20, panelHeight/2 - 20);
-    this.drawModalCorner(bg, panelWidth/2 - 20, panelHeight/2 - 20);
+    this.drawModalCorner(bg, -panelWidth / 2 + 20, -panelHeight / 2 + 20);
+    this.drawModalCorner(bg, panelWidth / 2 - 20, -panelHeight / 2 + 20);
+    this.drawModalCorner(bg, -panelWidth / 2 + 20, panelHeight / 2 - 20);
+    this.drawModalCorner(bg, panelWidth / 2 - 20, panelHeight / 2 - 20);
 
     this.highscoreContainer.add(bg);
 
-    const titleShadow = this.add.text(2, -panelHeight/2 + 38, '🏆  LEADERBOARD  🏆', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '34px',
-      color: '#000000'
-    }).setOrigin(0.5).setAlpha(0.5);
+    const titleShadow = this.add
+      .text(2, -panelHeight / 2 + 38, '🏆  LEADERBOARD  🏆', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '34px',
+        color: '#000000',
+      })
+      .setOrigin(0.5)
+      .setAlpha(0.5);
     this.highscoreContainer.add(titleShadow);
 
-    const title = this.add.text(0, -panelHeight/2 + 36, '🏆  LEADERBOARD  🏆', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '34px',
-      color: '#ffd700',
-      stroke: '#4a3520',
-      strokeThickness: 4
-    }).setOrigin(0.5);
+    const title = this.add
+      .text(0, -panelHeight / 2 + 36, '🏆  LEADERBOARD  🏆', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '34px',
+        color: '#ffd700',
+        stroke: '#4a3520',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
     this.highscoreContainer.add(title);
 
     const titleLine = this.add.graphics();
     titleLine.lineStyle(2, 0xd4a574, 0.8);
-    titleLine.lineBetween(-panelWidth/2 + 40, -panelHeight/2 + 70, panelWidth/2 - 40, -panelHeight/2 + 70);
+    titleLine.lineBetween(
+      -panelWidth / 2 + 40,
+      -panelHeight / 2 + 70,
+      panelWidth / 2 - 40,
+      -panelHeight / 2 + 70
+    );
     this.highscoreContainer.add(titleLine);
 
     this.refreshHighscoreDisplay();
 
-    const closeBtn = this.createModalButton(0, panelHeight/2 - 45, '✕  CLOSE', 140, 45);
+    const closeBtn = this.createModalButton(0, panelHeight / 2 - 45, '✕  CLOSE', 140, 45);
     closeBtn.hitArea.on('pointerdown', () => {
       this.audioManager.playSFX('ui_click');
       this.closeHighscores();
@@ -641,7 +705,7 @@ export class MenuScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.highscoreContainer,
       alpha: 1,
-      duration: 200
+      duration: 200,
     });
   }
 
@@ -649,18 +713,20 @@ export class MenuScene extends Phaser.Scene {
     if (!this.highscoreContainer) return;
 
     const panelHeight = 800;
-    const headerY = -panelHeight/2 + 90;
+    const headerY = -panelHeight / 2 + 90;
     const startY = headerY + 35;
     const rowHeight = 24;
 
     if (!this.scoresLoading) {
       this.scoresLoading = true;
 
-      const loadingText = this.add.text(0, 0, 'Loading global scores...', {
-        fontFamily: 'Arial',
-        fontSize: '18px',
-        color: '#888888'
-      }).setOrigin(0.5);
+      const loadingText = this.add
+        .text(0, 0, 'Loading global scores...', {
+          fontFamily: 'Arial',
+          fontSize: '18px',
+          color: '#888888',
+        })
+        .setOrigin(0.5);
       loadingText.setData('scoreRow', true);
       this.highscoreContainer.add(loadingText);
 
@@ -683,8 +749,8 @@ export class MenuScene extends Phaser.Scene {
   private renderScoreRows(headerY: number, startY: number, rowHeight: number): void {
     if (!this.highscoreContainer) return;
 
-    const toRemove = this.highscoreContainer.list.filter((obj: Phaser.GameObjects.GameObject) =>
-      obj.getData('scoreRow') === true
+    const toRemove = this.highscoreContainer.list.filter(
+      (obj: Phaser.GameObjects.GameObject) => obj.getData('scoreRow') === true
     );
     toRemove.forEach((obj: Phaser.GameObjects.GameObject) => obj.destroy());
 
@@ -698,15 +764,17 @@ export class MenuScene extends Phaser.Scene {
       { text: 'Kills', x: 130, align: 0 },
       { text: 'Time', x: 210, align: 0 },
       { text: 'Win', x: 290, align: 0 },
-      { text: 'Date', x: 350, align: 0 }
+      { text: 'Date', x: 350, align: 0 },
     ];
 
-    headers.forEach(h => {
-      const headerText = this.add.text(h.x, headerY, h.text, {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#c9a86c'
-      }).setOrigin(h.align, 0.5);
+    headers.forEach((h) => {
+      const headerText = this.add
+        .text(h.x, headerY, h.text, {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#c9a86c',
+        })
+        .setOrigin(h.align, 0.5);
       headerText.setData('scoreRow', true);
       this.highscoreContainer!.add(headerText);
     });
@@ -720,16 +788,19 @@ export class MenuScene extends Phaser.Scene {
     this.renderGlobalScores(startY, rowHeight);
   }
 
+  /* eslint-disable max-lines-per-function */
   private renderGlobalScores(startY: number, rowHeight: number): void {
     if (!this.highscoreContainer) return;
 
     if (this.globalScoresCache.length === 0) {
-      const noScores = this.add.text(0, startY + 100, 'No global scores yet!\nBe the first to submit a score.', {
-        fontFamily: 'Arial',
-        fontSize: '18px',
-        color: '#888888',
-        align: 'center'
-      }).setOrigin(0.5);
+      const noScores = this.add
+        .text(0, startY + 100, 'No global scores yet!\nBe the first to submit a score.', {
+          fontFamily: 'Arial',
+          fontSize: '18px',
+          color: '#888888',
+          align: 'center',
+        })
+        .setOrigin(0.5);
       noScores.setData('scoreRow', true);
       this.highscoreContainer.add(noScores);
       return;
@@ -741,83 +812,103 @@ export class MenuScene extends Phaser.Scene {
       const rankColors = ['#ffd700', '#c0c0c0', '#cd7f32'];
       const rankColor = isTop3 ? rankColors[index] : '#888888';
 
-      const rank = this.add.text(-440, y, `${index + 1}`, {
-        fontFamily: 'Arial Black',
-        fontSize: '14px',
-        color: rankColor
-      }).setOrigin(0.5, 0.5);
+      const rank = this.add
+        .text(-440, y, `${index + 1}`, {
+          fontFamily: 'Arial Black',
+          fontSize: '14px',
+          color: rankColor,
+        })
+        .setOrigin(0.5, 0.5);
       rank.setData('scoreRow', true);
       this.highscoreContainer!.add(rank);
 
-      const name = this.add.text(-400, y, this.truncateName(score.player_name, 12), {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#ffffff'
-      }).setOrigin(0, 0.5);
+      const name = this.add
+        .text(-400, y, this.truncateName(score.player_name, 12), {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#ffffff',
+        })
+        .setOrigin(0, 0.5);
       name.setData('scoreRow', true);
       this.highscoreContainer!.add(name);
 
-      const scoreText = this.add.text(-260, y, score.score.toLocaleString(), {
-        fontFamily: 'Arial Black',
-        fontSize: '14px',
-        color: isTop3 ? '#ffd700' : '#ffcc44'
-      }).setOrigin(0, 0.5);
+      const scoreText = this.add
+        .text(-260, y, score.score.toLocaleString(), {
+          fontFamily: 'Arial Black',
+          fontSize: '14px',
+          color: isTop3 ? '#ffd700' : '#ffcc44',
+        })
+        .setOrigin(0, 0.5);
       scoreText.setData('scoreRow', true);
       this.highscoreContainer!.add(scoreText);
 
-      const wave = this.add.text(-140, y, `${score.wave_reached}/${score.total_waves}`, {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: score.is_victory ? '#00ff00' : '#aaaaaa'
-      }).setOrigin(0, 0.5);
+      const wave = this.add
+        .text(-140, y, `${score.wave_reached}/${score.total_waves}`, {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: score.is_victory ? '#00ff00' : '#aaaaaa',
+        })
+        .setOrigin(0, 0.5);
       wave.setData('scoreRow', true);
       this.highscoreContainer!.add(wave);
 
-      const hp = this.add.text(-50, y, `${score.hp_remaining ?? 0}`, {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: (score.hp_remaining ?? 0) > 0 ? '#44ff44' : '#666666'
-      }).setOrigin(0, 0.5);
+      const hp = this.add
+        .text(-50, y, `${score.hp_remaining ?? 0}`, {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: (score.hp_remaining ?? 0) > 0 ? '#44ff44' : '#666666',
+        })
+        .setOrigin(0, 0.5);
       hp.setData('scoreRow', true);
       this.highscoreContainer!.add(hp);
 
-      const gold = this.add.text(30, y, this.formatNumber(score.gold_earned ?? 0), {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: '#ffd700'
-      }).setOrigin(0, 0.5);
+      const gold = this.add
+        .text(30, y, this.formatNumber(score.gold_earned ?? 0), {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: '#ffd700',
+        })
+        .setOrigin(0, 0.5);
       gold.setData('scoreRow', true);
       this.highscoreContainer!.add(gold);
 
-      const kills = this.add.text(130, y, this.formatNumber(score.creeps_killed ?? 0), {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: '#ff8844'
-      }).setOrigin(0, 0.5);
+      const kills = this.add
+        .text(130, y, this.formatNumber(score.creeps_killed ?? 0), {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: '#ff8844',
+        })
+        .setOrigin(0, 0.5);
       kills.setData('scoreRow', true);
       this.highscoreContainer!.add(kills);
 
-      const time = this.add.text(210, y, this.formatTime(score.time_seconds ?? 0), {
-        fontFamily: 'Arial',
-        fontSize: '13px',
-        color: '#88ccff'
-      }).setOrigin(0, 0.5);
+      const time = this.add
+        .text(210, y, this.formatTime(score.time_seconds ?? 0), {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: '#88ccff',
+        })
+        .setOrigin(0, 0.5);
       time.setData('scoreRow', true);
       this.highscoreContainer!.add(time);
 
-      const victoryText = this.add.text(290, y, score.is_victory ? '✓' : '✗', {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: score.is_victory ? '#00ff00' : '#ff6666'
-      }).setOrigin(0, 0.5);
+      const victoryText = this.add
+        .text(290, y, score.is_victory ? '✓' : '✗', {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: score.is_victory ? '#00ff00' : '#ff6666',
+        })
+        .setOrigin(0, 0.5);
       victoryText.setData('scoreRow', true);
       this.highscoreContainer!.add(victoryText);
 
-      const dateText = this.add.text(350, y, score.date, {
-        fontFamily: 'Arial',
-        fontSize: '12px',
-        color: '#666666'
-      }).setOrigin(0, 0.5);
+      const dateText = this.add
+        .text(350, y, score.date, {
+          fontFamily: 'Arial',
+          fontSize: '12px',
+          color: '#666666',
+        })
+        .setOrigin(0, 0.5);
       dateText.setData('scoreRow', true);
       this.highscoreContainer!.add(dateText);
     });
@@ -845,7 +936,7 @@ export class MenuScene extends Phaser.Scene {
         onComplete: () => {
           this.highscoreContainer?.destroy();
           this.highscoreContainer = null;
-        }
+        },
       });
     }
   }
@@ -856,7 +947,6 @@ export class MenuScene extends Phaser.Scene {
   }
 
   private showSettings(): void {
-
     if (this.settingsContainer) {
       this.closeSettings();
       return;
@@ -870,12 +960,28 @@ export class MenuScene extends Phaser.Scene {
 
     const clickBlocker = this.add.rectangle(0, 0, 420, 320, 0x000000, 0);
     clickBlocker.setInteractive();
-    clickBlocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-    });
-    clickBlocker.on('pointerup', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-    });
+    clickBlocker.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
+    clickBlocker.on(
+      'pointerup',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
     this.settingsContainer.add(clickBlocker);
 
     const bg = this.add.graphics();
@@ -902,20 +1008,25 @@ export class MenuScene extends Phaser.Scene {
 
     this.settingsContainer.add(bg);
 
-    const titleShadow = this.add.text(2, -118, '⚙  SETTINGS', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '30px',
-      color: '#000000'
-    }).setOrigin(0.5).setAlpha(0.5);
+    const titleShadow = this.add
+      .text(2, -118, '⚙  SETTINGS', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '30px',
+        color: '#000000',
+      })
+      .setOrigin(0.5)
+      .setAlpha(0.5);
     this.settingsContainer.add(titleShadow);
 
-    const title = this.add.text(0, -120, '⚙  SETTINGS', {
-      fontFamily: 'Georgia, serif',
-      fontSize: '30px',
-      color: '#ffd700',
-      stroke: '#4a3520',
-      strokeThickness: 4
-    }).setOrigin(0.5);
+    const title = this.add
+      .text(0, -120, '⚙  SETTINGS', {
+        fontFamily: 'Georgia, serif',
+        fontSize: '30px',
+        color: '#ffd700',
+        stroke: '#4a3520',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
     this.settingsContainer.add(title);
 
     const titleLine = this.add.graphics();
@@ -946,7 +1057,7 @@ export class MenuScene extends Phaser.Scene {
     this.tweens.add({
       targets: this.settingsContainer,
       alpha: 1,
-      duration: 200
+      duration: 200,
     });
   }
 
@@ -959,7 +1070,13 @@ export class MenuScene extends Phaser.Scene {
     g.fillCircle(x, y, 2);
   }
 
-  private createModalButton(x: number, y: number, text: string, btnWidth: number, btnHeight: number): { container: Phaser.GameObjects.Container, hitArea: Phaser.GameObjects.Rectangle } {
+  private createModalButton(
+    x: number,
+    y: number,
+    text: string,
+    btnWidth: number,
+    btnHeight: number
+  ): { container: Phaser.GameObjects.Container; hitArea: Phaser.GameObjects.Rectangle } {
     const container = this.add.container(0, 0);
     const btnGraphics = this.add.graphics();
 
@@ -969,34 +1086,66 @@ export class MenuScene extends Phaser.Scene {
 
       if (!pressed) {
         btnGraphics.fillStyle(0x000000, 0.4);
-        btnGraphics.fillRoundedRect(x - btnWidth/2 + 3, y - btnHeight/2 + 3, btnWidth, btnHeight, 10);
+        btnGraphics.fillRoundedRect(
+          x - btnWidth / 2 + 3,
+          y - btnHeight / 2 + 3,
+          btnWidth,
+          btnHeight,
+          10
+        );
       }
 
       btnGraphics.fillStyle(0x4a3520, 1);
-      btnGraphics.fillRoundedRect(x - btnWidth/2, y - btnHeight/2 + 3 + offsetY, btnWidth, btnHeight, 10);
+      btnGraphics.fillRoundedRect(
+        x - btnWidth / 2,
+        y - btnHeight / 2 + 3 + offsetY,
+        btnWidth,
+        btnHeight,
+        10
+      );
 
       const baseColor = hover ? 0x8b6914 : 0x6b4914;
       btnGraphics.fillStyle(baseColor, 1);
-      btnGraphics.fillRoundedRect(x - btnWidth/2, y - btnHeight/2 + offsetY, btnWidth, btnHeight - 3, 10);
+      btnGraphics.fillRoundedRect(
+        x - btnWidth / 2,
+        y - btnHeight / 2 + offsetY,
+        btnWidth,
+        btnHeight - 3,
+        10
+      );
 
       btnGraphics.fillStyle(hover ? 0xa08050 : 0x8b6914, 0.5);
-      btnGraphics.fillRoundedRect(x - btnWidth/2 + 3, y - btnHeight/2 + 3 + offsetY, btnWidth - 6, btnHeight/3, 8);
+      btnGraphics.fillRoundedRect(
+        x - btnWidth / 2 + 3,
+        y - btnHeight / 2 + 3 + offsetY,
+        btnWidth - 6,
+        btnHeight / 3,
+        8
+      );
 
       btnGraphics.lineStyle(2, 0xd4a574, 1);
-      btnGraphics.strokeRoundedRect(x - btnWidth/2, y - btnHeight/2 + offsetY, btnWidth, btnHeight - 3, 10);
+      btnGraphics.strokeRoundedRect(
+        x - btnWidth / 2,
+        y - btnHeight / 2 + offsetY,
+        btnWidth,
+        btnHeight - 3,
+        10
+      );
     };
 
     drawButton(false);
     container.add(btnGraphics);
 
-    const btnText = this.add.text(x, y - 2, text, {
-      fontFamily: 'Georgia, serif',
-      fontSize: '18px',
-      color: '#fff8dc',
-      fontStyle: 'bold',
-      stroke: '#4a3520',
-      strokeThickness: 2
-    }).setOrigin(0.5);
+    const btnText = this.add
+      .text(x, y - 2, text, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '18px',
+        color: '#fff8dc',
+        fontStyle: 'bold',
+        stroke: '#4a3520',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5);
     container.add(btnText);
 
     const hitArea = this.add.rectangle(x, y, btnWidth, btnHeight, 0x000000, 0);
@@ -1026,14 +1175,22 @@ export class MenuScene extends Phaser.Scene {
     return { container, hitArea };
   }
 
-  private createVolumeSlider(label: string, y: number, initialValue: number, onChange: (value: number) => void): void {
+  /* eslint-disable max-lines-per-function */
+  private createVolumeSlider(
+    label: string,
+    y: number,
+    initialValue: number,
+    onChange: (value: number) => void
+  ): void {
     if (!this.settingsContainer) return;
 
-    const labelText = this.add.text(-150, y, label + ':', {
-      fontFamily: 'Arial',
-      fontSize: '18px',
-      color: '#c9a86c'
-    }).setOrigin(0, 0.5);
+    const labelText = this.add
+      .text(-150, y, label + ':', {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#c9a86c',
+      })
+      .setOrigin(0, 0.5);
     this.settingsContainer.add(labelText);
 
     const trackWidth = 200;
@@ -1060,11 +1217,13 @@ export class MenuScene extends Phaser.Scene {
     handle.input!.cursor = 'pointer';
     this.settingsContainer.add(handle);
 
-    const valueText = this.add.text(trackX + trackWidth + 20, y, `${Math.round(initialValue * 100)}%`, {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#ffffff'
-    }).setOrigin(0, 0.5);
+    const valueText = this.add
+      .text(trackX + trackWidth + 20, y, `${Math.round(initialValue * 100)}%`, {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffffff',
+      })
+      .setOrigin(0, 0.5);
     this.settingsContainer.add(valueText);
 
     const updateFill = (value: number) => {
@@ -1088,39 +1247,64 @@ export class MenuScene extends Phaser.Scene {
       onChange(value);
     };
 
-    handle.on('pointerdown', (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      isDragging = true;
-      updateSliderFromPointer(pointer);
-    });
+    handle.on(
+      'pointerdown',
+      (
+        pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        isDragging = true;
+        updateSliderFromPointer(pointer);
+      }
+    );
 
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (!isDragging) return;
       updateSliderFromPointer(pointer);
     });
 
-    this.input.on('pointerup', (_pointer: Phaser.Input.Pointer, _currentlyOver: Phaser.GameObjects.GameObject[]) => {
-      if (isDragging) {
-        isDragging = false;
-
-      } else {
-        isDragging = false;
+    this.input.on(
+      'pointerup',
+      (_pointer: Phaser.Input.Pointer, _currentlyOver: Phaser.GameObjects.GameObject[]) => {
+        if (isDragging) {
+          isDragging = false;
+        } else {
+          isDragging = false;
+        }
       }
-    });
+    );
 
     this.input.on('pointerupoutside', () => {
       isDragging = false;
     });
 
-    const trackHitArea = this.add.rectangle(trackX + trackWidth / 2, y, trackWidth, 30, 0x000000, 0);
+    const trackHitArea = this.add.rectangle(
+      trackX + trackWidth / 2,
+      y,
+      trackWidth,
+      30,
+      0x000000,
+      0
+    );
     trackHitArea.setInteractive({ useHandCursor: true });
     this.settingsContainer.add(trackHitArea);
 
-    trackHitArea.on('pointerdown', (pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      isDragging = true;
-      updateSliderFromPointer(pointer);
-    });
+    trackHitArea.on(
+      'pointerdown',
+      (
+        pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        isDragging = true;
+        updateSliderFromPointer(pointer);
+      }
+    );
   }
 
   private closeSettings(): void {
@@ -1132,7 +1316,7 @@ export class MenuScene extends Phaser.Scene {
         onComplete: () => {
           this.settingsContainer?.destroy();
           this.settingsContainer = null;
-        }
+        },
       });
     }
   }

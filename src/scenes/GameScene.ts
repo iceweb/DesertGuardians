@@ -1,5 +1,20 @@
 import Phaser from 'phaser';
-import { MapManager, PathSystem, CreepManager, WaveManager, TowerManager, ProjectileManager, CombatManager, HUDManager, AudioManager, GoldMineManager, GoldMineUIManager, UIHitDetector, GameController, HighscoreAPI } from '../managers';
+import {
+  MapManager,
+  PathSystem,
+  CreepManager,
+  WaveManager,
+  TowerManager,
+  ProjectileManager,
+  CombatManager,
+  HUDManager,
+  AudioManager,
+  GoldMineManager,
+  GoldMineUIManager,
+  UIHitDetector,
+  GameController,
+  HighscoreAPI,
+} from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -29,12 +44,9 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
-  init(_data?: Record<string, unknown>): void {
-
-  }
+  init(_data?: Record<string, unknown>): void {}
 
   create(): void {
-
     this.gameController = new GameController();
     this.gameController.reset();
 
@@ -49,7 +61,7 @@ export class GameScene extends Phaser.Scene {
       setReviewMode: (enabled: boolean) => {
         this.towerManager.setReviewMode(enabled);
         this.goldMineUIManager.setReviewMode(enabled);
-      }
+      },
     });
     this.resultsUI.reset();
 
@@ -72,7 +84,12 @@ export class GameScene extends Phaser.Scene {
     this.projectileManager = new ProjectileManager(this, this.creepManager);
     this.setupProjectileCallbacks();
 
-    this.combatManager = new CombatManager(this, this.towerManager, this.creepManager, this.projectileManager);
+    this.combatManager = new CombatManager(
+      this,
+      this.towerManager,
+      this.creepManager,
+      this.projectileManager
+    );
     this.setupCombatCallbacks();
 
     this.environment = new GameEnvironment(this, this.pathSystem);
@@ -101,9 +118,9 @@ export class GameScene extends Phaser.Scene {
     this.audioManager.initialize();
     this.audioManager.playBGM();
 
-    HighscoreAPI.requestSession().then(token => {
+    HighscoreAPI.requestSession().then((token) => {
       if (token) {
-
+        // Session established - scores can be submitted
       } else {
         console.warn('GameScene: Could not get highscore session (offline mode)');
       }
@@ -114,11 +131,9 @@ export class GameScene extends Phaser.Scene {
     this.setupCreepClickHandler();
 
     this.updateNextWavePreview();
-
   }
 
   private setupGoldMineCallbacks(): void {
-
     this.goldMineManager.getPlayerGold = () => this.gameController.gold;
 
     this.goldMineManager.onMineBuild = (_mine, cost) => {
@@ -126,7 +141,6 @@ export class GameScene extends Phaser.Scene {
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('tower_place');
       this.audioManager.playSFX('coins');
-
     };
 
     this.goldMineManager.onMineUpgraded = (_mine, cost) => {
@@ -134,33 +148,28 @@ export class GameScene extends Phaser.Scene {
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('tower_place');
       this.audioManager.playSFX('coins');
-
     };
   }
 
   private setupTowerCallbacks(): void {
-
     this.towerManager.getPlayerGold = () => this.gameController.gold;
 
     this.towerManager.onTowerBuilt = (_tower, cost) => {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('tower_place');
-
     };
 
     this.towerManager.onTowerSold = (_tower, refund) => {
       this.gameController.addGold(refund);
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('sell_tower');
-
     };
 
     this.towerManager.onTowerUpgraded = (_tower, cost) => {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('tower_place');
-
     };
   }
 
@@ -181,11 +190,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupWaveCallbacks(): void {
-
     this.waveManager.getGameSpeed = () => this.hudManager.getGameSpeed();
 
     this.waveManager.on('waveStart', (waveNumber: number) => {
-
       this.gameController.setWave(waveNumber);
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
@@ -201,28 +208,27 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('finalWaveStarted', () => {
-
       this.registry.events.emit('final-wave-started');
     });
 
     this.waveManager.on('finalBossSpawning', () => {
-
       this.registry.events.emit('final-boss-spawning');
     });
 
     this.waveManager.on('waveComplete', async (waveNumber: number) => {
-
       this.audioManager.playSFX('wave_complete');
 
-      const waveBonus = GAME_CONFIG.WAVE_GOLD_BONUS_BASE +
-        Math.floor((waveNumber - 1) / GAME_CONFIG.WAVE_GOLD_BONUS_INTERVAL) * GAME_CONFIG.WAVE_GOLD_BONUS_INCREMENT;
+      const waveBonus =
+        GAME_CONFIG.WAVE_GOLD_BONUS_BASE +
+        Math.floor((waveNumber - 1) / GAME_CONFIG.WAVE_GOLD_BONUS_INTERVAL) *
+          GAME_CONFIG.WAVE_GOLD_BONUS_INCREMENT;
 
       this.gameController.addGold(waveBonus);
       this.hudManager.updateGold(this.gameController.gold);
 
       this.updateNextWavePreview();
 
-      await new Promise<void>(resolve => this.time.delayedCall(300, () => resolve()));
+      await new Promise<void>((resolve) => this.time.delayedCall(300, () => resolve()));
 
       const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
         this.audioManager.playSFX('coins');
@@ -233,7 +239,6 @@ export class GameScene extends Phaser.Scene {
       }
 
       if (waveNumber < this.waveManager.getTotalWaves()) {
-
         this.hudManager.showCountdown(waveNumber + 1, () => {
           if (!this.gameController.gameOver) {
             this.waveManager.startWave();
@@ -243,7 +248,6 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('allWavesComplete', () => {
-
       this.gameController.markGameOver();
       this.audioManager.playSFX('victory');
       this.goToResults(true);
@@ -258,7 +262,6 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('creepLeaked', (creep: Creep) => {
-
       const damage = creep.isBoss() ? 2 : 1;
       const destroyed = this.gameController.takeDamage(damage);
       this.hudManager.updateCastleHP(this.gameController.castleHP);
@@ -296,7 +299,7 @@ export class GameScene extends Phaser.Scene {
       goldRemaining: stateSnapshot.gold,
       totalGoldEarned: stats.goldEarned,
       creepsKilled: stats.killed,
-      runTimeSeconds: stateSnapshot.runTimeSeconds
+      runTimeSeconds: stateSnapshot.runTimeSeconds,
     };
 
     this.registry.events.emit('game-over');
@@ -316,7 +319,6 @@ export class GameScene extends Phaser.Scene {
     };
 
     this.hudManager.onMenuClicked = () => {
-
       this.scene.sleep('UIScene');
       this.scene.sleep('GameScene');
       this.scene.launch('MenuScene');
@@ -324,45 +326,58 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupUIHitDetector(): void {
-
     this.towerManager.setUIHitDetector(this.uiHitDetector);
 
     this.uiHitDetector.setMineCallback((x, y) => this.goldMineManager.getMineAtPosition(x, y));
 
-    this.uiHitDetector.setMenuCallback(() =>
-      this.towerManager.isMenuOpen() || this.goldMineUIManager.isMenuOpen()
+    this.uiHitDetector.setMenuCallback(
+      () => this.towerManager.isMenuOpen() || this.goldMineUIManager.isMenuOpen()
     );
 
-    this.uiHitDetector.registerBounds('nextWavePanel', 10, this.cameras.main.height - 200, 180, 120);
+    this.uiHitDetector.registerBounds(
+      'nextWavePanel',
+      10,
+      this.cameras.main.height - 200,
+      180,
+      120
+    );
 
     this.uiHitDetector.registerBounds('menuButton', 15, this.cameras.main.height - 50, 100, 40);
 
     const width = this.cameras.main.width;
-    this.uiHitDetector.registerBounds('startWaveButton', width / 2 - 100, this.cameras.main.height - 100, 200, 70);
+    this.uiHitDetector.registerBounds(
+      'startWaveButton',
+      width / 2 - 100,
+      this.cameras.main.height - 100,
+      200,
+      70
+    );
   }
 
   private setupCreepClickHandler(): void {
-    this.input.on('gameobjectdown', (_pointer: Phaser.Input.Pointer, gameObject: Phaser.GameObjects.GameObject) => {
+    this.input.on(
+      'gameobjectdown',
+      (_pointer: Phaser.Input.Pointer, gameObject: Phaser.GameObjects.GameObject) => {
+        if (gameObject instanceof Creep && gameObject.getIsActive()) {
+          const creep = gameObject as Creep;
+          const config = creep.getConfig();
 
-      if (gameObject instanceof Creep && gameObject.getIsActive()) {
-        const creep = gameObject as Creep;
-        const config = creep.getConfig();
-
-        this.hudManager.showCreepStats(
-          config.type,
-          creep.getCurrentHealth(),
-          config.maxHealth,
-          config.speed,
-          config.armor,
-          config.goldReward,
-          creep.x,
-          creep.y,
-          config.hasShield,
-          creep.getShieldHitsRemaining(),
-          config.canJump
-        );
+          this.hudManager.showCreepStats(
+            config.type,
+            creep.getCurrentHealth(),
+            config.maxHealth,
+            config.speed,
+            config.armor,
+            config.goldReward,
+            creep.x,
+            creep.y,
+            config.hasShield,
+            creep.getShieldHitsRemaining(),
+            config.canJump
+          );
+        }
       }
-    });
+    );
   }
 
   private updateNextWavePreview(): void {
@@ -412,7 +427,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupCreepCallbacks(): void {
-
     this.creepManager.onBossFirstHit = (creep) => {
       if (creep.getConfig().type === 'boss_5') {
         this.audioManager.playSFX('dragon_roar');

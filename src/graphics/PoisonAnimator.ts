@@ -23,7 +23,14 @@ export class PoisonAnimator {
 
   private cloudTimer: number = 0;
 
-  private particles: { x: number; y: number; vx: number; vy: number; life: number; size: number }[] = [];
+  private particles: {
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    life: number;
+    size: number;
+  }[] = [];
   private particleTimer: number = 0;
 
   private isCheeringActive: boolean = false;
@@ -54,7 +61,7 @@ export class PoisonAnimator {
       this.weaponGraphics,
       this.alchemistGraphics,
       this.effectGraphics,
-      this.particleGraphics
+      this.particleGraphics,
     ]);
 
     this.container.add([this.baseGraphics, this.alchemistContainer]);
@@ -80,7 +87,8 @@ export class PoisonAnimator {
       const rotationSpeed = 5.0;
 
       if (Math.abs(angleDiff) > 0.01) {
-        this.alchemistAngle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
+        this.alchemistAngle +=
+          Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), rotationSpeed * dt);
         this.alchemistAngle = Phaser.Math.Angle.Wrap(this.alchemistAngle);
       }
     }
@@ -131,9 +139,11 @@ export class PoisonAnimator {
     const alchemistWorldY = towerY + this.ALCHEMIST_Y[this.level - 1];
 
     if (this.level === 3) {
-      this.targetAngle = Phaser.Math.Angle.Between(towerX, alchemistWorldY, targetX, targetY) + Math.PI / 2;
+      this.targetAngle =
+        Phaser.Math.Angle.Between(towerX, alchemistWorldY, targetX, targetY) + Math.PI / 2;
     } else {
-      this.targetAngle = Phaser.Math.Angle.Between(towerX, alchemistWorldY, targetX, targetY) + Math.PI;
+      this.targetAngle =
+        Phaser.Math.Angle.Between(towerX, alchemistWorldY, targetX, targetY) + Math.PI;
     }
   }
 
@@ -160,11 +170,9 @@ export class PoisonAnimator {
     let localX: number, localY: number;
 
     if (this.level === 3) {
-
       localX = 0;
       localY = this.NOZZLE_LOCAL_Y;
     } else {
-
       localX = this.THROW_ARM_LOCAL_X - 10;
       localY = this.THROW_ARM_LOCAL_Y;
     }
@@ -177,7 +185,7 @@ export class PoisonAnimator {
 
     return {
       x: rotatedX,
-      y: rotatedY + this.ALCHEMIST_Y[this.level - 1]
+      y: rotatedY + this.ALCHEMIST_Y[this.level - 1],
     };
   }
 
@@ -199,7 +207,7 @@ export class PoisonAnimator {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed - 8,
       life: 1.0 + Math.random() * 0.5,
-      size: 2 + Math.random() * 3
+      size: 2 + Math.random() * 3,
     });
 
     if (this.particles.length > 12) {
@@ -234,7 +242,6 @@ export class PoisonAnimator {
     const towerHeight = 35;
 
     if (level === 1) {
-
       g.fillStyle(0x6b5a44, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 18);
       g.fillStyle(0x7b6a54, 1);
@@ -244,7 +251,6 @@ export class PoisonAnimator {
       g.fillCircle(-baseWidth + 8, 16, 5);
       g.fillCircle(baseWidth - 10, 18, 4);
     } else if (level === 2) {
-
       g.fillStyle(0x4a4a4a, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 20);
 
@@ -255,7 +261,6 @@ export class PoisonAnimator {
       g.fillStyle(0x3a3a3a, 1);
       g.fillRect(-baseWidth + 3, 12, (baseWidth - 3) * 2, 12);
     } else {
-
       g.fillStyle(0x3a3a3a, 1);
       g.fillRect(-baseWidth, 8, baseWidth * 2, 24);
 
@@ -343,10 +348,8 @@ export class PoisonAnimator {
 
     const bodyY = 10;
 
-    const robeColor = this.level === 1 ? 0x4a4a3a :
-                      this.level === 2 ? 0x3a3a2a : 0x888844;
-    const robeDark = this.level === 1 ? 0x3a3a2a :
-                     this.level === 2 ? 0x2a2a1a : 0x666622;
+    const robeColor = this.level === 1 ? 0x4a4a3a : this.level === 2 ? 0x3a3a2a : 0x888844;
+    const robeDark = this.level === 1 ? 0x3a3a2a : this.level === 2 ? 0x2a2a1a : 0x666622;
     const maskColor = 0x2a2a2a;
 
     if (this.isCheeringActive) {
@@ -379,7 +382,6 @@ export class PoisonAnimator {
     g.fillRect(4, bodyY, 3, 5);
 
     if (this.level === 1) {
-
       g.fillStyle(0x4a4a3a, 1);
       g.fillCircle(0, bodyY - 5, 9);
 
@@ -391,7 +393,6 @@ export class PoisonAnimator {
       g.fillCircle(-4, bodyY - 7, 2);
       g.fillCircle(4, bodyY - 7, 2);
     } else if (this.level === 2) {
-
       g.fillStyle(maskColor, 1);
       g.fillCircle(0, bodyY - 6, 11);
 
@@ -407,7 +408,6 @@ export class PoisonAnimator {
       g.fillCircle(-5, bodyY - 8, 3);
       g.fillCircle(5, bodyY - 8, 3);
     } else {
-
       g.fillStyle(0x888844, 1);
       g.fillCircle(0, bodyY - 7, 14);
 
@@ -506,7 +506,6 @@ export class PoisonAnimator {
 
     const gfxLevel = Math.min(this.level, 3);
     if (gfxLevel < 3) {
-
       const throwOffset = this.isThrowingActive ? this.throwProgress * 10 : 0;
       const vialX = this.THROW_ARM_LOCAL_X - throwOffset;
       const vialY = this.THROW_ARM_LOCAL_Y;
@@ -529,7 +528,6 @@ export class PoisonAnimator {
         g.fillRect(vialX + 14, vialY - 2, 4, 6);
       }
     } else {
-
       const recoilOffset = this.isThrowingActive ? this.throwProgress * 4 : 0;
 
       g.fillStyle(0x4a4a4a, 1);

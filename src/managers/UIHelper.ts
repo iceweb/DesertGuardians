@@ -55,6 +55,7 @@ export class UIHelper {
     this.scene = scene;
   }
 
+  /* eslint-disable complexity */
   createButton(config: ButtonConfig): ButtonResult {
     const {
       text,
@@ -73,14 +74,16 @@ export class UIHelper {
       paddingY = 10,
       minWidth = 0,
       enabled = true,
-      onClick
+      onClick,
     } = config;
 
-    const textObj = this.scene.add.text(0, 0, text, {
-      fontFamily,
-      fontSize: `${fontSize}px`,
-      color: enabled ? textColor : disabledTextColor
-    }).setOrigin(0.5);
+    const textObj = this.scene.add
+      .text(0, 0, text, {
+        fontFamily,
+        fontSize: `${fontSize}px`,
+        color: enabled ? textColor : disabledTextColor,
+      })
+      .setOrigin(0.5);
 
     const textWidth = textObj.width;
     const textHeight = textObj.height;
@@ -122,10 +125,18 @@ export class UIHelper {
       });
 
       if (onClick) {
-        hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-          event.stopPropagation();
-          onClick();
-        });
+        hitArea.on(
+          'pointerdown',
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData
+          ) => {
+            event.stopPropagation();
+            onClick();
+          }
+        );
       }
     }
 
@@ -137,7 +148,7 @@ export class UIHelper {
       text: textObj,
       hitArea,
       width: btnWidth,
-      height: btnHeight
+      height: btnHeight,
     };
   }
 
@@ -150,7 +161,7 @@ export class UIHelper {
       bgAlpha = 0.95,
       borderColor = 0xd4a574,
       borderWidth = 3,
-      cornerRadius = 12
+      cornerRadius = 12,
     } = config;
 
     const container = this.scene.add.container(x, y);
@@ -163,8 +174,10 @@ export class UIHelper {
     container.add(contentContainer);
 
     const finalize = (): { width: number; height: number } => {
-
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      let minX = Infinity,
+        minY = Infinity,
+        maxX = -Infinity,
+        maxY = -Infinity;
 
       contentContainer.each((child: Phaser.GameObjects.GameObject) => {
         if ('getBounds' in child && typeof child.getBounds === 'function') {
@@ -214,13 +227,13 @@ export class UIHelper {
       if (popupLeft < margin) {
         offsetX = margin - popupLeft;
       } else if (popupRight > screenWidth - margin) {
-        offsetX = (screenWidth - margin) - popupRight;
+        offsetX = screenWidth - margin - popupRight;
       }
 
       if (popupTop < margin) {
         offsetY = margin - popupTop;
       } else if (popupBottom > screenHeight - margin) {
-        offsetY = (screenHeight - margin) - popupBottom;
+        offsetY = screenHeight - margin - popupBottom;
       }
 
       container.x += offsetX;
@@ -233,14 +246,18 @@ export class UIHelper {
       container,
       background,
       contentContainer,
-      finalize
+      finalize,
     };
   }
 
-  measureText(text: string, fontSize: number = 14, fontFamily: string = 'Arial Black'): { width: number; height: number } {
+  measureText(
+    text: string,
+    fontSize: number = 14,
+    fontFamily: string = 'Arial Black'
+  ): { width: number; height: number } {
     const tempText = this.scene.add.text(0, 0, text, {
       fontFamily,
-      fontSize: `${fontSize}px`
+      fontSize: `${fontSize}px`,
     });
     const width = tempText.width;
     const height = tempText.height;
@@ -248,7 +265,13 @@ export class UIHelper {
     return { width, height };
   }
 
-  clampToScreen(container: Phaser.GameObjects.Container, width: number, height: number, originX: number = 0.5, originY: number = 0.5): void {
+  clampToScreen(
+    container: Phaser.GameObjects.Container,
+    width: number,
+    height: number,
+    originX: number = 0.5,
+    originY: number = 0.5
+  ): void {
     const camera = this.scene.cameras.main;
     const margin = 10;
 

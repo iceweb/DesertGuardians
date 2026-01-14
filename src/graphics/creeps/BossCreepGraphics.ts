@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export class BossCreepGraphics {
-
   static draw(
     g: Phaser.GameObjects.Graphics,
     type: string,
@@ -9,9 +8,7 @@ export class BossCreepGraphics {
     faceDirection: number,
     isPained: boolean = false
   ): void {
-
     if (isPained) {
-
       const painShake = Math.sin(bounceTime * 30) * 2;
       g.setPosition(painShake, 0);
     } else {
@@ -37,7 +34,6 @@ export class BossCreepGraphics {
       case 'boss_5':
         BossCreepGraphics.drawBoss5(g, bounceTime, faceDirection, isPained);
         break;
-
     }
 
     if (isPained) {
@@ -56,7 +52,7 @@ export class BossCreepGraphics {
 
     const numDrips = 3;
     for (let i = 0; i < numDrips; i++) {
-      const dripY = (bounceTime * 40 + i * 30) % 60 - 10;
+      const dripY = ((bounceTime * 40 + i * 30) % 60) - 10;
       const dripX = Math.sin(i * 2.5) * 20;
       const dripAlpha = Math.max(0, 1 - dripY / 50);
       g.fillStyle(0x8b0000, dripAlpha * 0.7);
@@ -64,7 +60,12 @@ export class BossCreepGraphics {
     }
   }
 
-  static drawBoss(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
+  static drawBoss(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number,
+    _isPained: boolean = false
+  ): void {
     const bounce = Math.sin(bounceTime * 4) * 3;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
 
@@ -76,19 +77,19 @@ export class BossCreepGraphics {
     g.fillStyle(0x000000, 0.4);
     g.fillEllipse(0, 30, 50, 18);
 
-    g.fillStyle(0x4B0082, 1);
+    g.fillStyle(0x4b0082, 1);
     g.fillEllipse(0, 0 + bounce, 44 * pulse, 38 * pulse);
 
-    g.fillStyle(0x6A0DAD, 1);
+    g.fillStyle(0x6a0dad, 1);
     g.fillEllipse(-10, -10 + bounce, 16, 20);
     g.fillEllipse(10, 5 + bounce, 18, 16);
-    g.fillStyle(0x8B008B, 1);
+    g.fillStyle(0x8b008b, 1);
     g.fillEllipse(0, -5 + bounce, 12, 14);
 
-    g.fillStyle(0x9370DB, 1);
+    g.fillStyle(0x9370db, 1);
     g.fillEllipse(18 * faceDirection, -5 + bounce, 18, 16);
 
-    g.fillStyle(0xFFD700, 1);
+    g.fillStyle(0xffd700, 1);
     g.beginPath();
     g.moveTo(-8 * faceDirection, -35 + bounce);
     g.lineTo(-4 * faceDirection, -45 + bounce);
@@ -102,40 +103,45 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xFF0000, 1);
+    g.fillStyle(0xff0000, 1);
     g.fillCircle(14 * faceDirection, -12 + bounce, 5);
     g.fillCircle(24 * faceDirection, -8 + bounce, 4);
     g.fillCircle(20 * faceDirection, 2 + bounce, 3);
-    g.fillStyle(0xFFFFFF, 1);
+    g.fillStyle(0xffffff, 1);
     g.fillCircle(12 * faceDirection, -14 + bounce, 2);
     g.fillCircle(22 * faceDirection, -10 + bounce, 1.5);
 
-    g.fillStyle(0x2F0040, 1);
+    g.fillStyle(0x2f0040, 1);
     g.fillEllipse(26 * faceDirection, 4 + bounce, 8, 6);
-    g.fillStyle(0xFFFFFF, 1);
+    g.fillStyle(0xffffff, 1);
     g.fillRect(22 * faceDirection, 1 + bounce, 3, 4);
     g.fillRect(27 * faceDirection, 2 + bounce, 3, 3);
 
-    g.fillStyle(0x4B0082, 1);
+    g.fillStyle(0x4b0082, 1);
     g.fillEllipse(-25, 10 + bounce, 10, 8);
     g.fillEllipse(25, 10 + bounce, 10, 8);
 
-    g.fillStyle(0x3A0066, 1);
+    g.fillStyle(0x3a0066, 1);
     g.fillEllipse(-15, 28, 12, 8);
     g.fillEllipse(15, 28, 12, 8);
   }
 
-  static drawBoss1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
+  static drawBoss1(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number,
+    _isPained: boolean = false
+  ): void {
     const bounce = Math.sin(bounceTime * 5) * 2;
     const pulse = 1 + Math.sin(bounceTime * 8) * 0.04;
 
-    g.fillStyle(0xFF6600, 0.12);
+    g.fillStyle(0xff6600, 0.12);
     g.fillCircle(0, 0, 35 * pulse);
 
     g.fillStyle(0x000000, 0.35);
     g.fillEllipse(0, 22, 32, 12);
 
-    g.fillStyle(0x55AA44, 1);
+    g.fillStyle(0x55aa44, 1);
     g.beginPath();
     g.moveTo(-12 * faceDirection, 8 + bounce);
     g.lineTo(-24 * faceDirection, 14 + bounce);
@@ -145,36 +151,36 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0x44CC33, 1);
+    g.fillStyle(0x44cc33, 1);
     g.fillEllipse(0, 0 + bounce, 26, 20);
 
-    g.fillStyle(0xFF8833, 0.7);
+    g.fillStyle(0xff8833, 0.7);
     g.fillCircle(-6, -4 + bounce, 4);
     g.fillCircle(4, 2 + bounce, 5);
     g.fillCircle(-2, 8 + bounce, 3);
 
-    g.fillStyle(0x88DD77, 1);
+    g.fillStyle(0x88dd77, 1);
     g.fillEllipse(0, 6 + bounce, 16, 10);
 
-    g.fillStyle(0x55BB44, 1);
+    g.fillStyle(0x55bb44, 1);
     g.fillEllipse(14 * faceDirection, -6 + bounce, 14, 12);
 
-    g.fillStyle(0x66CC55, 1);
+    g.fillStyle(0x66cc55, 1);
     g.fillEllipse(22 * faceDirection, -4 + bounce, 8, 6);
 
-    g.fillStyle(0xFFDD00, 1);
+    g.fillStyle(0xffdd00, 1);
     g.fillCircle(12 * faceDirection, -10 + bounce, 5);
     g.fillCircle(20 * faceDirection, -8 + bounce, 4);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(13 * faceDirection, -10 + bounce, 1.5, 4);
     g.fillEllipse(21 * faceDirection, -8 + bounce, 1, 3);
 
-    g.fillStyle(0xFF4444, 1);
+    g.fillStyle(0xff4444, 1);
     g.fillRect(26 * faceDirection, -3 + bounce, 6, 1);
     g.fillRect(30 * faceDirection, -4 + bounce, 3, 1);
     g.fillRect(30 * faceDirection, -2 + bounce, 3, 1);
 
-    g.fillStyle(0xFF6600, 1);
+    g.fillStyle(0xff6600, 1);
     for (let i = 0; i < 3; i++) {
       const spineX = -8 + i * 6;
       g.beginPath();
@@ -192,7 +198,12 @@ export class BossCreepGraphics {
     g.fillCircle(16, 8 + bounce, 4);
   }
 
-  static drawBoss2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
+  static drawBoss2(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number,
+    _isPained: boolean = false
+  ): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.03;
 
@@ -266,19 +277,19 @@ export class BossCreepGraphics {
     g.fillCircle(34 * faceDirection, -6 + bounce, 2);
     g.fillCircle(32 * faceDirection, -2 + bounce, 2);
 
-    g.fillStyle(0xDDAA00, 1);
+    g.fillStyle(0xddaa00, 1);
     g.fillEllipse(14 * faceDirection, -10 + bounce, 4, 5);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(14 * faceDirection, -10 + bounce, 1.5, 4);
 
-    g.fillStyle(0xFF6688, 1);
+    g.fillStyle(0xff6688, 1);
     g.fillRect(36 * faceDirection, -3 + bounce, 8, 1);
     g.fillRect(42 * faceDirection, -4 + bounce, 4, 1);
     g.fillRect(42 * faceDirection, -2 + bounce, 4, 1);
 
     g.fillStyle(0x556644, 1);
     g.fillEllipse(26 * faceDirection, 2 + bounce, 10, 6);
-    g.fillStyle(0xFFFFEE, 1);
+    g.fillStyle(0xffffee, 1);
     g.fillRect(22 * faceDirection, 0 + bounce, 2, 3);
     g.fillRect(26 * faceDirection, 1 + bounce, 2, 2);
     g.fillRect(30 * faceDirection, 0 + bounce, 2, 3);
@@ -288,14 +299,19 @@ export class BossCreepGraphics {
     g.fillEllipse(10, 26, 8, 5);
   }
 
-  static drawBoss3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
+  static drawBoss3(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number,
+    _isPained: boolean = false
+  ): void {
     const bounce = Math.sin(bounceTime * 3.5) * 3;
     const wingFlutter = Math.sin(bounceTime * 6) * 0.15;
     const pulse = 1 + Math.sin(bounceTime * 5) * 0.04;
 
-    g.fillStyle(0xFF6622, 0.12);
+    g.fillStyle(0xff6622, 0.12);
     g.fillCircle(0, -5 + bounce, 50 * pulse);
-    g.fillStyle(0xFFAA44, 0.08);
+    g.fillStyle(0xffaa44, 0.08);
     g.fillCircle(0, -5 + bounce, 42 * pulse);
 
     g.fillStyle(0x000000, 0.4);
@@ -353,9 +369,9 @@ export class BossCreepGraphics {
     g.fillStyle(0x997755, 1);
     g.fillEllipse(0, 2 + bounce, 34, 28);
 
-    g.fillStyle(0xBBAA88, 1);
+    g.fillStyle(0xbbaa88, 1);
     g.fillEllipse(0, 8 + bounce, 22, 14);
-    g.fillStyle(0xCCBB99, 0.8);
+    g.fillStyle(0xccbb99, 0.8);
     for (let i = 0; i < 4; i++) {
       g.fillRect(-10, 2 + i * 4 + bounce, 20, 2);
     }
@@ -389,10 +405,10 @@ export class BossCreepGraphics {
     g.fillStyle(0x997755, 1);
     g.fillEllipse(14 * faceDirection, -10 + bounce, 12, 14);
 
-    g.fillStyle(0xAA8866, 1);
+    g.fillStyle(0xaa8866, 1);
     g.fillEllipse(22 * faceDirection, -12 + bounce, 16, 14);
 
-    g.fillStyle(0xBB9977, 1);
+    g.fillStyle(0xbb9977, 1);
     g.fillEllipse(34 * faceDirection, -10 + bounce, 10, 8);
 
     g.fillStyle(0x775544, 1);
@@ -409,7 +425,7 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xFF8800, 1);
+    g.fillStyle(0xff8800, 1);
     g.fillEllipse(24 * faceDirection, -16 + bounce, 4, 5);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(25 * faceDirection, -16 + bounce, 1.5, 4);
@@ -421,28 +437,33 @@ export class BossCreepGraphics {
 
     g.fillStyle(0x886655, 1);
     g.fillEllipse(34 * faceDirection, -4 + bounce, 10, 6);
-    g.fillStyle(0xFF4400, 0.5);
+    g.fillStyle(0xff4400, 0.5);
     g.fillEllipse(38 * faceDirection, -4 + bounce, 6, 4);
-    g.fillStyle(0xFFFFEE, 1);
+    g.fillStyle(0xffffee, 1);
     g.fillRect(30 * faceDirection, -6 + bounce, 2, 4);
     g.fillRect(34 * faceDirection, -7 + bounce, 2, 5);
     g.fillRect(38 * faceDirection, -6 + bounce, 2, 4);
   }
 
-  static drawBoss4(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, _isPained: boolean = false): void {
+  static drawBoss4(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number,
+    _isPained: boolean = false
+  ): void {
     const hover = Math.sin(bounceTime * 3) * 3;
     const wingFlap = Math.sin(bounceTime * 4) * 0.25;
     const breathe = 1 + Math.sin(bounceTime * 4) * 0.04;
 
-    g.fillStyle(0xFF4400, 0.12);
+    g.fillStyle(0xff4400, 0.12);
     g.fillCircle(0, -5 + hover, 60 * breathe);
-    g.fillStyle(0xFFAA00, 0.08);
+    g.fillStyle(0xffaa00, 0.08);
     g.fillCircle(0, -5 + hover, 50 * breathe);
 
     g.fillStyle(0x000000, 0.45);
     g.fillEllipse(0, 35, 55, 18);
 
-    g.fillStyle(0xAA5533, 1);
+    g.fillStyle(0xaa5533, 1);
     g.beginPath();
     g.moveTo(-18 * faceDirection, 10 + hover);
     g.lineTo(-38 * faceDirection, 20 + hover);
@@ -508,12 +529,12 @@ export class BossCreepGraphics {
     g.fillCircle(-40, -28 + hover + wingFlap * 32, 3);
     g.fillCircle(40, -28 + hover + wingFlap * 32, 3);
 
-    g.fillStyle(0xBB6644, 1);
+    g.fillStyle(0xbb6644, 1);
     g.fillEllipse(0, 4 + hover, 40 * breathe, 32 * breathe);
 
-    g.fillStyle(0xDDCC99, 1);
+    g.fillStyle(0xddcc99, 1);
     g.fillEllipse(0, 10 + hover, 24, 18);
-    g.fillStyle(0xEEDDAA, 0.8);
+    g.fillStyle(0xeeddaa, 0.8);
     for (let i = 0; i < 5; i++) {
       g.fillRect(-12, 2 + i * 4 + hover, 24, 2);
     }
@@ -530,7 +551,7 @@ export class BossCreepGraphics {
       g.fillPath();
     }
 
-    g.fillStyle(0xAA5533, 1);
+    g.fillStyle(0xaa5533, 1);
     g.fillEllipse(-16, 20 + hover, 12, 16);
     g.fillEllipse(16, 20 + hover, 12, 16);
 
@@ -545,13 +566,13 @@ export class BossCreepGraphics {
     g.fillCircle(10, 36, 3);
     g.fillCircle(22, 35, 3);
 
-    g.fillStyle(0xBB6644, 1);
+    g.fillStyle(0xbb6644, 1);
     g.fillEllipse(16 * faceDirection, -14 + hover, 14, 18);
 
-    g.fillStyle(0xCC7755, 1);
+    g.fillStyle(0xcc7755, 1);
     g.fillEllipse(28 * faceDirection, -18 + hover, 18, 16);
 
-    g.fillStyle(0xDD8866, 1);
+    g.fillStyle(0xdd8866, 1);
     g.fillEllipse(42 * faceDirection, -16 + hover, 12, 10);
 
     g.fillStyle(0x443322, 1);
@@ -578,11 +599,11 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xFF6600, 1);
+    g.fillStyle(0xff6600, 1);
     g.fillEllipse(32 * faceDirection, -22 + hover, 5, 6);
     g.fillStyle(0x000000, 1);
     g.fillEllipse(33 * faceDirection, -22 + hover, 2, 5);
-    g.fillStyle(0xFFFF00, 0.6);
+    g.fillStyle(0xffff00, 0.6);
     g.fillCircle(31 * faceDirection, -24 + hover, 1.5);
 
     g.fillStyle(0x332222, 1);
@@ -592,22 +613,26 @@ export class BossCreepGraphics {
     g.fillCircle(54 * faceDirection, -20 + hover, 4);
     g.fillCircle(56 * faceDirection, -22 + hover, 3);
 
-    g.fillStyle(0xAA5533, 1);
+    g.fillStyle(0xaa5533, 1);
     g.fillEllipse(42 * faceDirection, -8 + hover, 12, 8);
-    g.fillStyle(0xFF4400, 0.6);
+    g.fillStyle(0xff4400, 0.6);
     g.fillEllipse(48 * faceDirection, -8 + hover, 8, 5);
-    g.fillStyle(0xFFAA00, 0.4);
+    g.fillStyle(0xffaa00, 0.4);
     g.fillCircle(54 * faceDirection, -8 + hover, 4);
 
-    g.fillStyle(0xFFFFEE, 1);
+    g.fillStyle(0xffffee, 1);
     g.fillRect(36 * faceDirection, -12 + hover, 2, 5);
     g.fillRect(40 * faceDirection, -13 + hover, 2, 6);
     g.fillRect(44 * faceDirection, -12 + hover, 2, 5);
     g.fillRect(48 * faceDirection, -11 + hover, 2, 4);
   }
 
-  static drawBoss5(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number, isPained: boolean = false): void {
-
+  static drawBoss5(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number,
+    isPained: boolean = false
+  ): void {
     const hover = Math.sin(bounceTime * 2) * 3;
     const wingFlap = Math.sin(bounceTime * 3) * 0.4;
     const breathe = 1 + Math.sin(bounceTime * 2) * 0.03;
@@ -995,7 +1020,6 @@ export class BossCreepGraphics {
     g.fillPath();
 
     if (isPained) {
-
       g.fillStyle(fireCore, 0.9 * fireFlicker);
       g.fillEllipse(75 * faceDirection, -14 + hover, 15, 10);
       g.fillStyle(0xffaa00, 0.7 * fireFlicker);
@@ -1017,7 +1041,11 @@ export class BossCreepGraphics {
     }
   }
 
-  static drawBossGuard1(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBossGuard1(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.03;
     const swordSwing = Math.sin(bounceTime * 3) * 5;
@@ -1067,9 +1095,9 @@ export class BossCreepGraphics {
     g.lineStyle(2, 0x776655, 1);
     g.strokePath();
 
-    g.fillStyle(0x44AA44, 1);
+    g.fillStyle(0x44aa44, 1);
     g.fillCircle(-20 * faceDirection, 0 + bounce, 6);
-    g.fillStyle(0x55CC55, 1);
+    g.fillStyle(0x55cc55, 1);
     g.beginPath();
     g.moveTo(-20 * faceDirection, -4 + bounce);
     g.lineTo(-17 * faceDirection, 2 + bounce);
@@ -1083,13 +1111,13 @@ export class BossCreepGraphics {
     g.fillStyle(0x888888, 1);
     g.save();
     g.translateCanvas(22 * faceDirection, -10 + bounce);
-    g.rotateCanvas((swordSwing * 0.02) * faceDirection);
+    g.rotateCanvas(swordSwing * 0.02 * faceDirection);
 
     g.fillRect(-2, -24, 4, 28);
-    g.fillStyle(0xAAAAAA, 1);
+    g.fillStyle(0xaaaaaa, 1);
     g.fillRect(-1, -24, 2, 28);
 
-    g.fillStyle(0xBBBBBB, 1);
+    g.fillStyle(0xbbbbbb, 1);
     g.beginPath();
     g.moveTo(-2, -24);
     g.lineTo(0, -32);
@@ -1113,7 +1141,7 @@ export class BossCreepGraphics {
     g.fillStyle(0x000000, 1);
     g.fillRect(10 * faceDirection, -14 + bounce, 6, 2);
 
-    g.fillStyle(0x88FF88, 0.8);
+    g.fillStyle(0x88ff88, 0.8);
     g.fillCircle(12 * faceDirection, -13 + bounce, 2);
 
     g.fillStyle(0x667766, 1);
@@ -1125,14 +1153,18 @@ export class BossCreepGraphics {
     g.fillPath();
   }
 
-  static drawBossGuard2(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBossGuard2(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.04;
     const swordSwing = Math.sin(bounceTime * 3) * 6;
 
-    g.fillStyle(0x88AA44, 0.25);
+    g.fillStyle(0x88aa44, 0.25);
     g.fillCircle(0, 0, 42 * pulse);
-    g.fillStyle(0xAAAA44, 0.15);
+    g.fillStyle(0xaaaa44, 0.15);
     g.fillCircle(0, 0, 48 * pulse);
 
     g.fillStyle(0x000000, 0.4);
@@ -1147,14 +1179,14 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.lineStyle(2, 0xCCAA44, 1);
+    g.lineStyle(2, 0xccaa44, 1);
     g.strokePath();
 
     g.fillStyle(0x556655, 1);
     g.fillRect(-12, 10 + bounce, 7, 16);
     g.fillRect(5, 10 + bounce, 7, 16);
 
-    g.fillStyle(0xBB9944, 1);
+    g.fillStyle(0xbb9944, 1);
     g.fillCircle(-8, 12 + bounce, 4);
     g.fillCircle(8, 12 + bounce, 4);
 
@@ -1172,7 +1204,7 @@ export class BossCreepGraphics {
       }
     }
 
-    g.lineStyle(2, 0xCCAA44, 1);
+    g.lineStyle(2, 0xccaa44, 1);
     g.strokeEllipse(0, -2 + bounce, 20, 12);
 
     g.fillStyle(0x665544, 1);
@@ -1186,12 +1218,12 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.lineStyle(3, 0xCCAA44, 1);
+    g.lineStyle(3, 0xccaa44, 1);
     g.strokePath();
 
-    g.fillStyle(0xAA6622, 1);
+    g.fillStyle(0xaa6622, 1);
     g.fillCircle(-23 * faceDirection, 0 + bounce, 8);
-    g.fillStyle(0xCC8833, 1);
+    g.fillStyle(0xcc8833, 1);
     g.beginPath();
     g.moveTo(-23 * faceDirection, -6 + bounce);
     g.lineTo(-18 * faceDirection, 4 + bounce);
@@ -1199,27 +1231,27 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xFF4400, 1);
+    g.fillStyle(0xff4400, 1);
     g.fillCircle(-23 * faceDirection, 0 + bounce, 3);
 
     g.fillStyle(0x667766, 1);
     g.fillEllipse(20 * faceDirection, -2 + bounce, 10, 8);
-    g.fillStyle(0xBB9944, 1);
+    g.fillStyle(0xbb9944, 1);
     g.fillCircle(18 * faceDirection, -6 + bounce, 5);
 
     g.save();
     g.translateCanvas(24 * faceDirection, -12 + bounce);
-    g.rotateCanvas((swordSwing * 0.02) * faceDirection);
+    g.rotateCanvas(swordSwing * 0.02 * faceDirection);
 
     g.fillStyle(0x999999, 1);
     g.fillRect(-3, -28, 6, 32);
-    g.fillStyle(0xBBBBBB, 1);
+    g.fillStyle(0xbbbbbb, 1);
     g.fillRect(-1, -28, 2, 32);
 
-    g.fillStyle(0xDDDDDD, 1);
+    g.fillStyle(0xdddddd, 1);
     g.fillRect(2, -26, 1, 28);
 
-    g.fillStyle(0xCCCCCC, 1);
+    g.fillStyle(0xcccccc, 1);
     g.beginPath();
     g.moveTo(-3, -28);
     g.lineTo(0, -38);
@@ -1227,7 +1259,7 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xCCAA44, 1);
+    g.fillStyle(0xccaa44, 1);
     g.fillRect(-10, 2, 20, 4);
     g.beginPath();
     g.moveTo(-10, 4);
@@ -1244,12 +1276,12 @@ export class BossCreepGraphics {
 
     g.fillStyle(0x553322, 1);
     g.fillRect(-2, 6, 4, 10);
-    g.fillStyle(0xCCAA44, 0.8);
+    g.fillStyle(0xccaa44, 0.8);
     for (let i = 0; i < 4; i++) {
       g.fillRect(-2, 7 + i * 2, 4, 1);
     }
 
-    g.fillStyle(0xCCAA44, 1);
+    g.fillStyle(0xccaa44, 1);
     g.fillCircle(0, 18, 3);
     g.restore();
 
@@ -1261,11 +1293,11 @@ export class BossCreepGraphics {
 
     g.fillStyle(0x000000, 1);
     g.fillRect(12 * faceDirection, -16 + bounce, 8, 3);
-    g.fillStyle(0xFFDD44, 0.9);
+    g.fillStyle(0xffdd44, 0.9);
     g.fillCircle(14 * faceDirection, -15 + bounce, 2);
     g.fillCircle(18 * faceDirection, -15 + bounce, 2);
 
-    g.fillStyle(0xCCAA44, 1);
+    g.fillStyle(0xccaa44, 1);
     g.beginPath();
     g.moveTo(4 * faceDirection, -22 + bounce);
     g.lineTo(8 * faceDirection, -36 + bounce);
@@ -1282,18 +1314,22 @@ export class BossCreepGraphics {
     g.fillPath();
   }
 
-  static drawBossGuard3(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
+  static drawBossGuard3(
+    g: Phaser.GameObjects.Graphics,
+    bounceTime: number,
+    faceDirection: number
+  ): void {
     const bounce = Math.sin(bounceTime * 4) * 2;
     const pulse = 1 + Math.sin(bounceTime * 6) * 0.05;
     const swordSwing = Math.sin(bounceTime * 3) * 8;
     const flameFlicker = Math.sin(bounceTime * 12) * 0.3 + 0.7;
     const flameWave = Math.sin(bounceTime * 8);
 
-    g.fillStyle(0xFF4400, 0.2 * flameFlicker);
+    g.fillStyle(0xff4400, 0.2 * flameFlicker);
     g.fillCircle(0, 0, 50 * pulse);
-    g.fillStyle(0xFF6600, 0.15 * flameFlicker);
+    g.fillStyle(0xff6600, 0.15 * flameFlicker);
     g.fillCircle(0, 0, 56 * pulse);
-    g.fillStyle(0xFFAA00, 0.1 * flameFlicker);
+    g.fillStyle(0xffaa00, 0.1 * flameFlicker);
     g.fillCircle(0, 0, 62 * pulse);
 
     for (let i = 0; i < 6; i++) {
@@ -1301,7 +1337,7 @@ export class BossCreepGraphics {
       const dist = 35 + Math.sin(bounceTime * 4 + i) * 8;
       const ex = Math.cos(angle) * dist;
       const ey = Math.sin(angle) * dist * 0.6;
-      g.fillStyle(0xFF6600, 0.6 + Math.sin(bounceTime * 8 + i) * 0.3);
+      g.fillStyle(0xff6600, 0.6 + Math.sin(bounceTime * 8 + i) * 0.3);
       g.fillCircle(ex, ey, 2 + Math.sin(bounceTime * 6 + i) * 1);
     }
 
@@ -1320,9 +1356,9 @@ export class BossCreepGraphics {
     for (let i = 0; i < 5; i++) {
       const fx = -32 * faceDirection + i * 2 * faceDirection;
       const fy = 28 + bounce + Math.sin(bounceTime * 10 + i) * 3;
-      g.fillStyle(0xFF4400, 0.7);
+      g.fillStyle(0xff4400, 0.7);
       g.fillCircle(fx, fy, 3);
-      g.fillStyle(0xFFAA00, 0.5);
+      g.fillStyle(0xffaa00, 0.5);
       g.fillCircle(fx, fy - 4, 2);
     }
 
@@ -1330,7 +1366,7 @@ export class BossCreepGraphics {
     g.fillRect(-14, 10 + bounce, 8, 18);
     g.fillRect(6, 10 + bounce, 8, 18);
 
-    g.fillStyle(0xFF4400, 0.6);
+    g.fillStyle(0xff4400, 0.6);
     g.fillRect(-12, 14 + bounce, 4, 2);
     g.fillRect(-12, 20 + bounce, 4, 2);
     g.fillRect(8, 14 + bounce, 4, 2);
@@ -1339,7 +1375,7 @@ export class BossCreepGraphics {
     g.fillStyle(0x222222, 1);
     g.fillEllipse(-10, 28, 12, 7);
     g.fillEllipse(10, 28, 12, 7);
-    g.fillStyle(0xFF6600, 0.7 * flameFlicker);
+    g.fillStyle(0xff6600, 0.7 * flameFlicker);
     g.fillCircle(-14, 26, 3);
     g.fillCircle(14, 26, 3);
 
@@ -1353,13 +1389,13 @@ export class BossCreepGraphics {
       }
     }
 
-    g.fillStyle(0xFF4400, 0.6 * flameFlicker);
+    g.fillStyle(0xff4400, 0.6 * flameFlicker);
     g.fillRect(-10, -2 + bounce, 20, 2);
     g.fillRect(-8, 4 + bounce, 16, 2);
 
-    g.fillStyle(0xFF6600, 0.8 * flameFlicker);
+    g.fillStyle(0xff6600, 0.8 * flameFlicker);
     g.fillCircle(0, 0 + bounce, 6);
-    g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+    g.fillStyle(0xffaa00, 0.6 * flameFlicker);
     g.fillCircle(0, 0 + bounce, 4);
 
     g.save();
@@ -1375,15 +1411,15 @@ export class BossCreepGraphics {
       const flameY = -30 + i * 4;
       const flameSize = 4 + Math.sin(bounceTime * 12 + i) * 2;
       const flameOffset = Math.sin(bounceTime * 10 + i * 0.5) * 3;
-      g.fillStyle(0xFF4400, 0.8 * flameFlicker);
+      g.fillStyle(0xff4400, 0.8 * flameFlicker);
       g.fillCircle(flameOffset, flameY, flameSize);
-      g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+      g.fillStyle(0xffaa00, 0.6 * flameFlicker);
       g.fillCircle(flameOffset, flameY - 2, flameSize * 0.6);
-      g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
+      g.fillStyle(0xffff00, 0.4 * flameFlicker);
       g.fillCircle(flameOffset, flameY - 3, flameSize * 0.3);
     }
 
-    g.fillStyle(0xFF6600, 0.9);
+    g.fillStyle(0xff6600, 0.9);
     g.beginPath();
     g.moveTo(-2, -32);
     g.lineTo(0, -42 - flameWave * 3);
@@ -1411,15 +1447,15 @@ export class BossCreepGraphics {
       const flameY = -32 + i * 4;
       const flameSize = 5 + Math.sin(bounceTime * 11 + i * 1.1) * 2;
       const flameOffset = Math.sin(bounceTime * 9 + i * 0.7) * 3;
-      g.fillStyle(0xFF4400, 0.8 * flameFlicker);
+      g.fillStyle(0xff4400, 0.8 * flameFlicker);
       g.fillCircle(flameOffset, flameY, flameSize);
-      g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+      g.fillStyle(0xffaa00, 0.6 * flameFlicker);
       g.fillCircle(flameOffset, flameY - 2, flameSize * 0.6);
-      g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
+      g.fillStyle(0xffff00, 0.4 * flameFlicker);
       g.fillCircle(flameOffset, flameY - 3, flameSize * 0.3);
     }
 
-    g.fillStyle(0xFF6600, 0.9);
+    g.fillStyle(0xff6600, 0.9);
     g.beginPath();
     g.moveTo(-2, -34);
     g.lineTo(0, -46 - flameWave * 4);
@@ -1438,10 +1474,10 @@ export class BossCreepGraphics {
     g.fillEllipse(-16 * faceDirection, -6 + bounce, 10, 8);
     g.fillEllipse(20 * faceDirection, -6 + bounce, 10, 8);
 
-    g.fillStyle(0xFF4400, 0.7 * flameFlicker);
+    g.fillStyle(0xff4400, 0.7 * flameFlicker);
     g.fillCircle(-16 * faceDirection, -10 + bounce, 5);
     g.fillCircle(20 * faceDirection, -10 + bounce, 5);
-    g.fillStyle(0xFFAA00, 0.5 * flameFlicker);
+    g.fillStyle(0xffaa00, 0.5 * flameFlicker);
     g.fillCircle(-16 * faceDirection, -13 + bounce, 3);
     g.fillCircle(20 * faceDirection, -13 + bounce, 3);
 
@@ -1460,10 +1496,10 @@ export class BossCreepGraphics {
 
     g.fillStyle(0x000000, 1);
     g.fillRect(10 * faceDirection, -20 + bounce, 10, 4);
-    g.fillStyle(0xFF4400, 0.9 * flameFlicker);
+    g.fillStyle(0xff4400, 0.9 * flameFlicker);
     g.fillCircle(13 * faceDirection, -18 + bounce, 3);
     g.fillCircle(18 * faceDirection, -18 + bounce, 3);
-    g.fillStyle(0xFFFF00, 0.7 * flameFlicker);
+    g.fillStyle(0xffff00, 0.7 * flameFlicker);
     g.fillCircle(13 * faceDirection, -18 + bounce, 1.5);
     g.fillCircle(18 * faceDirection, -18 + bounce, 1.5);
 
@@ -1481,13 +1517,13 @@ export class BossCreepGraphics {
     g.closePath();
     g.fillPath();
 
-    g.fillStyle(0xFF4400, 0.8 * flameFlicker);
+    g.fillStyle(0xff4400, 0.8 * flameFlicker);
     g.fillCircle(-4 * faceDirection, -40 + bounce + flameWave * 2, 4);
     g.fillCircle(18 * faceDirection, -42 + bounce + flameWave * 2, 4);
-    g.fillStyle(0xFFAA00, 0.6 * flameFlicker);
+    g.fillStyle(0xffaa00, 0.6 * flameFlicker);
     g.fillCircle(-4 * faceDirection, -44 + bounce + flameWave * 3, 3);
     g.fillCircle(18 * faceDirection, -46 + bounce + flameWave * 3, 3);
-    g.fillStyle(0xFFFF00, 0.4 * flameFlicker);
+    g.fillStyle(0xffff00, 0.4 * flameFlicker);
     g.fillCircle(-4 * faceDirection, -47 + bounce + flameWave * 4, 2);
     g.fillCircle(18 * faceDirection, -49 + bounce + flameWave * 4, 2);
   }

@@ -69,7 +69,7 @@ export class AudioManager {
 
     const bgmFiles = [
       { src: ['assets/audio/BGS1.mp3'], name: 'BGS1' },
-      { src: ['assets/audio/BGS2.mp3'], name: 'BGS2' }
+      { src: ['assets/audio/BGS2.mp3'], name: 'BGS2' },
     ];
 
     this.bgmTracksLoaded = 0;
@@ -82,18 +82,14 @@ export class AudioManager {
         preload: true,
         html5: true,
         onload: () => {
-
           this.bgmTracksLoaded++;
 
           if (this.bgmWantToPlay && !this.bgmPlaying && this.bgmTracksLoaded > 0) {
             this.startBGMPlayback();
           }
         },
-        onplay: () => {
-
-        },
+        onplay: () => {},
         onend: () => {
-
           if (this.bgmPlaying) {
             this.playNextBgmTrack();
           }
@@ -105,7 +101,7 @@ export class AudioManager {
           console.warn(`AudioManager: BGM ${bgmDef.name} play blocked (autoplay policy):`, error);
 
           this.bgmPlaying = false;
-        }
+        },
       });
       this.bgmTracks.push(track);
     });
@@ -115,13 +111,10 @@ export class AudioManager {
     this.initializeSFX();
 
     this.isInitialized = true;
-
   }
 
   private initializeSFX(): void {
-
     const sfxDefinitions: { key: SFXKey; file: string }[] = [
-
       { key: 'ui_click', file: 'click.mp3' },
       { key: 'coins', file: 'coins.mp3' },
 
@@ -133,7 +126,7 @@ export class AudioManager {
       { key: 'tower_place', file: 'tower_place.mp3' },
 
       { key: 'boss_level_entry', file: 'boss_level_entry.mp3' },
-      { key: 'dragon_roar', file: 'dragon.mp3' }
+      { key: 'dragon_roar', file: 'dragon.mp3' },
     ];
 
     for (const def of sfxDefinitions) {
@@ -142,9 +135,8 @@ export class AudioManager {
         volume: this.sfxVolume * MAX_VOLUME_SCALE,
         preload: true,
         onloaderror: () => {
-
-          console.debug(`AudioManager: SFX ${def.key} not found, skipping`);
-        }
+          // SFX file not found - silently skip
+        },
       });
       this.sfxSounds.set(def.key, sound);
     }
@@ -157,7 +149,7 @@ export class AudioManager {
 
     if (this.isMuted) return;
 
-    const anyPlaying = this.bgmTracks.some(track => track.playing());
+    const anyPlaying = this.bgmTracks.some((track) => track.playing());
     if (anyPlaying) return;
 
     this.startBGMPlayback();
@@ -170,9 +162,7 @@ export class AudioManager {
     if (currentTrack && currentTrack.state() === 'loaded') {
       this.bgmPlaying = true;
       currentTrack.play();
-
     } else {
-
       const otherIndex = this.currentBgmIndex === 0 ? 1 : 0;
       const otherTrack = this.bgmTracks[otherIndex];
       if (otherTrack && otherTrack.state() === 'loaded') {
@@ -184,13 +174,11 @@ export class AudioManager {
   }
 
   private playNextBgmTrack(): void {
-
     this.currentBgmIndex = this.currentBgmIndex === 0 ? 1 : 0;
 
     const nextTrack = this.bgmTracks[this.currentBgmIndex];
     if (nextTrack && nextTrack.state() === 'loaded') {
       nextTrack.play();
-
     }
   }
 
@@ -223,16 +211,13 @@ export class AudioManager {
 
     const sound = this.sfxSounds.get(key);
     if (sound && sound.state() === 'loaded') {
-
       sound.volume(this.sfxVolume);
       sound.play();
     }
 
     if (this.bgmWantToPlay && !this.bgmPlaying && !this.isMuted) {
-
       setTimeout(() => {
         if (!this.bgmPlaying) {
-
           this.startBGMPlayback();
         }
       }, 100);
@@ -240,9 +225,7 @@ export class AudioManager {
   }
 
   unlockAudio(): void {
-
     if (this.bgmWantToPlay && !this.bgmPlaying) {
-
       this.startBGMPlayback();
     }
   }
@@ -321,7 +304,7 @@ export class AudioManager {
       const settings: AudioSettings = {
         bgmVolume: this.bgmVolume,
         sfxVolume: this.sfxVolume,
-        muted: this.isMuted
+        muted: this.isMuted,
       };
       localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify(settings));
     } catch (e) {

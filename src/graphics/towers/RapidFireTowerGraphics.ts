@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export function drawRapidFireTower(g: Phaser.GameObjects.Graphics, level: number): void {
-
   g.fillStyle(0x000000, 0.3);
   g.fillEllipse(0, 25, 52, 18);
 
@@ -9,7 +8,6 @@ export function drawRapidFireTower(g: Phaser.GameObjects.Graphics, level: number
   const towerHeight = 37;
 
   if (level === 1) {
-
     g.fillStyle(0x8b7355, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 20);
 
@@ -31,7 +29,6 @@ export function drawRapidFireTower(g: Phaser.GameObjects.Graphics, level: number
     g.fillStyle(0x3a3a3a, 1);
     g.fillCircle(0, -towerHeight + 8, 6);
   } else if (level === 2) {
-
     g.fillStyle(0x4a4a4a, 1);
     g.fillRect(-baseWidth, 3, baseWidth * 2, 24);
     g.fillStyle(0x5a5a5a, 1);
@@ -69,7 +66,6 @@ export function drawRapidFireTower(g: Phaser.GameObjects.Graphics, level: number
     g.fillStyle(0x3a3a3a, 1);
     g.fillRect(-6, -towerHeight + 15, 12, 10);
   } else {
-
     g.fillStyle(0x5a5a5a, 1);
     g.fillRect(-baseWidth, 0, baseWidth * 2, 28);
     g.fillStyle(0x6a6a6a, 1);

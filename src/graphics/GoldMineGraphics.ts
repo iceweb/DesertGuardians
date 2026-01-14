@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { drawStar } from './towers/TowerGraphicsBase';
 
 export class GoldMineGraphics {
-
   static drawMine(
     graphics: Phaser.GameObjects.Graphics,
     level: 0 | 1 | 2 | 3,
@@ -27,7 +26,11 @@ export class GoldMineGraphics {
     }
   }
 
-  private static drawEmptySlot(g: Phaser.GameObjects.Graphics, _width: number, _height: number): void {
+  private static drawEmptySlot(
+    g: Phaser.GameObjects.Graphics,
+    _width: number,
+    _height: number
+  ): void {
     const cx = 0;
     const cy = 0;
 
@@ -101,7 +104,12 @@ export class GoldMineGraphics {
     g.lineBetween(cx - 3, cy + 44, cx + 3, cy + 44);
   }
 
-  private static drawSketchyCircle(g: Phaser.GameObjects.Graphics, x: number, y: number, radius: number): void {
+  private static drawSketchyCircle(
+    g: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    radius: number
+  ): void {
     const segments = 12;
     const wobble = radius * 0.15;
 
@@ -396,7 +404,13 @@ export class GoldMineGraphics {
     this.drawLevelIndicator(g, 3);
   }
 
-  static drawMinecart(g: Phaser.GameObjects.Graphics, x: number, y: number, scale: number = 1, hasGold: boolean = true): void {
+  static drawMinecart(
+    g: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    scale: number = 1,
+    hasGold: boolean = true
+  ): void {
     const s = scale;
 
     g.fillStyle(0x5a4535, 1);
@@ -422,7 +436,6 @@ export class GoldMineGraphics {
     g.fillCircle(x + 11 * s, y + 5 * s, 1.5 * s);
 
     if (hasGold) {
-
       g.fillStyle(0xffd700, 1);
       g.fillCircle(x - 4 * s, y - 4 * s, 5 * s);
       g.fillCircle(x + 4 * s, y - 3 * s, 4 * s);
@@ -488,16 +501,13 @@ export class GoldMineGraphics {
 
   static drawLevelIndicator(g: Phaser.GameObjects.Graphics, level: number): void {
     if (level === 1) {
-
       g.fillStyle(0xcd7f32, 1);
       drawStar(g, 0, -38, 4);
     } else if (level === 2) {
-
       g.fillStyle(0xc0c0c0, 1);
       drawStar(g, -8, -38, 4);
       drawStar(g, 8, -38, 4);
     } else if (level === 3) {
-
       g.fillStyle(0xffd700, 0.3);
       g.fillCircle(0, -40, 12);
       g.fillStyle(0xffd700, 1);
@@ -507,18 +517,24 @@ export class GoldMineGraphics {
     }
   }
 
-  static createShimmerTween(scene: Phaser.Scene, graphics: Phaser.GameObjects.Graphics): Phaser.Tweens.Tween {
+  static createShimmerTween(
+    scene: Phaser.Scene,
+    graphics: Phaser.GameObjects.Graphics
+  ): Phaser.Tweens.Tween {
     return scene.tweens.add({
       targets: graphics,
       alpha: { from: 0.7, to: 1 },
       duration: 1200,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
   }
 
-  static createIdleTween(scene: Phaser.Scene, graphics: Phaser.GameObjects.Graphics): Phaser.Tweens.Tween {
+  static createIdleTween(
+    scene: Phaser.Scene,
+    graphics: Phaser.GameObjects.Graphics
+  ): Phaser.Tweens.Tween {
     return scene.tweens.add({
       targets: graphics,
       scaleX: { from: 1, to: 1.02 },
@@ -526,7 +542,7 @@ export class GoldMineGraphics {
       duration: 2000,
       yoyo: true,
       repeat: -1,
-      ease: 'Sine.easeInOut'
+      ease: 'Sine.easeInOut',
     });
   }
 }

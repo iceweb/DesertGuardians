@@ -47,7 +47,7 @@ export class RapidFireAnimator {
       this.turretGraphics,
       this.barrelGraphics,
       this.gunnerGraphics,
-      this.muzzleFlashGraphics
+      this.muzzleFlashGraphics,
     ]);
 
     this.container.add([this.baseGraphics, this.turretContainer]);
@@ -80,7 +80,6 @@ export class RapidFireAnimator {
     }
 
     if (this.isFiring || this.barrelSpinSpeed > 0.1) {
-
       if (this.isFiring) {
         const maxSpeed = 20 + this.level * 10;
         this.barrelSpinSpeed = Math.min(this.barrelSpinSpeed + 50 * dt, maxSpeed);
@@ -111,7 +110,6 @@ export class RapidFireAnimator {
         this.isCheeringActive = false;
         this.cheerArmAngle = 0;
       } else {
-
         this.cheerArmAngle = Math.sin(this.cheerTimer * 20) * 0.5;
       }
       this.drawGunner();
@@ -121,14 +119,12 @@ export class RapidFireAnimator {
   }
 
   setTarget(targetX: number, targetY: number, towerX: number, towerY: number): void {
-
     const turretWorldY = towerY + this.TURRET_Y[this.level - 1];
-    this.targetAngle = Phaser.Math.Angle.Between(towerX, turretWorldY, targetX, targetY) + Math.PI / 2;
+    this.targetAngle =
+      Phaser.Math.Angle.Between(towerX, turretWorldY, targetX, targetY) + Math.PI / 2;
   }
 
-  clearTarget(): void {
-
-  }
+  clearTarget(): void {}
 
   onFire(): { x: number; y: number } {
     this.isFiring = true;
@@ -170,7 +166,6 @@ export class RapidFireAnimator {
     g.fillEllipse(0, 25, 52, 18);
 
     if (this.level === 1) {
-
       g.fillStyle(0x8b7355, 1);
       g.fillRect(-baseWidth, 5, baseWidth * 2, 20);
       g.lineStyle(1, 0x6b5344, 0.4);
@@ -183,7 +178,6 @@ export class RapidFireAnimator {
       g.fillStyle(0x6a6a6a, 1);
       g.fillRect(-14, -47, 28, 49);
     } else if (this.level === 2) {
-
       g.fillStyle(0x4a4a4a, 1);
       g.fillRect(-baseWidth, 3, baseWidth * 2, 24);
       g.fillStyle(0x5a5a5a, 1);
@@ -205,7 +199,6 @@ export class RapidFireAnimator {
       g.fillStyle(0xffcc00, 0.6);
       g.fillCircle(25, -30, 4);
     } else {
-
       g.fillStyle(0x5a5a5a, 1);
       g.fillRect(-baseWidth, 0, baseWidth * 2, 28);
       g.fillStyle(0x6a6a6a, 1);
@@ -254,7 +247,6 @@ export class RapidFireAnimator {
     g.clear();
 
     if (this.level === 1) {
-
       g.fillStyle(0x4a4a4a, 1);
       g.fillCircle(0, 0, 14);
       g.fillStyle(0x5a5a5a, 1);
@@ -262,7 +254,6 @@ export class RapidFireAnimator {
       g.lineStyle(2, 0x3a3a3a, 1);
       g.strokeCircle(0, 0, 12);
     } else if (this.level === 2) {
-
       g.fillStyle(0x4a4a4a, 1);
       g.fillCircle(0, 0, 18);
       g.fillStyle(0x5a5a5a, 1);
@@ -276,7 +267,6 @@ export class RapidFireAnimator {
       g.closePath();
       g.fillPath();
     } else {
-
       g.fillStyle(0x4a4a4a, 1);
       g.fillCircle(0, 0, 22);
       g.fillStyle(0x5a5a5a, 1);
@@ -304,13 +294,11 @@ export class RapidFireAnimator {
     g.clear();
 
     if (this.level === 1) {
-
       g.fillStyle(0x3a3a3a, 1);
       g.fillRect(-3, -25, 6, 20);
       g.fillStyle(0x2a2a2a, 1);
       g.fillCircle(0, -25, 3);
     } else if (this.level === 2) {
-
       g.fillStyle(0x3a3a3a, 1);
       g.fillRect(-7, -30, 5, 24);
       g.fillRect(2, -30, 5, 24);
@@ -318,7 +306,6 @@ export class RapidFireAnimator {
       g.fillCircle(-4.5, -30, 3);
       g.fillCircle(4.5, -30, 3);
     } else {
-
       const barrelCount = 6;
       const barrelSpread = 7;
 
@@ -379,9 +366,7 @@ export class RapidFireAnimator {
     g.fillRect(8, bodyY + 10, 4, 12);
 
     if (this.level === 1) {
-
       if (this.isCheeringActive) {
-
         const armSpread = this.cheerArmAngle * 8;
         g.fillStyle(uniformColor, 1);
 
@@ -392,7 +377,6 @@ export class RapidFireAnimator {
         g.fillCircle(-14 - armSpread, bodyY - 12, 5);
         g.fillCircle(14 + armSpread, bodyY - 12, 5);
       } else {
-
         g.fillStyle(uniformColor, 1);
         g.fillRect(-14, bodyY - 8, 7, 16);
         g.fillRect(7, bodyY - 8, 7, 16);
@@ -429,9 +413,7 @@ export class RapidFireAnimator {
 
       g.fillStyle(helmetDark, 1);
       g.fillEllipse(0, bodyY - 14, 10, 4);
-
     } else if (this.level === 2) {
-
       if (this.isCheeringActive) {
         const armSpread = this.cheerArmAngle * 10;
         g.fillStyle(uniformColor, 1);
@@ -442,7 +424,6 @@ export class RapidFireAnimator {
         g.fillCircle(-15 - armSpread, bodyY - 14, 5);
         g.fillCircle(15 + armSpread, bodyY - 14, 5);
       } else {
-
         g.fillStyle(uniformColor, 1);
         g.fillRect(-16, bodyY - 10, 8, 18);
         g.fillRect(8, bodyY - 10, 8, 18);
@@ -484,9 +465,7 @@ export class RapidFireAnimator {
       g.fillStyle(0x444444, 1);
       g.fillEllipse(-4, bodyY - 16, 4, 3);
       g.fillEllipse(4, bodyY - 16, 4, 3);
-
     } else {
-
       if (this.isCheeringActive) {
         const armSpread = this.cheerArmAngle * 12;
         g.fillStyle(uniformColor, 1);
@@ -501,7 +480,6 @@ export class RapidFireAnimator {
         g.fillCircle(-17 - armSpread, bodyY - 16, 6);
         g.fillCircle(17 + armSpread, bodyY - 16, 6);
       } else {
-
         g.fillStyle(uniformColor, 1);
         g.fillRect(-18, bodyY - 12, 9, 20);
         g.fillRect(9, bodyY - 12, 9, 20);

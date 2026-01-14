@@ -53,7 +53,11 @@ export class PathRenderer {
 
   private drawPathLayer(
     graphics: Phaser.GameObjects.Graphics,
-    segments: { start: Phaser.Math.Vector2; end: Phaser.Math.Vector2; direction: Phaser.Math.Vector2 }[],
+    segments: {
+      start: Phaser.Math.Vector2;
+      end: Phaser.Math.Vector2;
+      direction: Phaser.Math.Vector2;
+    }[],
     points: Phaser.Math.Vector2[],
     width: number,
     color: number,
@@ -81,7 +85,12 @@ export class PathRenderer {
   }
 
   private addCanyonEdgeDetails(
-    segments: { start: Phaser.Math.Vector2; end: Phaser.Math.Vector2; direction: Phaser.Math.Vector2; length: number }[],
+    segments: {
+      start: Phaser.Math.Vector2;
+      end: Phaser.Math.Vector2;
+      direction: Phaser.Math.Vector2;
+      length: number;
+    }[],
     pathWidth: number
   ): void {
     const edgeDetails = this.scene.add.graphics();
@@ -99,7 +108,7 @@ export class PathRenderer {
         const perpY = segment.direction.x;
 
         if (Math.random() > 0.5) {
-          const offset = (pathWidth / 2) + 5 + Math.random() * 8;
+          const offset = pathWidth / 2 + 5 + Math.random() * 8;
           const rockX = x + perpX * offset;
           const rockY = y + perpY * offset;
           const rockSize = 3 + Math.random() * 6;
@@ -111,7 +120,7 @@ export class PathRenderer {
         }
 
         if (Math.random() > 0.5) {
-          const offset = (pathWidth / 2) + 5 + Math.random() * 8;
+          const offset = pathWidth / 2 + 5 + Math.random() * 8;
           const rockX = x - perpX * offset;
           const rockY = y - perpY * offset;
           const rockSize = 3 + Math.random() * 6;
@@ -139,7 +148,7 @@ export class PathRenderer {
         const perpX = -segment.direction.y;
         const perpY = segment.direction.x;
         const side = Math.random() > 0.5 ? 1 : -1;
-        const offset = (pathWidth / 2) + 10;
+        const offset = pathWidth / 2 + 10;
 
         const crackX = x + perpX * offset * side;
         const crackY = y + perpY * offset * side;
@@ -159,7 +168,12 @@ export class PathRenderer {
   }
 
   private addPathDetails(
-    segments: { start: Phaser.Math.Vector2; end: Phaser.Math.Vector2; direction: Phaser.Math.Vector2; length: number }[]
+    segments: {
+      start: Phaser.Math.Vector2;
+      end: Phaser.Math.Vector2;
+      direction: Phaser.Math.Vector2;
+      length: number;
+    }[]
   ): void {
     const details = this.scene.add.graphics();
     details.setDepth(1.5);
@@ -174,7 +188,11 @@ export class PathRenderer {
 
         if (Math.random() > 0.6) {
           details.fillStyle(0x9a7a5a, 0.5);
-          details.fillCircle(x + (Math.random() - 0.5) * 30, y + (Math.random() - 0.5) * 30, 2 + Math.random() * 3);
+          details.fillCircle(
+            x + (Math.random() - 0.5) * 30,
+            y + (Math.random() - 0.5) * 30,
+            2 + Math.random() * 3
+          );
         }
       }
     }

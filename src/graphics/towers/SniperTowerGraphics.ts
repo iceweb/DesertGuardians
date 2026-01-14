@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export function drawSniperTower(g: Phaser.GameObjects.Graphics, level: number): void {
-
   g.fillStyle(0x000000, 0.3);
   g.fillEllipse(0, 25, 42, 16);
 
@@ -9,7 +8,6 @@ export function drawSniperTower(g: Phaser.GameObjects.Graphics, level: number): 
   const towerHeight = 55;
 
   if (level === 1) {
-
     g.fillStyle(0x6a5a4a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 18);
     g.fillStyle(0x5a4a3a, 1);
@@ -34,7 +32,6 @@ export function drawSniperTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillStyle(0x3a3a3a, 1);
     g.fillRect(5, -towerHeight - 10, 18, 3);
   } else if (level === 2) {
-
     g.fillStyle(0x5a5a5a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 20);
     g.fillStyle(0x4a4a4a, 1);
@@ -83,7 +80,6 @@ export function drawSniperTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.fillStyle(0x4a4a6a, 1);
     g.fillRect(12, -towerHeight - 12, 10, 4);
   } else {
-
     g.fillStyle(0x4a5a4a, 1);
     g.fillRect(-baseWidth, 5, baseWidth * 2, 22);
     g.fillStyle(0x3a4a3a, 1);
@@ -153,7 +149,12 @@ export function drawSniperTower(g: Phaser.GameObjects.Graphics, level: number): 
     g.lineStyle(1, 0x5a6a4a, 1);
     for (let i = 0; i < 8; i++) {
       const angle = Math.random() * Math.PI;
-      g.lineBetween(-4, -towerHeight - 2, -4 + Math.cos(angle) * 12, -towerHeight - 2 + Math.sin(angle) * 12);
+      g.lineBetween(
+        -4,
+        -towerHeight - 2,
+        -4 + Math.cos(angle) * 12,
+        -towerHeight - 2 + Math.sin(angle) * 12
+      );
     }
 
     g.fillStyle(0x2a2a2a, 1);

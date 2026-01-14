@@ -25,7 +25,11 @@ export class NextWavePanel {
     this.container.setVisible(false);
   }
 
-  show(waveNumber: number, creepTypes: Array<{ type: string; description: string }>, waveType?: WaveType): void {
+  show(
+    waveNumber: number,
+    creepTypes: Array<{ type: string; description: string }>,
+    waveType?: WaveType
+  ): void {
     this.clearIcons();
     this.container.removeAll(true);
 
@@ -56,7 +60,7 @@ export class NextWavePanel {
           if (this.bossGlow) {
             this.drawBossGlow(panelWidth, panelHeight, alpha);
           }
-        }
+        },
       });
     }
 
@@ -64,30 +68,49 @@ export class NextWavePanel {
     this.drawPanelBackground(bg, panelWidth, panelHeight, isBossWave);
     this.container.add(bg);
 
-    const hitBlocker = this.scene.add.rectangle(panelWidth / 2, panelHeight / 2, panelWidth, panelHeight, 0x000000, 0);
+    const hitBlocker = this.scene.add.rectangle(
+      panelWidth / 2,
+      panelHeight / 2,
+      panelWidth,
+      panelHeight,
+      0x000000,
+      0
+    );
     hitBlocker.setInteractive();
-    hitBlocker.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-    });
+    hitBlocker.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
     this.container.add(hitBlocker);
 
     const headerText = isBossWave ? '⚔️ BOSS WAVE' : 'Next Wave';
     const headerColor = isBossWave ? '#ff4444' : '#d4a574';
-    const header = this.scene.add.text(panelWidth / 2, 14, headerText, {
-      fontFamily: 'Arial',
-      fontSize: isBossWave ? '16px' : '15px',
-      fontStyle: isBossWave ? 'bold' : 'normal',
-      color: headerColor,
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5, 0);
+    const header = this.scene.add
+      .text(panelWidth / 2, 14, headerText, {
+        fontFamily: 'Arial',
+        fontSize: isBossWave ? '16px' : '15px',
+        fontStyle: isBossWave ? 'bold' : 'normal',
+        color: headerColor,
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5, 0);
     this.container.add(header);
 
-    const subtitle = this.scene.add.text(panelWidth / 2, 34, `Wave ${waveNumber}`, {
-      fontFamily: 'Arial',
-      fontSize: '13px',
-      color: '#888888'
-    }).setOrigin(0.5, 0);
+    const subtitle = this.scene.add
+      .text(panelWidth / 2, 34, `Wave ${waveNumber}`, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: '#888888',
+      })
+      .setOrigin(0.5, 0);
     this.container.add(subtitle);
 
     const headerHeight = 55;
@@ -110,7 +133,12 @@ export class NextWavePanel {
     this.container.setVisible(true);
   }
 
-  private createIconWithHover(x: number, y: number, creepType: string, description: string): Phaser.GameObjects.Container {
+  private createIconWithHover(
+    x: number,
+    y: number,
+    creepType: string,
+    description: string
+  ): Phaser.GameObjects.Container {
     const iconContainer = this.scene.add.container(x, y);
 
     const iconBg = this.scene.add.graphics();
@@ -124,13 +152,28 @@ export class NextWavePanel {
     icon.setDisplaySize(this.ICON_SIZE - 4, this.ICON_SIZE - 4);
     iconContainer.add(icon);
 
-    const hitArea = this.scene.add.rectangle(0, 0, this.ICON_SIZE + 4, this.ICON_SIZE + 4, 0x000000, 0);
+    const hitArea = this.scene.add.rectangle(
+      0,
+      0,
+      this.ICON_SIZE + 4,
+      this.ICON_SIZE + 4,
+      0x000000,
+      0
+    );
     hitArea.setInteractive({ useHandCursor: true });
     iconContainer.add(hitArea);
 
-    hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-    });
+    hitArea.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+      }
+    );
 
     const displayName = this.formatCreepName(creepType);
 
@@ -141,7 +184,12 @@ export class NextWavePanel {
       iconBg.lineStyle(2, 0xffd700, 1);
       iconBg.strokeCircle(0, 0, this.ICON_SIZE / 2 + 2);
 
-      this.showTooltip(displayName, description, iconContainer.x + this.container.x, iconContainer.y + this.container.y);
+      this.showTooltip(
+        displayName,
+        description,
+        iconContainer.x + this.container.x,
+        iconContainer.y + this.container.y
+      );
     });
 
     hitArea.on('pointerout', () => {
@@ -158,7 +206,6 @@ export class NextWavePanel {
   }
 
   private formatCreepName(type: string): string {
-
     if (type.startsWith('boss_')) {
       const bossNum = type.split('_')[1];
       const names: Record<string, string> = {
@@ -166,7 +213,7 @@ export class NextWavePanel {
         '2': 'Komodo Warlord',
         '3': 'Drake Champion',
         '4': 'Young Dragon',
-        '5': 'Elder Dragon Lord'
+        '5': 'Elder Dragon Lord',
       };
       return names[bossNum] || 'Boss';
     }
@@ -187,7 +234,7 @@ export class NextWavePanel {
     const tempText = this.scene.add.text(0, 0, description, {
       fontFamily: 'Arial',
       fontSize: '13px',
-      wordWrap: { width: 200 }
+      wordWrap: { width: 200 },
     });
     const textWidth = Math.min(tempText.width, 200);
     const textHeight = tempText.height;
@@ -215,21 +262,25 @@ export class NextWavePanel {
 
     this.tooltip.add(bg);
 
-    const nameText = this.scene.add.text(0, -tooltipHeight + 10, name, {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      fontStyle: 'bold',
-      color: '#ffd700'
-    }).setOrigin(0.5, 0);
+    const nameText = this.scene.add
+      .text(0, -tooltipHeight + 10, name, {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        fontStyle: 'bold',
+        color: '#ffd700',
+      })
+      .setOrigin(0.5, 0);
     this.tooltip.add(nameText);
 
-    const descText = this.scene.add.text(0, -tooltipHeight + 30, description, {
-      fontFamily: 'Arial',
-      fontSize: '13px',
-      color: '#ffffff',
-      wordWrap: { width: tooltipWidth - 20 },
-      align: 'center'
-    }).setOrigin(0.5, 0);
+    const descText = this.scene.add
+      .text(0, -tooltipHeight + 30, description, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: '#ffffff',
+        wordWrap: { width: tooltipWidth - 20 },
+        align: 'center',
+      })
+      .setOrigin(0.5, 0);
     this.tooltip.add(descText);
 
     const minX = tooltipWidth / 2 + 10;
@@ -255,8 +306,12 @@ export class NextWavePanel {
     this.bossGlow.fillRoundedRect(-4, -4, width + 8, height + 8, 10);
   }
 
-  private drawPanelBackground(g: Phaser.GameObjects.Graphics, width: number, height: number, isBossWave: boolean): void {
-
+  private drawPanelBackground(
+    g: Phaser.GameObjects.Graphics,
+    width: number,
+    height: number,
+    isBossWave: boolean
+  ): void {
     g.fillStyle(0x000000, 0.5);
     g.fillRoundedRect(4, 4, width, height, 8);
 
@@ -288,7 +343,7 @@ export class NextWavePanel {
   }
 
   private clearIcons(): void {
-    this.icons.forEach(icon => icon.destroy());
+    this.icons.forEach((icon) => icon.destroy());
     this.icons = [];
     this.bossGlow = null;
   }

@@ -1,15 +1,12 @@
 import Phaser from 'phaser';
 import type { Creep } from './Creep';
 import type { TowerBranch } from '../data';
-import {
-  TOWER_ABILITIES,
-  type AbilityDefinition
-} from './TowerAbilityDefinitions';
+import { TOWER_ABILITIES, type AbilityDefinition } from './TowerAbilityDefinitions';
 import { TowerAbilityVisuals } from './TowerAbilityVisuals';
 import {
   TowerAbilityEffects,
   type AbilityContext,
-  type AbilityResult
+  type AbilityResult,
 } from './TowerAbilityEffects';
 
 export { AbilityIconType, type AbilityDefinition } from './TowerAbilityDefinitions';
@@ -36,7 +33,7 @@ export class TowerAbilityHandler {
 
   selectAbility(abilityId: string): boolean {
     const abilities = this.getAvailableAbilities();
-    const ability = abilities.find(a => a.id === abilityId);
+    const ability = abilities.find((a) => a.id === abilityId);
 
     if (ability) {
       this.selectedAbility = ability;
@@ -69,6 +66,7 @@ export class TowerAbilityHandler {
     return this.executeAbility(context);
   }
 
+  /* eslint-disable complexity */
   private executeAbility(context: AbilityContext): AbilityResult {
     if (!this.selectedAbility) {
       return { triggered: false };
@@ -78,7 +76,6 @@ export class TowerAbilityHandler {
     const params = this.selectedAbility.effectParams;
 
     switch (abilityId) {
-
       case 'cannon_aftershock':
         return this.effects.executeAftershock(context, params);
       case 'cannon_earthquake':

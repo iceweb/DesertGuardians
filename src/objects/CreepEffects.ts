@@ -8,49 +8,58 @@ export class CreepEffects {
   }
 
   showPoisonDamage(x: number, y: number, damage: number): void {
-    const text = this.scene.add.text(x, y - 40, `-${damage}`, {
-      fontSize: '14px',
-      color: '#00ff00',
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5).setDepth(100);
+    const text = this.scene.add
+      .text(x, y - 40, `-${damage}`, {
+        fontSize: '14px',
+        color: '#00ff00',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5)
+      .setDepth(100);
 
     this.scene.tweens.add({
       targets: text,
       y: text.y - 30,
       alpha: 0,
       duration: 800,
-      onComplete: () => text.destroy()
+      onComplete: () => text.destroy(),
     });
   }
 
   showBurnDamage(x: number, y: number, damage: number): void {
-    const text = this.scene.add.text(x, y - 40, `-${damage}`, {
-      fontSize: '14px',
-      color: '#ff6600',
-      stroke: '#000000',
-      strokeThickness: 2
-    }).setOrigin(0.5).setDepth(100);
+    const text = this.scene.add
+      .text(x, y - 40, `-${damage}`, {
+        fontSize: '14px',
+        color: '#ff6600',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5)
+      .setDepth(100);
 
     this.scene.tweens.add({
       targets: text,
       y: text.y - 30,
       alpha: 0,
       duration: 800,
-      onComplete: () => text.destroy()
+      onComplete: () => text.destroy(),
     });
   }
 
   showDispelEffect(x: number, y: number, sizeScale: number = 1.0): void {
     const scale = Math.max(1.0, sizeScale);
 
-    const dispelText = this.scene.add.text(x, y - 50 * scale, 'DISPEL!', {
-      fontSize: `${Math.floor(20 * scale)}px`,
-      fontFamily: 'Arial Black',
-      color: '#FFD700',
-      stroke: '#8B4513',
-      strokeThickness: 4
-    }).setOrigin(0.5).setDepth(150);
+    const dispelText = this.scene.add
+      .text(x, y - 50 * scale, 'DISPEL!', {
+        fontSize: `${Math.floor(20 * scale)}px`,
+        fontFamily: 'Arial Black',
+        color: '#FFD700',
+        stroke: '#8B4513',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5)
+      .setDepth(150);
 
     this.scene.tweens.add({
       targets: dispelText,
@@ -59,13 +68,13 @@ export class CreepEffects {
       scale: 1.3,
       duration: 1000,
       ease: 'Cubic.easeOut',
-      onComplete: () => dispelText.destroy()
+      onComplete: () => dispelText.destroy(),
     });
 
     for (let ringIndex = 0; ringIndex < 3; ringIndex++) {
       const ring = this.scene.add.graphics();
       ring.setPosition(x, y);
-      ring.lineStyle(5 - ringIndex, 0xFFD700, 1);
+      ring.lineStyle(5 - ringIndex, 0xffd700, 1);
       ring.strokeCircle(0, -5, 25 * scale);
       ring.setDepth(100);
       ring.setScale(0.3);
@@ -77,7 +86,7 @@ export class CreepEffects {
         duration: 600 + ringIndex * 150,
         delay: ringIndex * 100,
         ease: 'Cubic.easeOut',
-        onComplete: () => ring.destroy()
+        onComplete: () => ring.destroy(),
       });
     }
 
@@ -85,10 +94,10 @@ export class CreepEffects {
       const angle = (i / 12) * Math.PI * 2;
       const particle = this.scene.add.graphics();
       particle.setPosition(x, y - 5);
-      particle.fillStyle(0xFFD700, 1);
+      particle.fillStyle(0xffd700, 1);
       particle.fillCircle(0, 0, 6 * scale);
 
-      particle.fillStyle(0xFFFFFF, 0.8);
+      particle.fillStyle(0xffffff, 0.8);
       particle.fillCircle(0, 0, 3 * scale);
       particle.setDepth(100);
 
@@ -103,15 +112,15 @@ export class CreepEffects {
         scale: 0.3,
         duration: 500,
         ease: 'Quad.easeOut',
-        onComplete: () => particle.destroy()
+        onComplete: () => particle.destroy(),
       });
     }
 
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y - 5);
-    flash.fillStyle(0xFFFFFF, 0.9);
+    flash.fillStyle(0xffffff, 0.9);
     flash.fillCircle(0, 0, 35 * scale);
-    flash.fillStyle(0xFFD700, 0.6);
+    flash.fillStyle(0xffd700, 0.6);
     flash.fillCircle(0, 0, 45 * scale);
     flash.setDepth(99);
 
@@ -120,14 +129,14 @@ export class CreepEffects {
       alpha: 0,
       scale: 2,
       duration: 300,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
 
     for (let i = 0; i < 8; i++) {
       const sparkle = this.scene.add.graphics();
       const offsetX = (Math.random() - 0.5) * 40 * scale;
       sparkle.setPosition(x + offsetX, y);
-      sparkle.fillStyle(0xFFFFAA, 1);
+      sparkle.fillStyle(0xffffaa, 1);
       sparkle.fillCircle(0, 0, 3);
       sparkle.setDepth(101);
 
@@ -139,13 +148,12 @@ export class CreepEffects {
         duration: 800 + Math.random() * 400,
         delay: Math.random() * 200,
         ease: 'Quad.easeOut',
-        onComplete: () => sparkle.destroy()
+        onComplete: () => sparkle.destroy(),
       });
     }
   }
 
   showDiggerPrepare(x: number, y: number): void {
-
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2;
       const crack = this.scene.add.graphics();
@@ -165,13 +173,13 @@ export class CreepEffects {
         alpha: 0,
         duration: 350,
         ease: 'Quad.easeOut',
-        onComplete: () => crack.destroy()
+        onComplete: () => crack.destroy(),
       });
     }
 
     for (let i = 0; i < 4; i++) {
       const dust = this.scene.add.graphics();
-      dust.fillStyle(0xCCBBAA, 0.6);
+      dust.fillStyle(0xccbbaa, 0.6);
       dust.fillCircle(0, 0, 3 + Math.random() * 3);
       dust.setPosition(x + (Math.random() - 0.5) * 15, y + 10);
       dust.setDepth(25);
@@ -182,15 +190,14 @@ export class CreepEffects {
         alpha: 0,
         scale: 1.5,
         duration: 300,
-        onComplete: () => dust.destroy()
+        onComplete: () => dust.destroy(),
       });
     }
   }
 
   showResurfaceStart(x: number, y: number): void {
-
     const bulge = this.scene.add.graphics();
-    bulge.fillStyle(0x6B4423, 0.7);
+    bulge.fillStyle(0x6b4423, 0.7);
     bulge.fillEllipse(0, 0, 20, 10);
     bulge.setPosition(x, y + 12);
     bulge.setDepth(24);
@@ -203,7 +210,7 @@ export class CreepEffects {
       alpha: 0,
       duration: 400,
       ease: 'Cubic.easeOut',
-      onComplete: () => bulge.destroy()
+      onComplete: () => bulge.destroy(),
     });
 
     for (let i = 0; i < 5; i++) {
@@ -230,9 +237,9 @@ export class CreepEffects {
             alpha: 0,
             duration: 300,
             delay: 200,
-            onComplete: () => crack.destroy()
+            onComplete: () => crack.destroy(),
           });
-        }
+        },
       });
     }
 
@@ -240,7 +247,7 @@ export class CreepEffects {
       const delay = Math.random() * 200;
       this.scene.time.delayedCall(delay, () => {
         const dirt = this.scene.add.graphics();
-        dirt.fillStyle(0x8B4513, 0.7);
+        dirt.fillStyle(0x8b4513, 0.7);
         dirt.fillCircle(0, 0, 2 + Math.random() * 3);
         dirt.setPosition(x + (Math.random() - 0.5) * 20, y + 12);
         dirt.setDepth(35);
@@ -252,14 +259,13 @@ export class CreepEffects {
           alpha: 0,
           duration: 400,
           ease: 'Quad.easeOut',
-          onComplete: () => dirt.destroy()
+          onComplete: () => dirt.destroy(),
         });
       });
     }
   }
 
   showBurrowEffect(x: number, y: number): void {
-
     const hole = this.scene.add.graphics();
     hole.fillStyle(0x3d2817, 0.9);
     hole.fillEllipse(0, 0, 35, 15);
@@ -273,16 +279,15 @@ export class CreepEffects {
       duration: 200,
       ease: 'Cubic.easeOut',
       onComplete: () => {
-
         this.scene.time.delayedCall(300, () => {
           this.scene.tweens.add({
             targets: hole,
             alpha: 0,
             duration: 400,
-            onComplete: () => hole.destroy()
+            onComplete: () => hole.destroy(),
           });
         });
-      }
+      },
     });
 
     for (let i = 0; i < 12; i++) {
@@ -291,7 +296,7 @@ export class CreepEffects {
 
       this.scene.time.delayedCall(delay, () => {
         const dirt = this.scene.add.graphics();
-        dirt.fillStyle(0x8B4513, 0.9);
+        dirt.fillStyle(0x8b4513, 0.9);
         dirt.fillCircle(0, 0, 3 + Math.random() * 4);
         dirt.setPosition(x, y + 10);
         dirt.setDepth(35);
@@ -307,14 +312,13 @@ export class CreepEffects {
           scale: 0.5,
           duration: 350,
           ease: 'Quad.easeOut',
-          onComplete: () => dirt.destroy()
+          onComplete: () => dirt.destroy(),
         });
       });
     }
   }
 
   showSurfaceEffect(x: number, y: number): void {
-
     const crack = this.scene.add.graphics();
     crack.lineStyle(3, 0x3d2817, 1);
     crack.beginPath();
@@ -338,15 +342,15 @@ export class CreepEffects {
           alpha: 0,
           duration: 500,
           delay: 200,
-          onComplete: () => crack.destroy()
+          onComplete: () => crack.destroy(),
         });
-      }
+      },
     });
 
     for (let i = 0; i < 14; i++) {
       const angle = (i / 14) * Math.PI * 2;
       const dirt = this.scene.add.graphics();
-      dirt.fillStyle(0x8B4513, 0.85);
+      dirt.fillStyle(0x8b4513, 0.85);
       dirt.fillCircle(0, 0, 4 + Math.random() * 5);
       dirt.setPosition(x, y + 12);
       dirt.setDepth(36);
@@ -362,13 +366,13 @@ export class CreepEffects {
         scale: 1.3,
         duration: 450,
         ease: 'Quad.easeOut',
-        onComplete: () => dirt.destroy()
+        onComplete: () => dirt.destroy(),
       });
     }
 
     for (let side = -1; side <= 1; side += 2) {
       const claw = this.scene.add.graphics();
-      claw.fillStyle(0x2F2F2F, 1);
+      claw.fillStyle(0x2f2f2f, 1);
       claw.beginPath();
       claw.moveTo(0, 0);
       claw.lineTo(-3, -10);
@@ -390,20 +394,19 @@ export class CreepEffects {
             alpha: 0,
             duration: 300,
             delay: 100,
-            onComplete: () => claw.destroy()
+            onComplete: () => claw.destroy(),
           });
-        }
+        },
       });
     }
   }
 
   showGhostPhaseStart(x: number, y: number): void {
-
     for (let i = 0; i < 10; i++) {
       const angle = (i / 10) * Math.PI * 2;
       const particle = this.scene.add.graphics();
       particle.setPosition(x, y);
-      particle.fillStyle(0x9370DB, 0.8);
+      particle.fillStyle(0x9370db, 0.8);
       particle.fillCircle(0, 0, 5);
       particle.setDepth(100);
 
@@ -418,13 +421,13 @@ export class CreepEffects {
         scale: 0.3,
         duration: 500,
         ease: 'Quad.easeOut',
-        onComplete: () => particle.destroy()
+        onComplete: () => particle.destroy(),
       });
     }
 
     const flash = this.scene.add.graphics();
     flash.setPosition(x, y - 5);
-    flash.fillStyle(0xE6E6FA, 0.6);
+    flash.fillStyle(0xe6e6fa, 0.6);
     flash.fillCircle(0, 0, 30);
     flash.setDepth(99);
 
@@ -433,15 +436,14 @@ export class CreepEffects {
       alpha: 0,
       scale: 1.5,
       duration: 300,
-      onComplete: () => flash.destroy()
+      onComplete: () => flash.destroy(),
     });
   }
 
   showImmuneText(x: number, y: number): void {
-
     const shimmer = this.scene.add.graphics();
     shimmer.setPosition(x, y - 10);
-    shimmer.fillStyle(0x9370DB, 0.5);
+    shimmer.fillStyle(0x9370db, 0.5);
     shimmer.fillCircle(0, 0, 15);
     shimmer.setDepth(100);
 
@@ -451,7 +453,7 @@ export class CreepEffects {
       alpha: 0,
       scale: 1.5,
       duration: 300,
-      onComplete: () => shimmer.destroy()
+      onComplete: () => shimmer.destroy(),
     });
   }
 
@@ -459,7 +461,7 @@ export class CreepEffects {
     for (let i = 0; i < 6; i++) {
       const angle = (i / 6) * Math.PI * 2 + Math.random() * 0.5;
       const dust = this.scene.add.graphics();
-      dust.fillStyle(0xDEB887, 0.7);
+      dust.fillStyle(0xdeb887, 0.7);
       dust.fillCircle(0, 0, 4 + Math.random() * 4);
       dust.setPosition(x, y + 15);
       dust.setDepth(25);
@@ -471,25 +473,24 @@ export class CreepEffects {
         alpha: 0,
         scale: 1.5,
         duration: 400,
-        onComplete: () => dust.destroy()
+        onComplete: () => dust.destroy(),
       });
     }
   }
 
   showShieldBlockEffect(x: number, y: number, shieldGraphics: Phaser.GameObjects.Graphics): void {
-
     this.scene.tweens.add({
       targets: shieldGraphics,
       alpha: 0.3,
       duration: 50,
       yoyo: true,
-      repeat: 2
+      repeat: 2,
     });
 
     for (let i = 0; i < 5; i++) {
       const spark = this.scene.add.graphics();
       spark.setPosition(x, y - 30);
-      spark.fillStyle(0x00BFFF, 1);
+      spark.fillStyle(0x00bfff, 1);
       spark.fillCircle(0, 0, 3);
       spark.setDepth(100);
 
@@ -503,17 +504,16 @@ export class CreepEffects {
         alpha: 0,
         scale: 0.5,
         duration: 250,
-        onComplete: () => spark.destroy()
+        onComplete: () => spark.destroy(),
       });
     }
   }
 
   showShieldBreakEffect(x: number, y: number): void {
-
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2;
       const fragment = this.scene.add.graphics();
-      fragment.fillStyle(0x00BFFF, 0.8);
+      fragment.fillStyle(0x00bfff, 0.8);
       fragment.fillCircle(0, 0, 5);
       fragment.setPosition(x, y - 5);
       fragment.setDepth(100);
@@ -525,17 +525,16 @@ export class CreepEffects {
         alpha: 0,
         scale: 0.5,
         duration: 400,
-        onComplete: () => fragment.destroy()
+        onComplete: () => fragment.destroy(),
       });
     }
   }
 
   showSpawnEffect(x: number, y: number, _babyCount: number): void {
-
     for (let i = 0; i < 12; i++) {
       const angle = (i / 12) * Math.PI * 2;
       const splat = this.scene.add.graphics();
-      splat.fillStyle(0x228B22, 0.8);
+      splat.fillStyle(0x228b22, 0.8);
       splat.fillCircle(0, 0, 6 + Math.random() * 6);
       splat.setPosition(x, y);
       splat.setDepth(35);
@@ -547,14 +546,14 @@ export class CreepEffects {
         alpha: 0,
         scale: 1.5,
         duration: 400,
-        onComplete: () => splat.destroy()
+        onComplete: () => splat.destroy(),
       });
     }
 
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2 + Math.random() * 0.3;
       const egg = this.scene.add.graphics();
-      egg.fillStyle(0x90EE90, 1);
+      egg.fillStyle(0x90ee90, 1);
       egg.fillCircle(0, 0, 4);
       egg.setPosition(x, y);
       egg.setDepth(36);
@@ -567,7 +566,7 @@ export class CreepEffects {
         scale: 0.5,
         duration: 350,
         ease: 'Quad.easeOut',
-        onComplete: () => egg.destroy()
+        onComplete: () => egg.destroy(),
       });
     }
   }
@@ -579,7 +578,7 @@ export class CreepEffects {
       scaleX: 0.5,
       scaleY: 0.5,
       duration: 200,
-      onComplete
+      onComplete,
     });
   }
 
@@ -608,11 +607,10 @@ export class CreepEffects {
         target.y = startY + (targetY - startY) * t - arc;
       },
       onComplete: () => {
-
         target.x = targetX;
         target.y = targetY;
         onComplete();
-      }
+      },
     });
   }
 

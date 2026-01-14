@@ -14,7 +14,14 @@ export interface TowerStats {
   airDamageBonus?: number;
 }
 
-export type TowerBranch = 'archer' | 'rapidfire' | 'sniper' | 'rockcannon' | 'icetower' | 'poison' | 'aura';
+export type TowerBranch =
+  | 'archer'
+  | 'rapidfire'
+  | 'sniper'
+  | 'rockcannon'
+  | 'icetower'
+  | 'poison'
+  | 'aura';
 
 export interface TowerConfig {
   key: string;
@@ -28,10 +35,17 @@ export interface TowerConfig {
   stats: TowerStats;
 }
 
-export const BRANCH_OPTIONS: TowerBranch[] = ['archer', 'rapidfire', 'sniper', 'rockcannon', 'icetower', 'poison', 'aura'];
+export const BRANCH_OPTIONS: TowerBranch[] = [
+  'archer',
+  'rapidfire',
+  'sniper',
+  'rockcannon',
+  'icetower',
+  'poison',
+  'aura',
+];
 
 export const TOWER_CONFIGS: Record<string, TowerConfig> = {
-
   archer_1: {
     key: 'archer_1',
     name: 'Archer Tower',
@@ -40,13 +54,14 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     level: 1,
     buildCost: 50,
     upgradeCost: 0,
-    description: 'Basic tower. Highly effective vs air (+200% damage). Can branch into specialized towers.',
+    description:
+      'Basic tower. Highly effective vs air (+200% damage). Can branch into specialized towers.',
     stats: {
       range: 200,
       fireRate: 900,
       damage: 10,
-      airDamageBonus: 2.0
-    }
+      airDamageBonus: 2.0,
+    },
   },
   archer_2: {
     key: 'archer_2',
@@ -60,8 +75,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 220,
       fireRate: 800,
       damage: 15,
-      airDamageBonus: 2.0
-    }
+      airDamageBonus: 2.0,
+    },
   },
   archer_3: {
     key: 'archer_3',
@@ -75,8 +90,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 250,
       fireRate: 700,
       damage: 19,
-      airDamageBonus: 2.0
-    }
+      airDamageBonus: 2.0,
+    },
   },
   archer_4: {
     key: 'archer_4',
@@ -90,8 +105,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 280,
       fireRate: 550,
       damage: 45,
-      airDamageBonus: 2.0
-    }
+      airDamageBonus: 2.0,
+    },
   },
 
   rapidfire_1: {
@@ -105,8 +120,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 180,
       fireRate: 320,
-      damage: 8
-    }
+      damage: 8,
+    },
   },
   rapidfire_2: {
     key: 'rapidfire_2',
@@ -119,8 +134,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 190,
       fireRate: 260,
-      damage: 11
-    }
+      damage: 11,
+    },
   },
   rapidfire_3: {
     key: 'rapidfire_3',
@@ -133,8 +148,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 200,
       fireRate: 220,
-      damage: 15
-    }
+      damage: 15,
+    },
   },
 
   sniper_1: {
@@ -148,8 +163,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 300,
       fireRate: 2200,
-      damage: 60
-    }
+      damage: 60,
+    },
   },
   sniper_2: {
     key: 'sniper_2',
@@ -162,8 +177,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 330,
       fireRate: 2000,
-      damage: 77
-    }
+      damage: 77,
+    },
   },
   sniper_3: {
     key: 'sniper_3',
@@ -176,8 +191,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 360,
       fireRate: 1800,
-      damage: 110
-    }
+      damage: 110,
+    },
   },
 
   rockcannon_1: {
@@ -192,8 +207,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 220,
       fireRate: 1800,
       damage: 25,
-      splashRadius: 70
-    }
+      splashRadius: 70,
+    },
   },
   rockcannon_2: {
     key: 'rockcannon_2',
@@ -207,8 +222,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 240,
       fireRate: 1700,
       damage: 32,
-      splashRadius: 85
-    }
+      splashRadius: 85,
+    },
   },
   rockcannon_3: {
     key: 'rockcannon_3',
@@ -222,8 +237,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 260,
       fireRate: 1500,
       damage: 47,
-      splashRadius: 100
-    }
+      splashRadius: 100,
+    },
   },
 
   icetower_1: {
@@ -240,8 +255,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 8,
       slowPercent: 0.4,
       slowDuration: 2000,
-      maxSlowTargets: 2
-    }
+      maxSlowTargets: 2,
+    },
   },
   icetower_2: {
     key: 'icetower_2',
@@ -257,8 +272,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 12,
       slowPercent: 0.5,
       slowDuration: 2500,
-      maxSlowTargets: 3
-    }
+      maxSlowTargets: 3,
+    },
   },
   icetower_3: {
     key: 'icetower_3',
@@ -274,8 +289,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 18,
       slowPercent: 0.6,
       slowDuration: 3000,
-      maxSlowTargets: 4
-    }
+      maxSlowTargets: 4,
+    },
   },
 
   poison_1: {
@@ -291,8 +306,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       fireRate: 1400,
       damage: 5,
       dotDamage: 5,
-      dotDuration: 5000
-    }
+      dotDuration: 5000,
+    },
   },
   poison_2: {
     key: 'poison_2',
@@ -307,8 +322,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       fireRate: 1300,
       damage: 8,
       dotDamage: 8,
-      dotDuration: 5000
-    }
+      dotDuration: 5000,
+    },
   },
   poison_3: {
     key: 'poison_3',
@@ -323,8 +338,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       fireRate: 1150,
       damage: 12,
       dotDamage: 12,
-      dotDuration: 6000
-    }
+      dotDuration: 6000,
+    },
   },
 
   aura_1: {
@@ -339,8 +354,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 90,
       fireRate: 0,
       damage: 0,
-      auraDamageMultiplier: 0.20
-    }
+      auraDamageMultiplier: 0.2,
+    },
   },
   aura_2: {
     key: 'aura_2',
@@ -354,8 +369,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 105,
       fireRate: 0,
       damage: 0,
-      auraDamageMultiplier: 0.30
-    }
+      auraDamageMultiplier: 0.3,
+    },
   },
   aura_3: {
     key: 'aura_3',
@@ -369,8 +384,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 120,
       fireRate: 0,
       damage: 0,
-      auraDamageMultiplier: 0.40
-    }
+      auraDamageMultiplier: 0.4,
+    },
   },
   aura_4: {
     key: 'aura_4',
@@ -384,8 +399,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 140,
       fireRate: 0,
       damage: 0,
-      auraDamageMultiplier: 0.50
-    }
+      auraDamageMultiplier: 0.5,
+    },
   },
 
   rapidfire_4: {
@@ -399,8 +414,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 220,
       fireRate: 200,
-      damage: 18
-    }
+      damage: 18,
+    },
   },
 
   sniper_4: {
@@ -414,8 +429,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 400,
       fireRate: 1700,
-      damage: 140
-    }
+      damage: 140,
+    },
   },
 
   rockcannon_4: {
@@ -430,8 +445,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       range: 280,
       fireRate: 1400,
       damage: 58,
-      splashRadius: 110
-    }
+      splashRadius: 110,
+    },
   },
 
   icetower_4: {
@@ -448,8 +463,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       damage: 24,
       slowPercent: 0.65,
       slowDuration: 3500,
-      maxSlowTargets: 5
-    }
+      maxSlowTargets: 5,
+    },
   },
 
   poison_4: {
@@ -465,7 +480,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
       fireRate: 1100,
       damage: 15,
       dotDamage: 15,
-      dotDuration: 6000
-    }
-  }
+      dotDuration: 6000,
+    },
+  },
 };

@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 
 export class EnvironmentDecorations {
-
   static drawPalmTree(scene: Phaser.Scene, x: number, y: number, scale: number = 1): void {
     const palm = scene.add.graphics();
     palm.setDepth(10);
@@ -37,7 +36,13 @@ export class EnvironmentDecorations {
     palm.fillCircle(x + 6 * scale, y - 80 * scale, 4 * scale);
   }
 
-  private static drawFrond(graphics: Phaser.GameObjects.Graphics, x: number, y: number, angle: number, length: number): void {
+  private static drawFrond(
+    graphics: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    angle: number,
+    length: number
+  ): void {
     const endX = x + Math.cos(angle) * length;
     const endY = y + Math.sin(angle) * length * 0.6 - 20;
     const midX = x + Math.cos(angle) * length * 0.5;
@@ -354,11 +359,7 @@ export class EnvironmentDecorations {
     }
 
     scorpion.fillStyle(0x1a0a00, 1);
-    scorpion.fillTriangle(
-      x - 24 * facing, y - 10,
-      x - 22 * facing, y - 6,
-      x - 28 * facing, y - 8
-    );
+    scorpion.fillTriangle(x - 24 * facing, y - 10, x - 22 * facing, y - 6, x - 28 * facing, y - 8);
 
     scorpion.lineStyle(2, 0x2a1a0a, 1);
     scorpion.lineBetween(x + 10 * facing, y - 2, x + 18 * facing, y - 6);

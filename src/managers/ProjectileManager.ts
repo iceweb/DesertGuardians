@@ -20,8 +20,6 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
     this.creepManager = creepManager;
 
     this.initializePool();
-
-    console.log('ProjectileManager: Initialized');
   }
 
   private getEffectGraphic(x: number, y: number, depth: number): Phaser.GameObjects.Graphics {
@@ -64,16 +62,20 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
 
       this.pool.push(projectile);
     }
-
-    console.log(`ProjectileManager: Pool initialized with ${this.POOL_SIZE} projectiles`);
   }
 
   private getFromPool(): Projectile | null {
-    const projectile = this.pool.find(p => !p.getIsActive());
+    const projectile = this.pool.find((p) => !p.getIsActive());
     return projectile || null;
   }
 
-  fire(x: number, y: number, target: Creep, config: ProjectileConfig, sourceTower?: Tower): Projectile | null {
+  fire(
+    x: number,
+    y: number,
+    target: Creep,
+    config: ProjectileConfig,
+    sourceTower?: Tower
+  ): Projectile | null {
     const projectile = this.getFromPool();
 
     if (!projectile) {
@@ -99,7 +101,14 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
     context.allCreeps = this.creepManager.getActiveCreeps();
   }
 
-  private handleSplash(x: number, y: number, radius: number, damage: number, isMagic: boolean, towerBranch?: string): void {
+  private handleSplash(
+    x: number,
+    y: number,
+    radius: number,
+    damage: number,
+    isMagic: boolean,
+    towerBranch?: string
+  ): void {
     const creeps = this.creepManager.getActiveCreeps();
 
     for (const creep of creeps) {
@@ -113,7 +122,6 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
   }
 
   private showSplashEffect(x: number, y: number, radius: number): void {
-
     const explosionFlash = this.getEffectGraphic(x, y, 26);
     explosionFlash.fillStyle(0xffaa00, 0.9);
     explosionFlash.fillCircle(0, 0, radius * 0.3);
@@ -124,7 +132,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       scaleX: 3,
       scaleY: 3,
       duration: 150,
-      onComplete: () => this.releaseEffectGraphic(explosionFlash)
+      onComplete: () => this.releaseEffectGraphic(explosionFlash),
     });
 
     const explosionRing = this.getEffectGraphic(x, y, 25);
@@ -137,7 +145,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       scaleX: 4,
       scaleY: 4,
       duration: 300,
-      onComplete: () => this.releaseEffectGraphic(explosionRing)
+      onComplete: () => this.releaseEffectGraphic(explosionRing),
     });
 
     const numDebris = 8;
@@ -163,7 +171,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
         alpha: 0,
         duration: 400 + Math.random() * 200,
         ease: 'Power2',
-        onComplete: () => this.releaseEffectGraphic(debris)
+        onComplete: () => this.releaseEffectGraphic(debris),
       });
     }
 
@@ -178,7 +186,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
       scaleY: 1.5,
       y: y - 20,
       duration: 500,
-      onComplete: () => this.releaseEffectGraphic(dustCloud)
+      onComplete: () => this.releaseEffectGraphic(dustCloud),
     });
 
     for (let i = 0; i < 3; i++) {
@@ -196,7 +204,7 @@ export class ProjectileManager extends Phaser.Events.EventEmitter {
           scaleX: 2,
           scaleY: 2,
           duration: 200,
-          onComplete: () => this.releaseEffectGraphic(spark)
+          onComplete: () => this.releaseEffectGraphic(spark),
         });
       });
     }

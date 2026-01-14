@@ -86,31 +86,41 @@ export class HUDManager {
     hudBg.fillTriangle(0, 60, 30, 60, 0, 30);
     hudBg.fillTriangle(width, 60, width - 30, 60, width, 30);
 
-    this.waveText = this.scene.add.text(width / 2, 32, `⚔️ WAVE 0 / ${this.totalWaves}`, {
-      fontFamily: 'Arial Black',
-      fontSize: '28px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0.5).setDepth(101);
+    this.waveText = this.scene.add
+      .text(width / 2, 32, `⚔️ WAVE 0 / ${this.totalWaves}`, {
+        fontFamily: 'Arial Black',
+        fontSize: '28px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5)
+      .setDepth(101);
 
-    this.goldText = this.scene.add.text(30, 32, `💰 ${this.gold}`, {
-      fontFamily: 'Arial Black',
-      fontSize: '26px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(0, 0.5).setDepth(101);
+    this.goldText = this.scene.add
+      .text(30, 32, `💰 ${this.gold}`, {
+        fontFamily: 'Arial Black',
+        fontSize: '26px',
+        color: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0, 0.5)
+      .setDepth(101);
 
-    this.hpText = this.scene.add.text(width - 30, 32, `❤️ ${this.castleHP}`, {
-      fontFamily: 'Arial Black',
-      fontSize: '26px',
-      color: '#ff4444',
-      stroke: '#000000',
-      strokeThickness: 3
-    }).setOrigin(1, 0.5).setDepth(101);
+    this.hpText = this.scene.add
+      .text(width - 30, 32, `❤️ ${this.castleHP}`, {
+        fontFamily: 'Arial Black',
+        fontSize: '26px',
+        color: '#ff4444',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(1, 0.5)
+      .setDepth(101);
   }
 
+  /* eslint-disable max-lines-per-function */
   private createWaveControls(width: number, height: number): void {
     this.startWaveButtonBg = this.scene.add.graphics();
     this.startWaveButtonBg.setDepth(100);
@@ -125,60 +135,112 @@ export class HUDManager {
 
       if (hover) {
         this.startWaveButtonBg.fillStyle(0xffd700, 0.3);
-        this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 - 8, btnY - btnHeight/2 - 8, btnWidth + 16, btnHeight + 16, 14);
+        this.startWaveButtonBg.fillRoundedRect(
+          btnX - btnWidth / 2 - 8,
+          btnY - btnHeight / 2 - 8,
+          btnWidth + 16,
+          btnHeight + 16,
+          14
+        );
       }
 
       this.startWaveButtonBg.fillStyle(0x1a0a00, 0.8);
-      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 + 4, btnY - btnHeight/2 + 4, btnWidth, btnHeight, 8);
+      this.startWaveButtonBg.fillRoundedRect(
+        btnX - btnWidth / 2 + 4,
+        btnY - btnHeight / 2 + 4,
+        btnWidth,
+        btnHeight,
+        8
+      );
 
-      const baseColor = pressed ? 0xa07840 : (hover ? 0xd4a574 : 0xc49564);
+      const baseColor = pressed ? 0xa07840 : hover ? 0xd4a574 : 0xc49564;
       this.startWaveButtonBg.fillStyle(baseColor, 1);
-      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2, btnY - btnHeight/2, btnWidth, btnHeight, 8);
+      this.startWaveButtonBg.fillRoundedRect(
+        btnX - btnWidth / 2,
+        btnY - btnHeight / 2,
+        btnWidth,
+        btnHeight,
+        8
+      );
 
       this.startWaveButtonBg.lineStyle(3, 0x8b6914, 1);
-      this.startWaveButtonBg.strokeRoundedRect(btnX - btnWidth/2, btnY - btnHeight/2, btnWidth, btnHeight, 8);
+      this.startWaveButtonBg.strokeRoundedRect(
+        btnX - btnWidth / 2,
+        btnY - btnHeight / 2,
+        btnWidth,
+        btnHeight,
+        8
+      );
       this.startWaveButtonBg.lineStyle(2, 0x5a4010, 0.5);
-      this.startWaveButtonBg.strokeRoundedRect(btnX - btnWidth/2 + 4, btnY - btnHeight/2 + 4, btnWidth - 8, btnHeight - 8, 6);
+      this.startWaveButtonBg.strokeRoundedRect(
+        btnX - btnWidth / 2 + 4,
+        btnY - btnHeight / 2 + 4,
+        btnWidth - 8,
+        btnHeight - 8,
+        6
+      );
 
       this.startWaveButtonBg.lineStyle(1, 0xb08050, 0.3);
       for (let i = 0; i < 4; i++) {
-        const ly = btnY - btnHeight/2 + 12 + i * 12;
-        this.startWaveButtonBg.lineBetween(btnX - btnWidth/2 + 10, ly, btnX + btnWidth/2 - 10, ly);
+        const ly = btnY - btnHeight / 2 + 12 + i * 12;
+        this.startWaveButtonBg.lineBetween(
+          btnX - btnWidth / 2 + 10,
+          ly,
+          btnX + btnWidth / 2 - 10,
+          ly
+        );
       }
 
       this.startWaveButtonBg.fillStyle(0xffd700, hover ? 1 : 0.8);
 
-      this.startWaveButtonBg.fillCircle(btnX - btnWidth/2 + 12, btnY - btnHeight/2 + 12, 5);
-      this.startWaveButtonBg.fillCircle(btnX + btnWidth/2 - 12, btnY - btnHeight/2 + 12, 5);
+      this.startWaveButtonBg.fillCircle(btnX - btnWidth / 2 + 12, btnY - btnHeight / 2 + 12, 5);
+      this.startWaveButtonBg.fillCircle(btnX + btnWidth / 2 - 12, btnY - btnHeight / 2 + 12, 5);
 
-      this.startWaveButtonBg.fillCircle(btnX - btnWidth/2 + 12, btnY + btnHeight/2 - 12, 5);
-      this.startWaveButtonBg.fillCircle(btnX + btnWidth/2 - 12, btnY + btnHeight/2 - 12, 5);
+      this.startWaveButtonBg.fillCircle(btnX - btnWidth / 2 + 12, btnY + btnHeight / 2 - 12, 5);
+      this.startWaveButtonBg.fillCircle(btnX + btnWidth / 2 - 12, btnY + btnHeight / 2 - 12, 5);
 
       this.startWaveButtonBg.fillStyle(hover ? 0xd4b070 : 0xc4a060, 0.4);
-      this.startWaveButtonBg.fillRoundedRect(btnX - btnWidth/2 + 6, btnY - btnHeight/2 + 4, btnWidth - 12, 12, 4);
+      this.startWaveButtonBg.fillRoundedRect(
+        btnX - btnWidth / 2 + 6,
+        btnY - btnHeight / 2 + 4,
+        btnWidth - 12,
+        12,
+        4
+      );
     };
 
     drawButton(false);
 
-    this.startWaveButton = this.scene.add.text(btnX, btnY, 'START', {
-      fontFamily: 'Georgia, Times New Roman, serif',
-      fontSize: '22px',
-      color: '#2a1a0a',
-      fontStyle: 'bold',
-      stroke: '#c49564',
-      strokeThickness: 1
-    }).setOrigin(0.5).setDepth(101);
+    this.startWaveButton = this.scene.add
+      .text(btnX, btnY, 'START', {
+        fontFamily: 'Georgia, Times New Roman, serif',
+        fontSize: '22px',
+        color: '#2a1a0a',
+        fontStyle: 'bold',
+        stroke: '#c49564',
+        strokeThickness: 1,
+      })
+      .setOrigin(0.5)
+      .setDepth(101);
 
     this.startWaveHitArea = this.scene.add.rectangle(btnX, btnY, btnWidth, btnHeight, 0xffffff, 0);
     this.startWaveHitArea.setDepth(102).setInteractive({ useHandCursor: true });
 
     this.startWaveHitArea.on('pointerover', () => drawButton(true));
     this.startWaveHitArea.on('pointerout', () => drawButton(false));
-    this.startWaveHitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      drawButton(true, true);
-      this.onStartWaveClicked?.();
-    });
+    this.startWaveHitArea.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        drawButton(true, true);
+        this.onStartWaveClicked?.();
+      }
+    );
   }
 
   private createBackButton(height: number): void {
@@ -210,22 +272,34 @@ export class HUDManager {
 
     drawMenuButton(false);
 
-    const backButton = this.scene.add.text(btnX, btnY, '◂ MENU', {
-      fontFamily: 'Georgia, Times New Roman, serif',
-      fontSize: '14px',
-      color: '#fff8dc',
-      fontStyle: 'bold',
-      stroke: '#4a3520',
-      strokeThickness: 2
-    }).setOrigin(0.5).setDepth(101).setInteractive({ useHandCursor: true });
+    const backButton = this.scene.add
+      .text(btnX, btnY, '◂ MENU', {
+        fontFamily: 'Georgia, Times New Roman, serif',
+        fontSize: '14px',
+        color: '#fff8dc',
+        fontStyle: 'bold',
+        stroke: '#4a3520',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5)
+      .setDepth(101)
+      .setInteractive({ useHandCursor: true });
 
     backButton.on('pointerover', () => drawMenuButton(true));
     backButton.on('pointerout', () => drawMenuButton(false));
-    backButton.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.audioManager.playSFX('ui_click');
-      this.onMenuClicked?.();
-    });
+    backButton.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.audioManager.playSFX('ui_click');
+        this.onMenuClicked?.();
+      }
+    );
   }
 
   private createSoundButton(height: number): void {
@@ -240,18 +314,42 @@ export class HUDManager {
       this.soundButtonBg.clear();
 
       this.soundButtonBg.fillStyle(0x1a0a00, 0.6);
-      this.soundButtonBg.fillRoundedRect(btnX - btnSize/2 + 2, btnY - btnSize/2 + 2, btnSize, btnSize, 6);
+      this.soundButtonBg.fillRoundedRect(
+        btnX - btnSize / 2 + 2,
+        btnY - btnSize / 2 + 2,
+        btnSize,
+        btnSize,
+        6
+      );
 
-      const bgColor = muted ? 0x4a2a10 : (hover ? 0x8b6914 : 0x6b4914);
+      const bgColor = muted ? 0x4a2a10 : hover ? 0x8b6914 : 0x6b4914;
       this.soundButtonBg.fillStyle(bgColor, 1);
-      this.soundButtonBg.fillRoundedRect(btnX - btnSize/2, btnY - btnSize/2, btnSize, btnSize, 6);
+      this.soundButtonBg.fillRoundedRect(
+        btnX - btnSize / 2,
+        btnY - btnSize / 2,
+        btnSize,
+        btnSize,
+        6
+      );
 
-      const innerColor = muted ? 0x5a3a20 : (hover ? 0xc49564 : 0xa07840);
+      const innerColor = muted ? 0x5a3a20 : hover ? 0xc49564 : 0xa07840;
       this.soundButtonBg.fillStyle(innerColor, 1);
-      this.soundButtonBg.fillRoundedRect(btnX - btnSize/2 + 2, btnY - btnSize/2 + 2, btnSize - 4, btnSize - 4, 5);
+      this.soundButtonBg.fillRoundedRect(
+        btnX - btnSize / 2 + 2,
+        btnY - btnSize / 2 + 2,
+        btnSize - 4,
+        btnSize - 4,
+        5
+      );
 
       this.soundButtonBg.lineStyle(2, muted ? 0x8b5a34 : 0xd4a574, 0.8);
-      this.soundButtonBg.strokeRoundedRect(btnX - btnSize/2, btnY - btnSize/2, btnSize, btnSize, 6);
+      this.soundButtonBg.strokeRoundedRect(
+        btnX - btnSize / 2,
+        btnY - btnSize / 2,
+        btnSize,
+        btnSize,
+        6
+      );
 
       const iconX = btnX - 4;
       const iconY = btnY;
@@ -270,7 +368,6 @@ export class HUDManager {
       this.soundButtonBg.fillPath();
 
       if (!muted) {
-
         this.soundButtonBg.lineStyle(2, iconColor, 0.8);
         this.soundButtonBg.beginPath();
         this.soundButtonBg.arc(iconX + 6, iconY, 5, -0.6, 0.6);
@@ -279,7 +376,6 @@ export class HUDManager {
         this.soundButtonBg.arc(iconX + 6, iconY, 9, -0.5, 0.5);
         this.soundButtonBg.strokePath();
       } else {
-
         this.soundButtonBg.lineStyle(3, 0xff4444, 1);
         this.soundButtonBg.lineBetween(iconX - 10, iconY - 8, iconX + 14, iconY + 8);
       }
@@ -298,13 +394,20 @@ export class HUDManager {
     hitArea.on('pointerout', () => {
       drawSoundButton(false, this.audioManager.getMuted());
     });
-    hitArea.on('pointerdown', (_pointer: Phaser.Input.Pointer, _localX: number, _localY: number, event: Phaser.Types.Input.EventData) => {
-      event.stopPropagation();
-      this.audioManager.playSFX('ui_click');
-      const newMuted = this.audioManager.toggleMute();
-      drawSoundButton(true, newMuted);
-
-    });
+    hitArea.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.audioManager.playSFX('ui_click');
+        const newMuted = this.audioManager.toggleMute();
+        drawSoundButton(true, newMuted);
+      }
+    );
   }
 
   isPausedState(): boolean {
@@ -321,20 +424,24 @@ export class HUDManager {
   }
 
   private createCountdownText(width: number, height: number): void {
-    this.countdownText = this.scene.add.text(width / 2, height / 2, '', {
-      fontFamily: 'Arial Black',
-      fontSize: '72px',
-      color: '#ffd700',
-      stroke: '#8b4513',
-      strokeThickness: 8,
-      shadow: {
-        offsetX: 4,
-        offsetY: 4,
-        color: '#000000',
-        blur: 8,
-        fill: true
-      }
-    }).setOrigin(0.5).setDepth(150).setVisible(false);
+    this.countdownText = this.scene.add
+      .text(width / 2, height / 2, '', {
+        fontFamily: 'Arial Black',
+        fontSize: '72px',
+        color: '#ffd700',
+        stroke: '#8b4513',
+        strokeThickness: 8,
+        shadow: {
+          offsetX: 4,
+          offsetY: 4,
+          color: '#000000',
+          blur: 8,
+          fill: true,
+        },
+      })
+      .setOrigin(0.5)
+      .setDepth(150)
+      .setVisible(false);
   }
 
   setCastlePosition(position: Phaser.Math.Vector2 | null): void {
@@ -429,7 +536,7 @@ export class HUDManager {
           countdownTimer.destroy();
           safeComplete();
         }
-      }
+      },
     });
 
     this.scene.time.delayedCall(4000, () => {
@@ -466,8 +573,17 @@ export class HUDManager {
     canJump?: boolean
   ): void {
     this.creepInfoPanel.show(
-      creepType, currentHP, maxHP, speed, armor, goldReward,
-      x, y, hasShield, shieldHitsRemaining, canJump
+      creepType,
+      currentHP,
+      maxHP,
+      speed,
+      armor,
+      goldReward,
+      x,
+      y,
+      hasShield,
+      shieldHitsRemaining,
+      canJump
     );
   }
 
@@ -475,7 +591,11 @@ export class HUDManager {
     this.creepInfoPanel.hide();
   }
 
-  showNextWavePreview(waveNumber: number, creepTypes: Array<{ type: string; description: string }>, waveType?: WaveType): void {
+  showNextWavePreview(
+    waveNumber: number,
+    creepTypes: Array<{ type: string; description: string }>,
+    waveType?: WaveType
+  ): void {
     this.nextWavePanel.show(waveNumber, creepTypes, waveType);
   }
 

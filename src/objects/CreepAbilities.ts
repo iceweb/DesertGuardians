@@ -4,7 +4,6 @@ import type { CreepConfig } from '../data';
 import { GAME_CONFIG } from '../data';
 
 export interface AbilityState {
-
   shieldHitsRemaining: number;
 
   jumpCooldown: number;
@@ -37,7 +36,6 @@ export interface AbilityCallbacks {
 }
 
 export class CreepAbilities {
-
   private readonly JUMP_COOLDOWN = GAME_CONFIG.JUMP_COOLDOWN;
   private readonly JUMP_DISTANCE = GAME_CONFIG.JUMP_DISTANCE;
   private readonly JUMP_WARNING_DURATION = GAME_CONFIG.JUMP_WARNING_DURATION;
@@ -73,7 +71,7 @@ export class CreepAbilities {
       ghostPhaseTriggered: false,
       ghostPhaseTimer: 0,
       dispelCooldown: 0,
-      canDispel: false
+      canDispel: false,
     };
   }
 
@@ -120,7 +118,12 @@ export class CreepAbilities {
     return this.state;
   }
 
-  updateJump(delta: number, config: CreepConfig, pathSystem: PathSystem, distanceTraveled: number): void {
+  updateJump(
+    delta: number,
+    config: CreepConfig,
+    pathSystem: PathSystem,
+    distanceTraveled: number
+  ): void {
     if (!config.canJump || this.state.isJumping) return;
 
     if (this.state.jumpWarningTime > 0) {
@@ -164,14 +167,12 @@ export class CreepAbilities {
     if (this.state.diggerTimer <= 0) {
       switch (this.state.diggerPhase) {
         case 'walking':
-
           this.state.diggerPhase = 'stopping';
           this.state.diggerTimer = this.DIGGER_STOP_DURATION;
           this.callbacks.onDiggerStop?.();
           break;
 
         case 'stopping':
-
           this.state.diggerPhase = 'burrowed';
           this.state.diggerTimer = this.BURROW_DURATION;
           this.state.isBurrowed = true;
@@ -179,14 +180,12 @@ export class CreepAbilities {
           break;
 
         case 'burrowed':
-
           this.state.diggerPhase = 'resurfacing';
           this.state.diggerTimer = this.DIGGER_RESURFACE_DURATION;
           this.callbacks.onResurfaceStart?.();
           break;
 
         case 'resurfacing':
-
           this.state.diggerPhase = 'walking';
           this.state.diggerTimer = this.DIGGER_WALK_DURATION;
           this.state.isBurrowed = false;
@@ -198,7 +197,12 @@ export class CreepAbilities {
     this.state.burrowTimer = this.state.diggerTimer;
   }
 
-  updateGhostPhase(delta: number, config: CreepConfig, currentHealth: number, maxHealth: number): void {
+  updateGhostPhase(
+    delta: number,
+    config: CreepConfig,
+    currentHealth: number,
+    maxHealth: number
+  ): void {
     if (!config.hasGhostPhase) return;
 
     if (!this.state.ghostPhaseTriggered && !this.state.isGhostPhase) {

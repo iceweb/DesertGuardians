@@ -40,7 +40,16 @@ export class UIComponents {
   }
 
   createPanel(config: PanelConfig): Phaser.GameObjects.Container {
-    const { x, y, width, height, depth = 50, alpha = 0.98, withCorners = true, withShadow = true } = config;
+    const {
+      x,
+      y,
+      width,
+      height,
+      depth = 50,
+      alpha = 0.98,
+      withCorners = true,
+      withShadow = true,
+    } = config;
 
     const container = this.scene.add.container(x, y);
     container.setDepth(depth);
@@ -49,32 +58,38 @@ export class UIComponents {
 
     if (withShadow) {
       bg.fillStyle(0x000000, 0.5);
-      bg.fillRoundedRect(-width/2 + 5, -height/2 + 5, width, height, THEME.dimensions.borderRadiusLg);
+      bg.fillRoundedRect(
+        -width / 2 + 5,
+        -height / 2 + 5,
+        width,
+        height,
+        THEME.dimensions.borderRadiusLg
+      );
     }
 
     bg.fillStyle(THEME.colors.bgDark, alpha);
-    bg.fillRoundedRect(-width/2, -height/2, width, height, THEME.dimensions.borderRadiusLg);
+    bg.fillRoundedRect(-width / 2, -height / 2, width, height, THEME.dimensions.borderRadiusLg);
 
     bg.lineStyle(4, THEME.colors.bgDarker, 1);
-    bg.strokeRoundedRect(-width/2, -height/2, width, height, THEME.dimensions.borderRadiusLg);
+    bg.strokeRoundedRect(-width / 2, -height / 2, width, height, THEME.dimensions.borderRadiusLg);
 
     bg.lineStyle(2, THEME.colors.bronze, 1);
-    bg.strokeRoundedRect(-width/2 + 5, -height/2 + 5, width - 10, height - 10, 14);
+    bg.strokeRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, height - 10, 14);
 
     bg.lineStyle(1, THEME.colors.goldDark, 0.6);
-    bg.strokeRoundedRect(-width/2 + 10, -height/2 + 10, width - 20, height - 20, 12);
+    bg.strokeRoundedRect(-width / 2 + 10, -height / 2 + 10, width - 20, height - 20, 12);
 
     container.add(bg);
 
     if (withCorners) {
       const corners = [
-        { cx: -width/2 + 20, cy: -height/2 + 20 },
-        { cx: width/2 - 20, cy: -height/2 + 20 },
-        { cx: -width/2 + 20, cy: height/2 - 20 },
-        { cx: width/2 - 20, cy: height/2 - 20 },
+        { cx: -width / 2 + 20, cy: -height / 2 + 20 },
+        { cx: width / 2 - 20, cy: -height / 2 + 20 },
+        { cx: -width / 2 + 20, cy: height / 2 - 20 },
+        { cx: width / 2 - 20, cy: height / 2 - 20 },
       ];
 
-      corners.forEach(c => {
+      corners.forEach((c) => {
         this.drawCornerDecoration(bg, c.cx, c.cy);
       });
     }
@@ -91,13 +106,21 @@ export class UIComponents {
     g.fillCircle(x, y, 2);
   }
 
-  createButton(config: ButtonConfig): { container: Phaser.GameObjects.Container; hitArea: Phaser.GameObjects.Rectangle } {
+  /* eslint-disable max-lines-per-function */
+  createButton(config: ButtonConfig): {
+    container: Phaser.GameObjects.Container;
+    hitArea: Phaser.GameObjects.Rectangle;
+  } {
     const {
-      x, y, text, width, height,
+      x,
+      y,
+      text,
+      width,
+      height,
       isPrimary = false,
       enabled = true,
       fontSize = isPrimary ? THEME.fontSize.xxl : THEME.fontSize.lg,
-      onClick
+      onClick,
     } = config;
 
     const container = this.scene.add.container(0, 0);
@@ -107,11 +130,10 @@ export class UIComponents {
       btnGraphics.clear();
 
       if (!enabled) {
-
         btnGraphics.fillStyle(0x2a2a2a, 1);
-        btnGraphics.fillRoundedRect(x - width/2, y - height/2, width, height, 10);
+        btnGraphics.fillRoundedRect(x - width / 2, y - height / 2, width, height, 10);
         btnGraphics.lineStyle(2, 0x444444, 1);
-        btnGraphics.strokeRoundedRect(x - width/2, y - height/2, width, height, 10);
+        btnGraphics.strokeRoundedRect(x - width / 2, y - height / 2, width, height, 10);
         return;
       }
 
@@ -119,53 +141,77 @@ export class UIComponents {
 
       if (!pressed) {
         btnGraphics.fillStyle(0x000000, 0.5);
-        btnGraphics.fillRoundedRect(x - width/2 + 4, y - height/2 + 4, width, height, 12);
+        btnGraphics.fillRoundedRect(x - width / 2 + 4, y - height / 2 + 4, width, height, 12);
       }
 
       btnGraphics.fillStyle(isPrimary ? 0x6b4914 : 0x4a3520, 1);
-      btnGraphics.fillRoundedRect(x - width/2, y - height/2 + 4 + offsetY, width, height, 12);
+      btnGraphics.fillRoundedRect(x - width / 2, y - height / 2 + 4 + offsetY, width, height, 12);
 
       const baseColor = isPrimary
-        ? (hover ? THEME.colors.bronze : THEME.colors.bronzeDark)
-        : (hover ? THEME.colors.goldDark : 0x6b4914);
+        ? hover
+          ? THEME.colors.bronze
+          : THEME.colors.bronzeDark
+        : hover
+          ? THEME.colors.goldDark
+          : 0x6b4914;
       btnGraphics.fillStyle(baseColor, 1);
-      btnGraphics.fillRoundedRect(x - width/2, y - height/2 + offsetY, width, height - 4, 12);
+      btnGraphics.fillRoundedRect(x - width / 2, y - height / 2 + offsetY, width, height - 4, 12);
 
       const highlightColor = isPrimary
-        ? (hover ? THEME.colors.bronzeLight : 0xd4b584)
-        : (hover ? 0xa08050 : THEME.colors.goldDark);
+        ? hover
+          ? THEME.colors.bronzeLight
+          : 0xd4b584
+        : hover
+          ? 0xa08050
+          : THEME.colors.goldDark;
       btnGraphics.fillStyle(highlightColor, 0.6);
-      btnGraphics.fillRoundedRect(x - width/2 + 4, y - height/2 + 4 + offsetY, width - 8, height/3, 8);
+      btnGraphics.fillRoundedRect(
+        x - width / 2 + 4,
+        y - height / 2 + 4 + offsetY,
+        width - 8,
+        height / 3,
+        8
+      );
 
       const borderColor = isPrimary ? THEME.colors.gold : THEME.colors.bronze;
       btnGraphics.lineStyle(2, borderColor, 1);
-      btnGraphics.strokeRoundedRect(x - width/2, y - height/2 + offsetY, width, height - 4, 12);
+      btnGraphics.strokeRoundedRect(x - width / 2, y - height / 2 + offsetY, width, height - 4, 12);
 
       btnGraphics.lineStyle(1, hover ? THEME.colors.gold : THEME.colors.goldDark, 0.5);
-      btnGraphics.strokeRoundedRect(x - width/2 + 3, y - height/2 + 3 + offsetY, width - 6, height - 10, 10);
+      btnGraphics.strokeRoundedRect(
+        x - width / 2 + 3,
+        y - height / 2 + 3 + offsetY,
+        width - 6,
+        height - 10,
+        10
+      );
 
       if (isPrimary) {
-        const gemY = y - height/2 + 12;
+        const gemY = y - height / 2 + 12;
         btnGraphics.fillStyle(THEME.colors.gold, 1);
-        btnGraphics.fillCircle(x - width/2 + 16, gemY + offsetY, 4);
-        btnGraphics.fillCircle(x + width/2 - 16, gemY + offsetY, 4);
+        btnGraphics.fillCircle(x - width / 2 + 16, gemY + offsetY, 4);
+        btnGraphics.fillCircle(x + width / 2 - 16, gemY + offsetY, 4);
         btnGraphics.fillStyle(THEME.colors.goldLight, 0.8);
-        btnGraphics.fillCircle(x - width/2 + 15, gemY - 1 + offsetY, 2);
-        btnGraphics.fillCircle(x + width/2 - 17, gemY - 1 + offsetY, 2);
+        btnGraphics.fillCircle(x - width / 2 + 15, gemY - 1 + offsetY, 2);
+        btnGraphics.fillCircle(x + width / 2 - 17, gemY - 1 + offsetY, 2);
       }
     };
 
     drawButton(false);
     container.add(btnGraphics);
 
-    const btnText = this.scene.add.text(x, y - 2, text, {
-      fontFamily: THEME.fonts.title,
-      fontSize: fontSize,
-      color: enabled ? hexToColor(THEME.colors.textPrimary) : hexToColor(THEME.colors.textDisabled),
-      fontStyle: 'bold',
-      stroke: hexToColor(THEME.colors.borderDark),
-      strokeThickness: isPrimary ? 3 : 2
-    }).setOrigin(0.5);
+    const btnText = this.scene.add
+      .text(x, y - 2, text, {
+        fontFamily: THEME.fonts.title,
+        fontSize: fontSize,
+        color: enabled
+          ? hexToColor(THEME.colors.textPrimary)
+          : hexToColor(THEME.colors.textDisabled),
+        fontStyle: 'bold',
+        stroke: hexToColor(THEME.colors.borderDark),
+        strokeThickness: isPrimary ? 3 : 2,
+      })
+      .setOrigin(0.5);
     container.add(btnText);
 
     const hitArea = this.scene.add.rectangle(x, y, width, height, 0x000000, 0);
@@ -199,11 +245,14 @@ export class UIComponents {
   }
 
   createCloseButton(x: number, y: number, onClick: () => void): Phaser.GameObjects.Text {
-    const closeBtn = this.scene.add.text(x, y, '✕', {
-      fontFamily: THEME.fonts.body,
-      fontSize: THEME.fontSize.xl,
-      color: hexToColor(THEME.colors.errorMuted)
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const closeBtn = this.scene.add
+      .text(x, y, '✕', {
+        fontFamily: THEME.fonts.body,
+        fontSize: THEME.fontSize.xl,
+        color: hexToColor(THEME.colors.errorMuted),
+      })
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true });
 
     closeBtn.on('pointerdown', onClick);
     closeBtn.on('pointerover', () => closeBtn.setColor('#ff9999'));
@@ -212,20 +261,30 @@ export class UIComponents {
     return closeBtn;
   }
 
-  createTitle(x: number, y: number, text: string, container?: Phaser.GameObjects.Container): { title: Phaser.GameObjects.Text; line: Phaser.GameObjects.Graphics } {
-    const titleShadow = this.scene.add.text(x + 2, y + 2, text, {
-      fontFamily: THEME.fonts.title,
-      fontSize: THEME.fontSize.title,
-      color: '#000000'
-    }).setOrigin(0.5).setAlpha(0.5);
+  createTitle(
+    x: number,
+    y: number,
+    text: string,
+    container?: Phaser.GameObjects.Container
+  ): { title: Phaser.GameObjects.Text; line: Phaser.GameObjects.Graphics } {
+    const titleShadow = this.scene.add
+      .text(x + 2, y + 2, text, {
+        fontFamily: THEME.fonts.title,
+        fontSize: THEME.fontSize.title,
+        color: '#000000',
+      })
+      .setOrigin(0.5)
+      .setAlpha(0.5);
 
-    const title = this.scene.add.text(x, y, text, {
-      fontFamily: THEME.fonts.title,
-      fontSize: THEME.fontSize.title,
-      color: hexToColor(THEME.colors.gold),
-      stroke: hexToColor(THEME.colors.borderDark),
-      strokeThickness: 4
-    }).setOrigin(0.5);
+    const title = this.scene.add
+      .text(x, y, text, {
+        fontFamily: THEME.fonts.title,
+        fontSize: THEME.fontSize.title,
+        color: hexToColor(THEME.colors.gold),
+        stroke: hexToColor(THEME.colors.borderDark),
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
 
     const line = this.scene.add.graphics();
     line.lineStyle(2, THEME.colors.bronze, 0.8);
@@ -251,17 +310,21 @@ export class UIComponents {
     valueColor: number = THEME.colors.textPrimary,
     container?: Phaser.GameObjects.Container
   ): { label: Phaser.GameObjects.Text; value: Phaser.GameObjects.Text } {
-    const labelText = this.scene.add.text(x, y, label, {
-      fontFamily: THEME.fonts.body,
-      fontSize: THEME.fontSize.md,
-      color: hexToColor(THEME.colors.textSecondary)
-    }).setOrigin(0, 0.5);
+    const labelText = this.scene.add
+      .text(x, y, label, {
+        fontFamily: THEME.fonts.body,
+        fontSize: THEME.fontSize.md,
+        color: hexToColor(THEME.colors.textSecondary),
+      })
+      .setOrigin(0, 0.5);
 
-    const valueText = this.scene.add.text(x + 50, y, value, {
-      fontFamily: THEME.fonts.bodyBold,
-      fontSize: THEME.fontSize.md,
-      color: hexToColor(valueColor)
-    }).setOrigin(0, 0.5);
+    const valueText = this.scene.add
+      .text(x + 50, y, value, {
+        fontFamily: THEME.fonts.bodyBold,
+        fontSize: THEME.fontSize.md,
+        color: hexToColor(valueColor),
+      })
+      .setOrigin(0, 0.5);
 
     if (container) {
       container.add(labelText);
@@ -279,12 +342,13 @@ export class UIComponents {
     onChange: (value: number) => void,
     container?: Phaser.GameObjects.Container
   ): void {
-
-    const labelText = this.scene.add.text(x - 100, y, label + ':', {
-      fontFamily: THEME.fonts.body,
-      fontSize: THEME.fontSize.lg,
-      color: hexToColor(THEME.colors.goldMuted)
-    }).setOrigin(0, 0.5);
+    const labelText = this.scene.add
+      .text(x - 100, y, label + ':', {
+        fontFamily: THEME.fonts.body,
+        fontSize: THEME.fontSize.lg,
+        color: hexToColor(THEME.colors.goldMuted),
+      })
+      .setOrigin(0, 0.5);
     container?.add(labelText);
 
     const trackWidth = 200;
@@ -311,11 +375,13 @@ export class UIComponents {
     handle.input!.cursor = 'pointer';
     container?.add(handle);
 
-    const valueText = this.scene.add.text(trackX + trackWidth + 20, y, `${Math.round(initialValue * 100)}%`, {
-      fontFamily: THEME.fonts.body,
-      fontSize: THEME.fontSize.sm,
-      color: '#ffffff'
-    }).setOrigin(0, 0.5);
+    const valueText = this.scene.add
+      .text(trackX + trackWidth + 20, y, `${Math.round(initialValue * 100)}%`, {
+        fontFamily: THEME.fonts.body,
+        fontSize: THEME.fontSize.sm,
+        color: '#ffffff',
+      })
+      .setOrigin(0, 0.5);
     container?.add(valueText);
 
     const updateFill = (value: number) => {
@@ -349,7 +415,14 @@ export class UIComponents {
       isDragging = false;
     });
 
-    const trackHitArea = this.scene.add.rectangle(trackX + trackWidth / 2, y, trackWidth, 30, 0x000000, 0);
+    const trackHitArea = this.scene.add.rectangle(
+      trackX + trackWidth / 2,
+      y,
+      trackWidth,
+      30,
+      0x000000,
+      0
+    );
     trackHitArea.setInteractive({ useHandCursor: true });
     container?.add(trackHitArea);
 

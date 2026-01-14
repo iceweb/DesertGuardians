@@ -6,12 +6,10 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-
-    console.log('BootScene: Loading initial config...');
+    // Load initial config
   }
 
   create(): void {
-    console.log('BootScene: Complete, transitioning to PreloadScene');
     this.scene.start('PreloadScene');
   }
 }

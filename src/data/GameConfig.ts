@@ -1,7 +1,4 @@
-
-
 export const GAME_CONFIG = {
-
   STARTING_GOLD: 250,
 
   MAX_CASTLE_HP: 25,
@@ -16,7 +13,7 @@ export const GAME_CONFIG = {
 
   WAVE_COMPLETE_DELAY: 500,
 
-  WAVE_HP_SCALING: 0.10,
+  WAVE_HP_SCALING: 0.1,
 
   MAX_HP_MULTIPLIER: 3.5,
 
@@ -71,7 +68,7 @@ export const GAME_CONFIG = {
   VETERAN_RANKS: [
     { name: 'Recruit', minKills: 0, damageBonus: 0 },
     { name: 'Corporal', minKills: 50, damageBonus: 0.05 },
-    { name: 'Sergeant', minKills: 150, damageBonus: 0.10 },
+    { name: 'Sergeant', minKills: 150, damageBonus: 0.1 },
     { name: 'Captain', minKills: 350, damageBonus: 0.15 },
   ],
 } as const;
