@@ -1299,7 +1299,7 @@ export class MenuScene extends Phaser.Scene {
     });
     
     // Stop dragging on pointer up anywhere - but block the event from propagating if we were dragging
-    this.input.on('pointerup', (_pointer: Phaser.Input.Pointer, currentlyOver: Phaser.GameObjects.GameObject[]) => {
+    this.input.on('pointerup', (_pointer: Phaser.Input.Pointer, _currentlyOver: Phaser.GameObjects.GameObject[]) => {
       if (isDragging) {
         isDragging = false;
         // If we were dragging and released over any interactive object, 

@@ -149,7 +149,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   // === SCALED BOSSES ===
   // dispelImmunity: duration in ms after dispel where boss is immune to slow/poison (early bosses nerfed)
   boss_1: { type: 'boss_1', maxHealth: 1200, speed: 50, armor: 3, goldReward: 60, sizeScale: 1.0, canDispel: true, dispelImmunity: 800, description: '🦎 Giant Gecko. Periodically dispels slow and poison effects.' },
-  boss_2: { type: 'boss_2', maxHealth: 2200, speed: 48, armor: 4, goldReward: 100, sizeScale: 1.15, canDispel: true, dispelImmunity: 1200, description: '🦎 Komodo Warlord. Dispels debuffs. High HP and armor.' },
+  boss_2: { type: 'boss_2', maxHealth: 1870, speed: 48, armor: 4, goldReward: 100, sizeScale: 1.15, canDispel: true, dispelImmunity: 1200, description: '🦎 Komodo Warlord. Dispels debuffs. High HP and armor.' },
   boss_3: { type: 'boss_3', maxHealth: 3600, speed: 40, armor: 5, goldReward: 160, sizeScale: 1.3, canDispel: true, dispelImmunity: 1500, description: '🐉 Drake Champion. Massive HP. Dispels all negative effects.' },
   boss_4: { type: 'boss_4', maxHealth: 5500, speed: 35, armor: 6, goldReward: 240, sizeScale: 1.5, canDispel: true, dispelImmunity: 2000, description: '🐉 Young Dragon. Extremely tanky. Focus fire required.' },
   boss_5: { type: 'boss_5', maxHealth: 9000, speed: 30, armor: 7, goldReward: 400, sizeScale: 1.7, canDispel: true, dispelImmunity: 2000, description: '🐉 Elder Dragon Lord. The final challenge!' },

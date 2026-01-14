@@ -274,12 +274,13 @@ export class GameScene extends Phaser.Scene {
       await new Promise<void>(resolve => this.time.delayedCall(300, () => resolve()));
       
       // Collect mine income with animation (this is the main visual feedback)
-      const mineIncome = await this.goldMineManager.collectIncomeWithAnimation();
+      // Play coins sound for each mine as its animation completes
+      const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
+        this.audioManager.playSFX('coins');
+      });
       if (mineIncome > 0) {
         this.gameController.addGold(mineIncome);
         this.hudManager.updateGold(this.gameController.gold);
-        this.audioManager.playSFX('coins');
-
       }
       
       // Automatically start next wave after a countdown (unless all waves done)
@@ -512,16 +513,18 @@ export class GameScene extends Phaser.Scene {
    * Setup creep manager callbacks for boss events
    */
   private setupCreepCallbacks(): void {
-    // Dragon roar on first hit
-    this.creepManager.onBossFirstHit = (_creep) => {
-
-      this.audioManager.playSFX('dragon_roar');
+    // Dragon roar on first hit - only for the final boss (boss_5)
+    this.creepManager.onBossFirstHit = (creep) => {
+      if (creep.getConfig().type === 'boss_5') {
+        this.audioManager.playSFX('dragon_roar');
+      }
     };
     
-    // Dragon roar and pain state at 25% health
-    this.creepManager.onBossPainThreshold = (_creep) => {
-
-      this.audioManager.playSFX('dragon_roar');
+    // Dragon roar and rage animation at 25% health - only for the final boss (boss_5)
+    this.creepManager.onBossPainThreshold = (creep) => {
+      if (creep.getConfig().type === 'boss_5') {
+        this.audioManager.playSFX('dragon_roar');
+      }
     };
   }
 

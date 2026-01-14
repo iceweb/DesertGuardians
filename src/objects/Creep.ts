@@ -39,6 +39,8 @@ export class Creep extends Phaser.GameObjects.Container {
   private bossFirstHit: boolean = false;
   private bossPainThresholdTriggered: boolean = false;
   private bossIsPained: boolean = false;
+  private bossRageAnimationActive: boolean = false;
+  private bossRageAnimationEndTime: number = 0;
   
   // Delegated handlers
   private statusEffects!: StatusEffectHandler;
@@ -151,6 +153,8 @@ export class Creep extends Phaser.GameObjects.Container {
     this.bossFirstHit = false;
     this.bossPainThresholdTriggered = false;
     this.bossIsPained = false;
+    this.bossRageAnimationActive = false;
+    this.bossRageAnimationEndTime = 0;
     
     // Initialize abilities
     this.abilities.initialize(this.config);
@@ -279,8 +283,13 @@ export class Creep extends Phaser.GameObjects.Container {
     // Animation time
     this.bounceTime += delta / 1000;
     
-    // Movement (unless jumping)
-    if (!state.isJumping) {
+    // Check if rage animation has ended
+    if (this.bossRageAnimationActive && this.scene.time.now >= this.bossRageAnimationEndTime) {
+      this.bossRageAnimationActive = false;
+    }
+    
+    // Movement (unless jumping or in rage animation)
+    if (!state.isJumping && !this.bossRageAnimationActive) {
       const speedMultiplier = this.statusEffects.getSpeedMultiplier();
       const moveDistance = (this.config.speed * speedMultiplier * delta) / 1000;
       this.distanceTraveled += moveDistance;
@@ -440,6 +449,13 @@ export class Creep extends Phaser.GameObjects.Container {
       if (!this.bossPainThresholdTriggered && previousHealthPercent > 0.25 && healthPercent <= 0.25) {
         this.bossPainThresholdTriggered = true;
         this.bossIsPained = true;
+        
+        // For the final boss (boss_5), trigger rage animation (1.5s pause)
+        if (this.config.type === 'boss_5') {
+          this.bossRageAnimationActive = true;
+          this.bossRageAnimationEndTime = this.scene.time.now + 1500; // 1.5 seconds
+        }
+        
         this.emit('bossPainThreshold', this);
         // Redraw to show pain state visual
         this.redraw();

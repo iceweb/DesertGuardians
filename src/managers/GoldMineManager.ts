@@ -221,8 +221,9 @@ export class GoldMineManager {
   /**
    * Collect income with animation from all mines
    * Returns a promise that resolves with total income when all animations complete
+   * @param onMineCollected - Optional callback fired when each mine's animation completes
    */
-  async collectIncomeWithAnimation(): Promise<number> {
+  async collectIncomeWithAnimation(onMineCollected?: (income: number) => void): Promise<number> {
     const activeMines = this.mines.filter(m => m.isBuilt());
     
     if (activeMines.length === 0) {
@@ -239,6 +240,7 @@ export class GoldMineManager {
     // Stagger animations for each mine with timeout protection
     for (let i = 0; i < activeMines.length; i++) {
       const mine = activeMines[i];
+      const mineIncome = mine.getIncomePerWave();
       
       // Delay each mine's animation slightly, with timeout fallback
       await new Promise<void>(resolve => {
@@ -246,6 +248,8 @@ export class GoldMineManager {
         const safeResolve = () => {
           if (!resolved) {
             resolved = true;
+            // Fire callback when this mine's animation completes
+            onMineCollected?.(mineIncome);
             resolve();
           }
         };
