@@ -2,19 +2,18 @@ import Phaser from 'phaser';
 import { CreepIconGenerator } from '../graphics/CreepIconGenerator';
 import type { WaveType } from '../data/GameData';
 
-export class NextWavePanel {
+export class CurrentWavePanel {
   private scene: Phaser.Scene;
   private container: Phaser.GameObjects.Container;
   private iconGenerator: CreepIconGenerator;
-  private tooltip: Phaser.GameObjects.Container | null = null;
   private icons: Phaser.GameObjects.Container[] = [];
-  private bossGlow: Phaser.GameObjects.Graphics | null = null;
-  private glowTween: Phaser.Tweens.Tween | null = null;
+  private tooltip: Phaser.GameObjects.Container | null = null;
 
   private panelX: number = 20;
   private panelYOffset: number = 130;
   private panelWidth: number = 0;
   private panelHeight: number = 0;
+
   private readonly ICON_SIZE = 42;
   private readonly ICON_SPACING = 56;
   private readonly MAX_ICONS_PER_ROW = 5;
@@ -30,6 +29,7 @@ export class NextWavePanel {
   show(
     waveNumber: number,
     creepTypes: Array<{ type: string; description: string }>,
+    currentCreepType: string | null,
     waveType?: WaveType
   ): void {
     this.clearIcons();
@@ -40,59 +40,16 @@ export class NextWavePanel {
 
     const iconCount = Math.min(creepTypes.length, this.MAX_ICONS_PER_ROW);
     const rows = Math.ceil(creepTypes.length / this.MAX_ICONS_PER_ROW);
-    this.panelWidth = Math.max(160, iconCount * this.ICON_SPACING + 50);
+    this.panelWidth = Math.max(180, iconCount * this.ICON_SPACING + 50);
     this.panelHeight = 95 + rows * this.ICON_SPACING;
 
     this.container.setPosition(this.panelX, height - this.panelYOffset - this.panelHeight / 2);
-
-    if (isBossWave) {
-      this.bossGlow = this.scene.add.graphics();
-      this.drawBossGlow(this.panelWidth, this.panelHeight, 0.3);
-      this.container.add(this.bossGlow);
-
-      this.glowTween = this.scene.tweens.add({
-        targets: { alpha: 0.3 },
-        alpha: 0.8,
-        duration: 800,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-        onUpdate: (tween) => {
-          const alpha = tween.getValue() ?? 0.3;
-          if (this.bossGlow) {
-            this.drawBossGlow(this.panelWidth, this.panelHeight, alpha);
-          }
-        },
-      });
-    }
 
     const bg = this.scene.add.graphics();
     this.drawPanelBackground(bg, this.panelWidth, this.panelHeight, isBossWave);
     this.container.add(bg);
 
-    const hitBlocker = this.scene.add.rectangle(
-      this.panelWidth / 2,
-      this.panelHeight / 2,
-      this.panelWidth,
-      this.panelHeight,
-      0x000000,
-      0
-    );
-    hitBlocker.setInteractive();
-    hitBlocker.on(
-      'pointerdown',
-      (
-        _pointer: Phaser.Input.Pointer,
-        _localX: number,
-        _localY: number,
-        event: Phaser.Types.Input.EventData
-      ) => {
-        event.stopPropagation();
-      }
-    );
-    this.container.add(hitBlocker);
-
-    const headerText = isBossWave ? '⚔️ BOSS WAVE' : 'Next Wave';
+    const headerText = isBossWave ? '⚔️ BOSS WAVE' : 'Current Wave';
     const headerColor = isBossWave ? '#ff4444' : '#d4a574';
     const header = this.scene.add
       .text(this.panelWidth / 2, 14, headerText, {
@@ -127,12 +84,31 @@ export class NextWavePanel {
       const x = startX + col * this.ICON_SPACING;
       const y = startY + row * this.ICON_SPACING;
 
-      const iconContainer = this.createIconWithHover(x, y, creepInfo.type, creepInfo.description);
+      const iconContainer = this.createIconWithHover(
+        x,
+        y,
+        creepInfo.type,
+        creepInfo.description
+      );
       this.container.add(iconContainer);
       this.icons.push(iconContainer);
+
+      if (currentCreepType && creepInfo.type === currentCreepType) {
+        this.addActiveIndicator(iconContainer);
+      }
     });
 
     this.container.setVisible(true);
+  }
+
+  setLayout(x: number, yOffset: number): void {
+    this.panelX = x;
+    this.panelYOffset = yOffset;
+    this.updatePosition();
+  }
+
+  getPanelWidth(): number {
+    return this.container.visible ? this.panelWidth : 0;
   }
 
   private createIconWithHover(
@@ -297,15 +273,21 @@ export class NextWavePanel {
     }
   }
 
-  private drawBossGlow(width: number, height: number, alpha: number): void {
-    if (!this.bossGlow) return;
-    this.bossGlow.clear();
+  private addActiveIndicator(iconContainer: Phaser.GameObjects.Container): void {
+    const arrow = this.scene.add.graphics();
+    arrow.fillStyle(0xffd700, 1);
+    arrow.beginPath();
+    arrow.moveTo(0, -this.ICON_SIZE / 2 - 10);
+    arrow.lineTo(-8, -this.ICON_SIZE / 2 - 22);
+    arrow.lineTo(8, -this.ICON_SIZE / 2 - 22);
+    arrow.closePath();
+    arrow.fillPath();
+    iconContainer.add(arrow);
 
-    this.bossGlow.fillStyle(0xff4400, alpha * 0.3);
-    this.bossGlow.fillRoundedRect(-8, -8, width + 16, height + 16, 12);
-
-    this.bossGlow.fillStyle(0xffd700, alpha * 0.4);
-    this.bossGlow.fillRoundedRect(-4, -4, width + 8, height + 8, 10);
+    const glow = this.scene.add.graphics();
+    glow.fillStyle(0xffd700, 0.15);
+    glow.fillCircle(0, 0, this.ICON_SIZE / 2 + 8);
+    iconContainer.addAt(glow, 0);
   }
 
   private drawPanelBackground(
@@ -337,27 +319,11 @@ export class NextWavePanel {
     this.container.setVisible(false);
     this.hideTooltip();
     this.clearIcons();
-
-    if (this.glowTween) {
-      this.glowTween.destroy();
-      this.glowTween = null;
-    }
   }
 
   private clearIcons(): void {
     this.icons.forEach((icon) => icon.destroy());
     this.icons = [];
-    this.bossGlow = null;
-  }
-
-  setLayout(x: number, yOffset: number): void {
-    this.panelX = x;
-    this.panelYOffset = yOffset;
-    this.updatePosition();
-  }
-
-  getPanelWidth(): number {
-    return this.container.visible ? this.panelWidth : 0;
   }
 
   updatePosition(): void {

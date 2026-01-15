@@ -398,6 +398,48 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     };
   }
 
+  getCurrentWaveInfo(): {
+    types: Array<{ type: string; description: string }>;
+    waveNumber: number;
+    waveType?: WaveType;
+    isBossWave: boolean;
+    currentCreepType: string | null;
+  } | null {
+    if (this.currentWave <= 0) return null;
+
+    const waveDef = WAVE_CONFIGS[this.currentWave - 1];
+    if (!waveDef) return null;
+
+    const uniqueTypes = [...new Set(waveDef.creeps.map((g) => g.type))];
+    const typesWithDescriptions = uniqueTypes.map((type) => ({
+      type,
+      description: CREEP_TYPES[type]?.description || 'Unknown creep type.',
+    }));
+
+    let currentCreepType: string | null = null;
+
+    if (this.isParallelMode) {
+      const activeGroup =
+        this.parallelGroups.find((g) => g.spawned < g.group.count && !g.finished) ||
+        this.pendingBossGroups[0];
+      currentCreepType = activeGroup?.creepType || null;
+    } else {
+      currentCreepType =
+        this.currentGroup?.creepType ||
+        this.groupQueue[0]?.creepType ||
+        this.pendingBossGroups[0]?.creepType ||
+        null;
+    }
+
+    return {
+      types: typesWithDescriptions,
+      waveNumber: waveDef.waveNumber,
+      waveType: waveDef.waveType,
+      isBossWave: waveDef.waveType === 'boss',
+      currentCreepType,
+    };
+  }
+
   reset(): void {
     if (this.spawnTimer) {
       this.spawnTimer.destroy();

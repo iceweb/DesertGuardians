@@ -124,11 +124,7 @@ describe('Projectile System', () => {
       const baseDamage = 30;
       const airDamageBonus = 2.0;
 
-      const calculateDamage = (
-        damage: number,
-        bonus: number,
-        flying: boolean
-      ): number => {
+      const calculateDamage = (damage: number, bonus: number, flying: boolean): number => {
         if (flying && bonus > 0) {
           return Math.floor(damage * (1 + bonus));
         }
@@ -140,11 +136,7 @@ describe('Projectile System', () => {
     });
 
     it('should apply magic damage (ignores armor)', () => {
-      const calculateDamage = (
-        baseDamage: number,
-        armor: number,
-        isMagic: boolean
-      ): number => {
+      const calculateDamage = (baseDamage: number, armor: number, isMagic: boolean): number => {
         if (isMagic) return baseDamage;
         return Math.max(1, baseDamage - armor);
       };
@@ -270,8 +262,8 @@ describe('Projectile System', () => {
       };
 
       // 15% crit chance
-      expect(rollCrit(0.15, 0.10)).toBe(true);
-      expect(rollCrit(0.15, 0.20)).toBe(false);
+      expect(rollCrit(0.15, 0.1)).toBe(true);
+      expect(rollCrit(0.15, 0.2)).toBe(false);
       expect(rollCrit(0, 0.05)).toBe(false);
     });
 

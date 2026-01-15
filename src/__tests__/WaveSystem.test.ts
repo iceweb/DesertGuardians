@@ -184,9 +184,9 @@ describe('Wave System', () => {
       };
 
       // In progress
-      expect(
-        isWaveComplete({ spawned: 10, total: 10, killed: 5, leaked: 2, activeCount: 3 })
-      ).toBe(false);
+      expect(isWaveComplete({ spawned: 10, total: 10, killed: 5, leaked: 2, activeCount: 3 })).toBe(
+        false
+      );
 
       // All killed but still active
       expect(
@@ -194,9 +194,9 @@ describe('Wave System', () => {
       ).toBe(false);
 
       // Complete
-      expect(
-        isWaveComplete({ spawned: 10, total: 10, killed: 8, leaked: 2, activeCount: 0 })
-      ).toBe(true);
+      expect(isWaveComplete({ spawned: 10, total: 10, killed: 8, leaked: 2, activeCount: 0 })).toBe(
+        true
+      );
     });
   });
 

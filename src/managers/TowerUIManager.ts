@@ -4,6 +4,7 @@ import { TOWER_CONFIGS } from '../data';
 import { TOWER_BRANCH_COLORS, VETERAN_RANK_COLORS } from '../data/ThemeConfig';
 import { UIHelper } from './UIHelper';
 import type { UIHitDetector } from './UIHitDetector';
+import type { PopupController } from './PopupController';
 import {
   TowerIconRenderer,
   TOWER_HINTS,
@@ -26,11 +27,10 @@ export class TowerUIManager {
 
   private buildMenuPosition: { x: number; y: number } | null = null;
 
-  private menuClosedThisFrame: boolean = false;
-
   private reviewMode: boolean = false;
 
   private uiHitDetector: UIHitDetector | null = null;
+  private popupController: PopupController | null = null;
 
   public onBuildRequested?: (x: number, y: number, towerKey: string) => void;
   public onUpgradeRequested?: (tower: Tower, newKey: string) => void;
@@ -51,6 +51,10 @@ export class TowerUIManager {
 
   setUIHitDetector(detector: UIHitDetector): void {
     this.uiHitDetector = detector;
+  }
+
+  setPopupController(controller: PopupController): void {
+    this.popupController = controller;
   }
 
   setReviewMode(enabled: boolean): void {
@@ -87,7 +91,7 @@ export class TowerUIManager {
     this.buildMenuPosition = { x, y };
     this.lastKnownGold = this.getPlayerGold?.() || 0;
 
-    this.closeMenus(true);
+    this.closeMenus(true, false);
 
     const playerGold = this.getPlayerGold?.() || 0;
     const archerConfig = TOWER_CONFIGS['archer_1'];
@@ -95,6 +99,8 @@ export class TowerUIManager {
 
     this.buildMenuContainer = this.scene.add.container(x, y - 120);
     this.buildMenuContainer.setDepth(200);
+
+    this.popupController?.open('tower-build', undefined, () => this.closeMenus(false, true));
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.97);
@@ -348,7 +354,7 @@ export class TowerUIManager {
     this.selectedTower = tower;
     this.lastKnownGold = this.getPlayerGold?.() || 0;
 
-    this.closeMenus(true);
+    this.closeMenus(true, false);
 
     const config = tower.getConfig();
     const playerGold = this.getPlayerGold?.() || 0;
@@ -364,7 +370,9 @@ export class TowerUIManager {
     const killCount = tower.getKillCount();
 
     const menuWidth = hasBranches && !this.reviewMode ? Math.max(780, branchCount * 115 + 60) : 420;
-    let menuHeight = 190;
+    let menuHeight = 210;
+    const hasSlow = !!config.stats.slowPercent && !!config.stats.slowDuration;
+    const hasDot = !!config.stats.dotDamage && !!config.stats.dotDuration;
     if (hasDamageBuff) menuHeight += 18;
     if (hasCritBuff) menuHeight += 18;
     if (this.reviewMode) {
@@ -378,9 +386,13 @@ export class TowerUIManager {
       }
     }
     if (!this.reviewMode) menuHeight += 45;
+    if (hasSlow) menuHeight += 22;
+    if (hasDot) menuHeight += 22;
 
     this.upgradeMenuContainer = this.scene.add.container(tower.x, tower.y - menuHeight / 2 - 40);
     this.upgradeMenuContainer.setDepth(200);
+
+    this.popupController?.open('tower-upgrade', undefined, () => this.closeMenus(false, true));
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.97);
@@ -535,8 +547,12 @@ export class TowerUIManager {
     this.upgradeMenuContainer.add(rangeValue);
 
     if (config.stats.airDamageBonus) {
+      const airText = `+${Math.round(config.stats.airDamageBonus * 100)}%`;
+      const airLabelX = statsStartX + 280;
+      const airValueX = statsStartX + 340;
+
       const airLabel = this.scene.add
-        .text(statsStartX + 280, yOffset, 'vs Air:', {
+        .text(airLabelX, yOffset, 'vs Air:', {
           fontFamily: 'Arial',
           fontSize: '16px',
           color: '#aaaaaa',
@@ -545,16 +561,53 @@ export class TowerUIManager {
       this.upgradeMenuContainer.add(airLabel);
 
       const airValue = this.scene.add
-        .text(statsStartX + 340, yOffset, `+${Math.round(config.stats.airDamageBonus * 100)}%`, {
+        .text(airValueX, yOffset, airText, {
           fontFamily: 'Arial Black',
           fontSize: '16px',
           color: '#66ccff',
         })
         .setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(airValue);
+
+      const rightLimit = menuWidth / 2 - 20;
+      if (airValueX + airValue.width > rightLimit) {
+        airLabel.setPosition(statsStartX, yOffset + statLineHeight);
+        airValue.setPosition(statsStartX + 60, yOffset + statLineHeight);
+        yOffset += statLineHeight;
+      }
     }
 
     yOffset += statLineHeight + 2;
+
+    if (hasSlow) {
+      const slowPercent = Math.round((config.stats.slowPercent || 0) * 100);
+      const slowSeconds = (config.stats.slowDuration || 0) / 1000;
+      const maxSlowTargets = config.stats.maxSlowTargets ? ` · Max ${config.stats.maxSlowTargets}` : '';
+
+      const slowText = this.scene.add
+        .text(statsStartX, yOffset, `❄ Slow: ${slowPercent}% for ${slowSeconds}s${maxSlowTargets}`, {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#aaddff',
+        })
+        .setOrigin(0, 0.5);
+      this.upgradeMenuContainer.add(slowText);
+      yOffset += statLineHeight;
+    }
+
+    if (hasDot) {
+      const dotDamage = config.stats.dotDamage || 0;
+      const dotSeconds = (config.stats.dotDuration || 0) / 1000;
+      const dotText = this.scene.add
+        .text(statsStartX, yOffset, `☠ DoT: ${dotDamage} dmg/s for ${dotSeconds}s · Stacks 3x`, {
+          fontFamily: 'Arial',
+          fontSize: '14px',
+          color: '#aaffaa',
+        })
+        .setOrigin(0, 0.5);
+      this.upgradeMenuContainer.add(dotText);
+      yOffset += statLineHeight;
+    }
 
     const rankColor = VETERAN_RANK_COLORS[veteranRank] || '#888888';
 
@@ -620,7 +673,7 @@ export class TowerUIManager {
       .setOrigin(0.5);
     this.upgradeMenuContainer.add(hintText);
 
-    yOffset += 24;
+    yOffset += hintText.height + 8;
 
     if (hasDamageBuff) {
       const buffPercent = Math.round((damageMultiplier - 1) * 100);
@@ -1071,7 +1124,18 @@ export class TowerUIManager {
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.closeMenus();
+      }
+    );
     this.upgradeMenuContainer.add(closeBtn);
 
     this.uiHelper.clampToScreen(this.upgradeMenuContainer, menuWidth, menuHeight, 0.5, 0.5);
@@ -1087,7 +1151,7 @@ export class TowerUIManager {
   /* eslint-enable complexity, max-lines-per-function */
 
   private showAbilitySelectionForExisting(tower: Tower): void {
-    this.closeMenus();
+    this.closeMenus(false, false);
 
     const abilities = tower.getAvailableAbilities();
     if (abilities.length === 0) return;
@@ -1097,6 +1161,8 @@ export class TowerUIManager {
 
     this.abilityMenuContainer = this.scene.add.container(tower.x, tower.y - menuHeight / 2 - 50);
     this.abilityMenuContainer.setDepth(250);
+
+    this.popupController?.open('tower-ability', undefined, () => this.closeMenus(false, true));
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
@@ -1195,13 +1261,24 @@ export class TowerUIManager {
       })
       .setOrigin(0.5)
       .setInteractive({ useHandCursor: true });
-    closeBtn.on('pointerdown', () => this.closeMenus());
+    closeBtn.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        this.closeMenus();
+      }
+    );
     this.abilityMenuContainer.add(closeBtn);
 
     this.uiHelper.clampToScreen(this.abilityMenuContainer, menuWidth, menuHeight, 0.5, 0.5);
   }
 
-  closeMenus(preserveSelection: boolean = false): void {
+  closeMenus(preserveSelection: boolean = false, notifyController: boolean = true): void {
     if (this.buildMenuContainer) {
       this.buildMenuContainer.destroy();
       this.buildMenuContainer = null;
@@ -1220,11 +1297,9 @@ export class TowerUIManager {
       this.buildMenuPosition = null;
     }
 
-    this.menuClosedThisFrame = true;
-
-    this.scene.time.delayedCall(50, () => {
-      this.menuClosedThisFrame = false;
-    });
+    if (notifyController) {
+      this.popupController?.close();
+    }
   }
 
   isMenuOpen(): boolean {
@@ -1233,10 +1308,6 @@ export class TowerUIManager {
       this.upgradeMenuContainer !== null ||
       this.abilityMenuContainer !== null
     );
-  }
-
-  wasMenuJustClosed(): boolean {
-    return this.menuClosedThisFrame;
   }
 
   clearPlacementGraphics(): void {

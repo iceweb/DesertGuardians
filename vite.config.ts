@@ -14,6 +14,12 @@ export default defineConfig({
       reporter: ['text', 'lcov', 'html'],
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.{test,spec}.ts', 'src/main.ts'],
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 60,
+        statements: 70,
+      },
     },
   },
   server: {
@@ -34,4 +40,14 @@ export default defineConfig({
   },
   // Prevent clearing the terminal on rebuild
   clearScreen: false,
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          phaser: ['phaser'],
+          audio: ['howler'],
+        },
+      },
+    },
+  },
 });

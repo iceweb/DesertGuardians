@@ -3,6 +3,7 @@ import { GoldMine } from '../objects/GoldMine';
 import { GoldMineManager } from './GoldMineManager';
 import { MINE_CONFIGS } from '../data/GameData';
 import { UIHelper } from './UIHelper';
+import type { PopupController } from './PopupController';
 
 export class GoldMineUIManager {
   private scene: Phaser.Scene;
@@ -16,6 +17,7 @@ export class GoldMineUIManager {
   private lastKnownGold: number = 0;
 
   private reviewMode: boolean = false;
+  private popupController: PopupController | null = null;
 
   public getPlayerGold?: () => number;
 
@@ -31,7 +33,15 @@ export class GoldMineUIManager {
     this.reviewMode = enabled;
   }
 
+  setPopupController(controller: PopupController): void {
+    this.popupController = controller;
+  }
+
   private handleMineClicked(mine: GoldMine): void {
+    if (this.popupController?.shouldIgnorePointer()) {
+      return;
+    }
+
     if (mine.isBuilt()) {
       this.showUpgradeMenu(mine);
     } else if (!this.reviewMode) {
@@ -43,7 +53,7 @@ export class GoldMineUIManager {
   showBuildMenu(mine: GoldMine): void {
     this.currentMine = mine;
     this.lastKnownGold = this.getPlayerGold?.() || 0;
-    this.closeMenus(true);
+    this.closeMenus(true, false);
 
     const playerGold = this.getPlayerGold?.() || 0;
     const buildCost = MINE_CONFIGS[1].buildCost;
@@ -56,29 +66,7 @@ export class GoldMineUIManager {
     this.buildMenuContainer = this.scene.add.container(x, y);
     this.buildMenuContainer.setDepth(200);
 
-    const blocker = this.scene.add.rectangle(
-      -x + this.scene.cameras.main.width / 2,
-      -y + this.scene.cameras.main.height / 2,
-      this.scene.cameras.main.width,
-      this.scene.cameras.main.height,
-      0x000000,
-      0
-    );
-    blocker.setInteractive();
-    blocker.on(
-      'pointerdown',
-      (
-        _pointer: Phaser.Input.Pointer,
-        _localX: number,
-        _localY: number,
-        event: Phaser.Types.Input.EventData
-      ) => {
-        event.stopPropagation();
-
-        this.closeMenus();
-      }
-    );
-    this.buildMenuContainer.add(blocker);
+    this.popupController?.open('mine-build', undefined, () => this.closeMenus(false, true));
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
@@ -224,7 +212,7 @@ export class GoldMineUIManager {
   showUpgradeMenu(mine: GoldMine): void {
     this.currentMine = mine;
     this.lastKnownGold = this.getPlayerGold?.() || 0;
-    this.closeMenus(true);
+    this.closeMenus(true, false);
 
     const config = mine.getConfig();
     const playerGold = this.getPlayerGold?.() || 0;
@@ -240,29 +228,7 @@ export class GoldMineUIManager {
     this.upgradeMenuContainer = this.scene.add.container(x, y);
     this.upgradeMenuContainer.setDepth(200);
 
-    const blocker = this.scene.add.rectangle(
-      -x + this.scene.cameras.main.width / 2,
-      -y + this.scene.cameras.main.height / 2,
-      this.scene.cameras.main.width,
-      this.scene.cameras.main.height,
-      0x000000,
-      0
-    );
-    blocker.setInteractive();
-    blocker.on(
-      'pointerdown',
-      (
-        _pointer: Phaser.Input.Pointer,
-        _localX: number,
-        _localY: number,
-        event: Phaser.Types.Input.EventData
-      ) => {
-        event.stopPropagation();
-
-        this.closeMenus();
-      }
-    );
-    this.upgradeMenuContainer.add(blocker);
+    this.popupController?.open('mine-upgrade', undefined, () => this.closeMenus(false, true));
 
     const bg = this.scene.add.graphics();
     bg.fillStyle(0x1a0a00, 0.95);
@@ -445,7 +411,7 @@ export class GoldMineUIManager {
     }
   }
 
-  closeMenus(preserveState: boolean = false): void {
+  closeMenus(preserveState: boolean = false, notifyController: boolean = true): void {
     if (this.buildMenuContainer) {
       this.buildMenuContainer.destroy();
       this.buildMenuContainer = null;
@@ -453,6 +419,10 @@ export class GoldMineUIManager {
     if (this.upgradeMenuContainer) {
       this.upgradeMenuContainer.destroy();
       this.upgradeMenuContainer = null;
+    }
+
+    if (notifyController) {
+      this.popupController?.close();
     }
 
     if (!preserveState) {

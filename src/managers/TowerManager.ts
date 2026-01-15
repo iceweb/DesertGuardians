@@ -7,6 +7,7 @@ import { TowerUIManager } from './TowerUIManager';
 import { GoldMineManager } from './GoldMineManager';
 import type { GoldMineUIManager } from './GoldMineUIManager';
 import type { UIHitDetector } from './UIHitDetector';
+import type { PopupController } from './PopupController';
 
 export class TowerManager {
   private scene: Phaser.Scene;
@@ -32,6 +33,7 @@ export class TowerManager {
   private goldMineManager: GoldMineManager | null = null;
 
   private goldMineUIManager: GoldMineUIManager | null = null;
+  private popupController: PopupController | null = null;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
@@ -83,13 +85,11 @@ export class TowerManager {
   }
 
   private handleClick(x: number, y: number): void {
-    if (this.uiManager.isMenuOpen()) {
-      return;
-    }
+    if (this.popupController?.shouldIgnorePointer()) return;
 
-    if (this.goldMineUIManager?.isMenuOpen()) {
-      return;
-    }
+    if (this.popupController?.isAnyOpen()) return;
+
+    if (this.uiManager.isMenuOpen() || this.goldMineUIManager?.isMenuOpen()) return;
 
     const clickedTower = this.getTowerAt(x, y);
 
@@ -295,11 +295,15 @@ export class TowerManager {
     this.goldMineUIManager = manager;
   }
 
+  setPopupController(controller: PopupController): void {
+    this.popupController = controller;
+    this.uiManager.setPopupController(controller);
+  }
+
   setUIHitDetector(detector: UIHitDetector): void {
     this.uiManager.setUIHitDetector(detector);
 
     detector.setTowerCallback((x, y) => this.getTowerAt(x, y));
-    detector.setMenuCallback(() => this.uiManager.isMenuOpen());
   }
 
   setReviewMode(enabled: boolean): void {

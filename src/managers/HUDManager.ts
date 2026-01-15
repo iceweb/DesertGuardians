@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { GameControlsManager } from './GameControlsManager';
 import { GameOverlayManager } from './GameOverlayManager';
 import { CreepInfoPanel } from './CreepInfoPanel';
+import { CurrentWavePanel } from './CurrentWavePanel';
 import { NextWavePanel } from './NextWavePanel';
 import { AudioManager } from './AudioManager';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -13,6 +14,7 @@ export class HUDManager {
   private gameControls: GameControlsManager;
   private overlayManager: GameOverlayManager;
   private creepInfoPanel: CreepInfoPanel;
+  private currentWavePanel: CurrentWavePanel;
   private nextWavePanel: NextWavePanel;
 
   private goldText!: Phaser.GameObjects.Text;
@@ -23,6 +25,13 @@ export class HUDManager {
   private startWaveButton!: Phaser.GameObjects.Text;
   private startWaveButtonBg!: Phaser.GameObjects.Graphics;
   private startWaveHitArea!: Phaser.GameObjects.Rectangle;
+
+  // Countdown state for pause support
+  private countdownActive: boolean = false;
+  private countdownTimeRemaining: number = 0;
+  private countdownNextWave: number = 0;
+  private countdownOnComplete: (() => void) | null = null;
+  private countdownLastDisplayed: number = 0;
 
   private soundButtonBg!: Phaser.GameObjects.Graphics;
   private audioManager!: AudioManager;
@@ -49,6 +58,7 @@ export class HUDManager {
     this.gameControls = new GameControlsManager(scene);
     this.overlayManager = new GameOverlayManager(scene);
     this.creepInfoPanel = new CreepInfoPanel(scene);
+    this.currentWavePanel = new CurrentWavePanel(scene);
     this.nextWavePanel = new NextWavePanel(scene);
   }
 
@@ -511,40 +521,45 @@ export class HUDManager {
   }
 
   showCountdown(nextWave: number, onComplete: () => void): void {
-    let countdown = 3;
-    let completed = false;
+    // Initialize countdown state (3 seconds)
+    this.countdownActive = true;
+    this.countdownTimeRemaining = 3000; // 3 seconds in ms
+    this.countdownNextWave = nextWave;
+    this.countdownOnComplete = onComplete;
+    this.countdownLastDisplayed = 3;
 
-    const safeComplete = () => {
-      if (!completed) {
-        completed = true;
-        this.countdownText.setVisible(false);
-        onComplete();
-      }
-    };
-
-    this.countdownText.setText(`Wave ${nextWave} in ${countdown}...`);
+    this.countdownText.setText(`Wave ${nextWave} in 3...`);
     this.countdownText.setVisible(true);
+  }
 
-    const countdownTimer = this.scene.time.addEvent({
-      delay: 1000,
-      repeat: 2,
-      callback: () => {
-        countdown--;
-        if (countdown > 0) {
-          this.countdownText.setText(`Wave ${nextWave} in ${countdown}...`);
-        } else {
-          countdownTimer.destroy();
-          safeComplete();
-        }
-      },
-    });
+  updateCountdown(delta: number): void {
+    if (!this.countdownActive) return;
 
-    this.scene.time.delayedCall(4000, () => {
-      if (!completed) {
-        console.warn('HUDManager: Countdown timer fallback triggered');
-        safeComplete();
+    // Subtract elapsed time
+    this.countdownTimeRemaining -= delta;
+
+    // Calculate seconds remaining (ceiling to show current second)
+    const secondsRemaining = Math.ceil(this.countdownTimeRemaining / 1000);
+
+    // Update display if second changed
+    if (secondsRemaining !== this.countdownLastDisplayed && secondsRemaining > 0) {
+      this.countdownLastDisplayed = secondsRemaining;
+      this.countdownText.setText(`Wave ${this.countdownNextWave} in ${secondsRemaining}...`);
+    }
+
+    // Check if countdown complete
+    if (this.countdownTimeRemaining <= 0) {
+      this.countdownActive = false;
+      this.countdownText.setVisible(false);
+      if (this.countdownOnComplete) {
+        this.countdownOnComplete();
+        this.countdownOnComplete = null;
       }
-    });
+    }
+  }
+
+  isCountdownActive(): boolean {
+    return this.countdownActive;
   }
 
   showFloatingText(text: string, x: number, y: number, color: number): void {
@@ -597,6 +612,47 @@ export class HUDManager {
     waveType?: WaveType
   ): void {
     this.nextWavePanel.show(waveNumber, creepTypes, waveType);
+  }
+
+  showWavePanels(
+    currentWave: {
+      waveNumber: number;
+      creepTypes: Array<{ type: string; description: string }>;
+      currentCreepType: string | null;
+      waveType?: WaveType;
+    } | null,
+    nextWave: {
+      waveNumber: number;
+      creepTypes: Array<{ type: string; description: string }>;
+      waveType?: WaveType;
+    } | null
+  ): void {
+    const baseX = 20;
+    const yOffset = 130;
+    const padding = 16;
+
+    if (currentWave) {
+      this.currentWavePanel.show(
+        currentWave.waveNumber,
+        currentWave.creepTypes,
+        currentWave.currentCreepType,
+        currentWave.waveType
+      );
+    } else {
+      this.currentWavePanel.hide();
+    }
+
+    const currentWidth = this.currentWavePanel.getPanelWidth();
+    const nextX = baseX + (currentWidth > 0 ? currentWidth + padding : 0);
+
+    if (nextWave) {
+      this.nextWavePanel.show(nextWave.waveNumber, nextWave.creepTypes, nextWave.waveType);
+    } else {
+      this.nextWavePanel.hide();
+    }
+
+    this.currentWavePanel.setLayout(baseX, yOffset);
+    this.nextWavePanel.setLayout(nextX, yOffset);
   }
 
   hideNextWavePreview(): void {

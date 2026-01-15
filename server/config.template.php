@@ -14,8 +14,9 @@ define('DB_NAME', 'your_database_name');
 define('DB_USER', 'your_database_user');
 define('DB_PASS', 'your_database_password');
 
-// Security - MUST match the client's SECRET_KEY in HighscoreAPI.ts
-define('SECRET_KEY', 'your-secret-key-here');
+// API runtime configuration
+define('ALLOWED_ORIGINS', 'https://yourdomain.example');
+define('DEBUG_API', false);
 
 // Scoring constants (must match client GAME_CONFIG)
 define('WAVE_BONUS_POINTS', 100);

@@ -21,8 +21,8 @@ if (!empty($rawInput) && $rawInput !== '{}') {
     $method = 'POST';
 }
 
-// Debug endpoint
-if (isset($_GET['debug'])) {
+// Debug endpoint (only when explicitly enabled)
+if (DEBUG_API && isset($_GET['debug'])) {
     header('Content-Type: application/json');
     echo json_encode([
         'raw_input' => $rawInput,
@@ -35,7 +35,17 @@ if (isset($_GET['debug'])) {
 
 // Set headers
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
+header('Vary: Origin');
+
+$requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = array_filter(array_map('trim', explode(',', ALLOWED_ORIGINS)));
+
+if (ALLOWED_ORIGINS === '*') {
+    header('Access-Control-Allow-Origin: *');
+} elseif ($requestOrigin && in_array($requestOrigin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $requestOrigin);
+}
+
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
@@ -193,6 +203,10 @@ function validateSession($pdo, $token, $ip) {
     if ($session['used']) {
         return ['valid' => false, 'error' => 'Session already used'];
     }
+
+    if ($session['ip_address'] !== $ip) {
+        return ['valid' => false, 'error' => 'Session IP mismatch'];
+    }
     
     // Check if session is expired
     $createdAt = strtotime($session['created_at']);
@@ -265,7 +279,7 @@ function handlePostRequest() {
     // Required fields
     $requiredFields = ['name', 'score', 'waveReached', 'totalWaves', 'hpRemaining', 
                        'goldEarned', 'creepsKilled', 'timeSeconds', 'isVictory', 
-                       'sessionToken', 'hash'];
+                       'sessionToken'];
     
     foreach ($requiredFields as $field) {
         if (!isset($data[$field])) {
@@ -286,7 +300,6 @@ function handlePostRequest() {
     $timeSeconds = intval($data['timeSeconds']);
     $isVictory = (bool)$data['isVictory'];
     $sessionToken = $data['sessionToken'];
-    $receivedHash = $data['hash'];
     
     $pdo = getDbConnection();
     $ip = getClientIP();
@@ -325,6 +338,12 @@ function handlePostRequest() {
         echo json_encode(['error' => 'Invalid wave reached']);
         return;
     }
+
+    if ($totalWaves < 1 || $totalWaves > MAX_WAVES) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid total waves']);
+        return;
+    }
     
     if ($hpRemaining < 0 || $hpRemaining > MAX_CASTLE_HP) {
         http_response_code(400);
@@ -335,14 +354,6 @@ function handlePostRequest() {
     if ($timeSeconds < MIN_RUN_TIME_SECONDS) {
         http_response_code(400);
         echo json_encode(['error' => 'Run time too short']);
-        return;
-    }
-    
-    // Verify hash
-    $expectedHash = hash('sha256', $name . $score . $waveReached . $sessionToken . SECRET_KEY);
-    if (!hash_equals($expectedHash, $receivedHash)) {
-        http_response_code(403);
-        echo json_encode(['error' => 'Invalid authentication']);
         return;
     }
     

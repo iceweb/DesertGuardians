@@ -1,5 +1,4 @@
 const API_URL = 'https://iceweb.ch/dg/api.php';
-const SECRET_KEY = 'DesertGuardians2026SecretKey!@#$';
 
 export interface ScoreSubmission {
   name: string;
@@ -116,17 +115,9 @@ export class HighscoreAPI {
     }
 
     try {
-      const hash = await this.generateHash(
-        submission.name,
-        submission.score,
-        submission.waveReached,
-        this.sessionToken
-      );
-
       const payload = {
         ...submission,
         sessionToken: this.sessionToken,
-        hash,
       };
 
       const response = await fetch(API_URL, {
@@ -155,21 +146,6 @@ export class HighscoreAPI {
       this.sessionToken = null;
       return { success: false, error: 'Network error. Score saved locally only.' };
     }
-  }
-
-  private static async generateHash(
-    name: string,
-    score: number,
-    waveReached: number,
-    sessionToken: string
-  ): Promise<string> {
-    const message = `${name}${score}${waveReached}${sessionToken}${SECRET_KEY}`;
-    const encoder = new TextEncoder();
-    const data = encoder.encode(message);
-
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
   static getSessionToken(): string | null {

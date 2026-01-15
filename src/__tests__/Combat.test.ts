@@ -80,11 +80,14 @@ describe('Combat System', () => {
       ];
 
       const findBestTarget = (creeps: MockCreep[]): MockCreep | null => {
-        return creeps.reduce((best, creep) => {
-          if (!creep.isActive || !creep.canBeTargeted) return best;
-          if (!best || creep.health > best.health) return creep;
-          return best;
-        }, null as MockCreep | null);
+        return creeps.reduce(
+          (best, creep) => {
+            if (!creep.isActive || !creep.canBeTargeted) return best;
+            if (!best || creep.health > best.health) return creep;
+            return best;
+          },
+          null as MockCreep | null
+        );
       };
 
       const target = findBestTarget(creeps);
@@ -152,7 +155,9 @@ describe('Combat System', () => {
       const findIceTarget = (creeps: MockCreep[]): MockCreep | null => {
         const nonSlowed = creeps.filter((c) => !c.isSlowed);
         if (nonSlowed.length > 0) {
-          return nonSlowed.reduce((best, c) => (c.distanceTraveled > best.distanceTraveled ? c : best));
+          return nonSlowed.reduce((best, c) =>
+            c.distanceTraveled > best.distanceTraveled ? c : best
+          );
         }
         // Fallback to slowed if no non-slowed available
         return creeps.reduce((best, c) => (c.distanceTraveled > best.distanceTraveled ? c : best));

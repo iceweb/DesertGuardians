@@ -12,6 +12,7 @@ import {
   GoldMineManager,
   GoldMineUIManager,
   UIHitDetector,
+  PopupController,
   GameController,
   HighscoreAPI,
 } from '../managers';
@@ -35,6 +36,7 @@ export class GameScene extends Phaser.Scene {
   private goldMineManager!: GoldMineManager;
   private goldMineUIManager!: GoldMineUIManager;
   private uiHitDetector!: UIHitDetector;
+  private popupController!: PopupController;
 
   private gameController!: GameController;
 
@@ -105,6 +107,10 @@ export class GameScene extends Phaser.Scene {
     this.goldMineUIManager.getPlayerGold = () => this.gameController.gold;
 
     this.towerManager.setGoldMineUIManager(this.goldMineUIManager);
+
+    this.popupController = new PopupController(this);
+    this.towerManager.setPopupController(this.popupController);
+    this.goldMineUIManager.setPopupController(this.popupController);
 
     this.hudManager = new HUDManager(this);
     this.hudManager.create(this.waveManager.getTotalWaves());
@@ -247,6 +253,10 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
+    this.waveManager.on('waveProgress', () => {
+      this.updateNextWavePreview();
+    });
+
     this.waveManager.on('allWavesComplete', () => {
       this.gameController.markGameOver();
       this.audioManager.playSFX('victory');
@@ -313,9 +323,24 @@ export class GameScene extends Phaser.Scene {
 
   private setupHUDCallbacks(): void {
     this.hudManager.onStartWaveClicked = () => {
-      if (!this.gameController.gameOver) {
-        this.waveManager.startWave();
+      if (this.gameController.gameOver) return;
+      if (this.hudManager.isCountdownActive()) return;
+
+      const nextWave = this.waveManager.getCurrentWave() + 1;
+
+      if (this.waveManager.getCurrentWave() === 0) {
+        // Show countdown before the first wave starts
+        this.hudManager.updateWave(nextWave);
+        this.hudManager.hideStartWaveButton();
+        this.hudManager.showCountdown(nextWave, () => {
+          if (!this.gameController.gameOver) {
+            this.waveManager.startWave();
+          }
+        });
+        return;
       }
+
+      this.waveManager.startWave();
     };
 
     this.hudManager.onMenuClicked = () => {
@@ -331,15 +356,15 @@ export class GameScene extends Phaser.Scene {
     this.uiHitDetector.setMineCallback((x, y) => this.goldMineManager.getMineAtPosition(x, y));
 
     this.uiHitDetector.setMenuCallback(
-      () => this.towerManager.isMenuOpen() || this.goldMineUIManager.isMenuOpen()
+      () => this.popupController?.isAnyOpen() || this.towerManager.isMenuOpen() || this.goldMineUIManager.isMenuOpen()
     );
 
     this.uiHitDetector.registerBounds(
       'nextWavePanel',
       10,
       this.cameras.main.height - 200,
-      180,
-      120
+      420,
+      140
     );
 
     this.uiHitDetector.registerBounds('menuButton', 15, this.cameras.main.height - 50, 100, 40);
@@ -381,26 +406,42 @@ export class GameScene extends Phaser.Scene {
   }
 
   private updateNextWavePreview(): void {
+    const currentWaveInfo = this.waveManager.getCurrentWaveInfo();
     const nextWaveInfo = this.waveManager.getNextWaveInfo();
-    if (nextWaveInfo) {
-      this.hudManager.showNextWavePreview(
-        nextWaveInfo.waveNumber,
-        nextWaveInfo.types,
-        nextWaveInfo.waveType
-      );
-    } else {
-      this.hudManager.hideNextWavePreview();
-    }
+
+    this.hudManager.showWavePanels(
+      currentWaveInfo
+        ? {
+            waveNumber: currentWaveInfo.waveNumber,
+            creepTypes: currentWaveInfo.types,
+            currentCreepType: currentWaveInfo.currentCreepType,
+            waveType: currentWaveInfo.waveType,
+          }
+        : null,
+      nextWaveInfo
+        ? {
+            waveNumber: nextWaveInfo.waveNumber,
+            creepTypes: nextWaveInfo.types,
+            waveType: nextWaveInfo.waveType,
+          }
+        : null
+    );
   }
 
   update(_time: number, delta: number): void {
     if (this.gameController.gameOver) return;
-    if (this.hudManager.isPausedState()) return;
 
     const cappedDelta = Math.min(delta, 50);
-
     const gameSpeed = this.hudManager.getGameSpeed();
     const scaledDelta = cappedDelta * gameSpeed;
+
+    // Update countdown only when not paused (freezes on pause)
+    if (!this.hudManager.isPausedState()) {
+      this.hudManager.updateCountdown(scaledDelta);
+    }
+
+    // Skip game logic updates when paused
+    if (this.hudManager.isPausedState()) return;
 
     this.gameController.addVirtualTime(scaledDelta);
 
