@@ -5,6 +5,7 @@ import { SpecialCreepGraphics } from './creeps/SpecialCreepGraphics';
 import { ElementalCreepGraphics } from './creeps/ElementalCreepGraphics';
 import { CreepEffectsGraphics } from './creeps/CreepEffectsGraphics';
 import { DragonKnightGraphics } from './creeps/DragonKnightGraphics';
+import { THEME } from '../data/ThemeConfig';
 
 export class CreepGraphics {
   private static readonly BASIC_TYPES = new Set(['furball', 'runner', 'tank']);
@@ -71,6 +72,9 @@ export class CreepGraphics {
     } else {
       BasicCreepGraphics.drawFurball(g, bounceTime, faceDirection);
     }
+
+    g.fillStyle(THEME.colors.warmHighlight, 0.06);
+    g.fillEllipse(-6 * faceDirection, -10, 16, 8);
   }
 
   static drawShield = CreepEffectsGraphics.drawShield;

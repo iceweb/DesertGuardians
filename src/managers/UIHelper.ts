@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { THEME } from '../data/ThemeConfig';
 
 export interface ButtonConfig {
   text: string;
@@ -95,8 +96,12 @@ export class UIHelper {
     const background = this.scene.add.graphics();
     const currentBgColor = enabled ? bgColor : disabledBgColor;
     const currentBorderColor = enabled ? borderColor : disabledBorderColor;
+    background.fillStyle(THEME.colors.warmShadow, 0.3);
+    background.fillRoundedRect(-btnWidth / 2 + 2, -btnHeight / 2 + 3, btnWidth, btnHeight, 6);
     background.fillStyle(currentBgColor, 1);
     background.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
+    background.fillStyle(THEME.colors.warmHighlight, 0.12);
+    background.fillRoundedRect(-btnWidth / 2 + 3, -btnHeight / 2 + 3, btnWidth - 6, 8, 5);
     background.lineStyle(2, currentBorderColor, 1);
     background.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
 
@@ -110,16 +115,24 @@ export class UIHelper {
 
       hitArea.on('pointerover', () => {
         background.clear();
+        background.fillStyle(THEME.colors.warmShadow, 0.3);
+        background.fillRoundedRect(-btnWidth / 2 + 2, -btnHeight / 2 + 3, btnWidth, btnHeight, 6);
         background.fillStyle(hoverBgColor, 1);
         background.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
+        background.fillStyle(THEME.colors.warmHighlight, 0.12);
+        background.fillRoundedRect(-btnWidth / 2 + 3, -btnHeight / 2 + 3, btnWidth - 6, 8, 5);
         background.lineStyle(2, borderColor, 1);
         background.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
       });
 
       hitArea.on('pointerout', () => {
         background.clear();
+        background.fillStyle(THEME.colors.warmShadow, 0.3);
+        background.fillRoundedRect(-btnWidth / 2 + 2, -btnHeight / 2 + 3, btnWidth, btnHeight, 6);
         background.fillStyle(bgColor, 1);
         background.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
+        background.fillStyle(THEME.colors.warmHighlight, 0.12);
+        background.fillRoundedRect(-btnWidth / 2 + 3, -btnHeight / 2 + 3, btnWidth - 6, 8, 5);
         background.lineStyle(2, borderColor, 1);
         background.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
       });
@@ -206,8 +219,18 @@ export class UIHelper {
       const bgY = minY - padding;
 
       background.clear();
+      background.fillStyle(THEME.colors.warmShadow, 0.3);
+      background.fillRoundedRect(bgX + 3, bgY + 5, contentWidth, contentHeight, cornerRadius + 1);
       background.fillStyle(bgColor, bgAlpha);
       background.fillRoundedRect(bgX, bgY, contentWidth, contentHeight, cornerRadius);
+      background.fillStyle(THEME.colors.warmHighlight, 0.08);
+      background.fillRoundedRect(
+        bgX + 4,
+        bgY + 4,
+        contentWidth - 8,
+        Math.max(16, contentHeight * 0.18),
+        Math.max(2, cornerRadius - 2)
+      );
       background.lineStyle(borderWidth, borderColor, 1);
       background.strokeRoundedRect(bgX, bgY, contentWidth, contentHeight, cornerRadius);
 

@@ -3,6 +3,7 @@ import { PathSystem } from '../managers/MapPathSystem';
 import { EnvironmentDecorations } from './EnvironmentDecorations';
 import { PathRenderer } from './PathRenderer';
 import { GAME_CONFIG } from '../data';
+import { THEME } from '../data/ThemeConfig';
 
 export class GameEnvironment {
   private scene: Phaser.Scene;
@@ -286,11 +287,11 @@ export class GameEnvironment {
     sky.setDepth(-100);
 
     const colors = [
-      { y: 0, color: 0x87ceeb },
-      { y: 0.3, color: 0xb0d4e8 },
-      { y: 0.6, color: 0xffd4a3 },
-      { y: 0.85, color: 0xffb366 },
-      { y: 1, color: 0xe8c896 },
+      { y: 0, color: 0x6fc1e6 },
+      { y: 0.35, color: 0xa8d6ee },
+      { y: 0.65, color: 0xf5cfa0 },
+      { y: 0.85, color: 0xe9a868 },
+      { y: 1, color: 0xd9935a },
     ];
 
     for (let i = 0; i < colors.length - 1; i++) {
@@ -322,6 +323,15 @@ export class GameEnvironment {
     sky.fillCircle(1600, 120, 80);
     sky.fillStyle(0xffff66, 0.2);
     sky.fillCircle(1600, 120, 110);
+
+    sky.fillStyle(0xf6c46b, 0.18);
+    sky.fillRect(0, height * 0.45, width, height * 0.2);
+
+    sky.fillStyle(THEME.colors.warmHighlight, 0.12);
+    sky.fillRect(0, height * 0.6, width, height * 0.2);
+
+    sky.fillStyle(THEME.colors.warmShadow, 0.08);
+    sky.fillRect(0, 0, width, height * 0.15);
   }
 
   private drawDesertTerrain(): void {
@@ -331,28 +341,37 @@ export class GameEnvironment {
     const terrain = this.scene.add.graphics();
     terrain.setDepth(-50);
 
-    terrain.fillStyle(0xe8d4a8, 1);
+    terrain.fillStyle(THEME.colors.sandLight, 1);
     terrain.fillRect(0, 0, width, height);
 
-    terrain.fillStyle(0xd4c094, 0.8);
+    terrain.fillStyle(THEME.colors.sandMid, 0.9);
     this.drawDune(terrain, -100, height * 0.7, 600, 200);
     this.drawDune(terrain, 400, height * 0.65, 800, 250);
     this.drawDune(terrain, 1000, height * 0.7, 700, 220);
     this.drawDune(terrain, 1500, height * 0.68, 600, 230);
 
-    terrain.fillStyle(0xdec8a0, 0.9);
+    terrain.fillStyle(THEME.colors.sandDark, 0.6);
     this.drawDune(terrain, 100, height * 0.8, 500, 150);
     this.drawDune(terrain, 700, height * 0.78, 600, 180);
     this.drawDune(terrain, 1300, height * 0.82, 550, 160);
 
-    terrain.fillStyle(0xf0e0c0, 0.4);
+    terrain.fillStyle(THEME.colors.warmHighlight, 0.28);
     for (let i = 0; i < 50; i++) {
       const x = Math.random() * width;
       const y = 100 + Math.random() * (height - 150);
       terrain.fillEllipse(x, y, 80 + Math.random() * 120, 15 + Math.random() * 25);
     }
 
-    terrain.lineStyle(1, 0xcbb896, 0.3);
+    terrain.fillStyle(0xf6c46b, 0.18);
+    terrain.fillRect(0, 0, width, height * 0.22);
+
+    terrain.fillStyle(THEME.colors.warmHighlight, 0.12);
+    terrain.fillRect(0, height * 0.18, width, height * 0.24);
+
+    terrain.fillStyle(THEME.colors.warmShadow, 0.08);
+    terrain.fillRect(0, height * 0.55, width, height * 0.45);
+
+    terrain.lineStyle(1, 0xcbb896, 0.25);
     for (let y = 150; y < height; y += 40) {
       terrain.beginPath();
       terrain.moveTo(0, y);
@@ -734,7 +753,7 @@ export class GameEnvironment {
     const cx = x - 20;
     const cy = y - 80;
 
-    castle.fillStyle(0x000000, 0.3);
+    castle.fillStyle(THEME.colors.warmShadow, 0.35);
     castle.fillEllipse(cx, cy + 95, 160, 40);
 
     const stairBaseY = cy + 160;
@@ -838,6 +857,11 @@ export class GameEnvironment {
     castle.closePath();
     castle.fillPath();
 
+    castle.fillStyle(THEME.colors.warmHighlight, 0.18);
+    castle.fillRect(cx - 58, cy - 32, 116, 14);
+    castle.fillStyle(THEME.colors.warmShadow, 0.18);
+    castle.fillRect(cx - 60, cy + 40, 120, 18);
+
     castle.fillStyle(0xd4c8b4, 1);
     castle.beginPath();
     castle.moveTo(cx + 60, cy + 60);
@@ -846,6 +870,11 @@ export class GameEnvironment {
     castle.lineTo(cx + 75, cy + 70);
     castle.closePath();
     castle.fillPath();
+
+    castle.fillStyle(THEME.colors.warmHighlight, 0.15);
+    castle.fillRect(cx + 60, cy - 30, 12, 18);
+    castle.fillStyle(THEME.colors.warmShadow, 0.2);
+    castle.fillRect(cx + 62, cy + 35, 12, 18);
 
     castle.lineStyle(1, 0xc8bca8, 0.5);
     for (let row = 0; row < 5; row++) {
@@ -864,6 +893,11 @@ export class GameEnvironment {
     castle.fillStyle(0xe8dcc8, 1);
     castle.fillRect(cx - 75, cy - 70, 40, 130);
 
+    castle.fillStyle(THEME.colors.warmHighlight, 0.18);
+    castle.fillRect(cx - 73, cy - 66, 34, 14);
+    castle.fillStyle(THEME.colors.warmShadow, 0.18);
+    castle.fillRect(cx - 73, cy + 40, 34, 18);
+
     castle.fillStyle(0xd4c8b4, 1);
     castle.beginPath();
     castle.moveTo(cx - 35, cy - 70);
@@ -878,6 +912,14 @@ export class GameEnvironment {
     castle.moveTo(cx - 80, cy - 70);
     castle.lineTo(cx - 55, cy - 130);
     castle.lineTo(cx - 30, cy - 70);
+    castle.closePath();
+    castle.fillPath();
+
+    castle.fillStyle(THEME.colors.warmHighlight, 0.2);
+    castle.beginPath();
+    castle.moveTo(cx - 78, cy - 70);
+    castle.lineTo(cx - 55, cy - 120);
+    castle.lineTo(cx - 52, cy - 70);
     castle.closePath();
     castle.fillPath();
 
@@ -904,6 +946,11 @@ export class GameEnvironment {
     castle.fillStyle(0xe8dcc8, 1);
     castle.fillRect(cx + 35, cy - 55, 40, 115);
 
+    castle.fillStyle(THEME.colors.warmHighlight, 0.18);
+    castle.fillRect(cx + 37, cy - 52, 34, 12);
+    castle.fillStyle(THEME.colors.warmShadow, 0.18);
+    castle.fillRect(cx + 37, cy + 35, 34, 16);
+
     castle.fillStyle(0xd4c8b4, 1);
     castle.beginPath();
     castle.moveTo(cx + 75, cy - 55);
@@ -918,6 +965,14 @@ export class GameEnvironment {
     castle.moveTo(cx + 30, cy - 55);
     castle.lineTo(cx + 55, cy - 115);
     castle.lineTo(cx + 80, cy - 55);
+    castle.closePath();
+    castle.fillPath();
+
+    castle.fillStyle(THEME.colors.warmHighlight, 0.2);
+    castle.beginPath();
+    castle.moveTo(cx + 32, cy - 55);
+    castle.lineTo(cx + 55, cy - 105);
+    castle.lineTo(cx + 58, cy - 55);
     castle.closePath();
     castle.fillPath();
 
@@ -947,6 +1002,15 @@ export class GameEnvironment {
     castle.lineTo(cx - 25, cy + 10);
     castle.arc(cx, cy + 10, 25, Math.PI, 0, false);
     castle.lineTo(cx + 25, cy + 60);
+    castle.closePath();
+    castle.fillPath();
+
+    castle.fillStyle(THEME.colors.warmHighlight, 0.15);
+    castle.beginPath();
+    castle.moveTo(cx - 22, cy + 58);
+    castle.lineTo(cx - 22, cy + 18);
+    castle.arc(cx, cy + 10, 22, Math.PI, 0, false);
+    castle.lineTo(cx + 22, cy + 58);
     castle.closePath();
     castle.fillPath();
 

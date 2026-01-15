@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { TowerBranch } from '../data';
+import { THEME } from '../data/ThemeConfig';
 import {
   drawRangeCircle,
   drawLevelIndicator,
@@ -41,6 +42,9 @@ export class TowerGraphics {
       default:
         drawArcherTower(g, level);
     }
+
+    g.fillStyle(THEME.colors.warmHighlight, 0.08);
+    g.fillEllipse(-8, -14, 26, 12);
 
     if (level >= 2) {
       drawLevelIndicator(g, level);

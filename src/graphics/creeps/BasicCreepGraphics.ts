@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { THEME } from '../../data/ThemeConfig';
 
 export class BasicCreepGraphics {
   static draw(
@@ -28,7 +29,7 @@ export class BasicCreepGraphics {
     const bounce = Math.sin(bounceTime * 8) * 3;
     const squish = 1 + Math.sin(bounceTime * 8) * 0.1;
 
-    g.fillStyle(0x000000, 0.3);
+    g.fillStyle(THEME.colors.warmShadow, 0.28);
     g.fillEllipse(0, 18, 28, 10);
 
     g.fillStyle(0x8b4513, 1);
@@ -40,6 +41,9 @@ export class BasicCreepGraphics {
 
     g.fillStyle(0xdeb887, 1);
     g.fillEllipse(8 * faceDirection, -6 + bounce, 12, 10);
+
+    g.fillStyle(THEME.colors.warmHighlight, 0.15);
+    g.fillEllipse(-4 * faceDirection, -12 + bounce, 10, 6);
 
     g.fillStyle(0x000000, 1);
     g.fillCircle(10 * faceDirection, -9 + bounce, 3);
@@ -70,7 +74,7 @@ export class BasicCreepGraphics {
     const bounce = Math.sin(bounceTime * 12) * 4;
     const legPhase = Math.sin(bounceTime * 12);
 
-    g.fillStyle(0x000000, 0.3);
+    g.fillStyle(THEME.colors.warmShadow, 0.26);
     g.fillEllipse(0, 16, 24, 8);
 
     g.fillStyle(0x4169e1, 1);
@@ -79,6 +83,9 @@ export class BasicCreepGraphics {
 
     g.fillStyle(0x6495ed, 1);
     g.fillEllipse(0 * faceDirection, -2 + bounce, 18, 16);
+
+    g.fillStyle(0xffffff, 0.12);
+    g.fillEllipse(-4 * faceDirection, -8 + bounce, 10, 6);
 
     g.fillStyle(0x4169e1, 1);
     g.fillEllipse(0, -2 + bounce, 14, 8);
@@ -105,7 +112,7 @@ export class BasicCreepGraphics {
   static drawTank(g: Phaser.GameObjects.Graphics, bounceTime: number, faceDirection: number): void {
     const bounce = Math.sin(bounceTime * 5) * 2;
 
-    g.fillStyle(0x000000, 0.3);
+    g.fillStyle(THEME.colors.warmShadow, 0.28);
     g.fillEllipse(0, 22, 40, 14);
 
     g.fillStyle(0x696969, 1);
@@ -113,6 +120,8 @@ export class BasicCreepGraphics {
 
     g.fillStyle(0x808080, 1);
     g.fillEllipse(0, -8 + bounce, 26, 14);
+    g.fillStyle(0xffffff, 0.1);
+    g.fillEllipse(-4 * faceDirection, -12 + bounce, 14, 6);
     g.fillStyle(0x505050, 1);
     g.beginPath();
     g.arc(0, -5 + bounce, 18, -2.5, -0.6, false);

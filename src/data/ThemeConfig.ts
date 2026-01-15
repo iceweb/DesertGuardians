@@ -16,6 +16,12 @@ export const THEME = {
     bgButton: 0x2a2a2a,
     bgButtonHover: 0x4a4a4a,
 
+    sandLight: 0xf3ddb1,
+    sandMid: 0xd6b377,
+    sandDark: 0xb78545,
+    warmShadow: 0x5a3a1e,
+    warmHighlight: 0xffefc9,
+
     borderDark: 0x4a3520,
     borderLight: 0x8b6914,
 

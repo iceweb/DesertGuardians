@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
+import { THEME } from '../data/ThemeConfig';
 
 export class EnvironmentDecorations {
   static drawPalmTree(scene: Phaser.Scene, x: number, y: number, scale: number = 1): void {
     const palm = scene.add.graphics();
     palm.setDepth(10);
 
-    palm.fillStyle(0x000000, 0.2);
+    palm.fillStyle(THEME.colors.warmShadow, 0.22);
     palm.fillEllipse(x + 30, y + 10, 60 * scale, 20 * scale);
 
     palm.fillStyle(0x8b6914, 1);
@@ -23,7 +24,7 @@ export class EnvironmentDecorations {
       palm.lineBetween(x - 6 * scale, ty, x + 6 * scale, ty);
     }
 
-    const frondColors = [0x228b22, 0x2e8b2e, 0x3cb371];
+    const frondColors = [0x2a7a2a, 0x2f8a33, 0x3a9a5a];
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2;
       const length = 50 + Math.random() * 20;
@@ -64,7 +65,7 @@ export class EnvironmentDecorations {
     const rocks = scene.add.graphics();
     rocks.setDepth(5);
 
-    rocks.fillStyle(0x000000, 0.2);
+    rocks.fillStyle(THEME.colors.warmShadow, 0.22);
     rocks.fillEllipse(x + 10, y + 20, 60, 15);
 
     rocks.fillStyle(0x7a6855, 1);
@@ -91,13 +92,15 @@ export class EnvironmentDecorations {
     rocks.fillCircle(x - 35, y + 10, 8);
     rocks.fillStyle(0x8a7865, 1);
     rocks.fillCircle(x + 38, y, 6);
+    rocks.fillStyle(THEME.colors.warmHighlight, 0.18);
+    rocks.fillEllipse(x - 5, y - 8, 20, 8);
   }
 
   static drawRuins(scene: Phaser.Scene, x: number, y: number): void {
     const ruins = scene.add.graphics();
     ruins.setDepth(4);
 
-    ruins.fillStyle(0x000000, 0.15);
+    ruins.fillStyle(THEME.colors.warmShadow, 0.18);
     ruins.fillEllipse(x, y + 40, 100, 25);
 
     ruins.fillStyle(0xc9b896, 1);
@@ -128,13 +131,15 @@ export class EnvironmentDecorations {
     ruins.lineBetween(x - 36, y, x - 26, y);
     ruins.lineBetween(x - 36, y + 10, x - 26, y + 10);
     ruins.lineBetween(x + 19, y + 5, x + 31, y + 5);
+    ruins.fillStyle(THEME.colors.warmHighlight, 0.12);
+    ruins.fillRect(x - 38, y - 28, 14, 10);
   }
 
   static drawOasis(scene: Phaser.Scene, x: number, y: number): void {
     const oasis = scene.add.graphics();
     oasis.setDepth(3);
 
-    oasis.fillStyle(0x1a4a6b, 0.8);
+    oasis.fillStyle(0x1a4a6b, 0.75);
     oasis.fillEllipse(x, y, 100, 40);
 
     oasis.fillStyle(0x4a90a8, 0.9);
@@ -156,7 +161,7 @@ export class EnvironmentDecorations {
     const cactus = scene.add.graphics();
     cactus.setDepth(8);
 
-    cactus.fillStyle(0x000000, 0.2);
+    cactus.fillStyle(THEME.colors.warmShadow, 0.22);
     cactus.fillEllipse(x + 10, y + 5, 40 * scale, 12 * scale);
 
     cactus.fillStyle(0x2d5a27, 1);
@@ -172,10 +177,13 @@ export class EnvironmentDecorations {
     cactus.fillRoundedRect(x + 10 * scale, y - 35 * scale, 25 * scale, 15 * scale, 6 * scale);
     cactus.fillRoundedRect(x + 22 * scale, y - 50 * scale, 15 * scale, 30 * scale, 6 * scale);
 
-    cactus.fillStyle(0xffffff, 0.6);
+    cactus.fillStyle(0xffffff, 0.4);
     for (let i = 0; i < 8; i++) {
       cactus.fillCircle(x + (Math.random() - 0.5) * 18 * scale, y - 20 - i * 7 * scale, 1.5);
     }
+
+    cactus.fillStyle(THEME.colors.warmHighlight, 0.12);
+    cactus.fillRoundedRect(x - 3 * scale, y - 65 * scale, 6 * scale, 55 * scale, 3 * scale);
 
     if (Math.random() > 0.5) {
       cactus.fillStyle(0xff69b4, 1);
@@ -196,7 +204,7 @@ export class EnvironmentDecorations {
     scarab.fillStyle(0xffd700, 0.1);
     scarab.fillCircle(x, y, 25 * scale);
 
-    scarab.fillStyle(0x000000, 0.2);
+    scarab.fillStyle(THEME.colors.warmShadow, 0.2);
     scarab.fillEllipse(x + 3, y + 8 * scale, 16 * scale, 6 * scale);
 
     scarab.fillStyle(0xdaa520, 1);
@@ -232,7 +240,7 @@ export class EnvironmentDecorations {
     scarab.lineBetween(x + 7 * scale, y, x + 13 * scale, y - 2 * scale);
     scarab.lineBetween(x + 6 * scale, y + 4 * scale, x + 12 * scale, y + 6 * scale);
 
-    scarab.fillStyle(0xfffacd, 0.6);
+    scarab.fillStyle(0xfffacd, 0.4);
     scarab.fillEllipse(x - 3 * scale, y - 3 * scale, 4 * scale, 3 * scale);
   }
 
@@ -267,7 +275,7 @@ export class EnvironmentDecorations {
     const tumbleweed = scene.add.graphics();
     tumbleweed.setDepth(5);
 
-    tumbleweed.fillStyle(0x000000, 0.15);
+    tumbleweed.fillStyle(THEME.colors.warmShadow, 0.18);
     tumbleweed.fillEllipse(x + 3, y + 12, 25, 8);
 
     const size = 12 + Math.random() * 8;
@@ -296,7 +304,7 @@ export class EnvironmentDecorations {
     const pottery = scene.add.graphics();
     pottery.setDepth(6);
 
-    pottery.fillStyle(0x000000, 0.2);
+    pottery.fillStyle(THEME.colors.warmShadow, 0.22);
     pottery.fillEllipse(x + 5, y + 20, 30, 10);
 
     pottery.fillStyle(0xb8860b, 1);
@@ -329,6 +337,9 @@ export class EnvironmentDecorations {
 
     pottery.fillStyle(0xd4a856, 0.4);
     pottery.fillEllipse(x - 8, y - 5, 6, 12);
+
+    pottery.fillStyle(THEME.colors.warmHighlight, 0.12);
+    pottery.fillEllipse(x - 4, y - 8, 6, 16);
 
     if (Math.random() > 0.6) {
       pottery.fillStyle(0xb8860b, 0.8);

@@ -57,10 +57,10 @@ export class UIComponents {
     const bg = this.scene.add.graphics();
 
     if (withShadow) {
-      bg.fillStyle(0x000000, 0.5);
+      bg.fillStyle(THEME.colors.warmShadow, 0.35);
       bg.fillRoundedRect(
-        -width / 2 + 5,
-        -height / 2 + 5,
+        -width / 2 + 4,
+        -height / 2 + 6,
         width,
         height,
         THEME.dimensions.borderRadiusLg
@@ -70,13 +70,22 @@ export class UIComponents {
     bg.fillStyle(THEME.colors.bgDark, alpha);
     bg.fillRoundedRect(-width / 2, -height / 2, width, height, THEME.dimensions.borderRadiusLg);
 
+    bg.fillStyle(THEME.colors.warmHighlight, 0.08);
+    bg.fillRoundedRect(
+      -width / 2 + 4,
+      -height / 2 + 4,
+      width - 8,
+      Math.max(18, height * 0.22),
+      THEME.dimensions.borderRadiusLg - 2
+    );
+
     bg.lineStyle(4, THEME.colors.bgDarker, 1);
     bg.strokeRoundedRect(-width / 2, -height / 2, width, height, THEME.dimensions.borderRadiusLg);
 
-    bg.lineStyle(2, THEME.colors.bronze, 1);
+    bg.lineStyle(2, THEME.colors.bronze, 0.9);
     bg.strokeRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, height - 10, 14);
 
-    bg.lineStyle(1, THEME.colors.goldDark, 0.6);
+    bg.lineStyle(1, THEME.colors.warmHighlight, 0.25);
     bg.strokeRoundedRect(-width / 2 + 10, -height / 2 + 10, width - 20, height - 20, 12);
 
     container.add(bg);
@@ -140,11 +149,11 @@ export class UIComponents {
       const offsetY = pressed ? 2 : 0;
 
       if (!pressed) {
-        btnGraphics.fillStyle(0x000000, 0.5);
-        btnGraphics.fillRoundedRect(x - width / 2 + 4, y - height / 2 + 4, width, height, 12);
+        btnGraphics.fillStyle(THEME.colors.warmShadow, 0.35);
+        btnGraphics.fillRoundedRect(x - width / 2 + 3, y - height / 2 + 5, width, height, 12);
       }
 
-      btnGraphics.fillStyle(isPrimary ? 0x6b4914 : 0x4a3520, 1);
+      btnGraphics.fillStyle(isPrimary ? THEME.colors.sandDark : THEME.colors.warmShadow, 1);
       btnGraphics.fillRoundedRect(x - width / 2, y - height / 2 + 4 + offsetY, width, height, 12);
 
       const baseColor = isPrimary
@@ -153,23 +162,32 @@ export class UIComponents {
           : THEME.colors.bronzeDark
         : hover
           ? THEME.colors.goldDark
-          : 0x6b4914;
+          : THEME.colors.sandDark;
       btnGraphics.fillStyle(baseColor, 1);
       btnGraphics.fillRoundedRect(x - width / 2, y - height / 2 + offsetY, width, height - 4, 12);
 
       const highlightColor = isPrimary
         ? hover
           ? THEME.colors.bronzeLight
-          : 0xd4b584
+          : THEME.colors.sandMid
         : hover
-          ? 0xa08050
+          ? THEME.colors.sandMid
           : THEME.colors.goldDark;
-      btnGraphics.fillStyle(highlightColor, 0.6);
+      btnGraphics.fillStyle(highlightColor, 0.35);
       btnGraphics.fillRoundedRect(
         x - width / 2 + 4,
         y - height / 2 + 4 + offsetY,
         width - 8,
         height / 3,
+        8
+      );
+
+      btnGraphics.fillStyle(THEME.colors.warmHighlight, 0.15);
+      btnGraphics.fillRoundedRect(
+        x - width / 2 + 6,
+        y - height / 2 + 6 + offsetY,
+        width - 12,
+        Math.max(6, height * 0.18),
         8
       );
 
