@@ -78,7 +78,8 @@ Tower defense games are significantly more complex than platformers:
 - **7 Tower Branches** with up to 4 upgrade levels and special abilities
 - **Gold Mine System** — Build and upgrade mines for passive income
 - **Castle Defense** — Protect your 25 HP from leaking creeps
-- **Flying Enemies** — Air units require anti-air towers to counter
+- **Special Wave Types** — Flying, Digger, Ghost, Broodmother, Flame, Plaguebearer, Chaos
+- **Elemental Immunities** — Flame enemies only take Ice damage; Plaguebearers only take Poison
 - **Victory & Defeat** — All runs can submit to the global leaderboard
 
 ### 🎯 Strategic Elements
@@ -86,6 +87,7 @@ Tower defense games are significantly more complex than platformers:
 - **Upgrade Decisions** — Level up towers for increased power
 - **Gold Management** — Balance between towers and gold mines
 - **Wave Previews** — See what's coming next to prepare your defense
+- **Post-Game Review Mode** — Click towers after a run to review stats and strategy
 
 ### 🏆 Scoring System
 - **Wave Bonus** — 100 points per wave reached
@@ -109,17 +111,17 @@ Tower defense games are significantly more complex than platformers:
 
 ## 🗼 Towers
 
-All towers start as **Archer Tower** and can branch into specialized paths at level 2. Each branch upgrades to level 4, unlocking special abilities.
+All towers start as **Archer Tower** and can branch into specialized paths at level 2. Each branch upgrades to level 4 and gains a set of special abilities that can proc during combat (Aura abilities are passive).
 
-| Tower | Type | Specialty | Level 4 Ability |
-|:------|:-----|:----------|:----------------|
-| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Elite marksman |
-| ⚡ **Rapid Fire** | Physical | Extreme attack speed | Burst mode |
-| 🎯 **Sniper** | Physical | High damage, long range | Assassination |
-| 💣 **Rock Cannon** | Physical | Splash damage (70-110px) | Siege bombardment |
-| ❄️ **Ice Tower** | Magic | Slows enemies 40-65% | Freeze wave |
-| ☠️ **Poison Tower** | Magic | DoT, ignores armor | Plague cloud |
-| ✨ **Aura Tower** | Support | Buffs nearby towers 20-50% | Ultimate buff |
+| Tower | Type | Specialty | Signature Abilities |
+|:------|:-----|:----------|:--------------------|
+| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Multi-Shot, Piercing Arrow, Quick Draw |
+| ⚡ **Rapid Fire** | Physical | Extreme attack speed | Bullet Storm, Ricochet, Incendiary Rounds |
+| 🎯 **Sniper** | Physical | High damage, long range | Critical Strike, Armor Pierce, Headshot |
+| 💣 **Rock Cannon** | Physical | Splash damage (70-110px) | Aftershock, Earthquake, Shrapnel Burst |
+| ❄️ **Ice Tower** | Magic | Slows enemies 40-65% | Ice Trap, Frost Nova, Shatter |
+| ☠️ **Poison Tower** | Magic | DoT, ignores armor | Plague Spread, Toxic Explosion, Corrosive Acid |
+| ✨ **Aura Tower** | Support | Buffs nearby towers 20-50% | War Cry, Critical Aura, Overcharge |
 
 ---
 
@@ -127,16 +129,20 @@ All towers start as **Archer Tower** and can branch into specialized paths at le
 
 | Type | Ability |
 |:-----|:--------|
-| **Standard** | Basic creep |
-| **Fast** | Moves quickly |
-| **Tank** | High HP, slow |
-| **Armored** | Reduces physical damage taken |
-| **Shielded** | Blocks first few hits |
-| **Jumper** | Can leap past towers |
-| **Flying** | Ignores ground path, requires anti-air |
-| **Guards** | Escort boss creeps |
-| **Dragon Knight** | Elite boss with massive HP |
-| **Bosses** | Powerful, deal 2+ damage if leaked |
+| **Furball** | Basic creep |
+| **Runner** | Very fast but fragile |
+| **Tank** | High HP, slow, armored |
+| **Shielded** | Blocks the first few hits |
+| **Jumper** | Leaps past towers every few seconds |
+| **Flying** | Air units; **immune to Rock Cannon and Poison** |
+| **Digger** | Burrows underground, invulnerable while digging |
+| **Ghost** | Phases out when low HP |
+| **Broodmother** | Spawns baby creeps on death |
+| **Baby** | Small, fast, weak |
+| **Flame** | **Only damaged by Ice Towers** |
+| **Plaguebearer** | **Only damaged by Poison Towers** |
+| **Bosses** | Multiple boss tiers with dispel mechanics |
+| **Boss Guards** | Shielded elite escorts for late-game bosses |
 
 ---
 
