@@ -658,4 +658,11 @@ export class HUDManager {
   hideNextWavePreview(): void {
     this.nextWavePanel.hide();
   }
+
+  destroy(): void {
+    this.gameControls.destroy();
+    this.creepInfoPanel.destroy();
+    this.currentWavePanel.destroy();
+    this.nextWavePanel.destroy();
+  }
 }

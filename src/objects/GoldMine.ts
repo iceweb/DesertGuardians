@@ -5,7 +5,7 @@ import type { MineConfig } from '../data/GameData';
 
 export class GoldMine extends Phaser.GameObjects.Container {
   private slotId: number;
-  private mineLevel: 0 | 1 | 2 | 3 = 0;
+  private mineLevel: 0 | 1 | 2 | 3 | 4 = 0;
   private totalInvested: number = 0;
   private mineWidth: number;
   private mineHeight: number;
@@ -60,11 +60,11 @@ export class GoldMine extends Phaser.GameObjects.Container {
   }
 
   upgrade(): boolean {
-    if (this.mineLevel === 0 || this.mineLevel >= 3) {
+    if (this.mineLevel === 0 || this.mineLevel >= 4) {
       return false;
     }
 
-    const nextLevel = (this.mineLevel + 1) as 1 | 2 | 3;
+    const nextLevel = (this.mineLevel + 1) as 1 | 2 | 3 | 4;
     const cost = MINE_CONFIGS[nextLevel].buildCost;
 
     this.mineLevel = nextLevel;
@@ -89,10 +89,10 @@ export class GoldMine extends Phaser.GameObjects.Container {
   }
 
   canUpgrade(): boolean {
-    return this.mineLevel > 0 && this.mineLevel < 3;
+    return this.mineLevel > 0 && this.mineLevel < 4;
   }
 
-  getLevel(): 0 | 1 | 2 | 3 {
+  getLevel(): 0 | 1 | 2 | 3 | 4 {
     return this.mineLevel;
   }
 
@@ -105,8 +105,8 @@ export class GoldMine extends Phaser.GameObjects.Container {
   }
 
   getUpgradeCost(): number {
-    if (this.mineLevel >= 3) return 0;
-    const nextLevel = (this.mineLevel + 1) as 1 | 2 | 3;
+    if (this.mineLevel >= 4) return 0;
+    const nextLevel = (this.mineLevel + 1) as 1 | 2 | 3 | 4;
     return MINE_CONFIGS[nextLevel].buildCost;
   }
 

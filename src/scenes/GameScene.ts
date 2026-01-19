@@ -108,6 +108,9 @@ export class GameScene extends Phaser.Scene {
 
     this.towerManager.setGoldMineUIManager(this.goldMineUIManager);
 
+    this.towerManager.setReviewMode(false);
+    this.goldMineUIManager.setReviewMode(false);
+
     this.popupController = new PopupController(this);
     this.towerManager.setPopupController(this.popupController);
     this.goldMineUIManager.setPopupController(this.popupController);
@@ -137,6 +140,17 @@ export class GameScene extends Phaser.Scene {
     this.setupCreepClickHandler();
 
     this.updateNextWavePreview();
+
+    // Register shutdown handler to clean up managers
+    this.events.once('shutdown', this.handleShutdown, this);
+  }
+
+  private handleShutdown(): void {
+    this.towerManager?.destroy();
+    this.goldMineUIManager?.destroy();
+    this.goldMineManager?.destroy();
+    this.popupController?.destroy();
+    this.hudManager?.destroy();
   }
 
   private setupGoldMineCallbacks(): void {

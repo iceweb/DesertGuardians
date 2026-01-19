@@ -4,7 +4,7 @@ import { drawStar } from './towers/TowerGraphicsBase';
 export class GoldMineGraphics {
   static drawMine(
     graphics: Phaser.GameObjects.Graphics,
-    level: 0 | 1 | 2 | 3,
+    level: 0 | 1 | 2 | 3 | 4,
     width: number = 60,
     height: number = 60
   ): void {
@@ -22,6 +22,9 @@ export class GoldMineGraphics {
         break;
       case 3:
         this.drawLevel3(graphics, width, height);
+        break;
+      case 4:
+        this.drawLevel4(graphics, width, height);
         break;
     }
   }
@@ -543,6 +546,203 @@ export class GoldMineGraphics {
     }
   }
 
+  private static drawLevel4(g: Phaser.GameObjects.Graphics, width: number, height: number): void {
+    const cx = 0;
+    const cy = 0;
+    const hw = width / 2;
+    const hh = height / 2;
+
+    // Rainbow glow effect
+    g.fillStyle(0x00d4ff, 0.15);
+    g.fillCircle(cx, cy, hw + 35);
+    g.fillStyle(0xff00ff, 0.12);
+    g.fillCircle(cx, cy, hw + 25);
+    g.fillStyle(0xffd700, 0.1);
+    g.fillCircle(cx, cy, hw + 18);
+
+    // Main structure - bigger and more elaborate
+    g.fillStyle(0x5c4a38, 1);
+    g.beginPath();
+    g.moveTo(cx - hw - 25, cy + hh + 15);
+    g.lineTo(cx - hw - 8, cy - 20);
+    g.lineTo(cx - 30, cy - hh - 10);
+    g.lineTo(cx + 30, cy - hh - 10);
+    g.lineTo(cx + hw + 8, cy - 20);
+    g.lineTo(cx + hw + 25, cy + hh + 15);
+    g.closePath();
+    g.fill();
+
+    // Premium frame with gradient effect
+    g.fillStyle(0x9a8a7a, 1);
+    g.fillRoundedRect(cx - 36, cy - 26, 72, 64, 10);
+
+    // Diamond-studded border
+    g.lineStyle(4, 0x00d4ff, 1);
+    g.strokeRoundedRect(cx - 36, cy - 26, 72, 64, 10);
+    g.lineStyle(2, 0xff00ff, 0.8);
+    g.strokeRoundedRect(cx - 34, cy - 24, 68, 60, 9);
+
+    // Iridescent shine
+    g.fillStyle(0x00d4ff, 0.25);
+    g.fillRoundedRect(cx - 30, cy - 20, 60, 54, 8);
+    g.fillStyle(0xff00ff, 0.15);
+    g.fillRoundedRect(cx - 28, cy - 18, 56, 50, 7);
+
+    // Mine entrance
+    g.fillStyle(0x000000, 1);
+    g.fillRoundedRect(cx - 22, cy - 10, 44, 38, 7);
+
+    // Magical glow from inside
+    g.fillStyle(0x00ffff, 0.2);
+    g.fillRoundedRect(cx - 18, cy - 6, 36, 30, 5);
+    g.fillStyle(0xff00ff, 0.15);
+    g.fillRoundedRect(cx - 16, cy - 4, 32, 26, 4);
+
+    // Premium golden pillars with cyan/magenta accents
+    g.fillStyle(0x00d4ff, 1);
+    g.fillRect(cx - 28, cy - 16, 10, 48);
+    g.fillStyle(0xffd700, 1);
+    g.fillRect(cx - 27, cy - 14, 6, 44);
+    g.fillStyle(0x00ffff, 0.6);
+    g.fillRect(cx - 25, cy - 12, 2, 40);
+
+    g.fillStyle(0xff00ff, 1);
+    g.fillRect(cx + 18, cy - 16, 10, 48);
+    g.fillStyle(0xffd700, 1);
+    g.fillRect(cx + 21, cy - 14, 6, 44);
+    g.fillStyle(0xff00ff, 0.6);
+    g.fillRect(cx + 23, cy - 12, 2, 40);
+
+    // Top beam with diamond shine
+    g.fillStyle(0x00d4ff, 1);
+    g.fillRect(cx - 32, cy - 22, 64, 14);
+    g.fillStyle(0xffd700, 1);
+    g.fillRect(cx - 32, cy - 24, 64, 5);
+    g.fillRect(cx - 32, cy - 12, 64, 4);
+    g.fillStyle(0xff00ff, 0.7);
+    g.fillRect(cx - 30, cy - 20, 60, 2);
+
+    // Colorful diamonds scattered on structure
+    this.drawDiamond(g, cx - 28, cy - 18, 4, 0x00d4ff); // Cyan diamond
+    this.drawDiamond(g, cx + 28, cy - 16, 4, 0xff00ff); // Magenta diamond
+    this.drawDiamond(g, cx, cy - 28, 5, 0xffd700);      // Gold diamond
+    this.drawDiamond(g, cx - 34, cy + 8, 3.5, 0x00ffaa); // Teal diamond
+    this.drawDiamond(g, cx + 34, cy + 10, 3.5, 0xff6b9d); // Pink diamond
+
+    // Gem indicators
+    g.fillStyle(0x00d4ff, 1);
+    g.fillCircle(cx - 22, cy - 8, 3.5);
+    g.fillStyle(0xff00ff, 1);
+    g.fillCircle(cx + 22, cy - 8, 3.5);
+    g.fillStyle(0xffd700, 1);
+    g.fillCircle(cx - 22, cy + 12, 3.5);
+    g.fillStyle(0x00ffaa, 1);
+    g.fillCircle(cx + 22, cy + 12, 3.5);
+
+    // Central ruby
+    g.fillStyle(0xff0066, 1);
+    g.fillCircle(cx, cy - 16, 5);
+    g.fillStyle(0xff6699, 0.8);
+    g.fillCircle(cx - 1.5, cy - 17, 2.5);
+
+    // Premium rails
+    g.fillStyle(0x5a5a5a, 1);
+    g.fillRect(cx - 14, cy + 28, 5, 18);
+    g.fillRect(cx + 9, cy + 28, 5, 18);
+    g.fillStyle(0x00d4ff, 1);
+    g.fillRect(cx - 13, cy + 28, 2, 18);
+    g.fillStyle(0xff00ff, 1);
+    g.fillRect(cx + 12, cy + 28, 2, 18);
+
+    g.fillStyle(0xb8860b, 1);
+    g.fillRect(cx - 18, cy + 30, 36, 5);
+    g.fillRect(cx - 18, cy + 38, 36, 5);
+
+    // Massive pile of gems and gold
+    // Large diamonds
+    this.drawDiamond(g, cx - 10, cy + 16, 7, 0x00d4ff);
+    this.drawDiamond(g, cx + 8, cy + 14, 6.5, 0xff00ff);
+    this.drawDiamond(g, cx - 2, cy + 12, 6, 0xffd700);
+    this.drawDiamond(g, cx + 12, cy + 20, 5, 0xff6b9d);
+    this.drawDiamond(g, cx - 12, cy + 22, 5, 0x00ffaa);
+
+    // Gold coins mixed with gems
+    g.fillStyle(0xffd700, 1);
+    g.fillCircle(cx, cy + 20, 4.5);
+    g.fillCircle(cx + 6, cy + 22, 4);
+    g.fillCircle(cx - 6, cy + 18, 3.5);
+    g.fillCircle(cx + 4, cy + 18, 3);
+    g.fillCircle(cx - 8, cy + 24, 3.5);
+
+    // Small sparkle gems
+    g.fillStyle(0x00ffff, 1);
+    g.fillCircle(cx + 2, cy + 14, 2);
+    g.fillCircle(cx - 4, cy + 24, 2);
+    g.fillStyle(0xff00ff, 1);
+    g.fillCircle(cx + 10, cy + 18, 2);
+    g.fillCircle(cx - 10, cy + 20, 2);
+
+    // Treasure chest accent
+    g.fillStyle(0xdaa520, 1);
+    g.fillRect(cx - 8, cy + 8, 16, 6);
+    g.fillRect(cx - 6, cy + 5, 12, 4);
+    g.fillStyle(0xffd700, 1);
+    g.fillCircle(cx, cy + 11, 2);
+
+    // Bright highlights on gems
+    g.fillStyle(0xffffff, 0.9);
+    g.fillCircle(cx - 8, cy + 14, 2);
+    g.fillCircle(cx + 9, cy + 12, 2);
+    g.fillCircle(cx - 1, cy + 10, 1.5);
+    g.fillCircle(cx + 5, cy + 16, 1.5);
+    g.fillCircle(cx + 11, cy + 18, 1);
+
+    // Magical spotlights
+    g.fillStyle(0x00d4ff, 1);
+    g.fillRect(cx - 44, cy - 12, 10, 18);
+    g.fillRect(cx + 34, cy - 12, 10, 18);
+    g.fillStyle(0x00ffff, 1);
+    g.fillCircle(cx - 39, cy - 2, 6);
+    g.fillCircle(cx + 39, cy - 2, 6);
+    g.fillStyle(0xffffff, 0.6);
+    g.fillCircle(cx - 39, cy - 2, 12);
+    g.fillCircle(cx + 39, cy - 2, 12);
+
+    this.drawLevelIndicator(g, 4);
+  }
+
+  private static drawDiamond(
+    g: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    size: number,
+    color: number
+  ): void {
+    // Draw faceted diamond
+    g.fillStyle(color, 1);
+    g.beginPath();
+    g.moveTo(x, y - size);           // Top
+    g.lineTo(x + size * 0.6, y);     // Right
+    g.lineTo(x, y + size);           // Bottom
+    g.lineTo(x - size * 0.6, y);     // Left
+    g.closePath();
+    g.fill();
+
+    // Center facet (lighter)
+    g.fillStyle(0xffffff, 0.7);
+    g.beginPath();
+    g.moveTo(x, y - size * 0.5);
+    g.lineTo(x + size * 0.3, y);
+    g.lineTo(x, y + size * 0.3);
+    g.lineTo(x - size * 0.3, y);
+    g.closePath();
+    g.fill();
+
+    // Highlight
+    g.fillStyle(0xffffff, 0.9);
+    g.fillCircle(x - size * 0.2, y - size * 0.3, size * 0.2);
+  }
+
   static drawLevelIndicator(g: Phaser.GameObjects.Graphics, level: number): void {
     if (level === 1) {
       g.fillStyle(0xcd7f32, 1);
@@ -558,6 +758,21 @@ export class GoldMineGraphics {
       drawStar(g, -12, -38, 4);
       drawStar(g, 0, -42, 5);
       drawStar(g, 12, -38, 4);
+    } else if (level === 4) {
+      // Rainbow aura for level 4
+      g.fillStyle(0x00d4ff, 0.4);
+      g.fillCircle(0, -42, 16);
+      g.fillStyle(0xff00ff, 0.3);
+      g.fillCircle(0, -42, 13);
+      // Colorful diamond stars
+      g.fillStyle(0x00d4ff, 1);
+      drawStar(g, -16, -40, 5);
+      g.fillStyle(0xffd700, 1);
+      drawStar(g, -6, -46, 5.5);
+      g.fillStyle(0xff00ff, 1);
+      drawStar(g, 4, -46, 5.5);
+      g.fillStyle(0x00ffaa, 1);
+      drawStar(g, 16, -40, 5);
     }
   }
 

@@ -42,7 +42,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'tank',
     maxHealth: 280,
     speed: 50,
-    armor: 6,
+    armor: 35,
     goldReward: 15,
     description: 'Heavily armored. Slow but extremely tough.',
   },
@@ -50,7 +50,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'jumper',
     maxHealth: 160,
     speed: 75,
-    armor: 2,
+    armor: 10,
     goldReward: 18,
     canJump: true,
     description: 'Leaps forward 150px every 4 seconds, bypassing towers.',
@@ -59,7 +59,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'shielded',
     maxHealth: 200,
     speed: 75,
-    armor: 3,
+    armor: 20,
     goldReward: 25,
     hasShield: true,
     description: 'Energy shield blocks the first 3 hits completely.',
@@ -78,7 +78,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'digger',
     maxHealth: 120,
     speed: 90,
-    armor: 3,
+    armor: 15,
     goldReward: 15,
     canDig: true,
     description: 'Burrows underground for 2s every 5s, becoming invulnerable.',
@@ -96,7 +96,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'broodmother',
     maxHealth: 450,
     speed: 35,
-    armor: 5,
+    armor: 30,
     goldReward: 25,
     sizeScale: 1.5,
     spawnOnDeath: {
@@ -138,7 +138,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_1',
     maxHealth: 1200,
     speed: 50,
-    armor: 3,
+    armor: 25,
     goldReward: 60,
     sizeScale: 1.0,
     canDispel: true,
@@ -149,7 +149,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_2',
     maxHealth: 1870,
     speed: 48,
-    armor: 4,
+    armor: 40,
     goldReward: 100,
     sizeScale: 1.15,
     canDispel: true,
@@ -160,7 +160,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_3',
     maxHealth: 3600,
     speed: 40,
-    armor: 5,
+    armor: 55,
     goldReward: 160,
     sizeScale: 1.3,
     canDispel: true,
@@ -171,7 +171,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_4',
     maxHealth: 5500,
     speed: 35,
-    armor: 6,
+    armor: 70,
     goldReward: 240,
     sizeScale: 1.5,
     canDispel: true,
@@ -182,7 +182,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_5',
     maxHealth: 9000,
     speed: 30,
-    armor: 7,
+    armor: 90,
     goldReward: 400,
     sizeScale: 1.7,
     canDispel: true,
@@ -194,7 +194,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_guard_1',
     maxHealth: 800,
     speed: 38,
-    armor: 5,
+    armor: 45,
     goldReward: 40,
     sizeScale: 1.2,
     hasShield: true,
@@ -204,7 +204,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_guard_2',
     maxHealth: 1200,
     speed: 36,
-    armor: 6,
+    armor: 50,
     goldReward: 60,
     sizeScale: 1.3,
     hasShield: true,
@@ -214,7 +214,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss_guard_3',
     maxHealth: 1800,
     speed: 34,
-    armor: 7,
+    armor: 60,
     goldReward: 80,
     sizeScale: 1.4,
     hasShield: true,
@@ -225,7 +225,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
     type: 'boss',
     maxHealth: 1500,
     speed: 45,
-    armor: 4,
+    armor: 30,
     goldReward: 60,
     sizeScale: 1.1,
     canDispel: true,
@@ -566,7 +566,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
 ];
 
 export interface MineConfig {
-  level: 0 | 1 | 2 | 3;
+  level: 0 | 1 | 2 | 3 | 4;
   buildCost: number;
   incomePerWave: number;
   name: string;
@@ -602,13 +602,20 @@ export const MINE_CONFIGS: Record<number, MineConfig> = {
     name: 'Gold Mine III',
     description: 'A master mine that produces 40g per wave.',
   },
+  4: {
+    level: 4,
+    buildCost: 425,
+    incomePerWave: 72,
+    name: 'Diamond Mine',
+    description: 'An elite mining operation that produces 72g per wave.',
+  },
 };
 
-export function getMineCost(targetLevel: 1 | 2 | 3): number {
+export function getMineCost(targetLevel: 1 | 2 | 3 | 4): number {
   return MINE_CONFIGS[targetLevel].buildCost;
 }
 
-export function getTotalInvestment(level: 0 | 1 | 2 | 3): number {
+export function getTotalInvestment(level: 0 | 1 | 2 | 3 | 4): number {
   let total = 0;
   for (let i = 1; i <= level; i++) {
     total += MINE_CONFIGS[i].buildCost;

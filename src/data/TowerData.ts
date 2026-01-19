@@ -116,11 +116,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 1,
     upgradeCost: 120,
-    description: 'High attack speed, low damage. Weak vs armor.',
+    description: 'High attack speed. Short range but devastating DPS.',
     stats: {
-      range: 180,
-      fireRate: 320,
-      damage: 8,
+      range: 185,
+      fireRate: 300,
+      damage: 10,
     },
   },
   rapidfire_2: {
@@ -130,11 +130,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 2,
     upgradeCost: 200,
-    description: 'Even faster attacks. Shreds unarmored targets.',
+    description: 'Faster attacks. Shreds targets in close range.',
     stats: {
-      range: 190,
-      fireRate: 260,
-      damage: 11,
+      range: 195,
+      fireRate: 250,
+      damage: 14,
     },
   },
   rapidfire_3: {
@@ -144,11 +144,11 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 3,
     upgradeCost: 420,
-    description: 'Machine gun fury. Devastating DPS.',
+    description: 'Machine gun fury. Devastating close-range DPS.',
     stats: {
-      range: 200,
-      fireRate: 220,
-      damage: 15,
+      range: 210,
+      fireRate: 210,
+      damage: 20,
     },
   },
 
@@ -412,9 +412,9 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 650,
     description: 'Ultimate rapid fire. Special ability unlocked.',
     stats: {
-      range: 220,
-      fireRate: 200,
-      damage: 18,
+      range: 230,
+      fireRate: 180,
+      damage: 26,
     },
   },
 

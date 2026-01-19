@@ -17,6 +17,11 @@ export const GAME_CONFIG = {
 
   MAX_HP_MULTIPLIER: 3.5,
 
+  // Armor scales more slowly than HP to keep early game balanced
+  WAVE_ARMOR_SCALING: 0.04,
+
+  MAX_ARMOR_MULTIPLIER: 2.0,
+
   ARCHER_BUILD_COST: 50,
 
   NORMAL_SPEED: 1.4,

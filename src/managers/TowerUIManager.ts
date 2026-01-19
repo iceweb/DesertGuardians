@@ -798,9 +798,18 @@ export class TowerUIManager {
             0
           );
           hitArea.setInteractive({ useHandCursor: true });
-          hitArea.on('pointerdown', () => {
-            this.onUpgradeRequested?.(tower, branchKey);
-          });
+          hitArea.on(
+            'pointerdown',
+            (
+              _pointer: Phaser.Input.Pointer,
+              _localX: number,
+              _localY: number,
+              event: Phaser.Types.Input.EventData
+            ) => {
+              event.stopPropagation();
+              this.onUpgradeRequested?.(tower, branchKey);
+            }
+          );
           hitArea.on('pointerover', () => {
             btn.clear();
             btn.fillStyle(0x4a4a4a, 1);
@@ -1231,11 +1240,20 @@ export class TowerUIManager {
 
       const hitArea = this.scene.add.rectangle(bx, btnY, btnWidth, btnHeight, 0xffffff, 0);
       hitArea.setInteractive({ useHandCursor: true });
-      hitArea.on('pointerdown', () => {
-        tower.selectAbility(ability.id);
-        this.onAbilitySelected?.(tower, ability.id);
-        this.closeMenus();
-      });
+      hitArea.on(
+        'pointerdown',
+        (
+          _pointer: Phaser.Input.Pointer,
+          _localX: number,
+          _localY: number,
+          event: Phaser.Types.Input.EventData
+        ) => {
+          event.stopPropagation();
+          tower.selectAbility(ability.id);
+          this.onAbilitySelected?.(tower, ability.id);
+          this.closeMenus();
+        }
+      );
       hitArea.on('pointerover', () => {
         btn.clear();
         btn.fillStyle(0x4a4a4a, 1);

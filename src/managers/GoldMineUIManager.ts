@@ -281,7 +281,7 @@ export class GoldMineUIManager {
     this.upgradeMenuContainer.add(investedText);
 
     if (canUpgrade) {
-      const nextLevel = (mine.getLevel() + 1) as 2 | 3;
+      const nextLevel = (mine.getLevel() + 1) as 2 | 3 | 4;
       const nextConfig = MINE_CONFIGS[nextLevel];
       const incomeGain = nextConfig.incomePerWave - config.incomePerWave;
 

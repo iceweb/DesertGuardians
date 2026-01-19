@@ -121,7 +121,16 @@ export class Creep extends Phaser.GameObjects.Container {
     );
     const scaledMaxHealth = Math.floor(baseConfig.maxHealth * hpMultiplier);
 
-    this.config = { ...baseConfig, maxHealth: scaledMaxHealth };
+    // Armor scaling: only applies to creeps with base armor > 0
+    const armorMultiplier = baseConfig.armor > 0
+      ? Math.min(
+          GAME_CONFIG.MAX_ARMOR_MULTIPLIER,
+          1 + (waveNumber - 1) * GAME_CONFIG.WAVE_ARMOR_SCALING
+        )
+      : 1;
+    const scaledArmor = Math.floor(baseConfig.armor * armorMultiplier);
+
+    this.config = { ...baseConfig, maxHealth: scaledMaxHealth, armor: scaledArmor };
     this.distanceTraveled = 0;
     this.currentHealth = this.config.maxHealth;
     this.isActive = true;
@@ -340,7 +349,9 @@ export class Creep extends Phaser.GameObjects.Container {
     }
 
     const effectiveArmor = Math.max(0, this.config.armor - this.statusEffects.getArmorReduction());
-    const actualDamage = isMagic ? amount : Math.max(1, amount - effectiveArmor);
+    // Percentage-based armor: damage * (100 / (100 + armor))
+    const armorMultiplier = 100 / (100 + effectiveArmor);
+    const actualDamage = isMagic ? amount : Math.max(1, Math.round(amount * armorMultiplier));
     const previousHealth = this.currentHealth;
     this.currentHealth -= actualDamage;
 

@@ -113,4 +113,12 @@ export class PopupController {
   shouldIgnorePointer(): boolean {
     return this.scene.time.now - this.lastCloseTime < this.closeGuardMs;
   }
+
+  destroy(): void {
+    this.scene.input.keyboard?.off('keydown-ESC');
+    this.scene.scale?.off('resize');
+    if (this.overlay) {
+      this.overlay.destroy();
+    }
+  }
 }
