@@ -178,30 +178,53 @@ export class GameScene extends Phaser.Scene {
     this.difficultyOverlay.add(panel);
 
     // Title
-    const title = this.add.text(0, -panelHeight / 2 + 50, 'SELECT DIFFICULTY', {
-      fontFamily: 'Arial Black',
-      fontSize: '32px',
-      color: '#ffd700',
-      stroke: '#000000',
-      strokeThickness: 4,
-    }).setOrigin(0.5);
+    const title = this.add
+      .text(0, -panelHeight / 2 + 50, 'SELECT DIFFICULTY', {
+        fontFamily: 'Arial Black',
+        fontSize: '32px',
+        color: '#ffd700',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
     this.difficultyOverlay.add(title);
 
     // Difficulty buttons
     const buttonY = 20;
     const buttonSpacing = 180;
 
-    this.createDifficultyButton(-buttonSpacing, buttonY, 'Easy', 0x44aa44, 'Enemies: 75% HP\nScore: ×0.75', () => {
-      this.selectDifficulty('Easy');
-    });
+    this.createDifficultyButton(
+      -buttonSpacing,
+      buttonY,
+      'Easy',
+      0x44aa44,
+      'Enemies: 75% HP\nScore: ×0.75',
+      () => {
+        this.selectDifficulty('Easy');
+      }
+    );
 
-    this.createDifficultyButton(0, buttonY, 'Normal', 0x4488cc, 'Standard Experience\nScore: ×1.0', () => {
-      this.selectDifficulty('Normal');
-    });
+    this.createDifficultyButton(
+      0,
+      buttonY,
+      'Normal',
+      0x4488cc,
+      'Standard Experience\nScore: ×1.0',
+      () => {
+        this.selectDifficulty('Normal');
+      }
+    );
 
-    this.createDifficultyButton(buttonSpacing, buttonY, 'Hard', 0xcc4444, 'Enemies: 125% HP\nScore: ×1.25', () => {
-      this.selectDifficulty('Hard');
-    });
+    this.createDifficultyButton(
+      buttonSpacing,
+      buttonY,
+      'Hard',
+      0xcc4444,
+      'Enemies: 125% HP\nScore: ×1.25',
+      () => {
+        this.selectDifficulty('Hard');
+      }
+    );
 
     // Fade in
     this.difficultyOverlay.setAlpha(0);
@@ -248,22 +271,26 @@ export class GameScene extends Phaser.Scene {
     container.add(bg);
 
     // Label
-    const labelText = this.add.text(0, -btnHeight / 2 + 35, label, {
-      fontFamily: 'Arial Black',
-      fontSize: '22px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 3,
-    }).setOrigin(0.5);
+    const labelText = this.add
+      .text(0, -btnHeight / 2 + 35, label, {
+        fontFamily: 'Arial Black',
+        fontSize: '22px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
     container.add(labelText);
 
     // Description
-    const descText = this.add.text(0, 20, description, {
-      fontFamily: 'Arial',
-      fontSize: '14px',
-      color: '#ffffff',
-      align: 'center',
-    }).setOrigin(0.5);
+    const descText = this.add
+      .text(0, 20, description, {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#ffffff',
+        align: 'center',
+      })
+      .setOrigin(0.5);
     container.add(descText);
 
     // Hit area
@@ -540,7 +567,10 @@ export class GameScene extends Phaser.Scene {
     this.uiHitDetector.setMineCallback((x, y) => this.goldMineManager.getMineAtPosition(x, y));
 
     this.uiHitDetector.setMenuCallback(
-      () => this.popupController?.isAnyOpen() || this.towerManager.isMenuOpen() || this.goldMineUIManager.isMenuOpen()
+      () =>
+        this.popupController?.isAnyOpen() ||
+        this.towerManager.isMenuOpen() ||
+        this.goldMineUIManager.isMenuOpen()
     );
 
     this.uiHitDetector.registerBounds(

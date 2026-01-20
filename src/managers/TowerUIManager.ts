@@ -582,14 +582,21 @@ export class TowerUIManager {
     if (hasSlow) {
       const slowPercent = Math.round((config.stats.slowPercent || 0) * 100);
       const slowSeconds = (config.stats.slowDuration || 0) / 1000;
-      const maxSlowTargets = config.stats.maxSlowTargets ? ` · Max ${config.stats.maxSlowTargets}` : '';
+      const maxSlowTargets = config.stats.maxSlowTargets
+        ? ` · Max ${config.stats.maxSlowTargets}`
+        : '';
 
       const slowText = this.scene.add
-        .text(statsStartX, yOffset, `❄ Slow: ${slowPercent}% for ${slowSeconds}s${maxSlowTargets}`, {
-          fontFamily: 'Arial',
-          fontSize: '14px',
-          color: '#aaddff',
-        })
+        .text(
+          statsStartX,
+          yOffset,
+          `❄ Slow: ${slowPercent}% for ${slowSeconds}s${maxSlowTargets}`,
+          {
+            fontFamily: 'Arial',
+            fontSize: '14px',
+            color: '#aaddff',
+          }
+        )
         .setOrigin(0, 0.5);
       this.upgradeMenuContainer.add(slowText);
       yOffset += statLineHeight;

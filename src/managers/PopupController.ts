@@ -26,7 +26,14 @@ export class PopupController {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
 
-    this.overlay = scene.add.rectangle(0, 0, scene.cameras.main.width, scene.cameras.main.height, 0x000000, 0);
+    this.overlay = scene.add.rectangle(
+      0,
+      0,
+      scene.cameras.main.width,
+      scene.cameras.main.height,
+      0x000000,
+      0
+    );
     this.overlay.setOrigin(0, 0);
     this.overlay.setDepth(190);
     this.overlay.setScrollFactor(0);

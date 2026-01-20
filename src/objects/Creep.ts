@@ -111,7 +111,12 @@ export class Creep extends Phaser.GameObjects.Container {
     });
   }
 
-  spawn(pathSystem: PathSystem, creepType: string, waveNumber: number = 1, difficultyMultiplier: number = 1.0): void {
+  spawn(
+    pathSystem: PathSystem,
+    creepType: string,
+    waveNumber: number = 1,
+    difficultyMultiplier: number = 1.0
+  ): void {
     this.pathSystem = pathSystem;
     const baseConfig = CREEP_TYPES[creepType] || CREEP_TYPES.furball;
 
@@ -122,12 +127,13 @@ export class Creep extends Phaser.GameObjects.Container {
     const scaledMaxHealth = Math.floor(baseConfig.maxHealth * hpMultiplier * difficultyMultiplier);
 
     // Armor scaling: only applies to creeps with base armor > 0
-    const armorMultiplier = baseConfig.armor > 0
-      ? Math.min(
-          GAME_CONFIG.MAX_ARMOR_MULTIPLIER,
-          1 + (waveNumber - 1) * GAME_CONFIG.WAVE_ARMOR_SCALING
-        )
-      : 1;
+    const armorMultiplier =
+      baseConfig.armor > 0
+        ? Math.min(
+            GAME_CONFIG.MAX_ARMOR_MULTIPLIER,
+            1 + (waveNumber - 1) * GAME_CONFIG.WAVE_ARMOR_SCALING
+          )
+        : 1;
     const scaledArmor = Math.floor(baseConfig.armor * armorMultiplier);
 
     this.config = { ...baseConfig, maxHealth: scaledMaxHealth, armor: scaledArmor };

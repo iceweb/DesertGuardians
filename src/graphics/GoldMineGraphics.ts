@@ -625,7 +625,7 @@ export class GoldMineGraphics {
     // Colorful diamonds scattered on structure
     this.drawDiamond(g, cx - 28, cy - 18, 4, 0x00d4ff); // Cyan diamond
     this.drawDiamond(g, cx + 28, cy - 16, 4, 0xff00ff); // Magenta diamond
-    this.drawDiamond(g, cx, cy - 28, 5, 0xffd700);      // Gold diamond
+    this.drawDiamond(g, cx, cy - 28, 5, 0xffd700); // Gold diamond
     this.drawDiamond(g, cx - 34, cy + 8, 3.5, 0x00ffaa); // Teal diamond
     this.drawDiamond(g, cx + 34, cy + 10, 3.5, 0xff6b9d); // Pink diamond
 
@@ -721,10 +721,10 @@ export class GoldMineGraphics {
     // Draw faceted diamond
     g.fillStyle(color, 1);
     g.beginPath();
-    g.moveTo(x, y - size);           // Top
-    g.lineTo(x + size * 0.6, y);     // Right
-    g.lineTo(x, y + size);           // Bottom
-    g.lineTo(x - size * 0.6, y);     // Left
+    g.moveTo(x, y - size); // Top
+    g.lineTo(x + size * 0.6, y); // Right
+    g.lineTo(x, y + size); // Bottom
+    g.lineTo(x - size * 0.6, y); // Left
     g.closePath();
     g.fill();
 

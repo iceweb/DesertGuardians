@@ -40,17 +40,23 @@ export class GameController extends Phaser.Events.EventEmitter {
 
   getCreepHealthMultiplier(): number {
     switch (this._difficulty) {
-      case 'Easy': return 0.75;
-      case 'Hard': return 1.25;
-      default: return 1.0;
+      case 'Easy':
+        return 0.75;
+      case 'Hard':
+        return 1.25;
+      default:
+        return 1.0;
     }
   }
 
   getScoreMultiplier(): number {
     switch (this._difficulty) {
-      case 'Easy': return 0.75;
-      case 'Hard': return 1.25;
-      default: return 1.0;
+      case 'Easy':
+        return 0.75;
+      case 'Hard':
+        return 1.25;
+      default:
+        return 1.0;
     }
   }
 

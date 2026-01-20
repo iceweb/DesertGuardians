@@ -112,13 +112,20 @@ export class GameSceneResultsUI {
     // Difficulty Multiplier
     let difficultyMultiplier: number;
     switch (result.difficulty) {
-      case 'Easy': difficultyMultiplier = 0.75; break;
-      case 'Hard': difficultyMultiplier = 1.25; break;
-      default: difficultyMultiplier = 1.0;
+      case 'Easy':
+        difficultyMultiplier = 0.75;
+        break;
+      case 'Hard':
+        difficultyMultiplier = 1.25;
+        break;
+      default:
+        difficultyMultiplier = 1.0;
     }
 
     this.scoreBreakdown = { waveScore, goldScore, hpBonus, timeMultiplier, difficultyMultiplier };
-    this.finalScore = Math.floor((waveScore + goldScore + hpBonus) * timeMultiplier * difficultyMultiplier);
+    this.finalScore = Math.floor(
+      (waveScore + goldScore + hpBonus) * timeMultiplier * difficultyMultiplier
+    );
   }
 
   /**
@@ -260,17 +267,37 @@ export class GameSceneResultsUI {
       this.resultsPopup.add(scoreTitle);
 
       if (this.scoreBreakdown) {
-        const diffLabel = this.resultData?.difficulty === 'Easy' ? 'Easy Mode' :
-                         this.resultData?.difficulty === 'Hard' ? 'Hard Mode' : 'Normal Mode';
-        const diffColor = this.resultData?.difficulty === 'Easy' ? '#44aa44' :
-                         this.resultData?.difficulty === 'Hard' ? '#cc4444' : '#4488cc';
-        
+        const diffLabel =
+          this.resultData?.difficulty === 'Easy'
+            ? 'Easy Mode'
+            : this.resultData?.difficulty === 'Hard'
+              ? 'Hard Mode'
+              : 'Normal Mode';
+        const diffColor =
+          this.resultData?.difficulty === 'Easy'
+            ? '#44aa44'
+            : this.resultData?.difficulty === 'Hard'
+              ? '#cc4444'
+              : '#4488cc';
+
         const breakdown = [
           { label: 'Wave Progress', value: `+${this.scoreBreakdown.waveScore}`, color: '#aaaaaa' },
-          { label: 'Gold Efficiency', value: `+${this.scoreBreakdown.goldScore}`, color: '#aaaaaa' },
+          {
+            label: 'Gold Efficiency',
+            value: `+${this.scoreBreakdown.goldScore}`,
+            color: '#aaaaaa',
+          },
           { label: 'HP Bonus', value: `+${this.scoreBreakdown.hpBonus}`, color: '#aaaaaa' },
-          { label: 'Time Multiplier', value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}`, color: '#aaaaaa' },
-          { label: diffLabel, value: `×${this.scoreBreakdown.difficultyMultiplier.toFixed(2)}`, color: diffColor },
+          {
+            label: 'Time Multiplier',
+            value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}`,
+            color: '#aaaaaa',
+          },
+          {
+            label: diffLabel,
+            value: `×${this.scoreBreakdown.difficultyMultiplier.toFixed(2)}`,
+            color: diffColor,
+          },
         ];
 
         breakdown.forEach((item, i) => {

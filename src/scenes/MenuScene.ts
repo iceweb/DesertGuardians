@@ -835,7 +835,12 @@ export class MenuScene extends Phaser.Scene {
 
       // Difficulty badge
       const diffBadge = score.difficulty === 'Easy' ? 'E' : score.difficulty === 'Hard' ? 'H' : 'N';
-      const diffColor = score.difficulty === 'Easy' ? '#44aa44' : score.difficulty === 'Hard' ? '#cc4444' : '#4488cc';
+      const diffColor =
+        score.difficulty === 'Easy'
+          ? '#44aa44'
+          : score.difficulty === 'Hard'
+            ? '#cc4444'
+            : '#4488cc';
       const difficulty = this.add
         .text(-270, y, diffBadge, {
           fontFamily: 'Arial Black',

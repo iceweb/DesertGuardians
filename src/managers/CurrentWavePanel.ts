@@ -84,12 +84,7 @@ export class CurrentWavePanel {
       const x = startX + col * this.ICON_SPACING;
       const y = startY + row * this.ICON_SPACING;
 
-      const iconContainer = this.createIconWithHover(
-        x,
-        y,
-        creepInfo.type,
-        creepInfo.description
-      );
+      const iconContainer = this.createIconWithHover(x, y, creepInfo.type, creepInfo.description);
       this.container.add(iconContainer);
       this.icons.push(iconContainer);
 
