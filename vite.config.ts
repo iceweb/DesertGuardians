@@ -15,10 +15,19 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.{test,spec}.ts', 'src/main.ts'],
       thresholds: {
-        lines: 70,
-        functions: 70,
-        branches: 60,
-        statements: 70,
+        // Apply thresholds only to pure logic code (not Phaser-dependent)
+        'src/data/**/*.ts': {
+          lines: 100,
+          functions: 100,
+          branches: 90,
+          statements: 100,
+        },
+        'src/objects/TowerAbilityDefinitions.ts': {
+          lines: 100,
+          functions: 100,
+          branches: 100,
+          statements: 100,
+        },
       },
     },
   },
