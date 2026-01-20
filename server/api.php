@@ -104,9 +104,20 @@ function getClientIP() {
 }
 
 /**
+ * Get difficulty score multiplier
+ */
+function getDifficultyMultiplier($difficulty) {
+    switch ($difficulty) {
+        case 'Easy': return DIFFICULTY_MULTIPLIER_EASY;
+        case 'Hard': return DIFFICULTY_MULTIPLIER_HARD;
+        default: return DIFFICULTY_MULTIPLIER_NORMAL;
+    }
+}
+
+/**
  * Calculate expected score from game data (server-side validation)
  */
-function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds) {
+function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty = 'Normal') {
     $waveScore = $waveReached * WAVE_BONUS_POINTS;
     $goldScore = floor($goldEarned * GOLD_BONUS_MULTIPLIER);
     $hpBonus = $hpRemaining * HP_BONUS_POINTS;
@@ -117,7 +128,9 @@ function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds) {
         $timeMultiplier = max(1.0, MAX_TIME_MULTIPLIER - ($timeSeconds - OPTIMAL_TIME_SECONDS) / 1800);
     }
     
-    return floor(($waveScore + $goldScore + $hpBonus) * $timeMultiplier);
+    $difficultyMultiplier = getDifficultyMultiplier($difficulty);
+    
+    return floor(($waveScore + $goldScore + $hpBonus) * $timeMultiplier * $difficultyMultiplier);
 }
 
 /**
@@ -240,7 +253,7 @@ function handleGetRequest() {
     $stmt = $pdo->prepare("
         SELECT player_name, score, wave_reached, total_waves, 
                hp_remaining, gold_earned, creeps_killed, time_seconds,
-               is_victory, submission_date 
+               is_victory, difficulty, submission_date 
         FROM highscores 
         ORDER BY score DESC, wave_reached DESC, submission_date ASC 
         LIMIT 20
@@ -256,6 +269,7 @@ function handleGetRequest() {
         $score['gold_earned'] = (int)$score['gold_earned'];
         $score['creeps_killed'] = (int)$score['creeps_killed'];
         $score['time_seconds'] = (int)$score['time_seconds'];
+        $score['difficulty'] = $score['difficulty'] ?? 'Normal';
         unset($score['submission_date']);
     }
     
@@ -279,7 +293,7 @@ function handlePostRequest() {
     // Required fields
     $requiredFields = ['name', 'score', 'waveReached', 'totalWaves', 'hpRemaining', 
                        'goldEarned', 'creepsKilled', 'timeSeconds', 'isVictory', 
-                       'sessionToken'];
+                       'difficulty', 'sessionToken'];
     
     foreach ($requiredFields as $field) {
         if (!isset($data[$field])) {
@@ -299,7 +313,15 @@ function handlePostRequest() {
     $creepsKilled = intval($data['creepsKilled']);
     $timeSeconds = intval($data['timeSeconds']);
     $isVictory = (bool)$data['isVictory'];
+    $difficulty = $data['difficulty'];
     $sessionToken = $data['sessionToken'];
+    
+    // Validate difficulty
+    if (!in_array($difficulty, ['Easy', 'Normal', 'Hard'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid difficulty']);
+        return;
+    }
     
     $pdo = getDbConnection();
     $ip = getClientIP();
@@ -358,7 +380,7 @@ function handlePostRequest() {
     }
     
     // Server-side score recalculation (allow small tolerance for floating point)
-    $calculatedScore = calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds);
+    $calculatedScore = calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty);
     $scoreDiff = abs($score - $calculatedScore);
     
     if ($scoreDiff > 5) { // Allow 5 point tolerance for floating point differences
@@ -383,11 +405,11 @@ function handlePostRequest() {
             INSERT INTO highscores (
                 player_name, score, wave_reached, total_waves, 
                 hp_remaining, gold_earned, creeps_killed, time_seconds, 
-                is_victory, session_token, ip_address
+                is_victory, difficulty, session_token, ip_address
             ) VALUES (
                 :name, :score, :wave_reached, :total_waves,
                 :hp_remaining, :gold_earned, :creeps_killed, :time_seconds,
-                :is_victory, :session_token, :ip
+                :is_victory, :difficulty, :session_token, :ip
             )
         ");
         
@@ -401,6 +423,7 @@ function handlePostRequest() {
             ':creeps_killed' => $creepsKilled,
             ':time_seconds' => $timeSeconds,
             ':is_victory' => $isVictory ? 1 : 0,
+            ':difficulty' => $difficulty,
             ':session_token' => $sessionToken,
             ':ip' => $ip
         ]);

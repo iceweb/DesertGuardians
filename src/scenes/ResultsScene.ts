@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { AudioManager, HighscoreAPI } from '../managers';
-import type { GlobalScore } from '../managers';
+import type { GlobalScore, Difficulty } from '../managers';
 import { GAME_CONFIG } from '../data/GameConfig';
 
 export interface GameResultData {
@@ -13,6 +13,7 @@ export interface GameResultData {
   totalGoldEarned: number;
   creepsKilled: number;
   runTimeSeconds: number;
+  difficulty: Difficulty;
 }
 
 let lastGameResult: GameResultData | null = null;
@@ -685,6 +686,7 @@ export class ResultsScene extends Phaser.Scene {
         creepsKilled: this.resultData.creepsKilled,
         timeSeconds: this.resultData.runTimeSeconds,
         isVictory: this.resultData.isVictory,
+        difficulty: this.resultData.difficulty,
       });
 
       if (result.success) {

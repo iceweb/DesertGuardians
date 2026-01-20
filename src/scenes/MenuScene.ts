@@ -757,11 +757,12 @@ export class MenuScene extends Phaser.Scene {
     const headers = [
       { text: '#', x: -440, align: 0.5 },
       { text: 'Name', x: -400, align: 0 },
-      { text: 'Score', x: -260, align: 0 },
-      { text: 'Wave', x: -140, align: 0 },
-      { text: 'HP', x: -50, align: 0 },
-      { text: 'Gold', x: 30, align: 0 },
-      { text: 'Kills', x: 130, align: 0 },
+      { text: 'Diff', x: -270, align: 0.5 },
+      { text: 'Score', x: -220, align: 0 },
+      { text: 'Wave', x: -110, align: 0 },
+      { text: 'HP', x: -30, align: 0 },
+      { text: 'Gold', x: 50, align: 0 },
+      { text: 'Kills', x: 140, align: 0 },
       { text: 'Time', x: 210, align: 0 },
       { text: 'Win', x: 290, align: 0 },
       { text: 'Date', x: 350, align: 0 },
@@ -832,8 +833,21 @@ export class MenuScene extends Phaser.Scene {
       name.setData('scoreRow', true);
       this.highscoreContainer!.add(name);
 
+      // Difficulty badge
+      const diffBadge = score.difficulty === 'Easy' ? 'E' : score.difficulty === 'Hard' ? 'H' : 'N';
+      const diffColor = score.difficulty === 'Easy' ? '#44aa44' : score.difficulty === 'Hard' ? '#cc4444' : '#4488cc';
+      const difficulty = this.add
+        .text(-270, y, diffBadge, {
+          fontFamily: 'Arial Black',
+          fontSize: '11px',
+          color: diffColor,
+        })
+        .setOrigin(0.5, 0.5);
+      difficulty.setData('scoreRow', true);
+      this.highscoreContainer!.add(difficulty);
+
       const scoreText = this.add
-        .text(-260, y, score.score.toLocaleString(), {
+        .text(-220, y, score.score.toLocaleString(), {
           fontFamily: 'Arial Black',
           fontSize: '14px',
           color: isTop3 ? '#ffd700' : '#ffcc44',
@@ -843,7 +857,7 @@ export class MenuScene extends Phaser.Scene {
       this.highscoreContainer!.add(scoreText);
 
       const wave = this.add
-        .text(-140, y, `${score.wave_reached}/${score.total_waves}`, {
+        .text(-110, y, `${score.wave_reached}/${score.total_waves}`, {
           fontFamily: 'Arial',
           fontSize: '13px',
           color: score.is_victory ? '#00ff00' : '#aaaaaa',
@@ -853,7 +867,7 @@ export class MenuScene extends Phaser.Scene {
       this.highscoreContainer!.add(wave);
 
       const hp = this.add
-        .text(-50, y, `${score.hp_remaining ?? 0}`, {
+        .text(-30, y, `${score.hp_remaining ?? 0}`, {
           fontFamily: 'Arial',
           fontSize: '13px',
           color: (score.hp_remaining ?? 0) > 0 ? '#44ff44' : '#666666',
@@ -863,7 +877,7 @@ export class MenuScene extends Phaser.Scene {
       this.highscoreContainer!.add(hp);
 
       const gold = this.add
-        .text(30, y, this.formatNumber(score.gold_earned ?? 0), {
+        .text(50, y, this.formatNumber(score.gold_earned ?? 0), {
           fontFamily: 'Arial',
           fontSize: '13px',
           color: '#ffd700',
@@ -873,7 +887,7 @@ export class MenuScene extends Phaser.Scene {
       this.highscoreContainer!.add(gold);
 
       const kills = this.add
-        .text(130, y, this.formatNumber(score.creeps_killed ?? 0), {
+        .text(140, y, this.formatNumber(score.creeps_killed ?? 0), {
           fontFamily: 'Arial',
           fontSize: '13px',
           color: '#ff8844',

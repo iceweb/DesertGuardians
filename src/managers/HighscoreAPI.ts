@@ -10,6 +10,7 @@ export interface ScoreSubmission {
   creepsKilled: number;
   timeSeconds: number;
   isVictory: boolean;
+  difficulty: 'Easy' | 'Normal' | 'Hard';
 }
 
 export interface GlobalScore {
@@ -22,6 +23,7 @@ export interface GlobalScore {
   creeps_killed: number;
   time_seconds: number;
   is_victory: boolean;
+  difficulty: 'Easy' | 'Normal' | 'Hard';
   date: string;
 }
 

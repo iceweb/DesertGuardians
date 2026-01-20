@@ -29,6 +29,7 @@ export class TowerManager {
   public onTowerUpgraded?: (tower: Tower, cost: number) => void;
   public onAuraBuffsChanged?: () => void;
   public getPlayerGold?: () => number;
+  public isGameReady?: () => boolean;
 
   private goldMineManager: GoldMineManager | null = null;
 
@@ -85,6 +86,8 @@ export class TowerManager {
   }
 
   private handleClick(x: number, y: number): void {
+    if (this.isGameReady && !this.isGameReady()) return;
+
     if (this.popupController?.shouldIgnorePointer()) return;
 
     if (this.popupController?.isAnyOpen()) return;

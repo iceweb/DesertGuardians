@@ -88,8 +88,10 @@ export class PopupController {
       this.activePopupId = null;
       this.activeOptions = { ...DEFAULT_OPTIONS };
       this.closeHandler = null;
-      this.overlay.setVisible(false);
-      this.overlay.disableInteractive();
+      if (this.overlay && this.overlay.scene) {
+        this.overlay.setVisible(false);
+        this.overlay.disableInteractive();
+      }
 
       if (!suppressGuard) {
         this.lastCloseTime = this.scene.time.now;

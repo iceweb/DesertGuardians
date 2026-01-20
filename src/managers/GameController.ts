@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { GAME_CONFIG } from '../data/GameConfig';
 
+export type Difficulty = 'Easy' | 'Normal' | 'Hard';
+
 export class GameController extends Phaser.Events.EventEmitter {
   private _gold: number;
   private _castleHP: number;
@@ -17,12 +19,39 @@ export class GameController extends Phaser.Events.EventEmitter {
   private _gameSpeed: number = 1;
   private _gameOver: boolean = false;
 
+  private _difficulty: Difficulty = 'Normal';
+
   constructor() {
     super();
 
     this._gold = GAME_CONFIG.STARTING_GOLD;
     this._castleHP = GAME_CONFIG.MAX_CASTLE_HP;
     this._maxCastleHP = GAME_CONFIG.MAX_CASTLE_HP;
+  }
+
+  get difficulty(): Difficulty {
+    return this._difficulty;
+  }
+
+  setDifficulty(difficulty: Difficulty): void {
+    this._difficulty = difficulty;
+    this.emit('difficultyChanged', difficulty);
+  }
+
+  getCreepHealthMultiplier(): number {
+    switch (this._difficulty) {
+      case 'Easy': return 0.75;
+      case 'Hard': return 1.25;
+      default: return 1.0;
+    }
+  }
+
+  getScoreMultiplier(): number {
+    switch (this._difficulty) {
+      case 'Easy': return 0.75;
+      case 'Hard': return 1.25;
+      default: return 1.0;
+    }
   }
 
   get gold(): number {
@@ -166,6 +195,7 @@ export class GameController extends Phaser.Events.EventEmitter {
     this._isPaused = false;
     this._gameSpeed = 1;
     this._gameOver = false;
+    this._difficulty = 'Normal';
   }
 
   getStateSnapshot(): {

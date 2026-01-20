@@ -334,10 +334,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       if (this.currentWave >= WAVE_CONFIGS.length) {
         this.emit('allWavesComplete');
       }
-    } else {
-      if (activeCount <= 3 && activeCount > 0) {
-        this.creepManager.debugActiveCreeps();
-      }
     }
   }
 

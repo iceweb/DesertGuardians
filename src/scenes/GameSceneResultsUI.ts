@@ -28,6 +28,7 @@ export class GameSceneResultsUI {
     goldScore: number;
     hpBonus: number;
     timeMultiplier: number;
+    difficultyMultiplier: number;
   } | null = null;
   private playerName: string = '';
   private nameInputText: Phaser.GameObjects.Text | null = null;
@@ -108,8 +109,16 @@ export class GameSceneResultsUI {
       timeMultiplier = Math.max(1.0, 1.5 - (result.runTimeSeconds - 900) / 1800);
     }
 
-    this.scoreBreakdown = { waveScore, goldScore, hpBonus, timeMultiplier };
-    this.finalScore = Math.floor((waveScore + goldScore + hpBonus) * timeMultiplier);
+    // Difficulty Multiplier
+    let difficultyMultiplier: number;
+    switch (result.difficulty) {
+      case 'Easy': difficultyMultiplier = 0.75; break;
+      case 'Hard': difficultyMultiplier = 1.25; break;
+      default: difficultyMultiplier = 1.0;
+    }
+
+    this.scoreBreakdown = { waveScore, goldScore, hpBonus, timeMultiplier, difficultyMultiplier };
+    this.finalScore = Math.floor((waveScore + goldScore + hpBonus) * timeMultiplier * difficultyMultiplier);
   }
 
   /**
@@ -251,11 +260,17 @@ export class GameSceneResultsUI {
       this.resultsPopup.add(scoreTitle);
 
       if (this.scoreBreakdown) {
+        const diffLabel = this.resultData?.difficulty === 'Easy' ? 'Easy Mode' :
+                         this.resultData?.difficulty === 'Hard' ? 'Hard Mode' : 'Normal Mode';
+        const diffColor = this.resultData?.difficulty === 'Easy' ? '#44aa44' :
+                         this.resultData?.difficulty === 'Hard' ? '#cc4444' : '#4488cc';
+        
         const breakdown = [
-          { label: 'Wave Progress', value: `+${this.scoreBreakdown.waveScore}` },
-          { label: 'Gold Efficiency', value: `+${this.scoreBreakdown.goldScore}` },
-          { label: 'HP Bonus', value: `+${this.scoreBreakdown.hpBonus}` },
-          { label: 'Time Multiplier', value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}` },
+          { label: 'Wave Progress', value: `+${this.scoreBreakdown.waveScore}`, color: '#aaaaaa' },
+          { label: 'Gold Efficiency', value: `+${this.scoreBreakdown.goldScore}`, color: '#aaaaaa' },
+          { label: 'HP Bonus', value: `+${this.scoreBreakdown.hpBonus}`, color: '#aaaaaa' },
+          { label: 'Time Multiplier', value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}`, color: '#aaaaaa' },
+          { label: diffLabel, value: `×${this.scoreBreakdown.difficultyMultiplier.toFixed(2)}`, color: diffColor },
         ];
 
         breakdown.forEach((item, i) => {
@@ -273,14 +288,14 @@ export class GameSceneResultsUI {
             .text(80, y, item.value, {
               fontFamily: 'Arial',
               fontSize: '13px',
-              color: '#aaaaaa',
+              color: item.color,
             })
             .setOrigin(1, 0.5);
           this.resultsPopup?.add(valueText);
         });
       }
 
-      const finalScoreY = scoreY + 120;
+      const finalScoreY = scoreY + 140;
       const finalScoreLabel = this.host.add
         .text(0, finalScoreY, 'FINAL SCORE', {
           fontFamily: 'Arial Black',
@@ -671,6 +686,7 @@ export class GameSceneResultsUI {
         creepsKilled: this.resultData.creepsKilled,
         timeSeconds: this.resultData.runTimeSeconds,
         isVictory: this.resultData.isVictory,
+        difficulty: this.resultData.difficulty,
       });
 
       if (result.success) {

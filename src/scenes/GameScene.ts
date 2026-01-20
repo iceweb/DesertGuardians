@@ -16,6 +16,7 @@ import {
   GameController,
   HighscoreAPI,
 } from '../managers';
+import type { Difficulty } from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
 import { GAME_CONFIG } from '../data/GameConfig';
@@ -41,6 +42,8 @@ export class GameScene extends Phaser.Scene {
   private gameController!: GameController;
 
   private resultsUI!: GameSceneResultsUI;
+  private difficultyOverlay: Phaser.GameObjects.Container | null = null;
+  private gameReady: boolean = false;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -143,6 +146,170 @@ export class GameScene extends Phaser.Scene {
 
     // Register shutdown handler to clean up managers
     this.events.once('shutdown', this.handleShutdown, this);
+
+    // Show difficulty selection overlay
+    this.gameReady = false;
+    this.showDifficultySelection();
+  }
+
+  private showDifficultySelection(): void {
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    this.difficultyOverlay = this.add.container(width / 2, height / 2);
+    this.difficultyOverlay.setDepth(500);
+
+    // Dim background
+    const dimBg = this.add.rectangle(0, 0, width * 2, height * 2, 0x000000, 0.7);
+    dimBg.setInteractive();
+    this.difficultyOverlay.add(dimBg);
+
+    // Panel
+    const panelWidth = 600;
+    const panelHeight = 400;
+
+    const panel = this.add.graphics();
+    panel.fillStyle(0x000000, 0.5);
+    panel.fillRoundedRect(-panelWidth / 2 + 8, -panelHeight / 2 + 8, panelWidth, panelHeight, 16);
+    panel.fillStyle(0x1a0a00, 0.98);
+    panel.fillRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
+    panel.lineStyle(3, 0xd4a574, 1);
+    panel.strokeRoundedRect(-panelWidth / 2, -panelHeight / 2, panelWidth, panelHeight, 16);
+    this.difficultyOverlay.add(panel);
+
+    // Title
+    const title = this.add.text(0, -panelHeight / 2 + 50, 'SELECT DIFFICULTY', {
+      fontFamily: 'Arial Black',
+      fontSize: '32px',
+      color: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 4,
+    }).setOrigin(0.5);
+    this.difficultyOverlay.add(title);
+
+    // Difficulty buttons
+    const buttonY = 20;
+    const buttonSpacing = 180;
+
+    this.createDifficultyButton(-buttonSpacing, buttonY, 'Easy', 0x44aa44, 'Enemies: 75% HP\nScore: ×0.75', () => {
+      this.selectDifficulty('Easy');
+    });
+
+    this.createDifficultyButton(0, buttonY, 'Normal', 0x4488cc, 'Standard Experience\nScore: ×1.0', () => {
+      this.selectDifficulty('Normal');
+    });
+
+    this.createDifficultyButton(buttonSpacing, buttonY, 'Hard', 0xcc4444, 'Enemies: 125% HP\nScore: ×1.25', () => {
+      this.selectDifficulty('Hard');
+    });
+
+    // Fade in
+    this.difficultyOverlay.setAlpha(0);
+    this.tweens.add({
+      targets: this.difficultyOverlay,
+      alpha: 1,
+      duration: 300,
+    });
+  }
+
+  private createDifficultyButton(
+    x: number,
+    y: number,
+    label: string,
+    color: number,
+    description: string,
+    onClick: () => void
+  ): void {
+    if (!this.difficultyOverlay) return;
+
+    const btnWidth = 150;
+    const btnHeight = 160;
+
+    const container = this.add.container(x, y);
+
+    // Button background
+    const bg = this.add.graphics();
+    const drawButton = (hover: boolean, pressed: boolean = false) => {
+      bg.clear();
+      const offsetY = pressed ? 2 : 0;
+
+      if (!pressed) {
+        bg.fillStyle(0x000000, 0.4);
+        bg.fillRoundedRect(-btnWidth / 2 + 4, -btnHeight / 2 + 4, btnWidth, btnHeight, 12);
+      }
+
+      bg.fillStyle(color, hover ? 1 : 0.8);
+      bg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2 + offsetY, btnWidth, btnHeight - 4, 12);
+
+      bg.lineStyle(2, hover ? 0xffd700 : 0xffffff, 1);
+      bg.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2 + offsetY, btnWidth, btnHeight - 4, 12);
+    };
+    drawButton(false);
+    container.add(bg);
+
+    // Label
+    const labelText = this.add.text(0, -btnHeight / 2 + 35, label, {
+      fontFamily: 'Arial Black',
+      fontSize: '22px',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3,
+    }).setOrigin(0.5);
+    container.add(labelText);
+
+    // Description
+    const descText = this.add.text(0, 20, description, {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#ffffff',
+      align: 'center',
+    }).setOrigin(0.5);
+    container.add(descText);
+
+    // Hit area
+    const hitArea = this.add.rectangle(0, 0, btnWidth, btnHeight, 0x000000, 0);
+    hitArea.setInteractive({ useHandCursor: true });
+    container.add(hitArea);
+
+    hitArea.on('pointerover', () => {
+      drawButton(true);
+      labelText.setScale(1.05);
+    });
+
+    hitArea.on('pointerout', () => {
+      drawButton(false);
+      labelText.setScale(1);
+    });
+
+    hitArea.on('pointerdown', () => {
+      drawButton(true, true);
+    });
+
+    hitArea.on('pointerup', () => {
+      this.audioManager.playSFX('ui_click');
+      onClick();
+    });
+
+    this.difficultyOverlay.add(container);
+  }
+
+  private selectDifficulty(difficulty: Difficulty): void {
+    this.gameController.setDifficulty(difficulty);
+    this.creepManager.setDifficultyMultiplier(this.gameController.getCreepHealthMultiplier());
+
+    // Fade out and destroy overlay
+    if (this.difficultyOverlay) {
+      this.tweens.add({
+        targets: this.difficultyOverlay,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => {
+          this.difficultyOverlay?.destroy();
+          this.difficultyOverlay = null;
+          this.gameReady = true;
+        },
+      });
+    }
   }
 
   private handleShutdown(): void {
@@ -173,6 +340,7 @@ export class GameScene extends Phaser.Scene {
 
   private setupTowerCallbacks(): void {
     this.towerManager.getPlayerGold = () => this.gameController.gold;
+    this.towerManager.isGameReady = () => this.gameReady;
 
     this.towerManager.onTowerBuilt = (_tower, cost) => {
       this.gameController.spendGold(cost);
@@ -324,6 +492,7 @@ export class GameScene extends Phaser.Scene {
       totalGoldEarned: stats.goldEarned,
       creepsKilled: stats.killed,
       runTimeSeconds: stateSnapshot.runTimeSeconds,
+      difficulty: this.gameController.difficulty,
     };
 
     this.registry.events.emit('game-over');
@@ -337,6 +506,7 @@ export class GameScene extends Phaser.Scene {
 
   private setupHUDCallbacks(): void {
     this.hudManager.onStartWaveClicked = () => {
+      if (!this.gameReady) return;
       if (this.gameController.gameOver) return;
       if (this.hudManager.isCountdownActive()) return;
 
@@ -444,6 +614,7 @@ export class GameScene extends Phaser.Scene {
 
   update(_time: number, delta: number): void {
     if (this.gameController.gameOver) return;
+    if (!this.gameReady) return;
 
     const cappedDelta = Math.min(delta, 50);
     const gameSpeed = this.hudManager.getGameSpeed();

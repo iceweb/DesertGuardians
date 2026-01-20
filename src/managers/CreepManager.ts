@@ -9,6 +9,7 @@ export class CreepManager {
   private activeCreeps: Creep[] = [];
   private readonly POOL_SIZE = 120;
   private currentWaveNumber: number = 1;
+  private difficultyMultiplier: number = 1.0;
 
   public onCreepDied?: (creep: Creep, goldReward: number, deathX: number, deathY: number) => void;
   public onCreepReachedEnd?: (creep: Creep) => void;
@@ -21,6 +22,10 @@ export class CreepManager {
     this.pathSystem = pathSystem;
 
     this.initializePool();
+  }
+
+  setDifficultyMultiplier(multiplier: number): void {
+    this.difficultyMultiplier = multiplier;
   }
 
   private initializePool(): void {
@@ -52,7 +57,7 @@ export class CreepManager {
     }
 
     this.currentWaveNumber = waveNumber;
-    creep.spawn(this.pathSystem, creepType, waveNumber);
+    creep.spawn(this.pathSystem, creepType, waveNumber, this.difficultyMultiplier);
     this.activeCreeps.push(creep);
 
     return creep;
@@ -72,7 +77,7 @@ export class CreepManager {
       return null;
     }
 
-    creep.spawn(this.pathSystem, creepType, waveNumber);
+    creep.spawn(this.pathSystem, creepType, waveNumber, this.difficultyMultiplier);
 
     const offsetX = (Math.random() - 0.5) * 40;
     const offsetY = (Math.random() - 0.5) * 30;

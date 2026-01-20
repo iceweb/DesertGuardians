@@ -1,6 +1,7 @@
 export { MapManager, PathSystem } from './MapPathSystem';
 export type { BuildPadData, MapData, MinePadData, PathSegment } from './MapPathSystem';
 export { GameController } from './GameController';
+export type { Difficulty } from './GameController';
 export { CreepManager } from './CreepManager';
 export { WaveManager } from './WaveManager';
 export { WAVE_CONFIGS } from '../data/GameData';
