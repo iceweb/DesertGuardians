@@ -74,6 +74,7 @@ Tower defense games are significantly more complex than platformers:
 ## ✨ Features
 
 ### 🏰 Core Gameplay
+- **3 Difficulty Levels** — Easy (75% enemy HP), Normal, Hard (125% enemy HP)
 - **35 Waves** of increasingly difficult enemies
 - **7 Tower Branches** with up to 4 upgrade levels and special abilities
 - **Gold Mine System** — Build and upgrade mines for passive income
@@ -94,6 +95,7 @@ Tower defense games are significantly more complex than platformers:
 - **Gold Bonus** — 0.2× total gold earned
 - **HP Bonus** — 100 points per HP remaining
 - **Time Multiplier** — Up to 1.5× for fast completion
+- **Difficulty Multiplier** — Easy ×0.75, Normal ×1.0, Hard ×1.25
 
 ### 🌐 Global Competition
 - **Global Leaderboard** — Top 20 scores worldwide
