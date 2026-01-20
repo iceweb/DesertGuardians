@@ -159,14 +159,14 @@ describe('Gold and Economy', () => {
   describe('Mine Income', () => {
     it('should calculate wave income from mines', () => {
       const calculateMineIncome = (mineLevels: number[]): number => {
-        const incomePerLevel: Record<number, number> = { 0: 0, 1: 12, 2: 22, 3: 40 };
+        const incomePerLevel: Record<number, number> = { 0: 0, 1: 12, 2: 20, 3: 32 };
         return mineLevels.reduce((sum, level) => sum + incomePerLevel[level], 0);
       };
 
       expect(calculateMineIncome([1, 1, 1])).toBe(36);
-      expect(calculateMineIncome([2, 2, 2])).toBe(66);
-      expect(calculateMineIncome([3, 3, 3])).toBe(120);
-      expect(calculateMineIncome([1, 2, 3])).toBe(74);
+      expect(calculateMineIncome([2, 2, 2])).toBe(60);
+      expect(calculateMineIncome([3, 3, 3])).toBe(96);
+      expect(calculateMineIncome([1, 2, 3])).toBe(64);
       expect(calculateMineIncome([0, 0, 0])).toBe(0);
     });
   });

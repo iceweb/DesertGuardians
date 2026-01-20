@@ -24,9 +24,9 @@ describe('GoldMine System', () => {
 
     it('should have valid build costs for all levels', () => {
       expect(MINE_CONFIGS[1].buildCost).toBe(75);
-      expect(MINE_CONFIGS[2].buildCost).toBe(150);
-      expect(MINE_CONFIGS[3].buildCost).toBe(250);
-      expect(MINE_CONFIGS[4].buildCost).toBe(425);
+      expect(MINE_CONFIGS[2].buildCost).toBe(125);
+      expect(MINE_CONFIGS[3].buildCost).toBe(200);
+      expect(MINE_CONFIGS[4].buildCost).toBe(350);
     });
 
     it('should have increasing build costs per level', () => {
@@ -43,9 +43,9 @@ describe('GoldMine System', () => {
 
     it('should have valid income values', () => {
       expect(MINE_CONFIGS[1].incomePerWave).toBe(12);
-      expect(MINE_CONFIGS[2].incomePerWave).toBe(22);
-      expect(MINE_CONFIGS[3].incomePerWave).toBe(40);
-      expect(MINE_CONFIGS[4].incomePerWave).toBe(72);
+      expect(MINE_CONFIGS[2].incomePerWave).toBe(20);
+      expect(MINE_CONFIGS[3].incomePerWave).toBe(32);
+      expect(MINE_CONFIGS[4].incomePerWave).toBe(55);
     });
 
     it('should have names and descriptions for all levels', () => {
@@ -61,9 +61,9 @@ describe('GoldMine System', () => {
   describe('getMineCost', () => {
     it('should return correct cost for each level', () => {
       expect(getMineCost(1)).toBe(75);
-      expect(getMineCost(2)).toBe(150);
-      expect(getMineCost(3)).toBe(250);
-      expect(getMineCost(4)).toBe(425);
+      expect(getMineCost(2)).toBe(125);
+      expect(getMineCost(3)).toBe(200);
+      expect(getMineCost(4)).toBe(350);
     });
   });
 
@@ -74,9 +74,9 @@ describe('GoldMine System', () => {
 
     it('should return cumulative cost for each level', () => {
       expect(getTotalInvestment(1)).toBe(75);
-      expect(getTotalInvestment(2)).toBe(75 + 150);
-      expect(getTotalInvestment(3)).toBe(75 + 150 + 250);
-      expect(getTotalInvestment(4)).toBe(75 + 150 + 250 + 425);
+      expect(getTotalInvestment(2)).toBe(75 + 125);
+      expect(getTotalInvestment(3)).toBe(75 + 125 + 200);
+      expect(getTotalInvestment(4)).toBe(75 + 125 + 200 + 350);
     });
   });
 
@@ -91,14 +91,14 @@ describe('GoldMine System', () => {
       // Level 1: 75 / 12 = 6.25 -> 7 waves
       expect(calculateBreakEven(1)).toBe(7);
 
-      // Level 2: 225 / 22 = 10.22 -> 11 waves
-      expect(calculateBreakEven(2)).toBe(11);
+      // Level 2: 200 / 20 = 10 -> 10 waves
+      expect(calculateBreakEven(2)).toBe(10);
 
-      // Level 3: 475 / 40 = 11.875 -> 12 waves
-      expect(calculateBreakEven(3)).toBe(12);
+      // Level 3: 400 / 32 = 12.5 -> 13 waves
+      expect(calculateBreakEven(3)).toBe(13);
 
-      // Level 4: 900 / 72 = 12.5 -> 13 waves
-      expect(calculateBreakEven(4)).toBe(13);
+      // Level 4: 750 / 55 = 13.6 -> 14 waves
+      expect(calculateBreakEven(4)).toBe(14);
     });
 
     it('should calculate upgrade value', () => {
@@ -117,9 +117,9 @@ describe('GoldMine System', () => {
       // Income diff: 12 - 0 = 12, Profit: 12 * 20 - 75 = 165
       expect(calculateUpgradeValue(0, 20)).toBe(165);
 
-      // Upgrade from 1 to 2 with 15 waves remaining
-      // Income diff: 22 - 12 = 10, Profit: 10 * 15 - 150 = 0
-      expect(calculateUpgradeValue(1, 15)).toBe(0);
+      // Upgrade from 1 to 2 with 16 waves remaining
+      // Income diff: 20 - 12 = 8, Profit: 8 * 16 - 125 = 3
+      expect(calculateUpgradeValue(1, 16)).toBe(3);
     });
   });
 
@@ -162,15 +162,15 @@ describe('GoldMine System', () => {
 
       expect(upgradeMine(mine)).toBe(true);
       expect(mine.level).toBe(2);
-      expect(mine.totalInvested).toBe(225);
+      expect(mine.totalInvested).toBe(200);
 
       expect(upgradeMine(mine)).toBe(true);
       expect(mine.level).toBe(3);
-      expect(mine.totalInvested).toBe(475);
+      expect(mine.totalInvested).toBe(400);
 
       expect(upgradeMine(mine)).toBe(true);
       expect(mine.level).toBe(4);
-      expect(mine.totalInvested).toBe(900);
+      expect(mine.totalInvested).toBe(750);
 
       expect(upgradeMine(mine)).toBe(false); // Max level
     });
@@ -183,9 +183,9 @@ describe('GoldMine System', () => {
       };
 
       expect(getUpgradeCost(0)).toBe(75); // Cost to build level 1
-      expect(getUpgradeCost(1)).toBe(150); // Cost to upgrade to level 2
-      expect(getUpgradeCost(2)).toBe(250); // Cost to upgrade to level 3
-      expect(getUpgradeCost(3)).toBe(425); // Cost to upgrade to level 4
+      expect(getUpgradeCost(1)).toBe(125); // Cost to upgrade to level 2
+      expect(getUpgradeCost(2)).toBe(200); // Cost to upgrade to level 3
+      expect(getUpgradeCost(3)).toBe(350); // Cost to upgrade to level 4
       expect(getUpgradeCost(4)).toBe(0); // Max level, no upgrade
     });
 
@@ -220,11 +220,11 @@ describe('GoldMine System', () => {
 
       expect(calculateTotalIncome([0, 0, 0])).toBe(0);
       expect(calculateTotalIncome([1, 1, 1])).toBe(36);
-      expect(calculateTotalIncome([2, 2, 2])).toBe(66);
-      expect(calculateTotalIncome([3, 3, 3])).toBe(120);
-      expect(calculateTotalIncome([4, 4, 4])).toBe(216);
-      expect(calculateTotalIncome([1, 2, 3])).toBe(74);
-      expect(calculateTotalIncome([4, 4, 4])).toBe(216);
+      expect(calculateTotalIncome([2, 2, 2])).toBe(60);
+      expect(calculateTotalIncome([3, 3, 3])).toBe(96);
+      expect(calculateTotalIncome([4, 4, 4])).toBe(165);
+      expect(calculateTotalIncome([1, 2, 3])).toBe(64);
+      expect(calculateTotalIncome([4, 4, 4])).toBe(165);
     });
 
     it('should calculate total investment from multiple mines', () => {
@@ -237,7 +237,7 @@ describe('GoldMine System', () => {
 
       expect(calculateTotalMineInvestment([0, 0, 0])).toBe(0);
       expect(calculateTotalMineInvestment([1, 1, 1])).toBe(225);
-      expect(calculateTotalMineInvestment([4, 4, 4])).toBe(2700);
+      expect(calculateTotalMineInvestment([4, 4, 4])).toBe(2250);
     });
 
     it('should track income over multiple waves', () => {

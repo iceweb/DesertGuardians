@@ -125,8 +125,8 @@ describe('GameData', () => {
   describe('getMineCost', () => {
     it('should return correct cost for each level', () => {
       expect(getMineCost(1)).toBe(75);
-      expect(getMineCost(2)).toBe(150);
-      expect(getMineCost(3)).toBe(250);
+      expect(getMineCost(2)).toBe(125);
+      expect(getMineCost(3)).toBe(200);
     });
   });
 
@@ -137,8 +137,8 @@ describe('GameData', () => {
 
     it('should return cumulative cost for each level', () => {
       expect(getTotalInvestment(1)).toBe(75);
-      expect(getTotalInvestment(2)).toBe(75 + 150);
-      expect(getTotalInvestment(3)).toBe(75 + 150 + 250);
+      expect(getTotalInvestment(2)).toBe(75 + 125);
+      expect(getTotalInvestment(3)).toBe(75 + 125 + 200);
     });
   });
 });

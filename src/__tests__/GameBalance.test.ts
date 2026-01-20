@@ -139,7 +139,8 @@ describe('Game Balance', () => {
       const maxMineIncome = MINE_CONFIGS[4].incomePerWave;
       const totalIncome = maxMineIncome * 35; // 35 waves
 
-      expect(totalIncome).toBeGreaterThan(maxMineCost * 2);
+      // With rebalanced values (750g cost, 55g/wave), should still profit well
+      expect(totalIncome).toBeGreaterThan(maxMineCost * 1.5);
     });
   });
 
