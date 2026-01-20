@@ -310,7 +310,7 @@ describe('CreepEffects Logic', () => {
       };
 
       // Verify all durations are reasonable (100-1000ms)
-      for (const [name, duration] of Object.entries(effects)) {
+      for (const [_name, duration] of Object.entries(effects)) {
         expect(duration).toBeGreaterThan(0);
         expect(duration).toBeLessThanOrEqual(1000);
       }

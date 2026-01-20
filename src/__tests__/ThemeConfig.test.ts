@@ -74,7 +74,7 @@ describe('ThemeConfig', () => {
     });
 
     it('should have all colors as numbers', () => {
-      for (const [key, value] of Object.entries(THEME.colors)) {
+      for (const [_key, value] of Object.entries(THEME.colors)) {
         expect(typeof value).toBe('number');
         expect(value).toBeGreaterThanOrEqual(0);
         expect(value).toBeLessThanOrEqual(0xffffff);

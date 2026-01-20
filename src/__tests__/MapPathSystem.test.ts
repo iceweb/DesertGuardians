@@ -8,12 +8,7 @@ import { describe, it, expect } from 'vitest';
 describe('PathSystem Logic', () => {
   describe('Path Segment Calculation', () => {
     it('should calculate segment length correctly', () => {
-      const calculateSegmentLength = (
-        x1: number,
-        y1: number,
-        x2: number,
-        y2: number
-      ): number => {
+      const calculateSegmentLength = (x1: number, y1: number, x2: number, y2: number): number => {
         const dx = x2 - x1;
         const dy = y2 - y1;
         return Math.sqrt(dx * dx + dy * dy);
@@ -85,7 +80,11 @@ describe('PathSystem Logic', () => {
   describe('Position At Distance', () => {
     it('should return start position at distance 0', () => {
       const getPositionAtDistance = (
-        segments: { start: { x: number; y: number }; end: { x: number; y: number }; length: number }[],
+        segments: {
+          start: { x: number; y: number };
+          end: { x: number; y: number };
+          length: number;
+        }[],
         distance: number
       ) => {
         let accumulatedLength = 0;
@@ -315,7 +314,10 @@ describe('PathSystem Logic', () => {
 
   describe('Path Loop Detection', () => {
     it('should detect if path forms a closed loop', () => {
-      const isClosedLoop = (points: { x: number; y: number }[], threshold: number = 100): boolean => {
+      const isClosedLoop = (
+        points: { x: number; y: number }[],
+        threshold: number = 100
+      ): boolean => {
         if (points.length < 3) return false;
 
         const first = points[0];
@@ -345,7 +347,11 @@ describe('PathSystem Logic', () => {
 
   describe('Point in Polygon', () => {
     it('should detect if point is inside polygon', () => {
-      const isInsidePolygon = (x: number, y: number, points: { x: number; y: number }[]): boolean => {
+      const isInsidePolygon = (
+        x: number,
+        y: number,
+        points: { x: number; y: number }[]
+      ): boolean => {
         if (points.length < 3) return false;
 
         let inside = false;
@@ -486,10 +492,7 @@ describe('PathSystem Logic', () => {
 
   describe('Segment Index Tracking', () => {
     it('should identify current segment from distance', () => {
-      const getSegmentIndex = (
-        distance: number,
-        segments: { length: number }[]
-      ): number => {
+      const getSegmentIndex = (distance: number, segments: { length: number }[]): number => {
         let accumulated = 0;
 
         for (let i = 0; i < segments.length; i++) {

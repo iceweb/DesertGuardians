@@ -30,7 +30,7 @@ describe('Game Balance', () => {
         return (damage / fireRate) * 1000;
       };
 
-      for (const [key, config] of Object.entries(TOWER_CONFIGS)) {
+      for (const [_key, config] of Object.entries(TOWER_CONFIGS)) {
         const dps = calculateDPS(config.stats.damage, config.stats.fireRate);
         if (config.stats.fireRate > 0) {
           expect(dps).toBeGreaterThan(0);
@@ -63,11 +63,7 @@ describe('Game Balance', () => {
 
   describe('Tower Cost Efficiency', () => {
     it('should calculate cost efficiency (DPS per gold) for each tower', () => {
-      const calculateEfficiency = (
-        damage: number,
-        fireRate: number,
-        totalCost: number
-      ): number => {
+      const calculateEfficiency = (damage: number, fireRate: number, totalCost: number): number => {
         if (fireRate === 0 || totalCost === 0) return 0;
         const dps = (damage / fireRate) * 1000;
         return dps / totalCost;
@@ -119,10 +115,6 @@ describe('Game Balance', () => {
     });
 
     it('should have balanced gold per HP ratio', () => {
-      const goldPerHP = (creep: { maxHealth: number; goldReward: number }) => {
-        return creep.goldReward / creep.maxHealth;
-      };
-
       // All creeps should have some gold reward
       for (const creep of Object.values(CREEP_TYPES)) {
         expect(creep.goldReward).toBeGreaterThan(0);
@@ -189,7 +181,7 @@ describe('Game Balance', () => {
       for (const rank of GAME_CONFIG.VETERAN_RANKS) {
         // Damage bonus should be between 0% and 30%
         expect(rank.damageBonus).toBeGreaterThanOrEqual(0);
-        expect(rank.damageBonus).toBeLessThanOrEqual(0.30);
+        expect(rank.damageBonus).toBeLessThanOrEqual(0.3);
       }
     });
   });
