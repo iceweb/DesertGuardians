@@ -91,11 +91,12 @@ Tower defense games are significantly more complex than platformers:
 - **Post-Game Review Mode** — Click towers after a run to review stats and strategy
 
 ### 🏆 Scoring System
-- **Wave Bonus** — 100 points per wave reached
+- **Wave Bonus** — 100 points per wave completed
 - **Gold Bonus** — 0.2× total gold earned
 - **HP Bonus** — 100 points per HP remaining
-- **Time Multiplier** — Up to 1.5× for fast completion
+- **Time Bonus** — Victory only! Exponential decay from ×1.35 (fast) to ×0.85 (slow)
 - **Difficulty Multiplier** — Easy ×0.75, Normal ×1.0, Hard ×1.25
+- **Global Rank Display** — See where you place among all players
 
 ### 🌐 Global Competition
 - **Global Leaderboard** — Top 20 scores worldwide
