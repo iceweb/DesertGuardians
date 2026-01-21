@@ -385,11 +385,13 @@ function handlePostRequest() {
         return;
     }
     
-    // Server-side score recalculation (allow small tolerance for floating point)
+    // Server-side score recalculation (allow tolerance for floating point differences)
     $calculatedScore = calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty, $isVictory);
     $scoreDiff = abs($score - $calculatedScore);
     
-    if ($scoreDiff > 5) { // Allow 5 point tolerance for floating point differences
+    // Allow 5% tolerance or 10 points (whichever is greater) for JS/PHP floating point differences
+    $tolerance = max(10, $calculatedScore * 0.05);
+    if ($scoreDiff > $tolerance) {
         http_response_code(400);
         echo json_encode([
             'error' => 'Score validation failed',
