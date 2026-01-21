@@ -252,9 +252,8 @@ export class GoldMineUIManager {
     );
     this.upgradeMenuContainer.add(menuHitArea);
 
-    const levelStars = '★'.repeat(mine.getLevel());
     const title = this.scene.add
-      .text(0, -menuHeight / 2 + 22, `${config.name} ${levelStars}`, {
+      .text(0, -menuHeight / 2 + 22, config.name, {
         fontFamily: 'Arial Black',
         fontSize: '18px',
         color: '#ffd700',

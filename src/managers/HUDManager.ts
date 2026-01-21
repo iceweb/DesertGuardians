@@ -36,7 +36,7 @@ export class HUDManager {
   private soundButtonBg!: Phaser.GameObjects.Graphics;
   private audioManager!: AudioManager;
 
-  private gold: number = 200;
+  private gold: number = GAME_CONFIG.STARTING_GOLD;
   private castleHP: number = GAME_CONFIG.MAX_CASTLE_HP;
   private maxCastleHP: number = GAME_CONFIG.MAX_CASTLE_HP;
   private currentWave: number = 0;

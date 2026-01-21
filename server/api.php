@@ -116,16 +116,22 @@ function getDifficultyMultiplier($difficulty) {
 
 /**
  * Calculate expected score from game data (server-side validation)
+ * Time bonus only applies on victory (completing all waves)
  */
-function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty = 'Normal') {
+function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty = 'Normal', $isVictory = false) {
     $waveScore = $waveReached * WAVE_BONUS_POINTS;
     $goldScore = floor($goldEarned * GOLD_BONUS_MULTIPLIER);
     $hpBonus = $hpRemaining * HP_BONUS_POINTS;
     
-    if ($timeSeconds <= OPTIMAL_TIME_SECONDS) {
-        $timeMultiplier = MAX_TIME_MULTIPLIER;
+    // Time bonus only applies on victory
+    if ($isVictory) {
+        // Exponential decay formula: floor + bonus * e^(-(time - peak) / decay)
+        $timeMultiplier = min(
+            TIME_BONUS_CAP,
+            TIME_BONUS_FLOOR + TIME_BONUS_BONUS * exp(-($timeSeconds - TIME_BONUS_PEAK) / TIME_BONUS_DECAY)
+        );
     } else {
-        $timeMultiplier = max(1.0, MAX_TIME_MULTIPLIER - ($timeSeconds - OPTIMAL_TIME_SECONDS) / 1800);
+        $timeMultiplier = 1.0;
     }
     
     $difficultyMultiplier = getDifficultyMultiplier($difficulty);
@@ -380,7 +386,7 @@ function handlePostRequest() {
     }
     
     // Server-side score recalculation (allow small tolerance for floating point)
-    $calculatedScore = calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty);
+    $calculatedScore = calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty, $isVictory);
     $scoreDiff = abs($score - $calculatedScore);
     
     if ($scoreDiff > 5) { // Allow 5 point tolerance for floating point differences

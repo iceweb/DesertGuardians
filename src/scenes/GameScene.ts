@@ -121,6 +121,7 @@ export class GameScene extends Phaser.Scene {
     this.hudManager = new HUDManager(this);
     this.hudManager.create(this.waveManager.getTotalWaves());
     this.hudManager.setCastlePosition(this.environment.getCastlePosition());
+    this.hudManager.updateGold(this.gameController.gold);
     this.setupHUDCallbacks();
 
     this.uiHitDetector = new UIHitDetector(this);
@@ -443,6 +444,11 @@ export class GameScene extends Phaser.Scene {
 
       this.updateNextWavePreview();
 
+      // Skip mine collection on final wave - handled by allWavesComplete
+      if (waveNumber >= this.waveManager.getTotalWaves()) {
+        return;
+      }
+
       await new Promise<void>((resolve) => this.time.delayedCall(300, () => resolve()));
 
       const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
@@ -466,7 +472,16 @@ export class GameScene extends Phaser.Scene {
       this.updateNextWavePreview();
     });
 
-    this.waveManager.on('allWavesComplete', () => {
+    this.waveManager.on('allWavesComplete', async () => {
+      // Collect final mine income before calculating score
+      const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
+        this.audioManager.playSFX('coins');
+      });
+      if (mineIncome > 0) {
+        this.gameController.addGold(mineIncome);
+        this.hudManager.updateGold(this.gameController.gold);
+      }
+
       this.gameController.markGameOver();
       this.audioManager.playSFX('victory');
       this.goToResults(true);

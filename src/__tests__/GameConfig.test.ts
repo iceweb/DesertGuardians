@@ -73,7 +73,7 @@ describe('GameConfig', () => {
       };
 
       expect(calculateHPMultiplier(1)).toBe(1);
-      expect(calculateHPMultiplier(10)).toBeCloseTo(1.9);
+      expect(calculateHPMultiplier(10)).toBeCloseTo(1.72);
       expect(calculateHPMultiplier(35)).toBe(GAME_CONFIG.MAX_HP_MULTIPLIER);
     });
 

@@ -88,7 +88,7 @@ export class GameSceneResultsUI {
   /**
    * Calculate the score for the game result using spec formula
    */
-  private calculateScore(result: GameResultData, _isVictory: boolean): void {
+  private calculateScore(result: GameResultData, isVictory: boolean): void {
     // Wave Score: points per wave completed
     const waveScore = result.waveReached * GAME_CONFIG.WAVE_BONUS_POINTS;
 
@@ -98,15 +98,34 @@ export class GameSceneResultsUI {
     // HP Bonus: points per HP remaining
     const hpBonus = result.castleHP * GAME_CONFIG.HP_BONUS_POINTS;
 
-    // Time Multiplier:
-    // Target = 900 seconds (15 min)
-    // <= 900s: 1.5x
-    // > 900s: max(1.0, 1.5 - (runTime - 900) / 1800)
-    let timeMultiplier: number;
-    if (result.runTimeSeconds <= 900) {
-      timeMultiplier = 1.5;
-    } else {
-      timeMultiplier = Math.max(1.0, 1.5 - (result.runTimeSeconds - 900) / 1800);
+    // Time Multiplier - Only applies on victory (completing all waves)
+    // On defeat, time multiplier is neutral (1.0x)
+    let timeMultiplier = 1.0;
+
+    if (isVictory) {
+      // Smooth exponential curve with fine granularity
+      // Every second counts! Designed for 20-40 min average playtime.
+      //
+      // Formula: floor + bonus * e^(-(time - peakTime) / decayRate)
+      // - peakTime (15 min): where max bonus is achieved
+      // - decayRate: how quickly bonus decays (higher = slower decay)
+      //
+      // Results (approximate):
+      //   10 min: 1.35x (cap)    | 30 min: 1.06x
+      //   15 min: 1.30x          | 35 min: 1.02x
+      //   20 min: 1.20x          | 40 min: 0.98x
+      //   25 min: 1.12x          | 50 min: 0.92x
+      //
+      const FLOOR = 0.85; // Minimum multiplier (never punish too hard)
+      const BONUS = 0.45; // Maximum bonus above floor
+      const PEAK_TIME = 900; // 15 minutes - where max bonus kicks in
+      const DECAY_RATE = 1200; // Decay constant (seconds)
+      const CAP = 1.35; // Maximum multiplier
+
+      timeMultiplier = Math.min(
+        CAP,
+        FLOOR + BONUS * Math.exp(-(result.runTimeSeconds - PEAK_TIME) / DECAY_RATE)
+      );
     }
 
     // Difficulty Multiplier
@@ -131,7 +150,7 @@ export class GameSceneResultsUI {
   /**
    * Show the results popup overlay
    */
-  /* eslint-disable max-lines-per-function, complexity */
+  /* eslint-disable max-lines-per-function */
   showResultsPopup(): void {
     if (this.resultsPopup) {
       this.resultsPopup.destroy();
@@ -210,132 +229,208 @@ export class GameSceneResultsUI {
       .setOrigin(0.5);
     this.resultsPopup.add(title);
 
-    if (this.resultData) {
+    if (this.resultData && this.scoreBreakdown) {
       const result = this.resultData;
+      const breakdown = this.scoreBreakdown;
 
-      const waveText = this.host.add
-        .text(0, -panelHeight / 2 + 95, `Wave ${result.waveReached}/${result.totalWaves}`, {
-          fontFamily: 'Arial',
-          fontSize: '20px',
-          color: '#c9a86c',
-        })
-        .setOrigin(0.5);
-      this.resultsPopup.add(waveText);
+      // Unified Score Breakdown Table
+      let tableY = -panelHeight / 2 + 90;
+      const rowHeight = 32;
+      const labelX = -panelWidth / 2 + 40;
+      const rawValueX = 60;
+      const pointsX = panelWidth / 2 - 40;
 
-      const statsY = -panelHeight / 2 + 140;
-      const statsGap = 28;
+      // Table header
+      const headerBg = this.host.add.graphics();
+      headerBg.fillStyle(0x2a1a00, 0.8);
+      headerBg.fillRoundedRect(-panelWidth / 2 + 20, tableY - 8, panelWidth - 40, 28, 6);
+      this.resultsPopup.add(headerBg);
 
-      const stats = [
-        {
-          label: 'Castle HP',
-          value: `${result.castleHP}/${result.maxCastleHP}`,
-          color: result.castleHP > 0 ? '#66ff66' : '#ff6666',
-        },
-        { label: 'Gold Earned', value: `${result.totalGoldEarned}`, color: '#ffd700' },
-        { label: 'Time', value: this.formatTime(result.runTimeSeconds), color: '#88ccff' },
-      ];
-
-      stats.forEach((stat, i) => {
-        const labelText = this.host.add
-          .text(-100, statsY + i * statsGap, stat.label + ':', {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            color: '#888888',
-          })
-          .setOrigin(0, 0.5);
-        this.resultsPopup?.add(labelText);
-
-        const valueText = this.host.add
-          .text(100, statsY + i * statsGap, stat.value, {
-            fontFamily: 'Arial',
-            fontSize: '16px',
-            color: stat.color,
-          })
-          .setOrigin(1, 0.5);
-        this.resultsPopup?.add(valueText);
-      });
-
-      const scoreY = statsY + stats.length * statsGap + 30;
-
-      const scoreTitle = this.host.add
-        .text(0, scoreY, '── Score Breakdown ──', {
-          fontFamily: 'Arial',
-          fontSize: '14px',
+      const headerLabel = this.host.add
+        .text(labelX, tableY + 6, 'COMPONENT', {
+          fontFamily: 'Arial Black',
+          fontSize: '11px',
           color: '#8b6914',
         })
-        .setOrigin(0.5);
-      this.resultsPopup.add(scoreTitle);
+        .setOrigin(0, 0.5);
+      this.resultsPopup.add(headerLabel);
 
-      if (this.scoreBreakdown) {
-        const diffLabel =
-          this.resultData?.difficulty === 'Easy'
-            ? 'Easy Mode'
-            : this.resultData?.difficulty === 'Hard'
-              ? 'Hard Mode'
-              : 'Normal Mode';
-        const diffColor =
-          this.resultData?.difficulty === 'Easy'
-            ? '#44aa44'
-            : this.resultData?.difficulty === 'Hard'
-              ? '#cc4444'
-              : '#4488cc';
-
-        const breakdown = [
-          { label: 'Wave Progress', value: `+${this.scoreBreakdown.waveScore}`, color: '#aaaaaa' },
-          {
-            label: 'Gold Efficiency',
-            value: `+${this.scoreBreakdown.goldScore}`,
-            color: '#aaaaaa',
-          },
-          { label: 'HP Bonus', value: `+${this.scoreBreakdown.hpBonus}`, color: '#aaaaaa' },
-          {
-            label: 'Time Multiplier',
-            value: `×${this.scoreBreakdown.timeMultiplier.toFixed(2)}`,
-            color: '#aaaaaa',
-          },
-          {
-            label: diffLabel,
-            value: `×${this.scoreBreakdown.difficultyMultiplier.toFixed(2)}`,
-            color: diffColor,
-          },
-        ];
-
-        breakdown.forEach((item, i) => {
-          const y = scoreY + 25 + i * 22;
-          const labelText = this.host.add
-            .text(-80, y, item.label, {
-              fontFamily: 'Arial',
-              fontSize: '13px',
-              color: '#666666',
-            })
-            .setOrigin(0, 0.5);
-          this.resultsPopup?.add(labelText);
-
-          const valueText = this.host.add
-            .text(80, y, item.value, {
-              fontFamily: 'Arial',
-              fontSize: '13px',
-              color: item.color,
-            })
-            .setOrigin(1, 0.5);
-          this.resultsPopup?.add(valueText);
-        });
-      }
-
-      const finalScoreY = scoreY + 140;
-      const finalScoreLabel = this.host.add
-        .text(0, finalScoreY, 'FINAL SCORE', {
+      const headerValue = this.host.add
+        .text(rawValueX, tableY + 6, 'VALUE', {
           fontFamily: 'Arial Black',
-          fontSize: '16px',
+          fontSize: '11px',
+          color: '#8b6914',
+        })
+        .setOrigin(0.5, 0.5);
+      this.resultsPopup.add(headerValue);
+
+      const headerPoints = this.host.add
+        .text(pointsX, tableY + 6, 'POINTS', {
+          fontFamily: 'Arial Black',
+          fontSize: '11px',
+          color: '#8b6914',
+        })
+        .setOrigin(1, 0.5);
+      this.resultsPopup.add(headerPoints);
+
+      tableY += 35;
+
+      // Score rows with raw values and point contributions
+      const diffLabel =
+        result.difficulty === 'Easy' ? 'Easy' : result.difficulty === 'Hard' ? 'Hard' : 'Normal';
+      const diffColor =
+        result.difficulty === 'Easy'
+          ? '#44aa44'
+          : result.difficulty === 'Hard'
+            ? '#cc4444'
+            : '#4488cc';
+
+      const baseScore = breakdown.waveScore + breakdown.goldScore + breakdown.hpBonus;
+
+      const scoreRows: Array<{
+        label: string;
+        rawValue: string;
+        points: string;
+        labelColor: string;
+        valueColor: string;
+        pointsColor: string;
+        isMultiplier?: boolean;
+        separator?: boolean;
+      }> = [
+        {
+          label: '⚔ Waves Completed',
+          rawValue: `${result.waveReached}/${result.totalWaves}`,
+          points: `+${breakdown.waveScore}`,
+          labelColor: '#aaaaaa',
+          valueColor: '#ffffff',
+          pointsColor: '#88ff88',
+        },
+        {
+          label: '💰 Gold Earned',
+          rawValue: `${result.totalGoldEarned}`,
+          points: `+${breakdown.goldScore}`,
+          labelColor: '#aaaaaa',
+          valueColor: '#ffd700',
+          pointsColor: '#88ff88',
+        },
+        {
+          label: '❤ Castle HP',
+          rawValue: `${result.castleHP}/${result.maxCastleHP}`,
+          points: `+${breakdown.hpBonus}`,
+          labelColor: '#aaaaaa',
+          valueColor: result.castleHP > 0 ? '#66ff66' : '#ff6666',
+          pointsColor: '#88ff88',
+        },
+        {
+          label: '',
+          rawValue: '',
+          points: '',
+          labelColor: '',
+          valueColor: '',
+          pointsColor: '',
+          separator: true,
+        },
+        {
+          label: '  Base Score',
+          rawValue: '',
+          points: `= ${baseScore}`,
+          labelColor: '#888888',
+          valueColor: '',
+          pointsColor: '#ffffff',
+        },
+        {
+          label: '',
+          rawValue: '',
+          points: '',
+          labelColor: '',
+          valueColor: '',
+          pointsColor: '',
+          separator: true,
+        },
+        {
+          label: '⏱ Time Bonus',
+          rawValue: this.formatTime(result.runTimeSeconds),
+          points: `×${breakdown.timeMultiplier.toFixed(2)}`,
+          labelColor: '#aaaaaa',
+          valueColor: '#88ccff',
+          pointsColor: breakdown.timeMultiplier >= 1.0 ? '#88ff88' : '#ffaa66',
+          isMultiplier: true,
+        },
+        {
+          label: `🎯 ${diffLabel} Mode`,
+          rawValue: '',
+          points: `×${breakdown.difficultyMultiplier.toFixed(2)}`,
+          labelColor: '#aaaaaa',
+          valueColor: diffColor,
+          pointsColor: diffColor,
+          isMultiplier: true,
+        },
+      ];
+
+      scoreRows.forEach((row) => {
+        if (row.separator) {
+          const line = this.host.add.graphics();
+          line.lineStyle(1, 0x4a3a20, 0.6);
+          line.lineBetween(-panelWidth / 2 + 40, tableY, panelWidth / 2 - 40, tableY);
+          this.resultsPopup?.add(line);
+          tableY += 12;
+          return;
+        }
+
+        const label = this.host.add
+          .text(labelX, tableY, row.label, {
+            fontFamily: 'Arial',
+            fontSize: '14px',
+            color: row.labelColor,
+          })
+          .setOrigin(0, 0.5);
+        this.resultsPopup?.add(label);
+
+        if (row.rawValue) {
+          const value = this.host.add
+            .text(rawValueX, tableY, row.rawValue, {
+              fontFamily: 'Arial',
+              fontSize: '14px',
+              color: row.valueColor,
+            })
+            .setOrigin(0.5, 0.5);
+          this.resultsPopup?.add(value);
+        }
+
+        const points = this.host.add
+          .text(pointsX, tableY, row.points, {
+            fontFamily: row.isMultiplier ? 'Arial Black' : 'Arial',
+            fontSize: '14px',
+            color: row.pointsColor,
+          })
+          .setOrigin(1, 0.5);
+        this.resultsPopup?.add(points);
+
+        tableY += rowHeight;
+      });
+
+      // Final score section with emphasis
+      tableY += 10;
+      const finalBg = this.host.add.graphics();
+      finalBg.fillStyle(0x3a2a10, 0.9);
+      finalBg.fillRoundedRect(-panelWidth / 2 + 20, tableY - 5, panelWidth - 40, 70, 8);
+      finalBg.lineStyle(2, 0xffd700, 0.8);
+      finalBg.strokeRoundedRect(-panelWidth / 2 + 20, tableY - 5, panelWidth - 40, 70, 8);
+      this.resultsPopup.add(finalBg);
+
+      const finalScoreLabel = this.host.add
+        .text(0, tableY + 12, 'FINAL SCORE', {
+          fontFamily: 'Arial Black',
+          fontSize: '14px',
           color: '#d4a574',
         })
         .setOrigin(0.5);
       this.resultsPopup.add(finalScoreLabel);
 
       const finalScoreValue = this.host.add
-        .text(0, finalScoreY + 35, `${this.finalScore}`, {
+        .text(0, tableY + 45, `${this.finalScore}`, {
           fontFamily: 'Arial Black',
-          fontSize: '40px',
+          fontSize: '36px',
           color: '#ffd700',
           stroke: '#000000',
           strokeThickness: 3,
@@ -399,8 +494,13 @@ export class GameSceneResultsUI {
       .setOrigin(0.5);
     this.resultsPopup.add(loadingText);
 
+    let playerRank = 0;
+
     try {
       this.currentScores = await HighscoreAPI.fetchScores();
+
+      // Calculate player's rank (where they would place)
+      playerRank = this.currentScores.filter((s) => s.score > this.finalScore).length + 1;
 
       if (this.currentScores.length < 20) {
         this.qualifiesForTop20 = true;
@@ -416,23 +516,36 @@ export class GameSceneResultsUI {
     loadingText.destroy();
 
     if (this.qualifiesForTop20 && !this.hasSubmitted) {
-      this.createNameEntrySection(nameY);
+      this.createNameEntrySection(nameY, playerRank);
     } else if (this.hasSubmitted) {
       this.createSubmittedSection(nameY);
     } else {
-      this.createLeaderboardPreview(nameY);
+      this.createLeaderboardPreview(nameY, playerRank);
     }
   }
 
-  private createNameEntrySection(nameY: number): void {
+  private createNameEntrySection(nameY: number, playerRank: number): void {
     if (!this.resultsPopup) return;
 
     this.saveSection = this.host.add.container(0, nameY);
 
+    // Show rank achievement only if rank was successfully fetched
+    if (playerRank > 0) {
+      const rankText = this.getRankText(playerRank);
+      const rankLabel = this.host.add
+        .text(0, -45, rankText, {
+          fontFamily: 'Arial Black',
+          fontSize: '18px',
+          color: this.getRankColor(playerRank),
+        })
+        .setOrigin(0.5);
+      this.saveSection.add(rankLabel);
+    }
+
     const newHighScore = this.host.add
-      .text(0, -25, '- NEW HIGH SCORE -', {
+      .text(0, -20, '🎉 NEW HIGH SCORE! 🎉', {
         fontFamily: 'Georgia, serif',
-        fontSize: '16px',
+        fontSize: '14px',
         color: '#ffd700',
       })
       .setOrigin(0.5);
@@ -498,19 +611,23 @@ export class GameSceneResultsUI {
     this.resultsPopup.add(this.savedConfirmation);
   }
 
-  private createLeaderboardPreview(nameY: number): void {
+  private createLeaderboardPreview(nameY: number, playerRank: number): void {
     if (!this.resultsPopup) return;
 
     const container = this.host.add.container(0, nameY - 20);
 
-    const message = this.host.add
-      .text(0, -40, 'Score not in top 20', {
-        fontFamily: 'Arial',
-        fontSize: '14px',
-        color: '#888888',
-      })
-      .setOrigin(0.5);
-    container.add(message);
+    // Show player's rank only if successfully fetched from server
+    if (playerRank > 0) {
+      const rankText = this.getRankText(playerRank);
+      const rankLabel = this.host.add
+        .text(0, -45, rankText, {
+          fontFamily: 'Arial Black',
+          fontSize: '16px',
+          color: this.getRankColor(playerRank),
+        })
+        .setOrigin(0.5);
+      container.add(rankLabel);
+    }
 
     const title = this.host.add
       .text(0, -15, '🏆 Top Scores', {
@@ -869,5 +986,23 @@ export class GameSceneResultsUI {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  private getRankText(rank: number): string {
+    if (rank === 1) return '🥇 1st Place!';
+    if (rank === 2) return '🥈 2nd Place!';
+    if (rank === 3) return '🥉 3rd Place!';
+    if (rank <= 10) return `🏆 Top 10! (#${rank})`;
+    if (rank <= 20) return `⭐ Top 20! (#${rank})`;
+    return `Rank #${rank}`;
+  }
+
+  private getRankColor(rank: number): string {
+    if (rank === 1) return '#FFD700'; // Gold
+    if (rank === 2) return '#C0C0C0'; // Silver
+    if (rank === 3) return '#CD7F32'; // Bronze
+    if (rank <= 10) return '#90EE90'; // Light green
+    if (rank <= 20) return '#87CEEB'; // Sky blue
+    return '#FFFFFF'; // White
   }
 }
