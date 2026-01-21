@@ -34,3 +34,24 @@ export {
   BRANCH_NAMES,
   BRANCH_DESCRIPTIONS,
 } from './TowerIconRenderer';
+
+// New architecture components
+export { GameEventBus, GameEventType, getEventBus } from './GameEventBus';
+export type { GameEventData, GameEventHandler } from './GameEventBus';
+export { InputSystem, InputContext, InputAction } from './InputSystem';
+export type { InputEventData, InputHandler } from './InputSystem';
+export { SelectionManager, SelectableType } from './SelectionManager';
+export type {
+  SelectionState,
+  SelectionChangeEvent,
+  SelectionChangeHandler,
+} from './SelectionManager';
+export { TowerStatsDisplay } from './TowerStatsDisplay';
+export {
+  RenderOptimizer,
+  DirtyTracker,
+  TextureCache,
+  GraphicsPool,
+  DrawBatcher,
+  FrameThrottler,
+} from './RenderOptimizer';

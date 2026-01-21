@@ -2,405 +2,54 @@ import Phaser from 'phaser';
 import { PathSystem } from '../managers/MapPathSystem';
 import { EnvironmentDecorations } from './EnvironmentDecorations';
 import { PathRenderer } from './PathRenderer';
-import { GAME_CONFIG } from '../data';
-import { THEME } from '../data/ThemeConfig';
+import { TerrainRenderer } from './TerrainRenderer';
+import { CastleRenderer } from './CastleRenderer';
 
+/**
+ * Main environment controller that coordinates rendering of all environment elements.
+ * Refactored to delegate to specialized renderer classes.
+ */
 export class GameEnvironment {
   private scene: Phaser.Scene;
   private pathSystem: PathSystem;
   private pathRenderer: PathRenderer;
-  private castlePosition: Phaser.Math.Vector2 | null = null;
-
-  private castleContainer: Phaser.GameObjects.Container | null = null;
-  private castleDamageGraphics: Phaser.GameObjects.Graphics | null = null;
-  private flagGraphics: Phaser.GameObjects.Graphics | null = null;
-  private flagPhase: number = 0;
-  private currentDamageState: number = 0;
-  private destroyedCastleGraphics: Phaser.GameObjects.Graphics | null = null;
+  private terrainRenderer: TerrainRenderer;
+  private castleRenderer: CastleRenderer;
 
   constructor(scene: Phaser.Scene, pathSystem: PathSystem) {
     this.scene = scene;
     this.pathSystem = pathSystem;
     this.pathRenderer = new PathRenderer(scene, pathSystem);
+    this.terrainRenderer = new TerrainRenderer(scene);
+    this.castleRenderer = new CastleRenderer(scene);
   }
 
   drawAll(spawn: Phaser.Math.Vector2, goal: Phaser.Math.Vector2): void {
-    this.drawSkyBackground();
-    this.drawDesertTerrain();
+    this.terrainRenderer.drawSkyBackground();
+    this.terrainRenderer.drawDesertTerrain();
     this.drawDecorations();
-    this.drawCanyonPath();
+    this.pathRenderer.draw();
     this.drawSpawnAndGoal(spawn, goal);
   }
 
   getCastlePosition(): Phaser.Math.Vector2 | null {
-    return this.castlePosition;
+    return this.castleRenderer.getCastlePosition();
   }
 
   update(delta: number): void {
-    if (this.flagGraphics && this.castlePosition) {
-      this.flagPhase += (delta / 1000) * 1.5;
-      if (this.flagPhase > Math.PI * 2) this.flagPhase -= Math.PI * 2;
-      this.drawFlag(this.castlePosition.x, this.castlePosition.y);
-    }
+    this.castleRenderer.update(delta);
   }
 
   updateCastleDamage(currentHP: number): void {
-    const maxHP = GAME_CONFIG.MAX_CASTLE_HP;
-    const hpPercent = currentHP / maxHP;
-
-    let newState = 0;
-    if (hpPercent <= 0.25) {
-      newState = 2;
-    } else if (hpPercent <= 0.5) {
-      newState = 1;
-    }
-
-    if (newState !== this.currentDamageState && this.castlePosition) {
-      this.currentDamageState = newState;
-      this.drawCastleDamage(this.castlePosition.x, this.castlePosition.y);
-    }
+    this.castleRenderer.updateCastleDamage(currentHP);
   }
 
   playCastleDestructionAnimation(onComplete?: () => void): void {
-    if (!this.castlePosition || !this.castleContainer) {
-      onComplete?.();
-      return;
-    }
-
-    const cx = this.castlePosition.x - 20;
-    const cy = this.castlePosition.y - 80;
-
-    if (this.flagGraphics) {
-      this.flagGraphics.setVisible(false);
-    }
-
-    const particles: Phaser.GameObjects.Graphics[] = [];
-    const numParticles = 30;
-
-    for (let i = 0; i < numParticles; i++) {
-      const particle = this.scene.add.graphics();
-      particle.setDepth(20);
-
-      const colors = [0x9a8a7a, 0xa0522d, 0x8b6914, 0x4a3a2a, 0x3a3020];
-      const color = colors[Math.floor(Math.random() * colors.length)];
-
-      particle.fillStyle(color, 1);
-      const size = 5 + Math.random() * 15;
-      particle.fillRect(-size / 2, -size / 2, size, size);
-
-      particle.setPosition(cx + (Math.random() - 0.5) * 100, cy + (Math.random() - 0.5) * 80);
-      particles.push(particle);
-
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 100 + Math.random() * 150;
-      const targetX = particle.x + Math.cos(angle) * distance;
-      const targetY = particle.y + Math.sin(angle) * distance + 100;
-
-      this.scene.tweens.add({
-        targets: particle,
-        x: targetX,
-        y: targetY,
-        alpha: 0,
-        rotation: Math.random() * 10 - 5,
-        duration: 800 + Math.random() * 400,
-        ease: 'Power2',
-        onComplete: () => {
-          particle.destroy();
-        },
-      });
-    }
-
-    this.scene.tweens.add({
-      targets: this.castleContainer,
-      x: { from: -5, to: 5 },
-      duration: 50,
-      repeat: 10,
-      yoyo: true,
-    });
-
-    this.scene.time.delayedCall(500, () => {
-      this.scene.tweens.add({
-        targets: this.castleContainer,
-        alpha: 0,
-        duration: 300,
-        onComplete: () => {
-          this.drawDestroyedCastle();
-
-          this.scene.cameras.main.shake(500, 0.02);
-
-          this.scene.time.delayedCall(800, () => {
-            onComplete?.();
-          });
-        },
-      });
-    });
+    this.castleRenderer.playCastleDestructionAnimation(onComplete);
   }
 
   showDestroyedCastle(): void {
-    if (!this.castlePosition || !this.castleContainer) return;
-
-    this.castleContainer.setAlpha(0);
-    if (this.flagGraphics) {
-      this.flagGraphics.setVisible(false);
-    }
-
-    this.drawDestroyedCastle();
-  }
-
-  private drawDestroyedCastle(): void {
-    if (!this.castlePosition) return;
-
-    if (this.destroyedCastleGraphics) {
-      this.destroyedCastleGraphics.destroy();
-    }
-
-    this.destroyedCastleGraphics = this.scene.add.graphics();
-    this.destroyedCastleGraphics.setDepth(15);
-
-    const x = this.castlePosition.x;
-    const y = this.castlePosition.y;
-    const cx = x - 20;
-    const cy = y - 80;
-
-    const g = this.destroyedCastleGraphics;
-
-    g.fillStyle(0x000000, 0.3);
-    g.fillEllipse(cx, cy + 95, 180, 50);
-
-    g.fillStyle(0x7a6a50, 1);
-    g.beginPath();
-    g.moveTo(cx - 80, cy + 85);
-    g.lineTo(cx + 80, cy + 85);
-    g.lineTo(cx + 70, cy + 70);
-    g.lineTo(cx - 60, cy + 70);
-    g.closePath();
-    g.fillPath();
-
-    const rubbleColors = [0x9a8a7a, 0x8b7a6a, 0x7a6a5a, 0xa89878];
-
-    g.fillStyle(rubbleColors[0], 1);
-    g.beginPath();
-    g.moveTo(cx - 60, cy + 70);
-    g.lineTo(cx - 40, cy + 20);
-    g.lineTo(cx - 20, cy + 35);
-    g.lineTo(cx + 10, cy + 15);
-    g.lineTo(cx + 40, cy + 30);
-    g.lineTo(cx + 60, cy + 70);
-    g.closePath();
-    g.fillPath();
-
-    g.fillStyle(rubbleColors[1], 1);
-    g.beginPath();
-    g.moveTo(cx - 50, cy + 70);
-    g.lineTo(cx - 35, cy + 40);
-    g.lineTo(cx - 10, cy + 50);
-    g.lineTo(cx + 20, cy + 35);
-    g.lineTo(cx + 45, cy + 70);
-    g.closePath();
-    g.fillPath();
-
-    g.fillStyle(0xe8dcc8, 0.9);
-    g.fillRect(cx - 75, cy + 20, 35, 50);
-    g.fillStyle(rubbleColors[2], 1);
-    g.beginPath();
-    g.moveTo(cx - 75, cy + 20);
-    g.lineTo(cx - 65, cy - 5);
-    g.lineTo(cx - 55, cy + 10);
-    g.lineTo(cx - 40, cy + 20);
-    g.closePath();
-    g.fillPath();
-
-    g.fillStyle(0xe8dcc8, 0.9);
-    g.fillRect(cx + 35, cy + 30, 35, 40);
-    g.fillStyle(rubbleColors[3], 1);
-    g.beginPath();
-    g.moveTo(cx + 35, cy + 30);
-    g.lineTo(cx + 50, cy + 5);
-    g.lineTo(cx + 60, cy + 25);
-    g.lineTo(cx + 70, cy + 30);
-    g.closePath();
-    g.fillPath();
-
-    g.fillStyle(0xa0522d, 0.8);
-    g.beginPath();
-    g.moveTo(cx - 30, cy + 60);
-    g.lineTo(cx - 15, cy + 40);
-    g.lineTo(cx + 10, cy + 55);
-    g.closePath();
-    g.fillPath();
-
-    g.fillStyle(0x8b4513, 0.8);
-    g.beginPath();
-    g.moveTo(cx + 50, cy + 65);
-    g.lineTo(cx + 65, cy + 45);
-    g.lineTo(cx + 80, cy + 60);
-    g.closePath();
-    g.fillPath();
-
-    g.fillStyle(0x6a5a4a, 0.9);
-    g.fillCircle(cx - 80, cy + 80, 8);
-    g.fillCircle(cx - 70, cy + 85, 6);
-    g.fillCircle(cx + 75, cy + 78, 7);
-    g.fillCircle(cx + 85, cy + 82, 5);
-    g.fillCircle(cx - 45, cy + 75, 5);
-    g.fillCircle(cx + 55, cy + 72, 6);
-
-    g.fillStyle(0x4a4a4a, 0.3);
-    g.fillCircle(cx - 20, cy, 20);
-    g.fillCircle(cx + 15, cy - 10, 18);
-    g.fillCircle(cx - 5, cy - 20, 15);
-    g.fillStyle(0x5a5a5a, 0.2);
-    g.fillCircle(cx + 30, cy + 5, 22);
-    g.fillCircle(cx - 40, cy - 5, 16);
-
-    g.fillStyle(0x3a3a3a, 1);
-    g.fillRect(cx - 90, cy + 70, 40, 4);
-
-    g.fillStyle(0x880000, 0.7);
-    g.beginPath();
-    g.moveTo(cx - 50, cy + 72);
-    g.lineTo(cx - 35, cy + 65);
-    g.lineTo(cx - 20, cy + 75);
-    g.lineTo(cx - 35, cy + 80);
-    g.closePath();
-    g.fillPath();
-
-    g.lineStyle(2, 0x3a2a1a, 0.8);
-    g.beginPath();
-    g.moveTo(cx - 40, cy + 85);
-    g.lineTo(cx - 30, cy + 75);
-    g.lineTo(cx - 35, cy + 70);
-    g.strokePath();
-
-    g.beginPath();
-    g.moveTo(cx + 30, cy + 85);
-    g.lineTo(cx + 25, cy + 78);
-    g.lineTo(cx + 35, cy + 72);
-    g.strokePath();
-  }
-
-  private drawSkyBackground(): void {
-    const width = this.scene.cameras.main.width;
-    const height = this.scene.cameras.main.height;
-
-    const sky = this.scene.add.graphics();
-    sky.setDepth(-100);
-
-    const colors = [
-      { y: 0, color: 0x6fc1e6 },
-      { y: 0.35, color: 0xa8d6ee },
-      { y: 0.65, color: 0xf5cfa0 },
-      { y: 0.85, color: 0xe9a868 },
-      { y: 1, color: 0xd9935a },
-    ];
-
-    for (let i = 0; i < colors.length - 1; i++) {
-      const startY = colors[i].y * height;
-      const endY = colors[i + 1].y * height;
-      const steps = Math.ceil(endY - startY);
-
-      for (let j = 0; j < steps; j++) {
-        const t = j / steps;
-        const r1 = (colors[i].color >> 16) & 0xff;
-        const g1 = (colors[i].color >> 8) & 0xff;
-        const b1 = colors[i].color & 0xff;
-        const r2 = (colors[i + 1].color >> 16) & 0xff;
-        const g2 = (colors[i + 1].color >> 8) & 0xff;
-        const b2 = colors[i + 1].color & 0xff;
-
-        const r = Math.floor(r1 + (r2 - r1) * t);
-        const g = Math.floor(g1 + (g2 - g1) * t);
-        const b = Math.floor(b1 + (b2 - b1) * t);
-
-        sky.fillStyle((r << 16) | (g << 8) | b, 1);
-        sky.fillRect(0, startY + j, width, 2);
-      }
-    }
-
-    sky.fillStyle(0xfffacd, 0.9);
-    sky.fillCircle(1600, 120, 60);
-    sky.fillStyle(0xffff99, 0.5);
-    sky.fillCircle(1600, 120, 80);
-    sky.fillStyle(0xffff66, 0.2);
-    sky.fillCircle(1600, 120, 110);
-
-    sky.fillStyle(0xf6c46b, 0.18);
-    sky.fillRect(0, height * 0.45, width, height * 0.2);
-
-    sky.fillStyle(THEME.colors.warmHighlight, 0.12);
-    sky.fillRect(0, height * 0.6, width, height * 0.2);
-
-    sky.fillStyle(THEME.colors.warmShadow, 0.08);
-    sky.fillRect(0, 0, width, height * 0.15);
-  }
-
-  private drawDesertTerrain(): void {
-    const width = this.scene.cameras.main.width;
-    const height = this.scene.cameras.main.height;
-
-    const terrain = this.scene.add.graphics();
-    terrain.setDepth(-50);
-
-    terrain.fillStyle(THEME.colors.sandLight, 1);
-    terrain.fillRect(0, 0, width, height);
-
-    terrain.fillStyle(THEME.colors.sandMid, 0.9);
-    this.drawDune(terrain, -100, height * 0.7, 600, 200);
-    this.drawDune(terrain, 400, height * 0.65, 800, 250);
-    this.drawDune(terrain, 1000, height * 0.7, 700, 220);
-    this.drawDune(terrain, 1500, height * 0.68, 600, 230);
-
-    terrain.fillStyle(THEME.colors.sandDark, 0.6);
-    this.drawDune(terrain, 100, height * 0.8, 500, 150);
-    this.drawDune(terrain, 700, height * 0.78, 600, 180);
-    this.drawDune(terrain, 1300, height * 0.82, 550, 160);
-
-    terrain.fillStyle(THEME.colors.warmHighlight, 0.28);
-    for (let i = 0; i < 50; i++) {
-      const x = Math.random() * width;
-      const y = 100 + Math.random() * (height - 150);
-      terrain.fillEllipse(x, y, 80 + Math.random() * 120, 15 + Math.random() * 25);
-    }
-
-    terrain.fillStyle(0xf6c46b, 0.18);
-    terrain.fillRect(0, 0, width, height * 0.22);
-
-    terrain.fillStyle(THEME.colors.warmHighlight, 0.12);
-    terrain.fillRect(0, height * 0.18, width, height * 0.24);
-
-    terrain.fillStyle(THEME.colors.warmShadow, 0.08);
-    terrain.fillRect(0, height * 0.55, width, height * 0.45);
-
-    terrain.lineStyle(1, 0xcbb896, 0.25);
-    for (let y = 150; y < height; y += 40) {
-      terrain.beginPath();
-      terrain.moveTo(0, y);
-      for (let x = 0; x < width; x += 20) {
-        terrain.lineTo(x, y + Math.sin(x * 0.02 + y * 0.01) * 5);
-      }
-      terrain.strokePath();
-    }
-  }
-
-  private drawDune(
-    graphics: Phaser.GameObjects.Graphics,
-    x: number,
-    baseY: number,
-    w: number,
-    h: number
-  ): void {
-    graphics.beginPath();
-    graphics.moveTo(x, baseY + h);
-
-    for (let t = 0; t <= 1; t += 0.02) {
-      const px = x + w * t;
-      const py = baseY + h - h * Math.sin(t * Math.PI) * (0.8 + Math.sin(t * 2) * 0.2);
-      graphics.lineTo(px, py);
-    }
-
-    graphics.lineTo(x + w, baseY + h);
-    graphics.closePath();
-    graphics.fillPath();
+    this.castleRenderer.showDestroyedCastle();
   }
 
   private drawDecorations(): void {
@@ -416,6 +65,7 @@ export class GameEnvironment {
       return true;
     };
 
+    // Palm trees
     const palmPositions = [
       { x: 480, y: 180 },
       { x: 680, y: 160 },
@@ -445,6 +95,7 @@ export class GameEnvironment {
       }
     }
 
+    // Rocks
     const rockPositions = [
       { x: 550, y: 200 },
       { x: 780, y: 180 },
@@ -471,6 +122,7 @@ export class GameEnvironment {
       }
     }
 
+    // Ruins
     const ruinPositions = [
       { x: 620, y: 200 },
       { x: 1450, y: 180 },
@@ -486,6 +138,7 @@ export class GameEnvironment {
       }
     }
 
+    // Cacti
     const cactiPositions = [
       { x: 420, y: 170 },
       { x: 750, y: 190 },
@@ -511,6 +164,7 @@ export class GameEnvironment {
       }
     }
 
+    // Scarabs
     const scarabPositions = [
       { x: 520, y: 170 },
       { x: 1280, y: 180 },
@@ -530,6 +184,7 @@ export class GameEnvironment {
       }
     }
 
+    // Flowers and tumbleweeds
     const flowerPositions = [
       { x: 450, y: 200 },
       { x: 700, y: 170 },
@@ -564,6 +219,7 @@ export class GameEnvironment {
       }
     }
 
+    // Pottery
     const potteryPositions = [
       { x: 580, y: 180 },
       { x: 1350, y: 190 },
@@ -581,6 +237,7 @@ export class GameEnvironment {
       }
     }
 
+    // Scorpions
     const scorpionPositions = [
       { x: 480, y: 190 },
       { x: 1100, y: 170 },
@@ -601,6 +258,7 @@ export class GameEnvironment {
       }
     }
 
+    // Oases
     if (isValidDecoPosition(1150, 200)) {
       EnvironmentDecorations.drawOasis(this.scene, 1150, 200);
     }
@@ -626,6 +284,7 @@ export class GameEnvironment {
   }
 
   private isInsidePathLoop(x: number, y: number): boolean {
+    // Define the path loop polygons
     const loop1 = [
       { x: 820, y: 210 },
       { x: 1100, y: 210 },
@@ -703,21 +362,18 @@ export class GameEnvironment {
     return Math.sqrt((px - nearestX) ** 2 + (py - nearestY) ** 2);
   }
 
-  private drawCanyonPath(): void {
-    this.pathRenderer.draw();
-  }
-
   private drawSpawnAndGoal(spawn: Phaser.Math.Vector2, goal: Phaser.Math.Vector2): void {
-    this.castlePosition = goal.clone();
-
+    // Draw spawn portal
     const spawnGraphics = this.scene.add.graphics();
     spawnGraphics.setDepth(15);
 
+    // Outer glow
     spawnGraphics.fillStyle(0x00ff00, 0.15);
     spawnGraphics.fillCircle(spawn.x, spawn.y, 65);
     spawnGraphics.fillStyle(0x00ff00, 0.25);
     spawnGraphics.fillCircle(spawn.x, spawn.y, 50);
 
+    // Rings
     spawnGraphics.lineStyle(6, 0x006600, 1);
     spawnGraphics.strokeCircle(spawn.x, spawn.y, 42);
     spawnGraphics.lineStyle(4, 0x00aa00, 1);
@@ -725,6 +381,7 @@ export class GameEnvironment {
     spawnGraphics.lineStyle(2, 0x00ff00, 1);
     spawnGraphics.strokeCircle(spawn.x, spawn.y, 34);
 
+    // Core
     spawnGraphics.fillStyle(0x00ff44, 0.4);
     spawnGraphics.fillCircle(spawn.x, spawn.y, 30);
     spawnGraphics.fillStyle(0x44ff88, 0.6);
@@ -732,6 +389,7 @@ export class GameEnvironment {
     spawnGraphics.fillStyle(0x88ffaa, 0.8);
     spawnGraphics.fillCircle(spawn.x, spawn.y, 10);
 
+    // Orbital dots
     spawnGraphics.lineStyle(2, 0x00cc00, 0.7);
     for (let i = 0; i < 8; i++) {
       const angle = (i / 8) * Math.PI * 2;
@@ -740,475 +398,7 @@ export class GameEnvironment {
       spawnGraphics.strokeCircle(rx, ry, 5);
     }
 
-    this.drawCastle(goal.x, goal.y);
-  }
-
-  private drawCastle(x: number, y: number): void {
-    this.castleContainer = this.scene.add.container(0, 0);
-    this.castleContainer.setDepth(15);
-
-    const castle = this.scene.add.graphics();
-    this.castleContainer.add(castle);
-
-    const cx = x - 20;
-    const cy = y - 80;
-
-    castle.fillStyle(THEME.colors.warmShadow, 0.35);
-    castle.fillEllipse(cx, cy + 95, 160, 40);
-
-    const stairBaseY = cy + 160;
-    const stairTopY = cy + 60;
-    const stairHeight = stairBaseY - stairTopY;
-    const numSteps = 10;
-    const stepHeight = stairHeight / numSteps;
-
-    const baseWidthHalf = 100;
-    const topWidthHalf = 40;
-
-    for (let i = 0; i < numSteps; i++) {
-      const stepY = stairBaseY - i * stepHeight;
-      const nextY = stepY - stepHeight;
-
-      const progress = i / numSteps;
-      const widthHalf = baseWidthHalf - (baseWidthHalf - topWidthHalf) * progress;
-      const nextWidthHalf = baseWidthHalf - (baseWidthHalf - topWidthHalf) * ((i + 1) / numSteps);
-
-      const topColor = 0xd8ccb8 + i * 0x010101;
-      castle.fillStyle(Math.min(topColor, 0xe8dcd0), 1);
-      castle.beginPath();
-      castle.moveTo(cx - widthHalf, stepY - stepHeight + 2);
-      castle.lineTo(cx + widthHalf, stepY - stepHeight + 2);
-      castle.lineTo(cx + nextWidthHalf, nextY + 2);
-      castle.lineTo(cx - nextWidthHalf, nextY + 2);
-      castle.closePath();
-      castle.fillPath();
-
-      castle.fillStyle(0xc4b8a4, 1);
-      castle.fillRect(cx - widthHalf, stepY - stepHeight + 2, widthHalf * 2, stepHeight - 2);
-
-      castle.lineStyle(1, 0xa89888, 1);
-      castle.lineBetween(
-        cx - widthHalf,
-        stepY - stepHeight + 2,
-        cx + widthHalf,
-        stepY - stepHeight + 2
-      );
-
-      castle.lineStyle(1, 0xe8dcd0, 0.6);
-      castle.lineBetween(
-        cx - widthHalf + 2,
-        stepY - stepHeight + 3,
-        cx + widthHalf - 2,
-        stepY - stepHeight + 3
-      );
-    }
-
-    castle.fillStyle(0xa89878, 1);
-    castle.beginPath();
-    castle.moveTo(cx - baseWidthHalf, stairBaseY);
-    castle.lineTo(cx - baseWidthHalf - 8, stairBaseY);
-    castle.lineTo(cx - topWidthHalf - 8, stairTopY);
-    castle.lineTo(cx - topWidthHalf, stairTopY);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0x988868, 1);
-    castle.beginPath();
-    castle.moveTo(cx + baseWidthHalf, stairBaseY);
-    castle.lineTo(cx + baseWidthHalf + 8, stairBaseY);
-    castle.lineTo(cx + topWidthHalf + 8, stairTopY);
-    castle.lineTo(cx + topWidthHalf, stairTopY);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0x9a8a70, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 75, cy + 85);
-    castle.lineTo(cx + 75, cy + 85);
-    castle.lineTo(cx + 85, cy + 70);
-    castle.lineTo(cx - 65, cy + 70);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xb8a890, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 65, cy + 70);
-    castle.lineTo(cx + 85, cy + 70);
-    castle.lineTo(cx + 75, cy + 60);
-    castle.lineTo(cx - 75, cy + 60);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0x7a6a50, 1);
-    castle.beginPath();
-    castle.moveTo(cx + 75, cy + 85);
-    castle.lineTo(cx + 85, cy + 70);
-    castle.lineTo(cx + 85, cy + 60);
-    castle.lineTo(cx + 75, cy + 75);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xe8dcc8, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 60, cy + 60);
-    castle.lineTo(cx - 60, cy - 35);
-    castle.lineTo(cx + 60, cy - 35);
-    castle.lineTo(cx + 60, cy + 60);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.18);
-    castle.fillRect(cx - 58, cy - 32, 116, 14);
-    castle.fillStyle(THEME.colors.warmShadow, 0.18);
-    castle.fillRect(cx - 60, cy + 40, 120, 18);
-
-    castle.fillStyle(0xd4c8b4, 1);
-    castle.beginPath();
-    castle.moveTo(cx + 60, cy + 60);
-    castle.lineTo(cx + 60, cy - 35);
-    castle.lineTo(cx + 75, cy - 25);
-    castle.lineTo(cx + 75, cy + 70);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.15);
-    castle.fillRect(cx + 60, cy - 30, 12, 18);
-    castle.fillStyle(THEME.colors.warmShadow, 0.2);
-    castle.fillRect(cx + 62, cy + 35, 12, 18);
-
-    castle.lineStyle(1, 0xc8bca8, 0.5);
-    for (let row = 0; row < 5; row++) {
-      const rowY = cy + 50 - row * 18;
-      castle.lineBetween(cx - 58, rowY, cx + 58, rowY);
-
-      const offset = (row % 2) * 20;
-      for (let col = 0; col < 6; col++) {
-        const colX = cx - 50 + offset + col * 22;
-        if (colX < cx + 55) {
-          castle.lineBetween(colX, rowY, colX, rowY - 18);
-        }
-      }
-    }
-
-    castle.fillStyle(0xe8dcc8, 1);
-    castle.fillRect(cx - 75, cy - 70, 40, 130);
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.18);
-    castle.fillRect(cx - 73, cy - 66, 34, 14);
-    castle.fillStyle(THEME.colors.warmShadow, 0.18);
-    castle.fillRect(cx - 73, cy + 40, 34, 18);
-
-    castle.fillStyle(0xd4c8b4, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 35, cy - 70);
-    castle.lineTo(cx - 25, cy - 62);
-    castle.lineTo(cx - 25, cy + 60);
-    castle.lineTo(cx - 35, cy + 60);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xa0522d, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 80, cy - 70);
-    castle.lineTo(cx - 55, cy - 130);
-    castle.lineTo(cx - 30, cy - 70);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.2);
-    castle.beginPath();
-    castle.moveTo(cx - 78, cy - 70);
-    castle.lineTo(cx - 55, cy - 120);
-    castle.lineTo(cx - 52, cy - 70);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xb86b3d, 0.7);
-    castle.beginPath();
-    castle.moveTo(cx - 75, cy - 70);
-    castle.lineTo(cx - 55, cy - 120);
-    castle.lineTo(cx - 55, cy - 130);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.lineStyle(2, 0x703010, 1);
-    castle.lineBetween(cx - 55, cy - 130, cx - 30, cy - 70);
-
-    castle.fillStyle(0x3a3020, 1);
-    castle.fillRect(cx - 62, cy - 40, 14, 22);
-    castle.lineStyle(2, 0x5a4a38, 1);
-    castle.strokeRect(cx - 62, cy - 40, 14, 22);
-
-    castle.lineStyle(2, 0x5a4a38, 1);
-    castle.lineBetween(cx - 55, cy - 40, cx - 55, cy - 18);
-    castle.lineBetween(cx - 62, cy - 29, cx - 48, cy - 29);
-
-    castle.fillStyle(0xe8dcc8, 1);
-    castle.fillRect(cx + 35, cy - 55, 40, 115);
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.18);
-    castle.fillRect(cx + 37, cy - 52, 34, 12);
-    castle.fillStyle(THEME.colors.warmShadow, 0.18);
-    castle.fillRect(cx + 37, cy + 35, 34, 16);
-
-    castle.fillStyle(0xd4c8b4, 1);
-    castle.beginPath();
-    castle.moveTo(cx + 75, cy - 55);
-    castle.lineTo(cx + 88, cy - 45);
-    castle.lineTo(cx + 88, cy + 60);
-    castle.lineTo(cx + 75, cy + 60);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xa0522d, 1);
-    castle.beginPath();
-    castle.moveTo(cx + 30, cy - 55);
-    castle.lineTo(cx + 55, cy - 115);
-    castle.lineTo(cx + 80, cy - 55);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.2);
-    castle.beginPath();
-    castle.moveTo(cx + 32, cy - 55);
-    castle.lineTo(cx + 55, cy - 105);
-    castle.lineTo(cx + 58, cy - 55);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xb86b3d, 0.7);
-    castle.beginPath();
-    castle.moveTo(cx + 35, cy - 55);
-    castle.lineTo(cx + 55, cy - 105);
-    castle.lineTo(cx + 55, cy - 115);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.lineStyle(2, 0x703010, 1);
-    castle.lineBetween(cx + 55, cy - 115, cx + 80, cy - 55);
-
-    castle.fillStyle(0x3a3020, 1);
-    castle.fillRect(cx + 48, cy - 28, 14, 22);
-    castle.lineStyle(2, 0x5a4a38, 1);
-    castle.strokeRect(cx + 48, cy - 28, 14, 22);
-
-    castle.lineStyle(2, 0x5a4a38, 1);
-    castle.lineBetween(cx + 55, cy - 28, cx + 55, cy - 6);
-    castle.lineBetween(cx + 48, cy - 17, cx + 62, cy - 17);
-
-    castle.fillStyle(0x1a0a00, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 25, cy + 60);
-    castle.lineTo(cx - 25, cy + 10);
-    castle.arc(cx, cy + 10, 25, Math.PI, 0, false);
-    castle.lineTo(cx + 25, cy + 60);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(THEME.colors.warmHighlight, 0.15);
-    castle.beginPath();
-    castle.moveTo(cx - 22, cy + 58);
-    castle.lineTo(cx - 22, cy + 18);
-    castle.arc(cx, cy + 10, 22, Math.PI, 0, false);
-    castle.lineTo(cx + 22, cy + 58);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0xd4a574, 1);
-    castle.beginPath();
-    castle.arc(cx, cy + 10, 20, Math.PI, 0, false);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.lineStyle(2, 0xb08050, 1);
-    for (let i = 0; i < 9; i++) {
-      const angle = Math.PI + (i * Math.PI) / 8;
-      const innerR = 8;
-      const outerR = 18;
-      castle.lineBetween(
-        cx + Math.cos(angle) * innerR,
-        cy + 10 + Math.sin(angle) * innerR,
-        cx + Math.cos(angle) * outerR,
-        cy + 10 + Math.sin(angle) * outerR
-      );
-    }
-
-    castle.fillStyle(0x0a0500, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 18, cy + 60);
-    castle.lineTo(cx - 18, cy + 15);
-    castle.arc(cx, cy + 15, 18, Math.PI, 0, false);
-    castle.lineTo(cx + 18, cy + 60);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.lineStyle(4, 0x8a7a68, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 28, cy + 62);
-    castle.lineTo(cx - 28, cy + 10);
-    castle.arc(cx, cy + 10, 28, Math.PI, 0, false);
-    castle.lineTo(cx + 28, cy + 62);
-    castle.strokePath();
-
-    castle.lineStyle(2, 0xc8b8a8, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 25, cy + 60);
-    castle.lineTo(cx - 25, cy + 10);
-    castle.arc(cx, cy + 10, 25, Math.PI, 0, false);
-    castle.lineTo(cx + 25, cy + 60);
-    castle.strokePath();
-
-    castle.fillStyle(0x4a3a2a, 1);
-    castle.fillRect(cx - 42, cy + 25, 6, 3);
-    castle.fillRect(cx - 40, cy + 28, 4, 12);
-
-    castle.fillStyle(0xff8800, 0.4);
-    castle.fillCircle(cx - 38, cy + 38, 12);
-
-    castle.fillStyle(0xd4a030, 1);
-    castle.fillRoundedRect(cx - 44, cy + 35, 12, 14, 3);
-    castle.fillStyle(0xffcc44, 0.9);
-    castle.fillRoundedRect(cx - 42, cy + 37, 8, 10, 2);
-
-    castle.fillStyle(0x4a3a2a, 1);
-    castle.fillRect(cx + 36, cy + 25, 6, 3);
-    castle.fillRect(cx + 36, cy + 28, 4, 12);
-
-    castle.fillStyle(0xff8800, 0.4);
-    castle.fillCircle(cx + 38, cy + 38, 12);
-
-    castle.fillStyle(0xd4a030, 1);
-    castle.fillRoundedRect(cx + 32, cy + 35, 12, 14, 3);
-    castle.fillStyle(0xffcc44, 0.9);
-    castle.fillRoundedRect(cx + 34, cy + 37, 8, 10, 2);
-
-    castle.fillStyle(0x8b6914, 1);
-    castle.beginPath();
-    castle.moveTo(cx - 35, cy - 35);
-    castle.lineTo(cx - 30, cy - 45);
-    castle.lineTo(cx + 30, cy - 45);
-    castle.lineTo(cx + 35, cy - 35);
-    castle.closePath();
-    castle.fillPath();
-
-    castle.fillStyle(0x3a3a3a, 1);
-    castle.fillRect(cx - 57, cy - 175, 4, 50);
-
-    this.flagGraphics = this.scene.add.graphics();
-    this.flagGraphics.setDepth(16);
-    this.castleContainer.add(this.flagGraphics);
-    this.drawFlag(cx, cy);
-
-    this.castleDamageGraphics = this.scene.add.graphics();
-    this.castleDamageGraphics.setDepth(17);
-    this.castleContainer.add(this.castleDamageGraphics);
-  }
-
-  private drawFlag(x: number, y: number): void {
-    if (!this.flagGraphics) return;
-
-    this.flagGraphics.clear();
-
-    const flagX = x - 73;
-    const flagY = y - 253;
-    const flagWidth = 30;
-    const flagHeight = 18;
-
-    const wave1 = Math.sin(this.flagPhase) * 2;
-    const wave2 = Math.sin(this.flagPhase + 1) * 3;
-    const wave3 = Math.sin(this.flagPhase + 2) * 2;
-
-    this.flagGraphics.fillStyle(0xcc0000, 1);
-    this.flagGraphics.beginPath();
-    this.flagGraphics.moveTo(flagX, flagY);
-    this.flagGraphics.lineTo(flagX + flagWidth * 0.33, flagY + wave1);
-    this.flagGraphics.lineTo(flagX + flagWidth * 0.66, flagY + wave2);
-    this.flagGraphics.lineTo(flagX + flagWidth, flagY + wave3);
-    this.flagGraphics.lineTo(flagX + flagWidth, flagY + flagHeight + wave3);
-    this.flagGraphics.lineTo(flagX + flagWidth * 0.66, flagY + flagHeight + wave2);
-    this.flagGraphics.lineTo(flagX + flagWidth * 0.33, flagY + flagHeight + wave1);
-    this.flagGraphics.lineTo(flagX, flagY + flagHeight);
-    this.flagGraphics.closePath();
-    this.flagGraphics.fillPath();
-
-    this.flagGraphics.fillStyle(0xff2222, 0.6);
-    this.flagGraphics.beginPath();
-    this.flagGraphics.moveTo(flagX, flagY + 2);
-    this.flagGraphics.lineTo(flagX + flagWidth * 0.4, flagY + 2 + wave1 * 0.8);
-    this.flagGraphics.lineTo(flagX + flagWidth * 0.4, flagY + 7 + wave1 * 0.8);
-    this.flagGraphics.lineTo(flagX, flagY + 7);
-    this.flagGraphics.closePath();
-    this.flagGraphics.fillPath();
-
-    this.flagGraphics.fillStyle(0xffd700, 0.9);
-    const emblX = flagX + flagWidth * 0.5;
-    const emblY = flagY + flagHeight * 0.5 + wave2 * 0.5;
-    this.flagGraphics.fillCircle(emblX, emblY, 4);
-  }
-
-  private drawCastleDamage(x: number, y: number): void {
-    if (!this.castleDamageGraphics) return;
-
-    this.castleDamageGraphics.clear();
-
-    if (this.currentDamageState === 0) return;
-
-    const cx = x - 20;
-    const cy = y - 80;
-
-    const crackColor = 0x2a1a0a;
-
-    if (this.currentDamageState >= 1) {
-      this.castleDamageGraphics.lineStyle(3, crackColor, 0.8);
-
-      this.castleDamageGraphics.beginPath();
-      this.castleDamageGraphics.moveTo(cx - 40, cy + 20);
-      this.castleDamageGraphics.lineTo(cx - 35, cy + 35);
-      this.castleDamageGraphics.lineTo(cx - 45, cy + 50);
-      this.castleDamageGraphics.strokePath();
-
-      this.castleDamageGraphics.beginPath();
-      this.castleDamageGraphics.moveTo(cx - 55, cy - 30);
-      this.castleDamageGraphics.lineTo(cx - 50, cy - 15);
-      this.castleDamageGraphics.lineTo(cx - 60, cy);
-      this.castleDamageGraphics.strokePath();
-
-      this.castleDamageGraphics.fillStyle(0x3a3a3a, 0.4);
-      this.castleDamageGraphics.fillCircle(cx + 20, cy + 30, 10);
-      this.castleDamageGraphics.fillCircle(cx - 30, cy - 10, 8);
-    }
-
-    if (this.currentDamageState >= 2) {
-      this.castleDamageGraphics.lineStyle(4, crackColor, 0.9);
-
-      this.castleDamageGraphics.beginPath();
-      this.castleDamageGraphics.moveTo(cx + 50, cy - 40);
-      this.castleDamageGraphics.lineTo(cx + 55, cy - 20);
-      this.castleDamageGraphics.lineTo(cx + 45, cy);
-      this.castleDamageGraphics.lineTo(cx + 52, cy + 20);
-      this.castleDamageGraphics.strokePath();
-
-      this.castleDamageGraphics.beginPath();
-      this.castleDamageGraphics.moveTo(cx + 10, cy - 20);
-      this.castleDamageGraphics.lineTo(cx + 5, cy);
-      this.castleDamageGraphics.lineTo(cx + 15, cy + 20);
-      this.castleDamageGraphics.strokePath();
-
-      this.castleDamageGraphics.fillStyle(0x9a8a7a, 0.9);
-      this.castleDamageGraphics.fillCircle(cx - 70, cy + 75, 8);
-      this.castleDamageGraphics.fillCircle(cx - 55, cy + 80, 6);
-      this.castleDamageGraphics.fillCircle(cx + 75, cy + 75, 7);
-      this.castleDamageGraphics.fillCircle(cx + 65, cy + 82, 5);
-
-      this.castleDamageGraphics.fillStyle(0x2a2a2a, 0.5);
-      this.castleDamageGraphics.fillCircle(cx - 45, cy - 50, 12);
-      this.castleDamageGraphics.fillCircle(cx + 45, cy - 25, 10);
-      this.castleDamageGraphics.fillCircle(cx, cy + 10, 14);
-
-      this.castleDamageGraphics.fillStyle(0x4a4a4a, 0.3);
-      this.castleDamageGraphics.fillCircle(cx - 55, cy - 140, 8);
-      this.castleDamageGraphics.fillCircle(cx - 50, cy - 150, 6);
-      this.castleDamageGraphics.fillCircle(cx + 55, cy - 120, 7);
-    }
+    // Draw castle at goal
+    this.castleRenderer.drawCastle(goal.x, goal.y);
   }
 }

@@ -1166,6 +1166,7 @@ export class TowerUIManager {
   }
   /* eslint-enable complexity, max-lines-per-function */
 
+  // eslint-disable-next-line max-lines-per-function
   private showAbilitySelectionForExisting(tower: Tower): void {
     this.closeMenus(false, false);
 

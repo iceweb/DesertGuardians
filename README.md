@@ -103,11 +103,17 @@ Tower defense games are significantly more complex than platformers:
 - **Anti-Cheat** — Server-side score validation
 
 ### 🎨 Polish
-- Egyptian/desert themed graphics
+- Egyptian/desert themed procedural graphics (no sprite assets)
 - Animated tower attacks and creep movements
 - Particle effects and visual feedback
 - Background music and sound effects
 - Castle destruction animation on defeat
+
+### 🏗️ Architecture
+- **Event-driven design** — Decoupled systems via GameEventBus
+- **Context-aware input** — InputSystem handles keyboard/mouse based on game state
+- **Modular components** — Split large files into focused, testable modules
+- **456 unit tests** — Comprehensive test coverage with Vitest
 
 ---
 
@@ -166,6 +172,12 @@ npm install
 # Start development server
 npm run dev
 
+# Run tests
+npm run test:run
+
+# Run tests with coverage
+npm run test:coverage
+
 # Build for production
 npm run build
 ```
@@ -182,18 +194,27 @@ npm run build
 Desert Guardians/
 ├── src/
 │   ├── main.ts              # Entry point
+│   ├── __tests__/           # Unit tests (456 tests)
 │   ├── data/                # Game configuration & tower data
 │   ├── graphics/            # Tower and creep animations
+│   │   ├── creeps/          # Creep renderers by type
+│   │   │   └── bosses/      # Individual boss renderers
+│   │   └── towers/          # Tower graphics by type
 │   ├── managers/            # Core game systems
 │   │   ├── WaveManager.ts   # Wave spawning logic
 │   │   ├── TowerManager.ts  # Tower placement & upgrades
 │   │   ├── CreepManager.ts  # Enemy management
 │   │   ├── CombatManager.ts # Targeting & damage
+│   │   ├── GameEventBus.ts  # Type-safe event system
+│   │   ├── InputSystem.ts   # Context-aware input handling
+│   │   ├── SelectionManager.ts # Centralized selection state
+│   │   ├── RenderOptimizer.ts  # Performance utilities
 │   │   └── HighscoreAPI.ts  # Global leaderboard client
 │   ├── objects/             # Game entities (towers, creeps, projectiles)
-│   └── scenes/              # Phaser scenes (Menu, Game, Results)
+│   └── scenes/              # Phaser scenes
+│       └── menu/            # Modular menu components
 ├── public/
-│   └── assets/              # Images, audio, maps
+│   └── assets/              # Audio files
 ├── server/                  # Backend API (PHP)
 │   ├── api.php              # Highscore endpoints
 │   ├── config.template.php  # Configuration template

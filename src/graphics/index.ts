@@ -1,4 +1,6 @@
 export * from './GameEnvironment';
+export * from './CastleRenderer';
+export * from './TerrainRenderer';
 export * from './CreepGraphics';
 export * from './CreepIconGenerator';
 export * from './TowerGraphics';

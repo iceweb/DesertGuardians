@@ -131,7 +131,7 @@ export class GameSceneResultsUI {
   /**
    * Show the results popup overlay
    */
-  /* eslint-disable max-lines-per-function */
+  /* eslint-disable max-lines-per-function, complexity */
   showResultsPopup(): void {
     if (this.resultsPopup) {
       this.resultsPopup.destroy();
