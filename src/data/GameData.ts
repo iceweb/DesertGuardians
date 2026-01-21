@@ -136,7 +136,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   boss_1: {
     type: 'boss_1',
-    maxHealth: 1200,
+    maxHealth: 1050,
     speed: 50,
     armor: 25,
     goldReward: 60,
@@ -147,7 +147,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_2: {
     type: 'boss_2',
-    maxHealth: 1870,
+    maxHealth: 1600,
     speed: 48,
     armor: 40,
     goldReward: 100,
@@ -158,7 +158,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_3: {
     type: 'boss_3',
-    maxHealth: 3600,
+    maxHealth: 3100,
     speed: 40,
     armor: 55,
     goldReward: 160,
@@ -169,7 +169,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_4: {
     type: 'boss_4',
-    maxHealth: 5500,
+    maxHealth: 4700,
     speed: 35,
     armor: 70,
     goldReward: 240,
@@ -180,7 +180,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_5: {
     type: 'boss_5',
-    maxHealth: 9000,
+    maxHealth: 7700,
     speed: 30,
     armor: 90,
     goldReward: 400,
@@ -192,7 +192,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   boss_guard_1: {
     type: 'boss_guard_1',
-    maxHealth: 800,
+    maxHealth: 700,
     speed: 38,
     armor: 45,
     goldReward: 40,
@@ -202,7 +202,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_guard_2: {
     type: 'boss_guard_2',
-    maxHealth: 1200,
+    maxHealth: 1050,
     speed: 36,
     armor: 50,
     goldReward: 60,
@@ -212,7 +212,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_guard_3: {
     type: 'boss_guard_3',
-    maxHealth: 1800,
+    maxHealth: 1550,
     speed: 34,
     armor: 60,
     goldReward: 80,
@@ -223,7 +223,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   boss: {
     type: 'boss',
-    maxHealth: 1500,
+    maxHealth: 1300,
     speed: 45,
     armor: 30,
     goldReward: 60,
