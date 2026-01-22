@@ -35,7 +35,6 @@ export class TowerAbilityEffects {
   private visuals: TowerAbilityVisuals;
 
   private bulletStormCount: number = 0;
-  private quickDrawActive: boolean = false;
 
   private plagueMarkedTargets: Set<Creep> = new Set();
 
@@ -72,16 +71,14 @@ export class TowerAbilityEffects {
   }
 
   /* eslint-disable max-lines-per-function */
-  executeEarthquake(
-    context: AbilityContext,
-    params: AbilityDefinition['effectParams']
-  ): AbilityResult {
+  executeTremor(context: AbilityContext, params: AbilityDefinition['effectParams']): AbilityResult {
     const { scene, hitPosition, allCreeps, tower } = context;
     const radius = params.radius || 85;
     const duration = params.duration || 3000;
-    const damage = params.damage || 8;
+    const damage = params.damage || 25;
+    const slowPercent = params.slowPercent || 0.3;
 
-    this.visuals.showFloatingText(tower.x, tower.y - 40, 'EARTHQUAKE!', 0x8b4513);
+    this.visuals.showFloatingText(tower.x, tower.y - 40, 'TREMOR!', 0x8b4513);
 
     const zoneContainer = scene.add.container(hitPosition.x, hitPosition.y);
     zoneContainer.setDepth(15);
@@ -95,15 +92,16 @@ export class TowerAbilityEffects {
     const debrisContainer = scene.add.container(0, 0);
     zoneContainer.add(debrisContainer);
 
-    const drawEarthquakeZone = (intensity: number = 1) => {
+    const drawTremorZone = (intensity: number = 1) => {
       zone.clear();
       cracks.clear();
 
+      // Brown/muddy zone with slow effect
       zone.fillStyle(0x5c4033, 0.4 * intensity);
       zone.fillCircle(0, 0, radius);
-      zone.fillStyle(0x8b4513, 0.5 * intensity);
+      zone.fillStyle(0x6b4423, 0.5 * intensity);
       zone.fillCircle(0, 0, radius * 0.7);
-      zone.fillStyle(0x6b3d2e, 0.6 * intensity);
+      zone.fillStyle(0x4a3020, 0.6 * intensity);
       zone.fillCircle(0, 0, radius * 0.4);
 
       zone.lineStyle(4, 0x3d2817, 0.8 * intensity);
@@ -155,7 +153,7 @@ export class TowerAbilityEffects {
       }
     };
 
-    drawEarthquakeZone(1);
+    drawTremorZone(1);
 
     const spawnDebris = () => {
       for (let i = 0; i < 8; i++) {
@@ -181,7 +179,7 @@ export class TowerAbilityEffects {
 
     spawnDebris();
 
-    const shakeEarthquake = () => {
+    const shakeTremor = () => {
       scene.tweens.chain({
         targets: zoneContainer,
         tweens: [
@@ -194,11 +192,12 @@ export class TowerAbilityEffects {
       });
     };
 
-    shakeEarthquake();
+    shakeTremor();
 
     const tickInterval = 500;
     let tickCount = 0;
     const maxTicks = Math.floor(duration / tickInterval);
+    const damagePerTick = Math.floor(damage / maxTicks);
 
     const timer = scene.time.addEvent({
       delay: tickInterval,
@@ -210,15 +209,17 @@ export class TowerAbilityEffects {
           if (!creep.getIsActive()) continue;
           const dist = Phaser.Math.Distance.Between(hitPosition.x, hitPosition.y, creep.x, creep.y);
           if (dist <= radius) {
-            creep.takeDamage(damage, false, 'rockcannon');
+            creep.takeDamage(damagePerTick, false, 'rockcannon');
+            // Apply slow effect
+            creep.applySlow(slowPercent, tickInterval + 200);
           }
         }
 
-        shakeEarthquake();
+        shakeTremor();
         spawnDebris();
 
         const intensity = 1 - (tickCount / maxTicks) * 0.3;
-        drawEarthquakeZone(intensity);
+        drawTremorZone(intensity);
       },
     });
 
@@ -253,7 +254,7 @@ export class TowerAbilityEffects {
       });
     });
 
-    return { triggered: true, abilityId: 'cannon_earthquake', message: 'EARTHQUAKE!' };
+    return { triggered: true, abilityId: 'cannon_tremor', message: 'TREMOR!' };
   }
 
   executeShrapnel(
@@ -423,30 +424,26 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'ice_frostnova', message: 'FROST NOVA!' };
   }
 
-  executeShatter(
+  executeDeepFreeze(
     context: AbilityContext,
     params: AbilityDefinition['effectParams']
   ): AbilityResult {
-    const { target, damage } = context;
-    let damageMultiplier = params.damageMultiplier || 2.0;
-
-    if (!target.isSlowed()) {
-      return { triggered: false };
-    }
+    const { target, tower } = context;
+    let brittleDuration = params.brittleDuration || 2500;
 
     if (target.isBoss()) {
-      damageMultiplier = 1.0 + (damageMultiplier - 1.0) * 0.5;
+      brittleDuration = Math.floor(brittleDuration * 0.5);
       this.visuals.showFloatingText(target.x, target.y - 30, 'RESISTED', 0xffaa00);
     }
 
-    target.clearSlow();
-    this.visuals.showShatterEffect(target.x, target.y);
+    target.applyBrittle(brittleDuration);
+    this.visuals.showDeepFreezeEffect(target.x, target.y, brittleDuration);
+    this.visuals.showFloatingText(tower.x, tower.y - 40, 'DEEP FREEZE!', 0x4488ff);
 
     return {
       triggered: true,
-      abilityId: 'ice_shatter',
-      extraDamage: damage * (damageMultiplier - 1),
-      message: 'SHATTER!',
+      abilityId: 'ice_deepfreeze',
+      message: 'DEEP FREEZE!',
     };
   }
 
@@ -609,14 +606,18 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'archer_piercing', message: 'PIERCE!' };
   }
 
-  executeQuickDraw(
+  executeHeavyArrows(
     context: AbilityContext,
-    _params: AbilityDefinition['effectParams']
+    params: AbilityDefinition['effectParams']
   ): AbilityResult {
-    this.quickDrawActive = true;
-    this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'QUICK DRAW!', 0xffd700);
+    const { target, tower } = context;
+    const knockbackDistance = params.knockbackDistance || 20;
 
-    return { triggered: true, abilityId: 'archer_quickdraw', message: 'QUICK DRAW!' };
+    target.applyKnockback(knockbackDistance);
+    this.visuals.showKnockbackEffect(target.x, target.y);
+    this.visuals.showFloatingText(tower.x, tower.y - 40, 'KNOCKBACK!', 0x8b4513);
+
+    return { triggered: true, abilityId: 'archer_heavyarrows', message: 'KNOCKBACK!' };
   }
 
   consumeBulletStorm(): boolean {
@@ -629,14 +630,6 @@ export class TowerAbilityEffects {
 
   getBulletStormSpeedMultiplier(): number {
     return this.bulletStormCount > 0 ? 2.0 : 1.0;
-  }
-
-  consumeQuickDraw(): boolean {
-    if (this.quickDrawActive) {
-      this.quickDrawActive = false;
-      return true;
-    }
-    return false;
   }
 
   onCreepDeath(creep: Creep, allCreeps: Creep[]): void {

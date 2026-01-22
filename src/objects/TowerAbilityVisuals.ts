@@ -986,4 +986,122 @@ export class TowerAbilityVisuals {
     g.fillStyle(0xffffff, 0.5);
     g.fillCircle(-size * 0.35, -size * 0.35, size * 0.2);
   }
+
+  showDeepFreezeEffect(x: number, y: number, duration: number): void {
+    const container = this.scene.add.container(x, y);
+    container.setDepth(35);
+
+    // Blue cracked overlay
+    const overlay = this.scene.add.graphics();
+    container.add(overlay);
+
+    const drawBrittleOverlay = (phase: number) => {
+      overlay.clear();
+
+      // Blue tint
+      overlay.fillStyle(0x4488ff, 0.25);
+      overlay.fillCircle(0, -5, 20);
+
+      // Cracks
+      overlay.lineStyle(2, 0x4488ff, 0.8);
+      overlay.lineBetween(-12, -18, -5, -8);
+      overlay.lineBetween(-5, -8, -10, 2);
+      overlay.lineBetween(-5, -8, 5, -5);
+      overlay.lineBetween(5, -5, 12, -15);
+      overlay.lineBetween(5, -5, 8, 5);
+
+      // Shimmer sparkles
+      const shimmer = (Math.sin(phase) + 1) * 0.5;
+      overlay.fillStyle(0x88ccff, 0.5 + shimmer * 0.4);
+      overlay.fillCircle(-8, -12, 2 + shimmer);
+      overlay.fillCircle(8, -10, 2 + shimmer);
+      overlay.fillCircle(0, -5, 1.5 + shimmer * 0.5);
+    };
+
+    drawBrittleOverlay(0);
+
+    let phase = 0;
+    const timer = this.scene.time.addEvent({
+      delay: 50,
+      repeat: Math.floor((duration - 200) / 50),
+      callback: () => {
+        phase += 0.15;
+        drawBrittleOverlay(phase);
+      },
+    });
+
+    // Fade out at end
+    this.scene.time.delayedCall(duration - 200, () => {
+      timer.destroy();
+      this.scene.tweens.add({
+        targets: container,
+        alpha: 0,
+        duration: 200,
+        onComplete: () => container.destroy(),
+      });
+    });
+  }
+
+  showKnockbackEffect(x: number, y: number): void {
+    // Dust cloud impact
+    for (let i = 0; i < 6; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dust = this.scene.add.graphics();
+      dust.setPosition(x, y);
+      dust.setDepth(34);
+      dust.fillStyle(0x8b7355, 0.7);
+      dust.fillCircle(0, 0, 4 + Math.random() * 4);
+
+      const distance = 15 + Math.random() * 15;
+      this.scene.tweens.add({
+        targets: dust,
+        x: x + Math.cos(angle) * distance,
+        y: y + Math.sin(angle) * distance - 5,
+        alpha: 0,
+        scaleX: 1.5,
+        scaleY: 1.5,
+        duration: 300 + Math.random() * 100,
+        onComplete: () => dust.destroy(),
+      });
+    }
+
+    // Impact ring
+    const ring = this.scene.add.graphics();
+    ring.setPosition(x, y);
+    ring.setDepth(33);
+    ring.lineStyle(3, 0x8b4513, 0.6);
+    ring.strokeCircle(0, 0, 10);
+
+    this.scene.tweens.add({
+      targets: ring,
+      scaleX: 2.5,
+      scaleY: 2.5,
+      alpha: 0,
+      duration: 250,
+      onComplete: () => ring.destroy(),
+    });
+  }
+
+  showEchoEffect(towerX: number, towerY: number): void {
+    // Ghostly purple ring effect
+    const ring = this.scene.add.graphics();
+    ring.setPosition(towerX, towerY - 20);
+    ring.setDepth(50);
+    ring.lineStyle(3, 0x9966ff, 0.8);
+    ring.strokeCircle(0, 0, 15);
+    ring.fillStyle(0xcc99ff, 0.3);
+    ring.fillCircle(0, 0, 15);
+
+    this.scene.tweens.add({
+      targets: ring,
+      scaleX: 2,
+      scaleY: 2,
+      alpha: 0,
+      duration: 300,
+      onComplete: () => ring.destroy(),
+    });
+
+    // Floating text
+    this.showFloatingText(towerX, towerY - 50, 'ECHO!', 0x9966ff);
+  }
 }

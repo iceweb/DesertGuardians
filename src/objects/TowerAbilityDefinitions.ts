@@ -22,6 +22,10 @@ export const AbilityIconType = {
   TRIPLE_ARROW: 'triplearrow',
   PIERCE_ARROW: 'piercearrow',
   SPEED_BOW: 'speedbow',
+  HEAVY_ARROW: 'heavyarrow',
+  TREMOR: 'tremor',
+  DEEP_FREEZE: 'deepfreeze',
+  ECHO: 'echo',
 } as const;
 export type AbilityIconType = (typeof AbilityIconType)[keyof typeof AbilityIconType];
 
@@ -51,6 +55,10 @@ export interface AbilityDefinition {
     bounceDamageMultiplier?: number;
     burnDamage?: number;
     burnDuration?: number;
+    knockbackDistance?: number;
+    multicastChance?: number;
+    brittleDuration?: number;
+    slowPercent?: number;
   };
 }
 
@@ -65,20 +73,20 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       effectParams: { count: 3, radius: 50, damageMultiplier: 0.5, duration: 500 },
     },
     {
-      id: 'cannon_earthquake',
-      name: 'Earthquake',
-      description: 'Ground zone dealing damage for 3s',
+      id: 'cannon_tremor',
+      name: 'Tremor',
+      description: 'Ground zone deals damage AND slows enemies by 30%',
       triggerChance: 0.2,
-      icon: { type: AbilityIconType.EARTHQUAKE, primaryColor: 0x8b4513, secondaryColor: 0x5c4033 },
-      effectParams: { radius: 85, duration: 3000, damage: 8 },
+      icon: { type: AbilityIconType.TREMOR, primaryColor: 0x8b4513, secondaryColor: 0x5c4033 },
+      effectParams: { radius: 85, duration: 3000, damage: 25, slowPercent: 0.3 },
     },
     {
       id: 'cannon_shrapnel',
       name: 'Shrapnel Burst',
-      description: '6 fragments dealing 25% damage each',
+      description: '6 fragments dealing 35% damage each',
       triggerChance: 0.3,
       icon: { type: AbilityIconType.SHRAPNEL, primaryColor: 0x808080, secondaryColor: 0x5a5a5a },
-      effectParams: { count: 6, radius: 8, damageMultiplier: 0.25 },
+      effectParams: { count: 6, radius: 8, damageMultiplier: 0.35 },
     },
   ],
   sniper: [
@@ -129,12 +137,12 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       effectParams: { radius: 80 },
     },
     {
-      id: 'ice_shatter',
-      name: 'Shatter',
-      description: 'If slowed, deal +100% damage and remove slow',
+      id: 'ice_deepfreeze',
+      name: 'Deep Freeze',
+      description: 'Target takes +30% Physical Damage for 2.5s',
       triggerChance: 0.12,
-      icon: { type: AbilityIconType.CRYSTAL, primaryColor: 0x87ceeb, secondaryColor: 0x4169e1 },
-      effectParams: { damageMultiplier: 2.0 },
+      icon: { type: AbilityIconType.DEEP_FREEZE, primaryColor: 0x4488ff, secondaryColor: 0x88ccff },
+      effectParams: { brittleDuration: 2500 },
     },
   ],
   poison: [
@@ -153,18 +161,18 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'poison_explosion',
       name: 'Toxic Explosion',
-      description: 'At max stacks, explode for 40 damage',
+      description: 'At max stacks, explode for 80 damage',
       triggerChance: 0.15,
       icon: { type: AbilityIconType.FLASK, primaryColor: 0x32cd32, secondaryColor: 0x00ff00 },
-      effectParams: { damage: 40, radius: 60 },
+      effectParams: { damage: 80, radius: 60 },
     },
     {
       id: 'poison_corrosive',
       name: 'Corrosive Acid',
-      description: 'Reduce armor by 2 per stack (max -6)',
+      description: 'Reduce armor by 10 per stack (max -50)',
       triggerChance: 0.25,
       icon: { type: AbilityIconType.ACID_DROP, primaryColor: 0x9acd32, secondaryColor: 0xadff2f },
-      effectParams: { armorReduction: 2 },
+      effectParams: { armorReduction: 10 },
     },
   ],
   rapidfire: [
@@ -191,14 +199,14 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'rapid_incendiary',
       name: 'Incendiary Rounds',
-      description: 'Apply burn: 5 dmg/sec for 3s',
+      description: 'Apply burn: 15 dmg/sec for 3s (stacks 5x)',
       triggerChance: 0.15,
       icon: {
         type: AbilityIconType.FLAME_BULLET,
         primaryColor: 0xff6600,
         secondaryColor: 0xff3300,
       },
-      effectParams: { burnDamage: 5, burnDuration: 3000 },
+      effectParams: { burnDamage: 15, burnDuration: 3000 },
     },
   ],
   aura: [
@@ -226,14 +234,13 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       effectParams: {},
     },
     {
-      id: 'aura_overcharge',
-      name: 'Overcharge',
-      description: "Randomly reset one tower's cooldown",
-      triggerChance: 0.08,
+      id: 'aura_echo',
+      name: 'Echo Amplification',
+      description: 'Nearby towers have 10% chance to Multicast',
+      triggerChance: 1.0,
       isPassive: true,
-      passiveTickRate: 1000,
-      icon: { type: AbilityIconType.LIGHTNING, primaryColor: 0xffd700, secondaryColor: 0xffff00 },
-      effectParams: {},
+      icon: { type: AbilityIconType.ECHO, primaryColor: 0x9966ff, secondaryColor: 0xcc99ff },
+      effectParams: { multicastChance: 0.1 },
     },
   ],
   archer: [
@@ -262,12 +269,12 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       effectParams: { count: 2, damageMultiplier: 1.0 },
     },
     {
-      id: 'archer_quickdraw',
-      name: 'Quick Draw',
-      description: 'Next shot has no cooldown',
-      triggerChance: 0.25,
-      icon: { type: AbilityIconType.SPEED_BOW, primaryColor: 0xffd700, secondaryColor: 0xffaa00 },
-      effectParams: {},
+      id: 'archer_heavyarrows',
+      name: 'Heavy Arrows',
+      description: '15% chance to Knockback target',
+      triggerChance: 0.15,
+      icon: { type: AbilityIconType.HEAVY_ARROW, primaryColor: 0x8b4513, secondaryColor: 0xa0522d },
+      effectParams: { knockbackDistance: 20 },
     },
   ],
 };

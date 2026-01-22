@@ -125,10 +125,17 @@ function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $
     
     // Time bonus only applies on victory
     if ($isVictory) {
-        // Exponential decay formula: floor + bonus * e^(-(time - peak) / decay)
-        $timeMultiplier = min(
-            TIME_BONUS_CAP,
-            TIME_BONUS_FLOOR + TIME_BONUS_BONUS * exp(-($timeSeconds - TIME_BONUS_PEAK) / TIME_BONUS_DECAY)
+        // Linear time bonus: every second counts between 15-35 minutes
+        // Formula: max(1.0, min(1.35, 1.0 + 0.35 * (2100 - time) / 1200))
+        $minTime = TIME_BONUS_MIN_TIME;  // 15 minutes
+        $maxTime = TIME_BONUS_MAX_TIME;  // 35 minutes
+        $cap = TIME_BONUS_CAP;           // 1.35
+        $floor = TIME_BONUS_FLOOR;       // 1.0
+        $bonusRange = $cap - $floor;     // 0.35
+        
+        $timeMultiplier = max(
+            $floor,
+            min($cap, $floor + ($bonusRange * ($maxTime - $timeSeconds)) / ($maxTime - $minTime))
         );
     } else {
         $timeMultiplier = 1.0;

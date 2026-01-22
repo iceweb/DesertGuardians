@@ -1031,6 +1031,62 @@ export class TowerUIManager {
           statY += statSpacing;
         }
 
+        // Show aura buff increase for aura towers
+        const oldAuraBuff = oldStats.auraDamageMultiplier || 0;
+        const newAuraBuff = newStats.auraDamageMultiplier || 0;
+        if (newAuraBuff > oldAuraBuff) {
+          const oldBuffPercent = Math.round(oldAuraBuff * 100);
+          const newBuffPercent = Math.round(newAuraBuff * 100);
+          const buffDiff = newBuffPercent - oldBuffPercent;
+
+          const buffLabel = this.scene.add
+            .text(-80, statY, 'Buff:', {
+              fontFamily: 'Arial Black',
+              fontSize: '16px',
+              color: '#aaaaaa',
+            })
+            .setOrigin(0, 0.5);
+          this.upgradeMenuContainer.add(buffLabel);
+
+          const buffValue = this.scene.add
+            .text(-30, statY, `+${oldBuffPercent}%`, {
+              fontFamily: 'Arial',
+              fontSize: '16px',
+              color: '#ffffff',
+            })
+            .setOrigin(0, 0.5);
+          this.upgradeMenuContainer.add(buffValue);
+
+          const buffArrow = this.scene.add
+            .text(20, statY, '→', {
+              fontFamily: 'Arial',
+              fontSize: '16px',
+              color: '#ff6666',
+            })
+            .setOrigin(0, 0.5);
+          this.upgradeMenuContainer.add(buffArrow);
+
+          const buffNew = this.scene.add
+            .text(45, statY, `+${newBuffPercent}%`, {
+              fontFamily: 'Arial Black',
+              fontSize: '16px',
+              color: '#ff6666',
+            })
+            .setOrigin(0, 0.5);
+          this.upgradeMenuContainer.add(buffNew);
+
+          const buffBonus = this.scene.add
+            .text(100, statY, `(+${buffDiff}%)`, {
+              fontFamily: 'Arial',
+              fontSize: '14px',
+              color: '#ff8888',
+            })
+            .setOrigin(0, 0.5);
+          this.upgradeMenuContainer.add(buffBonus);
+
+          statY += statSpacing;
+        }
+
         const costText = this.scene.add
           .text(0, yOffset + 110, `Cost: ${cost}g`, {
             fontFamily: 'Arial Black',

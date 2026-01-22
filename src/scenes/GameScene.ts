@@ -473,6 +473,9 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('allWavesComplete', async () => {
+      // Small delay to let player see the final boss gold reward text
+      await new Promise((resolve) => this.time.delayedCall(800, resolve));
+
       // Collect final mine income before calculating score
       const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
         this.audioManager.playSFX('coins');

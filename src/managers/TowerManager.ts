@@ -321,6 +321,7 @@ export class TowerManager {
     for (const tower of this.towers) {
       tower.setDamageMultiplier(1.0);
       tower.setAuraCritBonus(0);
+      tower.setMulticastChance(0);
     }
 
     const auraTowers = this.towers.filter((t) => t.isAuraTower());
@@ -330,6 +331,7 @@ export class TowerManager {
 
       let bestMultiplier = 0;
       let hasCritAura = false;
+      let hasEchoAura = false;
 
       for (const auraTower of auraTowers) {
         const distance = Phaser.Math.Distance.Between(tower.x, tower.y, auraTower.x, auraTower.y);
@@ -346,6 +348,9 @@ export class TowerManager {
           if (selectedAbilityId === 'aura_critaura') {
             hasCritAura = true;
           }
+          if (selectedAbilityId === 'aura_echo') {
+            hasEchoAura = true;
+          }
         }
       }
 
@@ -355,6 +360,10 @@ export class TowerManager {
 
       if (hasCritAura) {
         tower.setAuraCritBonus(0.15);
+      }
+
+      if (hasEchoAura) {
+        tower.setMulticastChance(0.1);
       }
     }
 

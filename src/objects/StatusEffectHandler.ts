@@ -22,10 +22,14 @@ export class StatusEffectHandler {
   private poisonStacks: PoisonStack[] = [];
   private poisonTickTimer: number = 0;
 
-  private burnEffect: BurnEffect | null = null;
+  private burnStacks: BurnEffect[] = [];
   private burnTickTimer: number = 0;
+  private static readonly MAX_BURN_STACKS = 5;
 
   private armorReduction: number = 0;
+  private static readonly MAX_ARMOR_REDUCTION = 50;
+
+  private brittleEndTime: number = 0;
 
   private immunityEndTime: number = 0;
 
@@ -87,16 +91,40 @@ export class StatusEffectHandler {
     if (this.isImmune()) return;
 
     const currentTime = this.scene.time.now;
-    this.burnEffect = {
+    const newBurn: BurnEffect = {
       damage: damagePerSecond,
       endTime: currentTime + durationMs,
     };
+
+    if (this.burnStacks.length >= StatusEffectHandler.MAX_BURN_STACKS) {
+      // Replace oldest (first) stack
+      this.burnStacks.shift();
+    }
+    this.burnStacks.push(newBurn);
   }
 
   applyArmorReduction(amount: number): void {
     if (this.isImmune()) return;
 
-    this.armorReduction = Math.min(6, this.armorReduction + amount);
+    this.armorReduction = Math.min(
+      StatusEffectHandler.MAX_ARMOR_REDUCTION,
+      this.armorReduction + amount
+    );
+  }
+
+  applyBrittle(durationMs: number): void {
+    if (this.isImmune()) return;
+
+    const currentTime = this.scene.time.now;
+    this.brittleEndTime = currentTime + durationMs;
+  }
+
+  isBrittle(): boolean {
+    return this.brittleEndTime > this.scene.time.now;
+  }
+
+  getBurnStackCount(): number {
+    return this.burnStacks.length;
   }
 
   getArmorReduction(): number {
@@ -127,18 +155,25 @@ export class StatusEffectHandler {
       }
     }
 
-    if (this.burnEffect && currentTime < this.burnEffect.endTime) {
+    // Filter expired burn stacks
+    this.burnStacks = this.burnStacks.filter((stack) => currentTime < stack.endTime);
+
+    if (this.burnStacks.length > 0) {
       this.burnTickTimer += delta;
 
       if (this.burnTickTimer >= 1000) {
         this.burnTickTimer = 0;
 
-        if (this.onBurnDamage) {
-          this.onBurnDamage(this.burnEffect.damage);
+        // Sum damage from all active burn stacks
+        let totalBurnDamage = 0;
+        for (const stack of this.burnStacks) {
+          totalBurnDamage += stack.damage;
+        }
+
+        if (totalBurnDamage > 0 && this.onBurnDamage) {
+          this.onBurnDamage(totalBurnDamage);
         }
       }
-    } else if (this.burnEffect) {
-      this.burnEffect = null;
     }
 
     if (this.slowEndTime > 0 && currentTime >= this.slowEndTime) {
@@ -159,7 +194,8 @@ export class StatusEffectHandler {
     const isSlowed = this.slowEndTime > currentTime;
     const isFrozen = this.freezeEndTime > currentTime;
     const isPoisoned = this.poisonStacks.length > 0;
-    const isBurning = this.burnEffect !== null && this.burnEffect.endTime > currentTime;
+    const isBurning = this.burnStacks.length > 0;
+    const isBrittle = this.brittleEndTime > currentTime;
 
     if (isFrozen) {
       this.statusGraphics.fillStyle(0x87ceeb, 0.4);
@@ -194,22 +230,42 @@ export class StatusEffectHandler {
     }
 
     if (isBurning) {
+      // Scale visual intensity based on stack count
+      const burnIntensity = Math.min(this.burnStacks.length, 5);
+      const particleCount = 2 + burnIntensity;
+
       this.statusGraphics.fillStyle(0xff6600, 0.7);
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < particleCount; i++) {
         const offset = (currentTime / 100 + i * 100) % 300;
-        const x = -8 + i * 8;
+        const x = -10 + i * (20 / particleCount);
         const y = -10 - (offset % 15);
-        const size = 3 + Math.sin(currentTime / 100 + i) * 2;
+        const size = 2 + Math.sin(currentTime / 100 + i) * 2 + burnIntensity * 0.5;
         this.statusGraphics.fillCircle(x, y, size);
       }
 
-      this.statusGraphics.fillStyle(0xffaa00, 0.3);
-      for (let i = 0; i < 2; i++) {
+      this.statusGraphics.fillStyle(0xffaa00, 0.3 + burnIntensity * 0.1);
+      for (let i = 0; i < burnIntensity; i++) {
         const offset = (currentTime / 150 + i * 150) % 300;
-        const x = -4 + i * 8;
+        const x = -6 + i * 4;
         const y = -8 - (offset % 12);
         this.statusGraphics.fillCircle(x, y, 2);
       }
+    }
+
+    if (isBrittle) {
+      // Draw blue cracked overlay for brittle status
+      this.statusGraphics.lineStyle(2, 0x4488ff, 0.8);
+      this.statusGraphics.lineBetween(-12, -18, -5, -8);
+      this.statusGraphics.lineBetween(-5, -8, -10, 2);
+      this.statusGraphics.lineBetween(-5, -8, 5, -5);
+      this.statusGraphics.lineBetween(5, -5, 12, -15);
+      this.statusGraphics.lineBetween(5, -5, 8, 5);
+
+      // Shimmer effect
+      const shimmer = ((currentTime / 200) % 1) * 0.5 + 0.3;
+      this.statusGraphics.fillStyle(0x88ccff, shimmer);
+      this.statusGraphics.fillCircle(-8, -12, 2);
+      this.statusGraphics.fillCircle(8, -10, 2);
     }
   }
 
@@ -232,7 +288,7 @@ export class StatusEffectHandler {
   }
 
   isBurning(): boolean {
-    return this.burnEffect !== null && this.burnEffect.endTime > this.scene.time.now;
+    return this.burnStacks.length > 0;
   }
 
   isPoisoned(): boolean {
@@ -249,9 +305,10 @@ export class StatusEffectHandler {
     this.freezeEndTime = 0;
     this.poisonStacks = [];
     this.poisonTickTimer = 0;
-    this.burnEffect = null;
+    this.burnStacks = [];
     this.burnTickTimer = 0;
     this.armorReduction = 0;
+    this.brittleEndTime = 0;
     this.immunityEndTime = 0;
   }
 
@@ -261,8 +318,9 @@ export class StatusEffectHandler {
     this.slowEndTime = 0;
     this.freezeEndTime = 0;
     this.poisonStacks = [];
-    this.burnEffect = null;
+    this.burnStacks = [];
     this.armorReduction = 0;
+    this.brittleEndTime = 0;
 
     if (immunityDurationMs > 0) {
       this.immunityEndTime = this.scene.time.now + immunityDurationMs;

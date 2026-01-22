@@ -6,6 +6,7 @@ import {
   MenuButton,
   SettingsModal,
   HighscoresModal,
+  InfoModal,
 } from './menu';
 
 /**
@@ -18,6 +19,7 @@ export class MenuScene extends Phaser.Scene {
   private menuDecorations: MenuDecorations | null = null;
   private settingsModal: SettingsModal | null = null;
   private highscoresModal: HighscoresModal | null = null;
+  private infoModal: InfoModal | null = null;
 
   private static gameInProgress: boolean = false;
 
@@ -162,7 +164,7 @@ export class MenuScene extends Phaser.Scene {
       },
     });
 
-    // Bottom buttons
+    // Bottom buttons - row 1
     const bottomY = buttonY + 100;
     const spacing = 160;
 
@@ -189,6 +191,19 @@ export class MenuScene extends Phaser.Scene {
       onClick: () => {
         this.audioManager.playSFX('ui_click');
         this.showSettings();
+      },
+    });
+
+    // Info button (centered below)
+    new MenuButton(this, {
+      x: width / 2,
+      y: bottomY + 65,
+      text: '📜  INFO',
+      width: 180,
+      height: 50,
+      onClick: () => {
+        this.audioManager.playSFX('ui_click');
+        this.showInfo();
       },
     });
   }
@@ -256,5 +271,17 @@ export class MenuScene extends Phaser.Scene {
       this.settingsModal = null;
     });
     this.settingsModal.show();
+  }
+
+  private showInfo(): void {
+    if (this.infoModal?.isOpen()) {
+      this.infoModal.close();
+      return;
+    }
+
+    this.infoModal = new InfoModal(this, this.audioManager, () => {
+      this.infoModal = null;
+    });
+    this.infoModal.show();
   }
 }

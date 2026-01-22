@@ -76,19 +76,20 @@ describe('Tower Abilities', () => {
       expect(aftershock!.effectParams.damageMultiplier).toBe(0.5);
     });
 
-    it('should have Earthquake with zone parameters', () => {
-      const earthquake = abilities.find((a) => a.id === 'cannon_earthquake');
-      expect(earthquake).toBeDefined();
-      expect(earthquake!.effectParams.radius).toBe(85);
-      expect(earthquake!.effectParams.duration).toBe(3000);
-      expect(earthquake!.effectParams.damage).toBe(8);
+    it('should have Tremor with zone parameters', () => {
+      const tremor = abilities.find((a) => a.id === 'cannon_tremor');
+      expect(tremor).toBeDefined();
+      expect(tremor!.effectParams.radius).toBe(85);
+      expect(tremor!.effectParams.duration).toBe(3000);
+      expect(tremor!.effectParams.damage).toBe(25);
+      expect(tremor!.effectParams.slowPercent).toBe(0.3);
     });
 
     it('should have Shrapnel with fragment parameters', () => {
       const shrapnel = abilities.find((a) => a.id === 'cannon_shrapnel');
       expect(shrapnel).toBeDefined();
       expect(shrapnel!.effectParams.count).toBe(6);
-      expect(shrapnel!.effectParams.damageMultiplier).toBe(0.25);
+      expect(shrapnel!.effectParams.damageMultiplier).toBe(0.35);
     });
   });
 
@@ -131,10 +132,10 @@ describe('Tower Abilities', () => {
       expect(frostNova!.effectParams.radius).toBe(80);
     });
 
-    it('should have Shatter with damage bonus', () => {
-      const shatter = abilities.find((a) => a.id === 'ice_shatter');
-      expect(shatter).toBeDefined();
-      expect(shatter!.effectParams.damageMultiplier).toBe(2.0);
+    it('should have Deep Freeze with brittle duration', () => {
+      const deepFreeze = abilities.find((a) => a.id === 'ice_deepfreeze');
+      expect(deepFreeze).toBeDefined();
+      expect(deepFreeze!.effectParams.brittleDuration).toBe(2500);
     });
   });
 
@@ -150,14 +151,14 @@ describe('Tower Abilities', () => {
     it('should have Toxic Explosion with damage and radius', () => {
       const explosion = abilities.find((a) => a.id === 'poison_explosion');
       expect(explosion).toBeDefined();
-      expect(explosion!.effectParams.damage).toBe(40);
+      expect(explosion!.effectParams.damage).toBe(80);
       expect(explosion!.effectParams.radius).toBe(60);
     });
 
     it('should have Corrosive Acid with armor reduction', () => {
       const corrosive = abilities.find((a) => a.id === 'poison_corrosive');
       expect(corrosive).toBeDefined();
-      expect(corrosive!.effectParams.armorReduction).toBe(2);
+      expect(corrosive!.effectParams.armorReduction).toBe(10);
     });
   });
 
@@ -181,7 +182,7 @@ describe('Tower Abilities', () => {
     it('should have Incendiary Rounds with burn damage', () => {
       const incendiary = abilities.find((a) => a.id === 'rapid_incendiary');
       expect(incendiary).toBeDefined();
-      expect(incendiary!.effectParams.burnDamage).toBe(5);
+      expect(incendiary!.effectParams.burnDamage).toBe(15);
       expect(incendiary!.effectParams.burnDuration).toBe(3000);
     });
   });
@@ -207,6 +208,12 @@ describe('Tower Abilities', () => {
       expect(critAura).toBeDefined();
       expect(critAura!.triggerChance).toBe(1.0);
     });
+
+    it('should have Echo Amplification with multicast chance', () => {
+      const echo = abilities.find((a) => a.id === 'aura_echo');
+      expect(echo).toBeDefined();
+      expect(echo!.effectParams.multicastChance).toBe(0.1);
+    });
   });
 
   describe('Archer Abilities', () => {
@@ -225,10 +232,11 @@ describe('Tower Abilities', () => {
       expect(piercing!.effectParams.damageMultiplier).toBe(1.0);
     });
 
-    it('should have Quick Draw', () => {
-      const quickdraw = abilities.find((a) => a.id === 'archer_quickdraw');
-      expect(quickdraw).toBeDefined();
-      expect(quickdraw!.triggerChance).toBe(0.25);
+    it('should have Heavy Arrows with knockback', () => {
+      const heavyArrows = abilities.find((a) => a.id === 'archer_heavyarrows');
+      expect(heavyArrows).toBeDefined();
+      expect(heavyArrows!.effectParams.knockbackDistance).toBe(20);
+      expect(heavyArrows!.triggerChance).toBe(0.15);
     });
   });
 
@@ -276,9 +284,9 @@ describe('Tower Abilities', () => {
 
     it('should calculate shrapnel damage per fragment', () => {
       const baseDamage = 80;
-      const damageMultiplier = 0.25;
+      const damageMultiplier = 0.35;
       const shrapnelDamage = baseDamage * damageMultiplier;
-      expect(shrapnelDamage).toBe(20);
+      expect(shrapnelDamage).toBe(28);
     });
 
     it('should calculate ricochet bounce damage', () => {
@@ -310,15 +318,15 @@ describe('Tower Abilities', () => {
       expect(bossDuration).toBe(600);
     });
 
-    it('should calculate earthquake tick damage', () => {
-      const damage = 8;
+    it('should calculate tremor tick damage', () => {
+      const damage = 25;
       const duration = 3000;
       const tickInterval = 500;
       const maxTicks = Math.floor(duration / tickInterval);
       const totalDamage = damage * maxTicks;
 
       expect(maxTicks).toBe(6);
-      expect(totalDamage).toBe(48);
+      expect(totalDamage).toBe(150);
     });
   });
 

@@ -305,8 +305,30 @@ export class Creep extends Phaser.GameObjects.Container {
     this.statusEffects.applyBurn(damagePerSecond, durationMs);
   }
 
+  applyBrittle(durationMs: number): void {
+    this.statusEffects.applyBrittle(durationMs);
+  }
+
+  isBrittle(): boolean {
+    return this.statusEffects.isBrittle();
+  }
+
   applyArmorReduction(amount: number): void {
     this.statusEffects.applyArmorReduction(amount);
+  }
+
+  applyKnockback(distance: number): void {
+    // Bosses are highly resistant to knockback
+    if (this.isBoss()) {
+      distance = distance * 0.1;
+    }
+
+    // Cannot knock back below start
+    this.distanceTraveled = Math.max(0, this.distanceTraveled - distance);
+
+    // Update position immediately
+    const pathData = this.pathSystem.getPositionAt(this.distanceTraveled);
+    this.setPosition(pathData.position.x, pathData.position.y);
   }
 
   clearSlow(): void {
@@ -357,7 +379,13 @@ export class Creep extends Phaser.GameObjects.Container {
     const effectiveArmor = Math.max(0, this.config.armor - this.statusEffects.getArmorReduction());
     // Percentage-based armor: damage * (100 / (100 + armor))
     const armorMultiplier = 100 / (100 + effectiveArmor);
-    const actualDamage = isMagic ? amount : Math.max(1, Math.round(amount * armorMultiplier));
+
+    // Brittle status: +30% physical damage
+    const brittleMultiplier = !isMagic && this.statusEffects.isBrittle() ? 1.3 : 1.0;
+
+    const actualDamage = isMagic
+      ? amount
+      : Math.max(1, Math.round(amount * armorMultiplier * brittleMultiplier));
     const previousHealth = this.currentHealth;
     this.currentHealth -= actualDamage;
 

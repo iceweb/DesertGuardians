@@ -77,6 +77,13 @@ export class CombatManager {
 
         tower.recordFire(currentTime);
 
+        // Echo multicast: roll for additional shot
+        const multicastChance = tower.getMulticastChance();
+        if (multicastChance > 0 && Math.random() < multicastChance) {
+          // Fire a second projectile with slight delay effect
+          this.projectileManager.fire(spawnX, spawnY, target, config, tower);
+        }
+
         this.onTowerFire?.(tower.getBranch());
       }
     }

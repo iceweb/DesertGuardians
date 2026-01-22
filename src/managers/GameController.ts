@@ -11,6 +11,8 @@ export class GameController extends Phaser.Events.EventEmitter {
   private _virtualGameTime: number = 0;
   private _gameStartTime: number = 0;
   private _hasGameStarted: boolean = false;
+  private _totalPausedTime: number = 0;
+  private _pauseStartTime: number = 0;
 
   private _currentWave: number = 0;
   private _totalWaves: number = 0;
@@ -134,6 +136,16 @@ export class GameController extends Phaser.Events.EventEmitter {
   }
 
   togglePause(): boolean {
+    if (!this._isPaused) {
+      // Starting pause - record when pause began
+      this._pauseStartTime = Date.now();
+    } else {
+      // Ending pause - accumulate paused time
+      if (this._pauseStartTime > 0) {
+        this._totalPausedTime += Date.now() - this._pauseStartTime;
+        this._pauseStartTime = 0;
+      }
+    }
     this._isPaused = !this._isPaused;
     this.emit('pauseChanged', this._isPaused);
     return this._isPaused;
@@ -141,6 +153,16 @@ export class GameController extends Phaser.Events.EventEmitter {
 
   setPaused(paused: boolean): void {
     if (this._isPaused !== paused) {
+      if (paused) {
+        // Starting pause - record when pause began
+        this._pauseStartTime = Date.now();
+      } else {
+        // Ending pause - accumulate paused time
+        if (this._pauseStartTime > 0) {
+          this._totalPausedTime += Date.now() - this._pauseStartTime;
+          this._pauseStartTime = 0;
+        }
+      }
       this._isPaused = paused;
       this.emit('pauseChanged', this._isPaused);
     }
@@ -187,7 +209,14 @@ export class GameController extends Phaser.Events.EventEmitter {
 
   getElapsedRealTime(): number {
     if (!this._hasGameStarted) return 0;
-    return Math.floor((Date.now() - this._gameStartTime) / 1000);
+    const totalElapsed = Date.now() - this._gameStartTime;
+    // Subtract accumulated pause time
+    let pausedTime = this._totalPausedTime;
+    // If currently paused, also subtract current pause duration
+    if (this._isPaused && this._pauseStartTime > 0) {
+      pausedTime += Date.now() - this._pauseStartTime;
+    }
+    return Math.floor((totalElapsed - pausedTime) / 1000);
   }
 
   reset(): void {
@@ -197,6 +226,8 @@ export class GameController extends Phaser.Events.EventEmitter {
     this._virtualGameTime = 0;
     this._gameStartTime = 0;
     this._hasGameStarted = false;
+    this._totalPausedTime = 0;
+    this._pauseStartTime = 0;
     this._currentWave = 0;
     this._isPaused = false;
     this._gameSpeed = 1;

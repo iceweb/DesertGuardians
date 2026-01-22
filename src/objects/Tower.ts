@@ -23,6 +23,7 @@ export class Tower extends Phaser.GameObjects.Container {
 
   private damageMultiplier: number = 1.0;
   private auraCritBonus: number = 0;
+  private multicastChance: number = 0;
   private buffGlowPhase: number = 0;
 
   private animator: TowerAnimator | null = null;
@@ -258,10 +259,11 @@ export class Tower extends Phaser.GameObjects.Container {
   }
 
   setDamageMultiplier(multiplier: number): void {
-    const wasBuffed = this.damageMultiplier > 1.0 || this.auraCritBonus > 0;
+    const wasBuffed =
+      this.damageMultiplier > 1.0 || this.auraCritBonus > 0 || this.multicastChance > 0;
     this.damageMultiplier = multiplier;
 
-    if (wasBuffed && multiplier <= 1.0 && this.auraCritBonus <= 0) {
+    if (wasBuffed && multiplier <= 1.0 && this.auraCritBonus <= 0 && this.multicastChance <= 0) {
       this.buffGlowGraphics.clear();
     }
   }
@@ -278,17 +280,26 @@ export class Tower extends Phaser.GameObjects.Container {
     return this.auraCritBonus;
   }
 
+  setMulticastChance(chance: number): void {
+    this.multicastChance = chance;
+  }
+
+  getMulticastChance(): number {
+    return this.multicastChance;
+  }
+
   hasAuraBuff(): boolean {
-    return this.damageMultiplier > 1.0 || this.auraCritBonus > 0;
+    return this.damageMultiplier > 1.0 || this.auraCritBonus > 0 || this.multicastChance > 0;
   }
 
   private drawBuffGlow(): void {
     const g = this.buffGlowGraphics;
     g.clear();
 
-    if (this.damageMultiplier <= 1.0 && this.auraCritBonus <= 0) return;
+    if (this.damageMultiplier <= 1.0 && this.auraCritBonus <= 0 && this.multicastChance <= 0)
+      return;
 
-    const buffStrength = this.damageMultiplier - 1.0 + this.auraCritBonus;
+    const buffStrength = this.damageMultiplier - 1.0 + this.auraCritBonus + this.multicastChance;
     const pulseIntensity = (Math.sin(this.buffGlowPhase) + 1) * 0.5;
     const baseAlpha = 0.15 + pulseIntensity * 0.15 + buffStrength * 0.2;
 

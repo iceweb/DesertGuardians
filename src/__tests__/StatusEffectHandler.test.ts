@@ -74,28 +74,29 @@ describe('StatusEffectHandler Logic', () => {
   });
 
   describe('Armor Reduction Logic', () => {
-    it('should cap armor reduction at 6', () => {
+    it('should cap armor reduction at 50', () => {
       let armorReduction = 0;
-      const maxReduction = 6;
+      const maxReduction = 50;
 
       // Apply multiple armor reductions
-      armorReduction = Math.min(maxReduction, armorReduction + 3);
-      expect(armorReduction).toBe(3);
+      armorReduction = Math.min(maxReduction, armorReduction + 30);
+      expect(armorReduction).toBe(30);
 
-      armorReduction = Math.min(maxReduction, armorReduction + 5);
-      expect(armorReduction).toBe(6); // Capped at 6
+      armorReduction = Math.min(maxReduction, armorReduction + 40);
+      expect(armorReduction).toBe(50); // Capped at 50
     });
 
     it('should apply armor reduction to damage calculation', () => {
-      const baseDamage = 20;
-      const armor = 5;
-      const armorReduction = 3;
+      const baseDamage = 100;
+      const armor = 50;
+      const armorReduction = 30;
 
       const effectiveArmor = Math.max(0, armor - armorReduction);
-      const damageAfterArmor = Math.max(1, baseDamage - effectiveArmor);
+      // Formula: damage × 100 / (100 + armor)
+      const damageAfterArmor = baseDamage * (100 / (100 + effectiveArmor));
 
-      expect(effectiveArmor).toBe(2);
-      expect(damageAfterArmor).toBe(18);
+      expect(effectiveArmor).toBe(20);
+      expect(damageAfterArmor).toBeCloseTo(83.33, 1);
     });
   });
 
@@ -149,23 +150,26 @@ describe('StatusEffectHandler Logic', () => {
       let slowEndTime = 5000;
       let freezeEndTime = 6000;
       let poisonStacks = [{ damage: 5, endTime: 7000 }];
-      let burnEffect: { damage: number; endTime: number } | null = { damage: 10, endTime: 8000 };
+      let burnStacks: { damage: number; endTime: number }[] = [{ damage: 10, endTime: 8000 }];
       let armorReduction = 3;
+      let brittleEndTime = 9000;
 
       // Dispel
       slowAmount = 0;
       slowEndTime = 0;
       freezeEndTime = 0;
       poisonStacks = [];
-      burnEffect = null;
+      burnStacks = [];
       armorReduction = 0;
+      brittleEndTime = 0;
 
       expect(slowAmount).toBe(0);
       expect(slowEndTime).toBe(0);
       expect(freezeEndTime).toBe(0);
       expect(poisonStacks.length).toBe(0);
-      expect(burnEffect).toBeNull();
+      expect(burnStacks.length).toBe(0);
       expect(armorReduction).toBe(0);
+      expect(brittleEndTime).toBe(0);
     });
 
     it('should grant immunity after dispel if specified', () => {
@@ -175,6 +179,120 @@ describe('StatusEffectHandler Logic', () => {
 
       expect(immunityEndTime).toBe(7000);
       expect(immunityEndTime > currentTime).toBe(true);
+    });
+  });
+
+  describe('Burn Stacking Logic', () => {
+    it('should cap burn stacks at 5', () => {
+      const MAX_BURN_STACKS = 5;
+      const stacks: { damage: number; endTime: number }[] = [];
+
+      // Add 6 stacks
+      for (let i = 0; i < 6; i++) {
+        if (stacks.length >= MAX_BURN_STACKS) {
+          // Replace oldest stack
+          stacks.shift();
+        }
+        stacks.push({ damage: 15, endTime: 5000 + i * 1000 });
+      }
+
+      expect(stacks.length).toBe(5);
+    });
+
+    it('should calculate total burn damage from all stacks', () => {
+      const stacks = [
+        { damage: 15, endTime: 5000 },
+        { damage: 15, endTime: 6000 },
+        { damage: 15, endTime: 7000 },
+        { damage: 15, endTime: 8000 },
+        { damage: 15, endTime: 9000 },
+      ];
+
+      const totalDamage = stacks.reduce((sum, stack) => sum + stack.damage, 0);
+      expect(totalDamage).toBe(75); // 15 × 5 stacks
+    });
+
+    it('should return stack count for intensity scaling', () => {
+      const stacks = [
+        { damage: 15, endTime: 5000 },
+        { damage: 15, endTime: 6000 },
+        { damage: 15, endTime: 7000 },
+      ];
+
+      expect(stacks.length).toBe(3);
+    });
+  });
+
+  describe('Brittle Status Logic', () => {
+    it('should correctly detect active brittle', () => {
+      const currentTime = 5000;
+      const brittleEndTime = 7500; // 2500ms duration
+
+      const isBrittle = brittleEndTime > currentTime;
+      expect(isBrittle).toBe(true);
+    });
+
+    it('should correctly detect expired brittle', () => {
+      const currentTime = 8000;
+      const brittleEndTime = 7500;
+
+      const isBrittle = brittleEndTime > currentTime;
+      expect(isBrittle).toBe(false);
+    });
+
+    it('should apply 30% bonus physical damage when brittle', () => {
+      const baseDamage = 100;
+      const isMagic = false;
+      const isBrittle = true;
+      const brittleMultiplier = !isMagic && isBrittle ? 1.3 : 1.0;
+
+      const finalDamage = baseDamage * brittleMultiplier;
+      expect(finalDamage).toBe(130);
+    });
+
+    it('should not affect magic damage', () => {
+      const baseDamage = 100;
+      const isMagic = true;
+      const isBrittle = true;
+      const brittleMultiplier = !isMagic && isBrittle ? 1.3 : 1.0;
+
+      const finalDamage = baseDamage * brittleMultiplier;
+      expect(finalDamage).toBe(100); // Magic unaffected
+    });
+  });
+
+  describe('Knockback Logic', () => {
+    it('should reduce distance traveled for normal creeps', () => {
+      let distanceTraveled = 100;
+      const knockbackDistance = 20;
+      const isBoss = false;
+      const bossResistance = 0.1;
+
+      const effectiveKnockback = isBoss ? knockbackDistance * bossResistance : knockbackDistance;
+      distanceTraveled = Math.max(0, distanceTraveled - effectiveKnockback);
+
+      expect(distanceTraveled).toBe(80);
+    });
+
+    it('should apply only 10% knockback to bosses', () => {
+      let distanceTraveled = 100;
+      const knockbackDistance = 20;
+      const isBoss = true;
+      const bossResistance = 0.1;
+
+      const effectiveKnockback = isBoss ? knockbackDistance * bossResistance : knockbackDistance;
+      distanceTraveled = Math.max(0, distanceTraveled - effectiveKnockback);
+
+      expect(distanceTraveled).toBe(98); // Only 2 pixels knocked back
+    });
+
+    it('should not go below zero distance', () => {
+      let distanceTraveled = 10;
+      const knockbackDistance = 20;
+
+      distanceTraveled = Math.max(0, distanceTraveled - knockbackDistance);
+
+      expect(distanceTraveled).toBe(0);
     });
   });
 });

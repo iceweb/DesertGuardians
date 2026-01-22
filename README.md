@@ -94,7 +94,7 @@ Tower defense games are significantly more complex than platformers:
 - **Wave Bonus** — 100 points per wave completed
 - **Gold Bonus** — 0.2× total gold earned
 - **HP Bonus** — 100 points per HP remaining
-- **Time Bonus** — Victory only! Exponential decay from ×1.35 (fast) to ×0.85 (slow)
+- **Time Bonus** — Victory only! Linear scale from ×1.35 (≤15 min) to ×1.0 (≥35 min)
 - **Difficulty Multiplier** — Easy ×0.75, Normal ×1.0, Hard ×1.25
 - **Global Rank Display** — See where you place among all players
 

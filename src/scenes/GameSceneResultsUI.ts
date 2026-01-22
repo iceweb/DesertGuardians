@@ -103,28 +103,30 @@ export class GameSceneResultsUI {
     let timeMultiplier = 1.0;
 
     if (isVictory) {
-      // Smooth exponential curve with fine granularity
-      // Every second counts! Designed for 20-40 min average playtime.
+      // Linear time bonus: every second counts between 15-35 minutes
+      // - Faster than 15 min: capped at 1.35x
+      // - Between 15-35 min: linear interpolation
+      // - Slower than 35 min: floored at 1.0x (no penalty)
       //
-      // Formula: floor + bonus * e^(-(time - peakTime) / decayRate)
-      // - peakTime (15 min): where max bonus is achieved
-      // - decayRate: how quickly bonus decays (higher = slower decay)
+      // Formula: max(1.0, min(1.35, 1.0 + 0.35 * (2100 - time) / 1200))
       //
-      // Results (approximate):
-      //   10 min: 1.35x (cap)    | 30 min: 1.06x
-      //   15 min: 1.30x          | 35 min: 1.02x
-      //   20 min: 1.20x          | 40 min: 0.98x
-      //   25 min: 1.12x          | 50 min: 0.92x
+      // Results:
+      //   ≤15 min: 1.35x (cap)   | 25 min: 1.18x
+      //   20 min: 1.26x          | 30 min: 1.09x
+      //   22 min: 1.23x          | ≥35 min: 1.00x (floor)
       //
-      const FLOOR = 0.85; // Minimum multiplier (never punish too hard)
-      const BONUS = 0.45; // Maximum bonus above floor
-      const PEAK_TIME = 900; // 15 minutes - where max bonus kicks in
-      const DECAY_RATE = 1200; // Decay constant (seconds)
+      const MIN_TIME = 900; // 15 minutes - max bonus threshold
+      const MAX_TIME = 2100; // 35 minutes - no bonus threshold
       const CAP = 1.35; // Maximum multiplier
+      const FLOOR = 1.0; // Minimum multiplier (no penalty)
+      const BONUS_RANGE = 0.35; // Bonus points from floor to cap
 
-      timeMultiplier = Math.min(
-        CAP,
-        FLOOR + BONUS * Math.exp(-(result.runTimeSeconds - PEAK_TIME) / DECAY_RATE)
+      timeMultiplier = Math.max(
+        FLOOR,
+        Math.min(
+          CAP,
+          FLOOR + (BONUS_RANGE * (MAX_TIME - result.runTimeSeconds)) / (MAX_TIME - MIN_TIME)
+        )
       );
     }
 

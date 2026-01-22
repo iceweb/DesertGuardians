@@ -78,8 +78,8 @@ export class TowerAbilityHandler {
     switch (abilityId) {
       case 'cannon_aftershock':
         return this.effects.executeAftershock(context, params);
-      case 'cannon_earthquake':
-        return this.effects.executeEarthquake(context, params);
+      case 'cannon_tremor':
+        return this.effects.executeTremor(context, params);
       case 'cannon_shrapnel':
         return this.effects.executeShrapnel(context, params);
 
@@ -94,8 +94,8 @@ export class TowerAbilityHandler {
         return this.effects.executeIceTrap(context, params);
       case 'ice_frostnova':
         return this.effects.executeFrostNova(context, params);
-      case 'ice_shatter':
-        return this.effects.executeShatter(context, params);
+      case 'ice_deepfreeze':
+        return this.effects.executeDeepFreeze(context, params);
 
       case 'poison_plague':
         return this.effects.executePlagueSpread(context, params);
@@ -115,8 +115,8 @@ export class TowerAbilityHandler {
         return this.effects.executeMultiShot(context, params);
       case 'archer_piercing':
         return this.effects.executePiercingArrow(context, params);
-      case 'archer_quickdraw':
-        return this.effects.executeQuickDraw(context, params);
+      case 'archer_heavyarrows':
+        return this.effects.executeHeavyArrows(context, params);
 
       default:
         return { triggered: false };
@@ -129,10 +129,6 @@ export class TowerAbilityHandler {
 
   getBulletStormSpeedMultiplier(): number {
     return this.effects.getBulletStormSpeedMultiplier();
-  }
-
-  consumeQuickDraw(): boolean {
-    return this.effects.consumeQuickDraw();
   }
 
   onCreepDeath(creep: Creep, allCreeps: Creep[]): void {
