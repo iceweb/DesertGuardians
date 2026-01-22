@@ -336,6 +336,7 @@ export class GameScene extends Phaser.Scene {
   private selectDifficulty(difficulty: Difficulty): void {
     this.gameController.setDifficulty(difficulty);
     this.creepManager.setDifficultyMultiplier(this.gameController.getCreepHealthMultiplier());
+    this.hudManager.setDifficulty(difficulty);
 
     // Fade out and destroy overlay
     if (this.difficultyOverlay) {

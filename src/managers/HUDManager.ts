@@ -18,6 +18,7 @@ export class HUDManager {
   private nextWavePanel: NextWavePanel;
 
   private goldText!: Phaser.GameObjects.Text;
+  private difficultyText!: Phaser.GameObjects.Text;
   private timeText!: Phaser.GameObjects.Text;
   private waveText!: Phaser.GameObjects.Text;
   private hpText!: Phaser.GameObjects.Text;
@@ -115,6 +116,17 @@ export class HUDManager {
         color: '#ffd700',
         stroke: '#000000',
         strokeThickness: 3,
+      })
+      .setOrigin(0, 0.5)
+      .setDepth(101);
+
+    this.difficultyText = this.scene.add
+      .text(160, 32, '', {
+        fontFamily: 'Arial Black',
+        fontSize: '18px',
+        color: '#aaaaaa',
+        stroke: '#000000',
+        strokeThickness: 2,
       })
       .setOrigin(0, 0.5)
       .setDepth(101);
@@ -493,6 +505,16 @@ export class HUDManager {
   updateWave(currentWave: number): void {
     this.currentWave = currentWave;
     this.waveText.setText(`⚔️ WAVE ${this.currentWave} / ${this.totalWaves}`);
+  }
+
+  setDifficulty(difficulty: 'Easy' | 'Normal' | 'Hard'): void {
+    const colors: Record<string, string> = {
+      Easy: '#44ff44',
+      Normal: '#ffcc00',
+      Hard: '#ff4444',
+    };
+    this.difficultyText.setText(`[${difficulty}]`);
+    this.difficultyText.setColor(colors[difficulty] || '#aaaaaa');
   }
 
   updateTime(seconds: number): void {
