@@ -135,14 +135,16 @@ describe('Projectile System', () => {
       expect(calculateDamage(baseDamage, airDamageBonus, false)).toBe(30);
     });
 
-    it('should apply magic damage (ignores armor)', () => {
+    it('should apply magic damage (uses 80% of armor)', () => {
       const calculateDamage = (baseDamage: number, armor: number, isMagic: boolean): number => {
-        if (isMagic) return baseDamage;
-        return Math.max(1, baseDamage - armor);
+        const armorForCalc = isMagic ? armor * 0.8 : armor;
+        return Math.max(1, Math.round(baseDamage * (100 / (100 + armorForCalc))));
       };
 
-      expect(calculateDamage(50, 30, false)).toBe(20);
-      expect(calculateDamage(50, 30, true)).toBe(50);
+      // Physical: 50 * (100/130) = 38.46 -> 38
+      expect(calculateDamage(50, 30, false)).toBe(38);
+      // Magic: 50 * (100/124) = 40.32 -> 40 (uses 80% of 30 = 24 armor)
+      expect(calculateDamage(50, 30, true)).toBe(40);
     });
   });
 

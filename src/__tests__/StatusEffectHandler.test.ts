@@ -183,40 +183,38 @@ describe('StatusEffectHandler Logic', () => {
   });
 
   describe('Burn Stacking Logic', () => {
-    it('should cap burn stacks at 5', () => {
-      const MAX_BURN_STACKS = 5;
+    it('should cap burn stacks at 3', () => {
+      const MAX_BURN_STACKS = 3;
       const stacks: { damage: number; endTime: number }[] = [];
 
-      // Add 6 stacks
-      for (let i = 0; i < 6; i++) {
+      // Add 4 stacks
+      for (let i = 0; i < 4; i++) {
         if (stacks.length >= MAX_BURN_STACKS) {
           // Replace oldest stack
           stacks.shift();
         }
-        stacks.push({ damage: 15, endTime: 5000 + i * 1000 });
+        stacks.push({ damage: 10, endTime: 5000 + i * 1000 });
       }
 
-      expect(stacks.length).toBe(5);
+      expect(stacks.length).toBe(3);
     });
 
     it('should calculate total burn damage from all stacks', () => {
       const stacks = [
-        { damage: 15, endTime: 5000 },
-        { damage: 15, endTime: 6000 },
-        { damage: 15, endTime: 7000 },
-        { damage: 15, endTime: 8000 },
-        { damage: 15, endTime: 9000 },
+        { damage: 10, endTime: 5000 },
+        { damage: 10, endTime: 6000 },
+        { damage: 10, endTime: 7000 },
       ];
 
       const totalDamage = stacks.reduce((sum, stack) => sum + stack.damage, 0);
-      expect(totalDamage).toBe(75); // 15 × 5 stacks
+      expect(totalDamage).toBe(30); // 10 × 3 stacks
     });
 
     it('should return stack count for intensity scaling', () => {
       const stacks = [
-        { damage: 15, endTime: 5000 },
-        { damage: 15, endTime: 6000 },
-        { damage: 15, endTime: 7000 },
+        { damage: 10, endTime: 5000 },
+        { damage: 10, endTime: 6000 },
+        { damage: 10, endTime: 7000 },
       ];
 
       expect(stacks.length).toBe(3);
@@ -240,21 +238,21 @@ describe('StatusEffectHandler Logic', () => {
       expect(isBrittle).toBe(false);
     });
 
-    it('should apply 30% bonus physical damage when brittle', () => {
+    it('should apply 20% bonus physical damage when brittle', () => {
       const baseDamage = 100;
       const isMagic = false;
       const isBrittle = true;
-      const brittleMultiplier = !isMagic && isBrittle ? 1.3 : 1.0;
+      const brittleMultiplier = !isMagic && isBrittle ? 1.2 : 1.0;
 
       const finalDamage = baseDamage * brittleMultiplier;
-      expect(finalDamage).toBe(130);
+      expect(finalDamage).toBe(120);
     });
 
     it('should not affect magic damage', () => {
       const baseDamage = 100;
       const isMagic = true;
       const isBrittle = true;
-      const brittleMultiplier = !isMagic && isBrittle ? 1.3 : 1.0;
+      const brittleMultiplier = !isMagic && isBrittle ? 1.2 : 1.0;
 
       const finalDamage = baseDamage * brittleMultiplier;
       expect(finalDamage).toBe(100); // Magic unaffected

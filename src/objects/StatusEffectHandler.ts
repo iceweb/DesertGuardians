@@ -24,10 +24,10 @@ export class StatusEffectHandler {
 
   private burnStacks: BurnEffect[] = [];
   private burnTickTimer: number = 0;
-  private static readonly MAX_BURN_STACKS = 5;
+  private static readonly MAX_BURN_STACKS = 3;
 
   private armorReduction: number = 0;
-  private static readonly MAX_ARMOR_REDUCTION = 50;
+  private static readonly MAX_ARMOR_REDUCTION = 25;
 
   private brittleEndTime: number = 0;
 

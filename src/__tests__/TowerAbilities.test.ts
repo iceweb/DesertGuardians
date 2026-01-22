@@ -158,7 +158,7 @@ describe('Tower Abilities', () => {
     it('should have Corrosive Acid with armor reduction', () => {
       const corrosive = abilities.find((a) => a.id === 'poison_corrosive');
       expect(corrosive).toBeDefined();
-      expect(corrosive!.effectParams.armorReduction).toBe(10);
+      expect(corrosive!.effectParams.armorReduction).toBe(5);
     });
   });
 
@@ -182,7 +182,7 @@ describe('Tower Abilities', () => {
     it('should have Incendiary Rounds with burn damage', () => {
       const incendiary = abilities.find((a) => a.id === 'rapid_incendiary');
       expect(incendiary).toBeDefined();
-      expect(incendiary!.effectParams.burnDamage).toBe(15);
+      expect(incendiary!.effectParams.burnDamage).toBe(10);
       expect(incendiary!.effectParams.burnDuration).toBe(3000);
     });
   });

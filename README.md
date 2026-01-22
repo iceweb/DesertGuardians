@@ -114,7 +114,7 @@ Tower defense games are significantly more complex than platformers:
 - **Event-driven design** — Decoupled systems via GameEventBus
 - **Context-aware input** — InputSystem handles keyboard/mouse based on game state
 - **Modular components** — Split large files into focused, testable modules
-- **456 unit tests** — Comprehensive test coverage with Vitest
+- **467 unit tests** — Comprehensive test coverage with Vitest
 
 ---
 
@@ -124,13 +124,13 @@ All towers start as **Archer Tower** and can branch into specialized paths at le
 
 | Tower | Type | Specialty | Signature Abilities |
 |:------|:-----|:----------|:--------------------|
-| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Multi-Shot, Piercing Arrow, Quick Draw |
+| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Multi-Shot, Piercing Arrow, Heavy Arrows |
 | ⚡ **Rapid Fire** | Physical | Extreme attack speed | Bullet Storm, Ricochet, Incendiary Rounds |
 | 🎯 **Sniper** | Physical | High damage, long range | Critical Strike, Armor Pierce, Headshot |
-| 💣 **Rock Cannon** | Physical | Splash damage (70-110px) | Aftershock, Earthquake, Shrapnel Burst |
-| ❄️ **Ice Tower** | Magic | Slows enemies 40-65% | Ice Trap, Frost Nova, Shatter |
-| ☠️ **Poison Tower** | Magic | DoT, ignores armor | Plague Spread, Toxic Explosion, Corrosive Acid |
-| ✨ **Aura Tower** | Support | Buffs nearby towers 20-50% | War Cry, Critical Aura, Overcharge |
+| 💣 **Rock Cannon** | Physical | Splash damage (70-110px) | Aftershock, Tremor, Shrapnel Burst |
+| ❄️ **Ice Tower** | Magic | Slows enemies, 80% armor pen | Ice Trap, Frost Nova, Deep Freeze |
+| ☠️ **Poison Tower** | Magic | DoT, 80% armor pen, no air | Plague Spread, Toxic Explosion, Corrosive Acid |
+| ✨ **Aura Tower** | Support | Buffs nearby towers 20-50% | War Cry, Critical Aura, Echo Amplify |
 
 ---
 
@@ -195,7 +195,7 @@ npm run build
 Desert Guardians/
 ├── src/
 │   ├── main.ts              # Entry point
-│   ├── __tests__/           # Unit tests (456 tests)
+│   ├── __tests__/           # Unit tests (467 tests)
 │   ├── data/                # Game configuration & tower data
 │   ├── graphics/            # Tower and creep animations
 │   │   ├── creeps/          # Creep renderers by type

@@ -139,7 +139,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'ice_deepfreeze',
       name: 'Deep Freeze',
-      description: 'Target takes +30% Physical Damage for 2.5s',
+      description: 'Target takes +20% Physical Damage for 2.5s',
       triggerChance: 0.12,
       icon: { type: AbilityIconType.DEEP_FREEZE, primaryColor: 0x4488ff, secondaryColor: 0x88ccff },
       effectParams: { brittleDuration: 2500 },
@@ -169,10 +169,10 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'poison_corrosive',
       name: 'Corrosive Acid',
-      description: 'Reduce armor by 10 per stack (max -50)',
+      description: 'Reduce armor by 5 per stack (max -25)',
       triggerChance: 0.25,
       icon: { type: AbilityIconType.ACID_DROP, primaryColor: 0x9acd32, secondaryColor: 0xadff2f },
-      effectParams: { armorReduction: 10 },
+      effectParams: { armorReduction: 5 },
     },
   ],
   rapidfire: [
@@ -206,7 +206,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
         primaryColor: 0xff6600,
         secondaryColor: 0xff3300,
       },
-      effectParams: { burnDamage: 15, burnDuration: 3000 },
+      effectParams: { burnDamage: 10, burnDuration: 3000 },
     },
   ],
   aura: [

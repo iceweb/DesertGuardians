@@ -251,7 +251,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Slows enemies by 40% for 2s. Max 2 targets.',
     stats: {
       range: 180,
-      fireRate: 1100,
+      fireRate: 1400,
       damage: 8,
       slowPercent: 0.4,
       slowDuration: 2000,
@@ -268,7 +268,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Freezing cold. 50% slow for 2.5s. Max 3 targets.',
     stats: {
       range: 200,
-      fireRate: 1000,
+      fireRate: 1300,
       damage: 12,
       slowPercent: 0.5,
       slowDuration: 2500,
@@ -285,7 +285,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Absolute zero. 60% slow for 3s. Max 4 targets.',
     stats: {
       range: 220,
-      fireRate: 900,
+      fireRate: 1200,
       damage: 18,
       slowPercent: 0.6,
       slowDuration: 3000,
@@ -300,10 +300,10 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 1,
     upgradeCost: 65,
-    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. Ignores armor. Great vs armored!',
+    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. 80% armor pen. Great vs armored!',
     stats: {
       range: 200,
-      fireRate: 1400,
+      fireRate: 1800,
       damage: 5,
       dotDamage: 5,
       dotDuration: 5000,
@@ -319,7 +319,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x. Great vs armored!',
     stats: {
       range: 220,
-      fireRate: 1300,
+      fireRate: 1650,
       damage: 8,
       dotDamage: 8,
       dotDuration: 5000,
@@ -335,7 +335,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x. Great vs armored!',
     stats: {
       range: 240,
-      fireRate: 1150,
+      fireRate: 1500,
       damage: 12,
       dotDamage: 12,
       dotDuration: 6000,
@@ -459,7 +459,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Absolute zero. 65% slow for 3.5s. Special ability.',
     stats: {
       range: 240,
-      fireRate: 850,
+      fireRate: 1100,
       damage: 24,
       slowPercent: 0.65,
       slowDuration: 3500,
@@ -477,7 +477,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     description: 'Plague master. 15 dmg/s for 6s. Great vs armored! Special ability.',
     stats: {
       range: 260,
-      fireRate: 1100,
+      fireRate: 1400,
       damage: 15,
       dotDamage: 15,
       dotDuration: 6000,

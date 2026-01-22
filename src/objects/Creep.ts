@@ -377,15 +377,15 @@ export class Creep extends Phaser.GameObjects.Container {
     }
 
     const effectiveArmor = Math.max(0, this.config.armor - this.statusEffects.getArmorReduction());
+    // Magic damage uses 80% of armor (20% penetration), physical uses full armor
+    const armorForCalc = isMagic ? effectiveArmor * 0.8 : effectiveArmor;
     // Percentage-based armor: damage * (100 / (100 + armor))
-    const armorMultiplier = 100 / (100 + effectiveArmor);
+    const armorMultiplier = 100 / (100 + armorForCalc);
 
-    // Brittle status: +30% physical damage
-    const brittleMultiplier = !isMagic && this.statusEffects.isBrittle() ? 1.3 : 1.0;
+    // Brittle status: +20% physical damage (doesn't affect magic)
+    const brittleMultiplier = !isMagic && this.statusEffects.isBrittle() ? 1.2 : 1.0;
 
-    const actualDamage = isMagic
-      ? amount
-      : Math.max(1, Math.round(amount * armorMultiplier * brittleMultiplier));
+    const actualDamage = Math.max(1, Math.round(amount * armorMultiplier * brittleMultiplier));
     const previousHealth = this.currentHealth;
     this.currentHealth -= actualDamage;
 

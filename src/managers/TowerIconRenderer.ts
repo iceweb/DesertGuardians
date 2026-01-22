@@ -193,7 +193,7 @@ export const TOWER_HINTS: Record<TowerBranch, string> = {
   sniper: '🎯 Extreme range and damage. Best for picking off tough single targets.',
   rockcannon: '💥 Splash damage hits multiple enemies. Great for swarms.',
   icetower: '❄️ Slows enemies so other towers deal more damage. Essential support.',
-  poison: '☠️ Damage over time ignores armor. Best counter to armored units!',
+  poison: '☠️ Damage over time with 80% armor penetration. Best counter to armored units!',
   aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.',
 };
 
