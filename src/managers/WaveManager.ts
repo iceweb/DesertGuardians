@@ -30,6 +30,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   private pathSystem!: PathSystem;
 
   private currentWave: number = 0;
+  private wavesCompleted: number = 0;
   private waveInProgress: boolean = false;
   private waveStarted: boolean = false;
 
@@ -328,6 +329,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     if (totalHandled >= this.creepsToSpawn && activeCount === 0) {
       this.waveInProgress = false;
+      this.wavesCompleted++;
 
       this.emit('waveComplete', this.currentWave);
 
@@ -339,6 +341,10 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
   getCurrentWave(): number {
     return this.currentWave;
+  }
+
+  getWavesCompleted(): number {
+    return this.wavesCompleted;
   }
 
   getTotalWaves(): number {

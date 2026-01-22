@@ -155,6 +155,11 @@ export class GameScene extends Phaser.Scene {
     // Register shutdown handler to clean up managers
     this.events.once('shutdown', this.handleShutdown, this);
 
+    // Listen for pause events to track pause time for score calculation
+    this.events.on('pauseToggled', (isPaused: boolean) => {
+      this.gameController.setPaused(isPaused);
+    });
+
     // Show difficulty selection overlay
     this.gameReady = false;
     this.showDifficultySelection();
@@ -540,7 +545,7 @@ export class GameScene extends Phaser.Scene {
 
     const resultData = {
       isVictory,
-      waveReached: this.waveManager.getCurrentWave(),
+      waveReached: this.waveManager.getWavesCompleted(),
       totalWaves: this.waveManager.getTotalWaves(),
       castleHP: stateSnapshot.castleHP,
       maxCastleHP: stateSnapshot.maxCastleHP,
@@ -689,6 +694,9 @@ export class GameScene extends Phaser.Scene {
     if (!this.hudManager.isPausedState()) {
       this.hudManager.updateCountdown(scaledDelta);
     }
+
+    // Update elapsed time display (every frame is fine, it's just a text update)
+    this.hudManager.updateTime(this.gameController.getElapsedRealTime());
 
     // Skip game logic updates when paused
     if (this.hudManager.isPausedState()) return;

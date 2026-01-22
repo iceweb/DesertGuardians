@@ -18,6 +18,7 @@ export class HUDManager {
   private nextWavePanel: NextWavePanel;
 
   private goldText!: Phaser.GameObjects.Text;
+  private timeText!: Phaser.GameObjects.Text;
   private waveText!: Phaser.GameObjects.Text;
   private hpText!: Phaser.GameObjects.Text;
   private hpBar!: Phaser.GameObjects.Graphics;
@@ -116,6 +117,17 @@ export class HUDManager {
         strokeThickness: 3,
       })
       .setOrigin(0, 0.5)
+      .setDepth(101);
+
+    this.timeText = this.scene.add
+      .text(width - 180, 32, '⏱ 0:00', {
+        fontFamily: 'Arial Black',
+        fontSize: '22px',
+        color: '#88ccff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5, 0.5)
       .setDepth(101);
 
     this.hpText = this.scene.add
@@ -481,6 +493,21 @@ export class HUDManager {
   updateWave(currentWave: number): void {
     this.currentWave = currentWave;
     this.waveText.setText(`⚔️ WAVE ${this.currentWave} / ${this.totalWaves}`);
+  }
+
+  updateTime(seconds: number): void {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    this.timeText.setText(`⏱ ${mins}:${secs.toString().padStart(2, '0')}`);
+
+    // Color changes based on time bonus thresholds
+    if (seconds <= 900) {
+      this.timeText.setColor('#44ff44'); // Green - max bonus
+    } else if (seconds <= 2700) {
+      this.timeText.setColor('#88ccff'); // Blue - partial bonus
+    } else {
+      this.timeText.setColor('#ffaa44'); // Orange - no bonus
+    }
   }
 
   private updateHPBar(): void {

@@ -117,10 +117,10 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   flame: {
     type: 'flame',
-    maxHealth: 45,
-    speed: 95,
-    armor: 8,
-    goldReward: 10,
+    maxHealth: 30,
+    speed: 90,
+    armor: 4,
+    goldReward: 9,
     onlyDamagedBy: 'ice',
     description: '🔥 Only damaged by Ice Towers! Immune to other damage.',
   },
