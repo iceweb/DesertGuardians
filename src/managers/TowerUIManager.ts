@@ -805,6 +805,9 @@ export class TowerUIManager {
             0
           );
           hitArea.setInteractive({ useHandCursor: true });
+          // Capture references at creation time
+          const capturedTower = tower;
+          const capturedBranchKey = branchKey;
           hitArea.on(
             'pointerdown',
             (
@@ -814,7 +817,14 @@ export class TowerUIManager {
               event: Phaser.Types.Input.EventData
             ) => {
               event.stopPropagation();
-              this.onUpgradeRequested?.(tower, branchKey);
+              // Re-check affordability at click time
+              const currentGold = this.getPlayerGold?.() || 0;
+              const requiredCost = TOWER_CONFIGS[capturedBranchKey]?.upgradeCost || 0;
+              if (currentGold < requiredCost) {
+                console.warn('Cannot afford upgrade anymore:', currentGold, '<', requiredCost);
+                return;
+              }
+              this.onUpgradeRequested?.(capturedTower, capturedBranchKey);
             }
           );
           hitArea.on('pointerover', () => {
@@ -861,6 +871,13 @@ export class TowerUIManager {
           enabled: canAfford,
           onClick: canAfford
             ? () => {
+                // Re-check affordability at click time
+                const currentGold = this.getPlayerGold?.() || 0;
+                const requiredCost = levelUpConfig.upgradeCost || 0;
+                if (currentGold < requiredCost) {
+                  console.warn('Cannot afford upgrade anymore:', currentGold, '<', requiredCost);
+                  return;
+                }
                 if (isLevel4) {
                   this.showAbilitySelection(tower, upgradeOptions.levelUp!);
                 } else {

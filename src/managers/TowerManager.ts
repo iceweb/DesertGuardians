@@ -245,8 +245,18 @@ export class TowerManager {
   }
 
   private upgradeTower(tower: Tower, newKey: string): void {
+    // Validate tower still exists (may have been sold or destroyed)
+    if (!this.towers.includes(tower)) {
+      console.warn('TowerManager: Attempted to upgrade non-existent tower');
+      this.uiManager.closeMenus();
+      return;
+    }
+
     const newConfig = TOWER_CONFIGS[newKey];
-    if (!newConfig) return;
+    if (!newConfig) {
+      console.warn('TowerManager: Invalid upgrade key:', newKey);
+      return;
+    }
 
     const cost = newConfig.upgradeCost || 0;
 

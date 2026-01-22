@@ -117,9 +117,9 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   flame: {
     type: 'flame',
-    maxHealth: 30,
+    maxHealth: 24,
     speed: 90,
-    armor: 4,
+    armor: 2,
     goldReward: 9,
     onlyDamagedBy: 'ice',
     description: '🔥 Only damaged by Ice Towers! Immune to other damage.',
@@ -415,8 +415,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
       { type: 'tank', count: 12, intervalMs: 1200 },
       { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
       { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
-      { type: 'boss_guard_1', count: 2, intervalMs: 2000, delayStart: 26000 },
-      { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 26000 },
+      { type: 'boss_guard_1', count: 2, intervalMs: 1500, delayStart: 26000 },
+      { type: 'boss_3', count: 1, intervalMs: 500, delayStart: 28000 },
     ],
   },
   {
@@ -479,8 +479,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
       { type: 'shielded', count: 12, intervalMs: 1100 },
       { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
       { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },
-      { type: 'boss_guard_2', count: 2, intervalMs: 2000, delayStart: 30000 },
-      { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 30000 },
+      { type: 'boss_guard_2', count: 2, intervalMs: 1500, delayStart: 30000 },
+      { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 32000 },
     ],
   },
   {
