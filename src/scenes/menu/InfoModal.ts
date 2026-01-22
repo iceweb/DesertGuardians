@@ -38,25 +38,25 @@ export class InfoModal {
           title: '🏰 YOUR MISSION',
           content: [
             'Defend your castle through 35 waves!',
-            'Castle HP: 25 — lose it all and game over.',
+            'Castle HP: 25 — lose it all, game over.',
             'Regular enemies deal 1 damage if leaked.',
-            'Bosses deal 2 damage — stop them at all costs!',
+            'Bosses deal 2 damage — stop them!',
           ],
         },
         {
           title: '🎮 HOW TO PLAY',
           content: [
             'Click empty tile → Build menu appears',
-            'Click tower → Upgrade/Sell/Ability options',
+            'Click tower → Upgrade/Sell/Ability',
             'Towers auto-target enemies in range',
-            'Press SPACE or click ▶ to start waves',
+            'Press SPACE or ▶ to start waves',
           ],
         },
         // RIGHT COLUMN
         {
           title: '💰 ECONOMY',
           content: [
-            'Start with 200 gold on Normal difficulty',
+            'Start: 200g Normal, 250g Easy, 150g Hard',
             'Earn gold by killing enemies',
             'Build Gold Mines for passive income',
             'Sell towers for 60% refund',
@@ -65,137 +65,236 @@ export class InfoModal {
         {
           title: '🏆 SCORING',
           content: [
-            '+100 points per wave completed',
-            '+0.2 points per gold earned',
-            '+100 points per HP remaining',
+            '+100 per wave | +0.2 per gold earned',
+            '+100 per HP remaining at end',
             'Time bonus ×1.0-1.35 (victory only)',
-            'Difficulty: Easy ×0.75 | Hard ×1.25',
+            'Difficulty: Easy×0.75 | Hard×1.25',
           ],
         },
       ],
-      // PAGE 2: YOUR ARSENAL - All tower types explained
+      // PAGE 2: YOUR ARSENAL - Tower types
       [
         // LEFT COLUMN
         {
-          title: '🗼 PHYSICAL TOWERS',
+          title: '🏹 PHYSICAL TOWERS',
           content: [
-            '🏹 Archer — Fast, cheap, +200% vs flying',
-            '⚡ Rapid Fire — Extremely fast attacks',
-            '🎯 Sniper — Longest range, highest damage',
-            '💣 Cannon — Splash damage, ground only',
+            'Archer — Fast, cheap, +200% vs flying',
+            'Rapid Fire — Very fast, lower damage',
+            'Sniper — Longest range, huge damage',
+            'Cannon — Splash AoE, ground only',
           ],
         },
         {
           title: '🔮 MAGIC TOWERS',
           content: [
-            '❄️ Ice — Slows enemies, ignores armor',
-            '☠️ Poison — DoT, ignores armor, ground only',
-            'Magic damage bypasses ALL armor!',
-            'Essential against high-armor Tanks.',
+            'Ice — Slows enemies, ignores armor',
+            'Poison — DoT, ignores armor, no air',
+            'Magic bypasses ALL armor!',
+            'Essential vs high-armor Tanks.',
           ],
         },
         // RIGHT COLUMN
         {
-          title: '✨ SUPPORT TOWER',
+          title: '✨ AURA TOWER',
           content: [
-            '✨ Aura — Buffs all towers in range',
+            'Buffs ALL towers in its range',
             'Does not attack directly',
-            'Choose: +Damage, +Crit, or +Multicast',
-            'One Aura can buff multiple towers!',
+            'Choose: +Dmg, +Crit, or +Echo',
+            'Position to buff multiple towers!',
           ],
         },
         {
-          title: '⚔️ DAMAGE FORMULA',
+          title: '⚔️ ARMOR FORMULA',
           content: [
-            'Physical: damage × 100/(100+armor)',
+            'Physical: dmg × 100/(100+armor)',
             '50 armor = 33% reduction',
             '100 armor = 50% reduction',
-            '200 armor = 67% reduction',
             'Magic: Full damage always!',
           ],
         },
       ],
-      // PAGE 3: KNOW YOUR ENEMY - All enemy types
+      // PAGE 3: ENEMIES & BOSSES
       [
         // LEFT COLUMN
         {
           title: '👾 COMMON ENEMIES',
           content: [
-            '🟤 Furball — Standard, no tricks',
-            '🟡 Runner — Fast but low HP',
-            '🔵 Tank — Slow, high armor & HP',
-            '🟢 Shielded — Absorbs first 3 hits',
-            '🟣 Jumper — Leaps forward in bursts',
+            'Furball — Standard, no tricks',
+            'Runner — Fast but fragile',
+            'Tank — Slow, high armor & HP',
+            'Shielded — Blocks first 3 hits',
+            'Jumper — Leaps forward in bursts',
           ],
         },
         {
           title: '👻 SPECIAL ENEMIES',
           content: [
-            '🪽 Flying — Immune to Cannon & Poison',
-            '🕳️ Digger — Burrows, briefly untargetable',
-            '👻 Ghost — Phases out when damaged',
-            '🕷️ Broodmother — Spawns babies on death',
+            'Flying — Immune to Cannon & Poison',
+            'Digger — Burrows, briefly untargetable',
+            'Ghost — Phases out when hit',
+            'Broodmother — Spawns babies on death',
           ],
         },
         // RIGHT COLUMN
         {
-          title: '⚠️ COUNTER-PICKS',
+          title: '⚠️ HARD COUNTERS',
           content: [
-            '🔥 Flame — ONLY Ice towers work!',
+            '🔥 Flame — ONLY Ice damages it!',
             '☣️ Plaguebearer — ONLY Poison works!',
-            'Build the right towers or they pass!',
+            'Wrong towers = they walk through!',
             'Check wave preview before building.',
           ],
         },
         {
           title: '🐉 BOSS WAVES',
           content: [
-            'Waves 11, 18, 25, 30, 35 have bosses',
-            'Bosses deal 2 damage if leaked',
-            'They dispel debuffs periodically',
-            'Later bosses bring elite guards',
-            'Focus fire and slow them down!',
+            'Waves 11, 18, 25, 30, 35',
+            'Deal 2 damage if leaked',
+            'Dispel debuffs periodically',
+            'Later bosses have elite guards',
           ],
         },
       ],
-      // PAGE 4: MASTERY - Abilities and Synergies
+      // PAGE 4: PHYSICAL TOWER ABILITIES
       [
         // LEFT COLUMN
         {
-          title: '⚡ TOWER ABILITIES',
+          title: '💣 CANNON ABILITIES',
           content: [
-            'At level 4, each tower unlocks 3 abilities',
-            'Choose ONE ability per tower',
-            'Some trigger on hit, others are passive',
-            'Abilities define your late-game strategy!',
+            'Aftershock — Stuns briefly on hit',
+            '  → Great for slowing boss rushes',
+            'Tremor — Damage zone + 30% slow',
+            '  → Area denial, synergy with slows',
+            'Shrapnel — AoE deals 35% damage',
+            '  → Best for clustered waves',
           ],
         },
         {
-          title: '💥 DAMAGE ABILITIES',
+          title: '🎯 SNIPER ABILITIES',
           content: [
-            'Cannon: Aftershock/Tremor/Shrapnel',
-            'Sniper: Critical/Pierce/Headshot',
-            'Rapid: BulletStorm/Ricochet/Incendiary',
-            'Archer: MultiShot/Piercing/HeavyArrows',
+            'Critical Strike — 3× damage crits',
+            '  → Huge burst, scales with Aura',
+            'Armor Pierce — Ignores 50% armor',
+            '  → Shreds Tanks without magic',
+            'Headshot — Instant kill low HP',
+            '  → Execute threshold 25% HP',
           ],
         },
         // RIGHT COLUMN
         {
-          title: '🧊 DEBUFF ABILITIES',
+          title: '⚡ RAPID FIRE ABILITIES',
           content: [
-            'Ice: Trap/FrostNova/DeepFreeze',
-            'Poison: Plague/Explosion/Corrosive',
-            'Aura: +25%Dmg/+15%Crit/+10%Echo',
-            'Debuffs stack with physical damage!',
+            'Bullet Storm — 2× speed, less dmg',
+            '  → More procs, faster status apply',
+            'Ricochet — Bounces to 2 targets',
+            '  → Spread damage in clusters',
+            'Incendiary — Burn stacks (max 5×)',
+            '  → 75 DPS at full stacks!',
           ],
         },
         {
+          title: '🏹 ARCHER ABILITIES',
+          content: [
+            'Multi-Shot — Hits 3 targets at once',
+            '  → Efficient vs swarms',
+            'Piercing Arrow — Hits all in a line',
+            '  → Perfect for path chokes',
+            'Heavy Arrows — Knockback enemies',
+            '  → Buys time, 10% on bosses',
+          ],
+        },
+      ],
+      // PAGE 5: MAGIC & SUPPORT ABILITIES
+      [
+        // LEFT COLUMN
+        {
+          title: '❄️ ICE TOWER ABILITIES',
+          content: [
+            'Ice Trap — Creates freezing zone',
+            '  → Zone control, stops groups',
+            'Frost Nova — Freezes all nearby',
+            '  → Emergency AoE freeze',
+            'Deep Freeze — Brittle: +30% phys',
+            '  → HUGE synergy with Snipers!',
+          ],
+        },
+        {
+          title: '☠️ POISON ABILITIES',
+          content: [
+            'Plague Spread — DoT spreads nearby',
+            '  → Chain reaction in clusters',
+            'Toxic Explosion — 80 dmg on death',
+            '  → Finisher, clears weakened mobs',
+            'Corrosive Acid — Stacking -10 armor',
+            '  → Up to -50 armor! Tank shredder',
+          ],
+        },
+        // RIGHT COLUMN
+        {
+          title: '✨ AURA ABILITIES',
+          content: [
+            'Battle Cry — +25% damage to allies',
+            '  → Best general-purpose buff',
+            'Precision Field — +15% crit chance',
+            '  → Amazing with Snipers',
+            'Echo Amplify — 10% double-shot',
+            '  → Chance to fire twice!',
+          ],
+        },
+        {
+          title: '⚡ ABILITY UNLOCKS',
+          content: [
+            'Reach tower level 4 to unlock',
+            'Choose ONE ability per tower',
+            'Cannot change after selection!',
+            'Plan your build carefully.',
+          ],
+        },
+      ],
+      // PAGE 6: SYNERGIES & PRO TIPS
+      [
+        // LEFT COLUMN
+        {
           title: '🔥 POWER COMBOS',
           content: [
-            'Deep Freeze → Snipers = +30% damage',
-            'Corrosive Acid → Cannons = Tank killer',
-            'Incendiary × 5 stacks = Massive DoT',
-            'Echo Aura + Snipers = Double crits',
+            'Deep Freeze + Snipers',
+            '  → +30% physical damage boost',
+            'Corrosive Acid + Cannons',
+            '  → Strip armor, then AoE nuke',
+            'Incendiary × 5 stacks',
+            '  → 75 burn DPS melts everything',
+          ],
+        },
+        {
+          title: '💎 ADVANCED COMBOS',
+          content: [
+            'Echo Aura + Crit Sniper',
+            '  → Double-shot crits = massive',
+            'Tremor + Ice Trap',
+            '  → Perma-slow kill zones',
+            'Heavy Arrows + Frost Nova',
+            '  → Knockback into freeze',
+          ],
+        },
+        // RIGHT COLUMN
+        {
+          title: '💡 PRO TIPS',
+          content: [
+            'Build Gold Mines in wave 1-5',
+            'Ice towers are ESSENTIAL for bosses',
+            'Mix tower types for all threats',
+            'Sell unused towers before bosses',
+            'Aura placement affects many towers',
+          ],
+        },
+        {
+          title: '🎯 BOSS STRATEGY',
+          content: [
+            'Stack slows: Ice + Tremor combo',
+            'Deep Freeze before Sniper burst',
+            'Corrosive early to strip armor',
+            'Save gold for emergency towers',
+            'Knockback buys extra shot time',
           ],
         },
       ],
