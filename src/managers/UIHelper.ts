@@ -161,6 +161,8 @@ export class UIHelper {
       });
 
       if (onClick) {
+        // Capture onClick reference at registration time for reliability
+        const capturedOnClick = onClick;
         hitArea.on(
           'pointerdown',
           (
@@ -170,8 +172,9 @@ export class UIHelper {
             event: Phaser.Types.Input.EventData
           ) => {
             event.stopPropagation();
-            // Use setTimeout to ensure visual feedback renders before action
-            setTimeout(() => onClick(), 0);
+            // Execute synchronously - action must happen before any state changes
+            // The visual pressed state was already applied by the earlier pointerdown handler
+            capturedOnClick();
           }
         );
       }
