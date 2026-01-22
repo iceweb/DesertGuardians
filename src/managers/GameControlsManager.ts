@@ -212,6 +212,9 @@ export class GameControlsManager {
   togglePause(): void {
     this.isPaused = !this.isPaused;
 
+    // Pause/resume Phaser's time system to freeze all delayedCall timers
+    this.scene.time.paused = this.isPaused;
+
     if (this.isPaused) {
       this.showPauseOverlay();
     } else {
