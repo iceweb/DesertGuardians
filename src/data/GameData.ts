@@ -40,7 +40,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   tank: {
     type: 'tank',
-    maxHealth: 280,
+    maxHealth: 252,
     speed: 50,
     armor: 35,
     goldReward: 15,
@@ -85,7 +85,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   ghost: {
     type: 'ghost',
-    maxHealth: 175,
+    maxHealth: 158,
     speed: 75,
     armor: 0,
     goldReward: 14,
@@ -94,7 +94,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   broodmother: {
     type: 'broodmother',
-    maxHealth: 450,
+    maxHealth: 405,
     speed: 35,
     armor: 30,
     goldReward: 25,
@@ -117,16 +117,16 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   flame: {
     type: 'flame',
-    maxHealth: 16,
-    speed: 90,
-    armor: 0,
-    goldReward: 8,
+    maxHealth: 45,
+    speed: 95,
+    armor: 8,
+    goldReward: 10,
     onlyDamagedBy: 'ice',
     description: '🔥 Only damaged by Ice Towers! Immune to other damage.',
   },
   plaguebearer: {
     type: 'plaguebearer',
-    maxHealth: 120,
+    maxHealth: 108,
     speed: 75,
     armor: 10,
     goldReward: 12,
@@ -158,7 +158,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_3: {
     type: 'boss_3',
-    maxHealth: 2635,
+    maxHealth: 2370,
     speed: 40,
     armor: 47,
     goldReward: 160,
@@ -169,7 +169,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_4: {
     type: 'boss_4',
-    maxHealth: 4000,
+    maxHealth: 3600,
     speed: 35,
     armor: 60,
     goldReward: 240,
@@ -180,7 +180,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_5: {
     type: 'boss_5',
-    maxHealth: 6545,
+    maxHealth: 5890,
     speed: 30,
     armor: 77,
     goldReward: 400,
@@ -192,7 +192,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   boss_guard_1: {
     type: 'boss_guard_1',
-    maxHealth: 700,
+    maxHealth: 630,
     speed: 38,
     armor: 45,
     goldReward: 40,
@@ -202,7 +202,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_guard_2: {
     type: 'boss_guard_2',
-    maxHealth: 1050,
+    maxHealth: 945,
     speed: 36,
     armor: 50,
     goldReward: 60,
@@ -212,7 +212,7 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
   },
   boss_guard_3: {
     type: 'boss_guard_3',
-    maxHealth: 1550,
+    maxHealth: 1395,
     speed: 34,
     armor: 60,
     goldReward: 80,
