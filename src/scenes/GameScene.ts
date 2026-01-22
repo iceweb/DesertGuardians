@@ -16,6 +16,7 @@ import {
   GameController,
   HighscoreAPI,
 } from '../managers';
+import { InputQueue } from '../managers/InputQueue';
 import type { Difficulty } from '../managers';
 import { Creep } from '../objects';
 import { GameEnvironment } from '../graphics';
@@ -130,6 +131,12 @@ export class GameScene extends Phaser.Scene {
     this.audioManager = AudioManager.getInstance();
     this.audioManager.initialize();
     this.audioManager.playBGM();
+
+    // Initialize priority input queue for reliable click handling at high speeds
+    const canvas = this.game.canvas;
+    if (canvas) {
+      InputQueue.getInstance().init(canvas);
+    }
 
     HighscoreAPI.requestSession().then((token) => {
       if (token) {
@@ -341,6 +348,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleShutdown(): void {
+    // Clear input queue handlers on shutdown
+    InputQueue.getInstance().clearHandlers();
+    InputQueue.getInstance().clearQueue();
+
     this.towerManager?.destroy();
     this.goldMineUIManager?.destroy();
     this.goldMineManager?.destroy();
@@ -661,9 +672,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    // Process queued clicks FIRST - before any game logic
+    // This ensures clicks are never lost during heavy frames
+    InputQueue.getInstance().processQueue();
+
     if (this.gameController.gameOver) return;
     if (!this.gameReady) return;
 
+    // Cap delta to prevent physics issues on slow frames
+    // At 3x speed, 50ms cap = 150ms game time max per frame
     const cappedDelta = Math.min(delta, 50);
     const gameSpeed = this.hudManager.getGameSpeed();
     const scaledDelta = cappedDelta * gameSpeed;

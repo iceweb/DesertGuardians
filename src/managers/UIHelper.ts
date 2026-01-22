@@ -56,7 +56,7 @@ export class UIHelper {
     this.scene = scene;
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-lines-per-function */
   createButton(config: ButtonConfig): ButtonResult {
     const {
       text,
@@ -137,6 +137,29 @@ export class UIHelper {
         background.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
       });
 
+      // Pressed state - immediate visual feedback before action executes
+      hitArea.on('pointerdown', () => {
+        background.clear();
+        // Pressed effect: darker, slightly offset to simulate press
+        background.fillStyle(0x1a1a1a, 1);
+        background.fillRoundedRect(-btnWidth / 2 + 1, -btnHeight / 2 + 2, btnWidth, btnHeight, 6);
+        background.lineStyle(2, 0xffffff, 0.8);
+        background.strokeRoundedRect(-btnWidth / 2 + 1, -btnHeight / 2 + 2, btnWidth, btnHeight, 6);
+      });
+
+      hitArea.on('pointerup', () => {
+        // Restore to hover state since pointer is still over
+        background.clear();
+        background.fillStyle(THEME.colors.warmShadow, 0.3);
+        background.fillRoundedRect(-btnWidth / 2 + 2, -btnHeight / 2 + 3, btnWidth, btnHeight, 6);
+        background.fillStyle(hoverBgColor, 1);
+        background.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
+        background.fillStyle(THEME.colors.warmHighlight, 0.12);
+        background.fillRoundedRect(-btnWidth / 2 + 3, -btnHeight / 2 + 3, btnWidth - 6, 8, 5);
+        background.lineStyle(2, borderColor, 1);
+        background.strokeRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
+      });
+
       if (onClick) {
         hitArea.on(
           'pointerdown',
@@ -147,7 +170,8 @@ export class UIHelper {
             event: Phaser.Types.Input.EventData
           ) => {
             event.stopPropagation();
-            onClick();
+            // Use setTimeout to ensure visual feedback renders before action
+            setTimeout(() => onClick(), 0);
           }
         );
       }
