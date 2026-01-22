@@ -101,7 +101,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'sniper_pierce',
       name: 'Armor Pierce',
-      description: 'Shot ignores 100% armor',
+      description: 'Shot deals magic damage (80% armor pen)',
       triggerChance: 0.2,
       icon: {
         type: AbilityIconType.DIAMOND_BULLET,
@@ -199,7 +199,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'rapid_incendiary',
       name: 'Incendiary Rounds',
-      description: 'Apply burn: 15 dmg/sec for 3s (stacks 5x)',
+      description: 'Apply burn: 10 dmg/sec for 3s (stacks 3×)',
       triggerChance: 0.15,
       icon: {
         type: AbilityIconType.FLAME_BULLET,

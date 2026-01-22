@@ -161,21 +161,21 @@ export class InfoModal {
         {
           title: '💣 CANNON ABILITIES',
           content: [
-            'Aftershock — Stuns briefly on hit',
-            '  → Great for slowing boss rushes',
+            'Aftershock — 3 extra explosions',
+            '  → 50% dmg each, delayed impact',
             'Tremor — Damage zone + 30% slow',
             '  → Area denial, synergy with slows',
-            'Shrapnel — AoE deals 35% damage',
+            'Shrapnel — 6 fragments (35% dmg)',
             '  → Best for clustered waves',
           ],
         },
         {
           title: '🎯 SNIPER ABILITIES',
           content: [
-            'Critical Strike — 3× damage crits',
+            'Critical Strike — 2× damage crits',
             '  → Huge burst, scales with Aura',
-            'Armor Pierce — Ignores 50% armor',
-            '  → Shreds Tanks without magic',
+            'Armor Pierce — 80% armor pen',
+            '  → Uses magic dmg path vs Tanks',
             'Headshot — Instant kill low HP',
             '  → Execute threshold 25% HP',
           ],
@@ -186,7 +186,7 @@ export class InfoModal {
           content: [
             'Bullet Storm — 2× speed, less dmg',
             '  → More procs, faster status apply',
-            'Ricochet — Bounces to 2 targets',
+            'Ricochet — Bounces to 1 extra target',
             '  → Spread damage in clusters',
             'Incendiary — Burn stacks (max 3×)',
             '  → 30 DPS at full stacks!',
@@ -197,7 +197,7 @@ export class InfoModal {
           content: [
             'Multi-Shot — Hits 3 targets at once',
             '  → Efficient vs swarms',
-            'Piercing Arrow — Hits all in a line',
+            'Piercing Arrow — Passes through +2',
             '  → Perfect for path chokes',
             'Heavy Arrows — Knockback enemies',
             '  → Buys time, 10% on bosses',
@@ -210,10 +210,10 @@ export class InfoModal {
         {
           title: '❄️ ICE TOWER ABILITIES',
           content: [
-            'Ice Trap — Creates freezing zone',
-            '  → Zone control, stops groups',
-            'Frost Nova — Freezes all nearby',
-            '  → Emergency AoE freeze',
+            'Ice Trap — Freeze target 2s',
+            '  → Stops enemy completely',
+            'Frost Nova — Slows all nearby',
+            '  → AoE 80px slow effect',
             'Deep Freeze — Brittle: +20% phys',
             '  → HUGE synergy with Snipers!',
           ],
@@ -233,9 +233,9 @@ export class InfoModal {
         {
           title: '✨ AURA ABILITIES',
           content: [
-            'Battle Cry — +25% damage to allies',
+            'War Cry — +25% attack speed',
             '  → Best general-purpose buff',
-            'Precision Field — +15% crit chance',
+            'Critical Aura — +15% crit chance',
             '  → Amazing with Snipers',
             'Echo Amplify — 10% double-shot',
             '  → Chance to fire twice!',

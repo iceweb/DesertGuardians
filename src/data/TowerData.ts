@@ -54,8 +54,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     level: 1,
     buildCost: 50,
     upgradeCost: 0,
-    description:
-      'Basic tower. Highly effective vs air (+200% damage). Can branch into specialized towers.',
+    description: 'Basic tower with +200% damage vs flying units. Upgrade to specialize.',
     stats: {
       range: 200,
       fireRate: 900,
@@ -70,7 +69,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'archer',
     level: 2,
     upgradeCost: 110,
-    description: 'Improved archer. Highly effective vs air (+200% damage). Can still branch.',
+    description: 'Improved archer with +200% damage vs flying. Can still specialize.',
     stats: {
       range: 220,
       fireRate: 800,
@@ -85,7 +84,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'archer',
     level: 3,
     upgradeCost: 280,
-    description: 'Master archer. Highly effective vs air (+200% damage). Elite damage.',
+    description: 'Master archer with +200% damage vs flying. High single-target DPS.',
     stats: {
       range: 250,
       fireRate: 700,
@@ -100,7 +99,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'archer',
     level: 4,
     upgradeCost: 800,
-    description: 'Legendary marksman. Highly effective vs air (+200% damage). Endgame devastation.',
+    description: 'Elite marksman. +200% vs flying. Abilities: Multi-Shot, Piercing, or Knockback.',
     stats: {
       range: 280,
       fireRate: 550,
@@ -116,7 +115,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 1,
     upgradeCost: 120,
-    description: 'High attack speed. Short range but devastating DPS.',
+    description: 'Extremely fast attacks. Great vs unarmored. Weak vs heavy armor.',
     stats: {
       range: 185,
       fireRate: 300,
@@ -130,7 +129,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 2,
     upgradeCost: 200,
-    description: 'Faster attacks. Shreds targets in close range.',
+    description: 'Faster attacks. Melts unarmored targets. Use with poison/ice vs armor.',
     stats: {
       range: 195,
       fireRate: 250,
@@ -144,7 +143,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 3,
     upgradeCost: 420,
-    description: 'Machine gun fury. Devastating close-range DPS.',
+    description: 'Machine gun fury. ~95 DPS vs unarmored. Pair with armor shred.',
     stats: {
       range: 210,
       fireRate: 210,
@@ -159,7 +158,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 1,
     upgradeCost: 150,
-    description: 'Long range, high damage per shot.',
+    description: 'Long range, high single-shot damage. Best for priority targets.',
     stats: {
       range: 300,
       fireRate: 2200,
@@ -173,7 +172,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 2,
     upgradeCost: 240,
-    description: 'Deadly precision. Increased damage and range.',
+    description: 'Extended range (330px). Focus-fires high-threat targets.',
     stats: {
       range: 330,
       fireRate: 2000,
@@ -187,7 +186,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 3,
     upgradeCost: 480,
-    description: 'Assassin elite. Maximum damage and range.',
+    description: 'Assassin elite. 360px range. Excellent for picking off bosses.',
     stats: {
       range: 360,
       fireRate: 1800,
@@ -202,7 +201,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 1,
     upgradeCost: 130,
-    description: 'Splash damage in 70px radius.',
+    description: 'AOE splash damage (70px). Excellent against swarms.',
     stats: {
       range: 220,
       fireRate: 1800,
@@ -217,7 +216,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 2,
     upgradeCost: 230,
-    description: 'Bigger explosions. 85px splash radius.',
+    description: 'Bigger explosions (85px splash). Clears grouped enemies.',
     stats: {
       range: 240,
       fireRate: 1700,
@@ -232,7 +231,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 3,
     upgradeCost: 460,
-    description: 'Devastation. 100px splash radius.',
+    description: 'Massive 100px splash. Place where enemies cluster.',
     stats: {
       range: 260,
       fireRate: 1500,
@@ -248,7 +247,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 1,
     upgradeCost: 65,
-    description: 'Slows enemies by 40% for 2s. Max 2 targets.',
+    description: '80% armor penetration. Slows 40% for 2s. Prefers unslowed targets.',
     stats: {
       range: 180,
       fireRate: 1400,
@@ -265,7 +264,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 2,
     upgradeCost: 130,
-    description: 'Freezing cold. 50% slow for 2.5s. Max 3 targets.',
+    description: '80% armor pen. 50% slow for 2.5s. Essential crowd control.',
     stats: {
       range: 200,
       fireRate: 1300,
@@ -282,7 +281,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 3,
     upgradeCost: 240,
-    description: 'Absolute zero. 60% slow for 3s. Max 4 targets.',
+    description: '80% armor pen. 60% slow for 3s. Core for late-game.',
     stats: {
       range: 220,
       fireRate: 1200,
@@ -300,7 +299,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 1,
     upgradeCost: 65,
-    description: 'DoT: 5 dmg/sec for 5s. Stacks 3x. 80% armor pen. Great vs armored!',
+    description: '80% armor pen. DoT: 5/s for 5s, stacks 3x. Best vs armored!',
     stats: {
       range: 200,
       fireRate: 1800,
@@ -316,7 +315,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 2,
     upgradeCost: 130,
-    description: 'Deadly venom. 8 dmg/sec for 5s. Stacks 3x. Great vs armored!',
+    description: '80% armor pen. DoT: 8/s for 5s, stacks 3x. Melts armored waves.',
     stats: {
       range: 220,
       fireRate: 1650,
@@ -332,7 +331,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 3,
     upgradeCost: 240,
-    description: 'Plague bringer. 12 dmg/sec for 6s. Stacks 3x. Great vs armored!',
+    description: '80% armor pen. DoT: 12/s for 6s, stacks 3x. Essential for bosses.',
     stats: {
       range: 240,
       fireRate: 1500,
@@ -349,7 +348,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'aura',
     level: 1,
     upgradeCost: 100,
-    description: 'Buffs nearby towers +20% damage. Does not attack.',
+    description: 'Buffs nearby towers +20% damage. Place next to DPS towers.',
     stats: {
       range: 90,
       fireRate: 0,
@@ -364,7 +363,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'aura',
     level: 2,
     upgradeCost: 200,
-    description: 'Buffs nearby towers +30% damage. Wider aura.',
+    description: '+30% damage buff. 105px range. Affects more towers.',
     stats: {
       range: 105,
       fireRate: 0,
@@ -379,7 +378,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'aura',
     level: 3,
     upgradeCost: 400,
-    description: 'Buffs nearby towers +40% damage. Maximum power.',
+    description: '+40% damage buff. 120px range. Huge DPS multiplier.',
     stats: {
       range: 120,
       fireRate: 0,
@@ -394,7 +393,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'aura',
     level: 4,
     upgradeCost: 600,
-    description: 'Ultimate support. +50% damage buff. Special ability.',
+    description: '+50% buff. Abilities: War Cry speed, Critical Aura, or Echo Multicast.',
     stats: {
       range: 140,
       fireRate: 0,
@@ -410,7 +409,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 4,
     upgradeCost: 650,
-    description: 'Ultimate rapid fire. Special ability unlocked.',
+    description: '~144 DPS. Abilities: Bullet Storm, Ricochet, or Incendiary Burn.',
     stats: {
       range: 230,
       fireRate: 180,
@@ -425,7 +424,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'sniper',
     level: 4,
     upgradeCost: 750,
-    description: 'Elite assassin. Special ability unlocked.',
+    description: '400px range. Abilities: Critical Strike, Armor Pierce, or Headshot.',
     stats: {
       range: 400,
       fireRate: 1700,
@@ -440,7 +439,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rockcannon',
     level: 4,
     upgradeCost: 700,
-    description: 'Siege weapon. 110px splash. Special ability.',
+    description: '110px splash. Abilities: Aftershock, Tremor Slow, or Shrapnel.',
     stats: {
       range: 280,
       fireRate: 1400,
@@ -456,7 +455,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'icetower',
     level: 4,
     upgradeCost: 500,
-    description: 'Absolute zero. 65% slow for 3.5s. Special ability.',
+    description: '80% armor pen. 65% slow, 3.5s. Ice Trap/Frost Nova/Deep Freeze.',
     stats: {
       range: 240,
       fireRate: 1100,
@@ -474,7 +473,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'poison',
     level: 4,
     upgradeCost: 500,
-    description: 'Plague master. 15 dmg/s for 6s. Great vs armored! Special ability.',
+    description: '80% armor pen. ~56 base DPS (3 stacks). Plague/Toxic/Corrosive.',
     stats: {
       range: 260,
       fireRate: 1400,

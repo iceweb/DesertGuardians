@@ -188,13 +188,13 @@ export class TowerIconRenderer {
 }
 
 export const TOWER_HINTS: Record<TowerBranch, string> = {
-  archer: '🏹 Versatile tower. +200% damage vs flying units. Good all-rounder.',
-  rapidfire: '⚡ Very fast attacks shred unarmored targets. Weak vs heavy armor.',
-  sniper: '🎯 Extreme range and damage. Best for picking off tough single targets.',
-  rockcannon: '💥 Splash damage hits multiple enemies. Great for swarms.',
-  icetower: '❄️ Slows enemies so other towers deal more damage. Essential support.',
-  poison: '☠️ Damage over time with 80% armor penetration. Best counter to armored units!',
-  aura: '🔴 Buffs damage of nearby towers. Place next to your best DPS towers.',
+  archer: '🏹 Versatile physical tower. +200% damage vs flying. Multi-shot/Pierce/Knockback at L4.',
+  rapidfire: '⚡ Extremely fast attacks (~144 DPS at L4). Weak vs armor—pair with Poison or Ice!',
+  sniper: '🎯 Extreme range (400px) and burst damage. Critical Strike/Armor Pierce/Headshot at L4.',
+  rockcannon: '💥 Splash damage (110px at L4). Great for swarms. Aftershock/Tremor/Shrapnel at L4.',
+  icetower: '❄️ 80% armor pen + slow (65% at L4). Ice Trap/Frost Nova/Deep Freeze abilities.',
+  poison: '☠️ 80% armor pen DoT (3 stacks). ~56 base DPS. Best vs armored! Plague/Toxic/Corrosive.',
+  aura: '🔴 +50% damage buff at L4. War Cry speed/Critical Aura/Echo Multicast abilities.',
 };
 
 export const BRANCH_NAMES: Record<TowerBranch, string> = {
@@ -208,11 +208,11 @@ export const BRANCH_NAMES: Record<TowerBranch, string> = {
 };
 
 export const BRANCH_DESCRIPTIONS: Record<TowerBranch, string> = {
-  archer: 'Best vs flying units',
-  rapidfire: 'Fast attacks, weak vs armor',
-  sniper: 'High single-target damage',
+  archer: '+200% vs flying units',
+  rapidfire: 'Max DPS, weak vs armor',
+  sniper: 'Long range, high burst',
   rockcannon: 'AOE splash damage',
-  icetower: 'Slows enemies for allies',
-  poison: 'Best vs armored units',
+  icetower: '80% armor pen + slow',
+  poison: '80% armor pen DoT',
   aura: 'Buffs nearby towers',
 };
