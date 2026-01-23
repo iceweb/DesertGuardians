@@ -219,6 +219,15 @@ export class GameController extends Phaser.Events.EventEmitter {
     return Math.floor((totalElapsed - pausedTime) / 1000);
   }
 
+  /**
+   * Returns elapsed in-game time in seconds.
+   * This accounts for game speed (2x, 3x) - time passes faster when sped up.
+   * Used for scoring/time bonus calculations.
+   */
+  getElapsedGameTime(): number {
+    return Math.floor(this._virtualGameTime / 1000);
+  }
+
   reset(): void {
     this._gold = GAME_CONFIG.STARTING_GOLD;
     this._castleHP = GAME_CONFIG.MAX_CASTLE_HP;
@@ -249,7 +258,7 @@ export class GameController extends Phaser.Events.EventEmitter {
       maxCastleHP: this._maxCastleHP,
       currentWave: this._currentWave,
       totalWaves: this._totalWaves,
-      runTimeSeconds: this.getElapsedRealTime(),
+      runTimeSeconds: this.getElapsedGameTime(),
     };
   }
 }

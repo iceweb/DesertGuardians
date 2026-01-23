@@ -696,8 +696,8 @@ export class GameScene extends Phaser.Scene {
       this.hudManager.updateCountdown(scaledDelta);
     }
 
-    // Update elapsed time display (every frame is fine, it's just a text update)
-    this.hudManager.updateTime(this.gameController.getElapsedRealTime());
+    // Update elapsed time display using in-game time (scales with game speed)
+    this.hudManager.updateTime(this.gameController.getElapsedGameTime());
 
     // Skip game logic updates when paused
     if (this.hudManager.isPausedState()) return;
