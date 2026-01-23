@@ -94,7 +94,7 @@ Tower defense games are significantly more complex than platformers:
 - **Wave Bonus** — 100 points per wave completed
 - **Gold Bonus** — 0.2× total gold earned
 - **HP Bonus** — 100 points per HP remaining
-- **Time Bonus** — Victory only! Linear scale from ×1.35 (≤15 min) to ×1.0 (≥35 min)
+- **Time Bonus** — Victory only! +1.5 points per second under 40 minutes (max 3000 pts)
 - **Difficulty Multiplier** — Easy ×0.75, Normal ×1.0, Hard ×1.25
 - **Global Rank Display** — See where you place among all players
 
@@ -255,7 +255,18 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-## 👤 Author
+## � Changelog
+
+### v1.0 (January 23, 2026)
+- **Time Bonus Rework**: Changed from multiplier (×1.0-1.35) to additive bonus (+1.5 pts/sec under 40 min, max 3000 pts)
+- **In-Game Timer**: Timer now uses game time (scales with 2×/3× speed) instead of real time
+- **Timer Start**: Timer only begins when wave 1 starts, not when the game loads
+- **Version Display**: Added version number to home screen and leaderboard
+- **Auto-Versioning**: Build process auto-increments minor version number
+
+---
+
+## �👤 Author
 
 **Mike Blöchlinger**
 

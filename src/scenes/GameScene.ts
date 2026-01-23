@@ -702,7 +702,10 @@ export class GameScene extends Phaser.Scene {
     // Skip game logic updates when paused
     if (this.hudManager.isPausedState()) return;
 
-    this.gameController.addVirtualTime(scaledDelta);
+    // Only accumulate game time after the first wave starts
+    if (this.gameController.hasGameStarted) {
+      this.gameController.addVirtualTime(scaledDelta);
+    }
 
     this.creepManager.update(scaledDelta);
 

@@ -47,7 +47,7 @@ export class ResultsScene extends Phaser.Scene {
     waveScore: number;
     goldScore: number;
     hpBonus: number;
-    timeMultiplier: number;
+    timeBonus: number;
   };
 
   private playerName: string = '';
@@ -91,25 +91,22 @@ export class ResultsScene extends Phaser.Scene {
     // HP Bonus: points per HP remaining
     const hpBonus = data.castleHP * GAME_CONFIG.HP_BONUS_POINTS;
 
-    // Time Multiplier:
-    // Target = 900 seconds (15 min)
-    // <= 900s: 1.5x
-    // > 900s: max(1.0, 1.5 - (runTime - 900) / 1800)
-    let timeMultiplier: number;
-    if (data.runTimeSeconds <= 900) {
-      timeMultiplier = 1.5;
-    } else {
-      timeMultiplier = Math.max(1.0, 1.5 - (data.runTimeSeconds - 900) / 1800);
-    }
+    // Time Bonus: Additive points for fast completion
+    // 40 min baseline, 1.5 pts per second saved, cap at 3000
+    const MAX_TIME = 2400;
+    const POINTS_PER_SECOND = 1.5;
+    const CAP = 3000;
+    const secondsSaved = Math.max(0, MAX_TIME - data.runTimeSeconds);
+    const timeBonus = Math.min(CAP, Math.floor(secondsSaved * POINTS_PER_SECOND));
 
-    // Final score: (base scores + HP bonus) × time multiplier
-    this.finalScore = Math.floor((waveScore + goldScore + hpBonus) * timeMultiplier);
+    // Final score: base scores + time bonus (no difficulty multiplier in legacy scene)
+    this.finalScore = Math.floor(waveScore + goldScore + hpBonus + timeBonus);
 
     this.scoreBreakdown = {
       waveScore,
       goldScore,
       hpBonus,
-      timeMultiplier,
+      timeBonus,
     };
 
     // Store for review mode
@@ -283,7 +280,13 @@ export class ResultsScene extends Phaser.Scene {
         label: 'HP Bonus',
         value: `${this.resultData.castleHP} × ${GAME_CONFIG.HP_BONUS_POINTS} = ${this.scoreBreakdown.hpBonus}`,
       },
-      { label: 'Time Multiplier', value: `× ${this.scoreBreakdown.timeMultiplier.toFixed(2)}` },
+      {
+        label: 'Time Bonus',
+        value:
+          this.scoreBreakdown.timeBonus > 0
+            ? `+${this.scoreBreakdown.timeBonus.toLocaleString()}`
+            : '0',
+      },
     ];
 
     breakdown.forEach((item, index) => {

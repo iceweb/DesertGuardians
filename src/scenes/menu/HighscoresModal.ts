@@ -199,8 +199,9 @@ export class HighscoresModal {
       { text: 'Gold', x: 50, align: 0 },
       { text: 'Kills', x: 140, align: 0 },
       { text: 'Time', x: 210, align: 0 },
-      { text: 'Win', x: 290, align: 0 },
-      { text: 'Date', x: 350, align: 0 },
+      { text: 'Win', x: 280, align: 0 },
+      { text: 'Date', x: 330, align: 0 },
+      { text: 'Ver', x: 420, align: 0 },
     ];
 
     headers.forEach((h) => {
@@ -358,7 +359,7 @@ export class HighscoresModal {
 
       // Victory
       const victoryText = this.scene.add
-        .text(290, y, score.is_victory ? '✓' : '✗', {
+        .text(280, y, score.is_victory ? '✓' : '✗', {
           fontFamily: 'Arial',
           fontSize: '14px',
           color: score.is_victory ? '#00ff00' : '#ff6666',
@@ -369,7 +370,7 @@ export class HighscoresModal {
 
       // Date
       const dateText = this.scene.add
-        .text(350, y, score.date, {
+        .text(330, y, score.date, {
           fontFamily: 'Arial',
           fontSize: '12px',
           color: '#666666',
@@ -377,6 +378,17 @@ export class HighscoresModal {
         .setOrigin(0, 0.5);
       dateText.setData('scoreRow', true);
       this.container!.add(dateText);
+
+      // Version
+      const versionText = this.scene.add
+        .text(420, y, score.client_version || '-', {
+          fontFamily: 'Arial',
+          fontSize: '12px',
+          color: '#555555',
+        })
+        .setOrigin(0, 0.5);
+      versionText.setData('scoreRow', true);
+      this.container!.add(versionText);
     });
   }
 

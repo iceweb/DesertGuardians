@@ -11,7 +11,8 @@
   },
   "scripts": {
     "dev": "vite --force",
-    "build": "npm run lint && npm run format:check && vitest run && tsc && vite build",
+    "build": "node scripts/increment-version.js && npm run lint && npm run format:check && vitest run && tsc && vite build",
+    "build:no-increment": "npm run lint && npm run format:check && vitest run && tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",

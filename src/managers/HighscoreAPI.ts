@@ -1,5 +1,7 @@
 const API_URL = 'https://iceweb.ch/dg/api.php';
 
+import { VERSION } from '../version';
+
 export interface ScoreSubmission {
   name: string;
   score: number;
@@ -11,6 +13,7 @@ export interface ScoreSubmission {
   timeSeconds: number;
   isVictory: boolean;
   difficulty: 'Easy' | 'Normal' | 'Hard';
+  clientVersion?: string;
 }
 
 export interface GlobalScore {
@@ -25,6 +28,7 @@ export interface GlobalScore {
   is_victory: boolean;
   difficulty: 'Easy' | 'Normal' | 'Hard';
   date: string;
+  client_version?: string;
 }
 
 interface SessionResponse {
@@ -119,6 +123,7 @@ export class HighscoreAPI {
     try {
       const payload = {
         ...submission,
+        clientVersion: VERSION,
         sessionToken: this.sessionToken,
       };
 

@@ -123,27 +123,22 @@ function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $
     $goldScore = floor($goldEarned * GOLD_BONUS_MULTIPLIER);
     $hpBonus = $hpRemaining * HP_BONUS_POINTS;
     
-    // Time bonus only applies on victory
+    // Time bonus only applies on victory (additive, not multiplicative)
+    $timeBonus = 0;
     if ($isVictory) {
-        // Linear time bonus: every second counts between 15-35 minutes
-        // Formula: max(1.0, min(1.35, 1.0 + 0.35 * (2100 - time) / 1200))
-        $minTime = TIME_BONUS_MIN_TIME;  // 15 minutes
-        $maxTime = TIME_BONUS_MAX_TIME;  // 35 minutes
-        $cap = TIME_BONUS_CAP;           // 1.35
-        $floor = TIME_BONUS_FLOOR;       // 1.0
-        $bonusRange = $cap - $floor;     // 0.35
+        // Additive time bonus: every second saved from 40-min baseline = 1.5 pts
+        // Capped at 3000 points
+        $maxTime = TIME_BONUS_MAX_TIME;      // 40 minutes
+        $pointsPerSec = TIME_BONUS_POINTS_PER_SEC; // 1.5
+        $cap = TIME_BONUS_CAP;               // 3000
         
-        $timeMultiplier = max(
-            $floor,
-            min($cap, $floor + ($bonusRange * ($maxTime - $timeSeconds)) / ($maxTime - $minTime))
-        );
-    } else {
-        $timeMultiplier = 1.0;
+        $secondsSaved = max(0, $maxTime - $timeSeconds);
+        $timeBonus = min($cap, floor($secondsSaved * $pointsPerSec));
     }
     
     $difficultyMultiplier = getDifficultyMultiplier($difficulty);
     
-    return floor(($waveScore + $goldScore + $hpBonus) * $timeMultiplier * $difficultyMultiplier);
+    return floor(($waveScore + $goldScore + $hpBonus + $timeBonus) * $difficultyMultiplier);
 }
 
 /**
@@ -266,7 +261,7 @@ function handleGetRequest() {
     $stmt = $pdo->prepare("
         SELECT player_name, score, wave_reached, total_waves, 
                hp_remaining, gold_earned, creeps_killed, time_seconds,
-               is_victory, difficulty, submission_date 
+               is_victory, difficulty, submission_date, client_version 
         FROM highscores 
         ORDER BY score DESC, wave_reached DESC, submission_date ASC 
         LIMIT 20
@@ -328,6 +323,7 @@ function handlePostRequest() {
     $isVictory = (bool)$data['isVictory'];
     $difficulty = $data['difficulty'];
     $sessionToken = $data['sessionToken'];
+    $clientVersion = isset($data['clientVersion']) ? substr($data['clientVersion'], 0, 10) : null;
     
     // Validate difficulty
     if (!in_array($difficulty, ['Easy', 'Normal', 'Hard'])) {
@@ -420,11 +416,11 @@ function handlePostRequest() {
             INSERT INTO highscores (
                 player_name, score, wave_reached, total_waves, 
                 hp_remaining, gold_earned, creeps_killed, time_seconds, 
-                is_victory, difficulty, session_token, ip_address
+                is_victory, difficulty, session_token, ip_address, client_version
             ) VALUES (
                 :name, :score, :wave_reached, :total_waves,
                 :hp_remaining, :gold_earned, :creeps_killed, :time_seconds,
-                :is_victory, :difficulty, :session_token, :ip
+                :is_victory, :difficulty, :session_token, :ip, :client_version
             )
         ");
         
@@ -440,7 +436,8 @@ function handlePostRequest() {
             ':is_victory' => $isVictory ? 1 : 0,
             ':difficulty' => $difficulty,
             ':session_token' => $sessionToken,
-            ':ip' => $ip
+            ':ip' => $ip,
+            ':client_version' => $clientVersion
         ]);
         
         echo json_encode([

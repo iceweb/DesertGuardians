@@ -27,7 +27,7 @@ export class GameSceneResultsUI {
     waveScore: number;
     goldScore: number;
     hpBonus: number;
-    timeMultiplier: number;
+    timeBonus: number;
     difficultyMultiplier: number;
   } | null = null;
   private playerName: string = '';
@@ -98,36 +98,27 @@ export class GameSceneResultsUI {
     // HP Bonus: points per HP remaining
     const hpBonus = result.castleHP * GAME_CONFIG.HP_BONUS_POINTS;
 
-    // Time Multiplier - Only applies on victory (completing all waves)
-    // On defeat, time multiplier is neutral (1.0x)
-    let timeMultiplier = 1.0;
+    // Time Bonus - Additive points for fast completion (victory only)
+    // Every second saved from 40-minute baseline = 1.5 points, capped at 3000
+    let timeBonus = 0;
 
     if (isVictory) {
-      // Linear time bonus: every second counts between 15-35 minutes
-      // - Faster than 15 min: capped at 1.35x
-      // - Between 15-35 min: linear interpolation
-      // - Slower than 35 min: floored at 1.0x (no penalty)
+      // Additive time bonus: every second counts equally
+      // - 40 min (2400s) baseline: 0 bonus
+      // - Every second faster: +1.5 points
+      // - Cap at 3000 points (prevents extreme speedrun abuse)
       //
-      // Formula: max(1.0, min(1.35, 1.0 + 0.35 * (2100 - time) / 1200))
+      // Examples:
+      //   12 min (720s): 2520 pts  | 25 min (1500s): 1350 pts
+      //   15 min (900s): 2250 pts  | 30 min (1800s): 900 pts
+      //   20 min (1200s): 1800 pts | 40 min (2400s): 0 pts
       //
-      // Results:
-      //   ≤15 min: 1.35x (cap)   | 25 min: 1.18x
-      //   20 min: 1.26x          | 30 min: 1.09x
-      //   22 min: 1.23x          | ≥35 min: 1.00x (floor)
-      //
-      const MIN_TIME = 900; // 15 minutes - max bonus threshold
-      const MAX_TIME = 2100; // 35 minutes - no bonus threshold
-      const CAP = 1.35; // Maximum multiplier
-      const FLOOR = 1.0; // Minimum multiplier (no penalty)
-      const BONUS_RANGE = 0.35; // Bonus points from floor to cap
+      const MAX_TIME = 2400; // 40 minutes - baseline (no bonus)
+      const POINTS_PER_SECOND = 1.5; // Every second matters equally
+      const CAP = 3000; // Maximum bonus points
 
-      timeMultiplier = Math.max(
-        FLOOR,
-        Math.min(
-          CAP,
-          FLOOR + (BONUS_RANGE * (MAX_TIME - result.runTimeSeconds)) / (MAX_TIME - MIN_TIME)
-        )
-      );
+      const secondsSaved = Math.max(0, MAX_TIME - result.runTimeSeconds);
+      timeBonus = Math.min(CAP, Math.floor(secondsSaved * POINTS_PER_SECOND));
     }
 
     // Difficulty Multiplier
@@ -143,9 +134,9 @@ export class GameSceneResultsUI {
         difficultyMultiplier = 1.0;
     }
 
-    this.scoreBreakdown = { waveScore, goldScore, hpBonus, timeMultiplier, difficultyMultiplier };
+    this.scoreBreakdown = { waveScore, goldScore, hpBonus, timeBonus, difficultyMultiplier };
     this.finalScore = Math.floor(
-      (waveScore + goldScore + hpBonus) * timeMultiplier * difficultyMultiplier
+      (waveScore + goldScore + hpBonus + timeBonus) * difficultyMultiplier
     );
   }
 
@@ -352,11 +343,10 @@ export class GameSceneResultsUI {
         {
           label: '⏱ Time Bonus',
           rawValue: this.formatTime(result.runTimeSeconds),
-          points: `×${breakdown.timeMultiplier.toFixed(2)}`,
+          points: breakdown.timeBonus > 0 ? `+${breakdown.timeBonus.toLocaleString()}` : '0',
           labelColor: '#aaaaaa',
           valueColor: '#88ccff',
-          pointsColor: breakdown.timeMultiplier >= 1.0 ? '#88ff88' : '#ffaa66',
-          isMultiplier: true,
+          pointsColor: breakdown.timeBonus > 0 ? '#88ff88' : '#aaaaaa',
         },
         {
           label: `🎯 ${diffLabel} Mode`,

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { AudioManager } from '../managers';
+import { VERSION } from '../version';
 import {
   MenuBackground,
   MenuDecorations,
@@ -206,19 +207,19 @@ export class MenuScene extends Phaser.Scene {
         this.showInfo();
       },
     });
+
+    // Version display (prominent, under buttons)
+    this.add
+      .text(width / 2, bottomY + 130, `Version ${VERSION}`, {
+        fontFamily: 'Georgia, serif',
+        fontSize: '18px',
+        color: '#c9a86c',
+      })
+      .setOrigin(0.5)
+      .setDepth(20);
   }
 
   private createFooter(width: number, height: number): void {
-    // Version
-    this.add
-      .text(width - 15, height - 15, 'v1.0.0', {
-        fontFamily: 'Georgia, serif',
-        fontSize: '12px',
-        color: '#8b6914',
-      })
-      .setOrigin(1, 1)
-      .setDepth(50);
-
     // Credits
     this.add
       .text(width / 2, height - 15, '© 2026 Created by Mike Blöchlinger', {
