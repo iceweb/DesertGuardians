@@ -522,13 +522,13 @@ export class HUDManager {
     const secs = seconds % 60;
     this.timeText.setText(`⏱ ${mins}:${secs.toString().padStart(2, '0')}`);
 
-    // Color changes based on time bonus thresholds (40 min baseline)
-    if (seconds <= 1200) {
-      this.timeText.setColor('#44ff44'); // Green - excellent (20 min or less)
-    } else if (seconds <= 2400) {
-      this.timeText.setColor('#88ccff'); // Blue - partial bonus (under 40 min)
+    // Color changes based on time bonus thresholds (80 min baseline)
+    if (seconds <= 2400) {
+      this.timeText.setColor('#44ff44'); // Green - excellent (40 min or less, max bonus)
+    } else if (seconds <= 4800) {
+      this.timeText.setColor('#88ccff'); // Blue - partial bonus (under 80 min)
     } else {
-      this.timeText.setColor('#ffaa44'); // Orange - no bonus (over 40 min)
+      this.timeText.setColor('#ffaa44'); // Orange - no bonus (over 80 min)
     }
   }
 

@@ -67,7 +67,7 @@ export class InfoModal {
           content: [
             '+100 per wave | +0.2 per gold earned',
             '+100 per HP remaining at end',
-            'Time Bonus: +1.5 pts/sec under 40min',
+            'Time Bonus: +1.5 pts/sec under 80min',
             'Difficulty: Easy×0.75 | Hard×1.25',
           ],
         },

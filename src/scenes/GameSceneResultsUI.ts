@@ -104,16 +104,16 @@ export class GameSceneResultsUI {
 
     if (isVictory) {
       // Additive time bonus: every second counts equally
-      // - 40 min (2400s) baseline: 0 bonus
+      // - 80 min (4800s) baseline: 0 bonus
       // - Every second faster: +1.5 points
       // - Cap at 3000 points (prevents extreme speedrun abuse)
       //
       // Examples:
-      //   12 min (720s): 2520 pts  | 25 min (1500s): 1350 pts
-      //   15 min (900s): 2250 pts  | 30 min (1800s): 900 pts
-      //   20 min (1200s): 1800 pts | 40 min (2400s): 0 pts
+      //   30 min (1800s): 3000 pts (capped) | 60 min (3600s): 1800 pts
+      //   40 min (2400s): 3000 pts (capped) | 70 min (4200s): 900 pts
+      //   50 min (3000s): 2700 pts          | 80 min (4800s): 0 pts
       //
-      const MAX_TIME = 2400; // 40 minutes - baseline (no bonus)
+      const MAX_TIME = 4800; // 80 minutes - baseline (no bonus)
       const POINTS_PER_SECOND = 1.5; // Every second matters equally
       const CAP = 3000; // Maximum bonus points
 
