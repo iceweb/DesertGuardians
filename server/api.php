@@ -126,9 +126,9 @@ function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $
     // Time bonus only applies on victory (additive, not multiplicative)
     $timeBonus = 0;
     if ($isVictory) {
-        // Additive time bonus: every second saved from 40-min baseline = 1.5 pts
+        // Additive time bonus: every second saved from 80-min baseline = 1.5 pts
         // Capped at 3000 points
-        $maxTime = TIME_BONUS_MAX_TIME;      // 40 minutes
+        $maxTime = TIME_BONUS_MAX_TIME;      // 80 minutes
         $pointsPerSec = TIME_BONUS_POINTS_PER_SEC; // 1.5
         $cap = TIME_BONUS_CAP;               // 3000
         

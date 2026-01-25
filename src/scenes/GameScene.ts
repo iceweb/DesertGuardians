@@ -663,6 +663,7 @@ export class GameScene extends Phaser.Scene {
         ? {
             waveNumber: currentWaveInfo.waveNumber,
             creepTypes: currentWaveInfo.types,
+            groups: currentWaveInfo.groups,
             currentCreepType: currentWaveInfo.currentCreepType,
             waveType: currentWaveInfo.waveType,
           }
@@ -671,6 +672,7 @@ export class GameScene extends Phaser.Scene {
         ? {
             waveNumber: nextWaveInfo.waveNumber,
             creepTypes: nextWaveInfo.types,
+            groups: nextWaveInfo.groups,
             waveType: nextWaveInfo.waveType,
           }
         : null

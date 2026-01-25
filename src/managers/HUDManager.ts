@@ -667,12 +667,14 @@ export class HUDManager {
     currentWave: {
       waveNumber: number;
       creepTypes: Array<{ type: string; description: string }>;
+      groups?: Array<Array<{ type: string; description: string }>>;
       currentCreepType: string | null;
       waveType?: WaveType;
     } | null,
     nextWave: {
       waveNumber: number;
       creepTypes: Array<{ type: string; description: string }>;
+      groups?: Array<Array<{ type: string; description: string }>>;
       waveType?: WaveType;
     } | null
   ): void {
@@ -685,7 +687,8 @@ export class HUDManager {
         currentWave.waveNumber,
         currentWave.creepTypes,
         currentWave.currentCreepType,
-        currentWave.waveType
+        currentWave.waveType,
+        currentWave.groups
       );
     } else {
       this.currentWavePanel.hide();
@@ -695,7 +698,12 @@ export class HUDManager {
     const nextX = baseX + (currentWidth > 0 ? currentWidth + padding : 0);
 
     if (nextWave) {
-      this.nextWavePanel.show(nextWave.waveNumber, nextWave.creepTypes, nextWave.waveType);
+      this.nextWavePanel.show(
+        nextWave.waveNumber,
+        nextWave.creepTypes,
+        nextWave.waveType,
+        nextWave.groups
+      );
     } else {
       this.nextWavePanel.hide();
     }

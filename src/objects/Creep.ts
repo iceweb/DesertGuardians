@@ -6,6 +6,7 @@ import { CREEP_TYPES, GAME_CONFIG } from '../data';
 import { StatusEffectHandler } from './StatusEffectHandler';
 import { CreepAbilities } from './CreepAbilities';
 import { CreepEffects } from './CreepEffects';
+import { calculateScaledHealth, calculateScaledArmor } from '../utils/GameCalculations';
 
 export class Creep extends Phaser.GameObjects.Container {
   private config!: CreepConfig;
@@ -120,21 +121,12 @@ export class Creep extends Phaser.GameObjects.Container {
     this.pathSystem = pathSystem;
     const baseConfig = CREEP_TYPES[creepType] || CREEP_TYPES.furball;
 
-    const hpMultiplier = Math.min(
-      GAME_CONFIG.MAX_HP_MULTIPLIER,
-      1 + (waveNumber - 1) * GAME_CONFIG.WAVE_HP_SCALING
+    const scaledMaxHealth = calculateScaledHealth(
+      baseConfig.maxHealth,
+      waveNumber,
+      difficultyMultiplier
     );
-    const scaledMaxHealth = Math.floor(baseConfig.maxHealth * hpMultiplier * difficultyMultiplier);
-
-    // Armor scaling: only applies to creeps with base armor > 0
-    const armorMultiplier =
-      baseConfig.armor > 0
-        ? Math.min(
-            GAME_CONFIG.MAX_ARMOR_MULTIPLIER,
-            1 + (waveNumber - 1) * GAME_CONFIG.WAVE_ARMOR_SCALING
-          )
-        : 1;
-    const scaledArmor = Math.floor(baseConfig.armor * armorMultiplier);
+    const scaledArmor = calculateScaledArmor(baseConfig.armor, waveNumber);
 
     this.config = { ...baseConfig, maxHealth: scaledMaxHealth, armor: scaledArmor };
     this.distanceTraveled = 0;
@@ -177,8 +169,8 @@ export class Creep extends Phaser.GameObjects.Container {
       }
     });
 
-    const startPos = pathSystem.getStartPoint();
-    this.setPosition(startPos.x, startPos.y);
+    const startPoint = pathSystem.getStartPoint();
+    this.setPosition(startPoint.x, startPoint.y);
 
     this.setActive(true);
     this.setVisible(true);
@@ -212,12 +204,15 @@ export class Creep extends Phaser.GameObjects.Container {
     this.healthBarBg.clear();
     this.healthBarFg.clear();
 
-    if (this.currentHealth >= this.config.maxHealth) {
+    const isBoss = this.config.type.startsWith('boss');
+
+    // Hide health bar at full health, except for bosses (always visible)
+    if (this.currentHealth >= this.config.maxHealth && !isBoss) {
       return;
     }
 
-    const barWidth = 30,
-      barHeight = 4,
+    const barWidth = isBoss ? 50 : 30,
+      barHeight = isBoss ? 6 : 4,
       yOffset = -35;
 
     this.healthBarBg.fillStyle(0x000000, 0.7);

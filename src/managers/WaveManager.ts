@@ -5,6 +5,9 @@ import { Creep } from '../objects';
 import { WAVE_CONFIGS, CREEP_TYPES } from '../data/GameData';
 import type { WaveCreepGroup, WaveType } from '../data/GameData';
 
+// Boss spawns this many milliseconds after guards (gives guards a head start)
+const BOSS_SPAWN_DELAY_MS = 1500;
+
 export type WaveManagerEvents = {
   waveStart: [waveNumber: number];
   waveComplete: [waveNumber: number];
@@ -43,6 +46,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   private parallelGroups: GroupSpawnState[] = [];
   private parallelTimers: Map<string, Phaser.Time.TimerEvent> = new Map();
   private isParallelMode: boolean = false;
+  private activeBossGroups: GroupSpawnState[] = [];
 
   private creepsToSpawn: number = 0;
   private creepsSpawned: number = 0;
@@ -143,13 +147,31 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       immediateGroups.push(firstDelayed);
     }
 
+    // Check if this parallel wave has both guards and boss
+    const hasGuards = this.parallelGroups.some((g) => this.isGuardType(g.creepType));
+    const hasBoss = this.parallelGroups.some((g) => this.isBossType(g.creepType));
+    const isBossWithGuards = hasGuards && hasBoss;
+
+    // For immediate groups, add delay to bosses if guards are present
     for (const group of immediateGroups) {
-      this.startParallelGroup(group);
+      if (isBossWithGuards && this.isBossType(group.creepType)) {
+        // Delay boss spawn so guards get a head start
+        const gameSpeed = this.getGameSpeed?.() || 1;
+        const scaledDelay = BOSS_SPAWN_DELAY_MS / gameSpeed;
+        this.scene.time.delayedCall(scaledDelay, () => {
+          this.startParallelGroup(group);
+        });
+      } else {
+        this.startParallelGroup(group);
+      }
     }
 
     for (const group of delayedGroups) {
       const gameSpeed = this.getGameSpeed?.() || 1;
-      const scaledDelay = group.group.delayStart! / gameSpeed;
+      // Add extra delay for bosses when guards are present
+      const extraBossDelay =
+        isBossWithGuards && this.isBossType(group.creepType) ? BOSS_SPAWN_DELAY_MS : 0;
+      const scaledDelay = (group.group.delayStart! + extraBossDelay) / gameSpeed;
       this.scene.time.delayedCall(scaledDelay, () => {
         if (group.creepType === 'boss_5') {
           this.emit('finalBossSpawning');
@@ -158,6 +180,20 @@ export class WaveManager extends Phaser.Events.EventEmitter {
         this.startParallelGroup(group);
       });
     }
+  }
+
+  /**
+   * Check if this is a boss type (not guard) that should spawn behind guards
+   */
+  private isBossType(type: string): boolean {
+    return type.match(/^boss_\d+$/) !== null;
+  }
+
+  /**
+   * Check if this is a boss_guard type
+   */
+  private isGuardType(type: string): boolean {
+    return type.startsWith('boss_guard_');
   }
 
   private startParallelGroup(groupState: GroupSpawnState): void {
@@ -237,25 +273,51 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   }
 
   private checkNextGroupStart(): void {
-    if (!this.waveInProgress) return;
-    if (this.isParallelMode) return;
-    if (!this.currentGroup) return;
-    if (!this.currentGroup.finished) return;
+    if (!this.waveInProgress || this.isParallelMode || !this.currentGroup?.finished) return;
 
     const hasMoreGroups = this.groupQueue.length > 0 || this.pendingBossGroups.length > 0;
-    if (!hasMoreGroups) return;
+    if (!hasMoreGroups || !this.shouldStartNextGroup()) return;
 
-    if (this.shouldStartNextGroup()) {
-      if (this.groupQueue.length > 0) {
-        this.startNextGroup();
-      } else if (this.pendingBossGroups.length > 0) {
-        for (const bossGroup of this.pendingBossGroups) {
+    if (this.groupQueue.length > 0) {
+      this.startNextGroup();
+    } else if (this.pendingBossGroups.length > 0) {
+      this.startPendingBossGroups();
+    }
+  }
+
+  private startPendingBossGroups(): void {
+    const hasGuards = this.pendingBossGroups.some((g) => this.isGuardType(g.creepType));
+    const hasBoss = this.pendingBossGroups.some((g) => this.isBossType(g.creepType));
+    const isBossWithGuards = hasGuards && hasBoss;
+
+    const guardGroups = this.pendingBossGroups.filter((g) => this.isGuardType(g.creepType));
+    const bossGroups = this.pendingBossGroups.filter((g) => this.isBossType(g.creepType));
+
+    // Start guards immediately
+    for (const guardGroup of guardGroups) {
+      this.activeBossGroups.push(guardGroup);
+      this.startParallelGroup(guardGroup);
+    }
+
+    // Start bosses with delay if guards present
+    if (isBossWithGuards && bossGroups.length > 0) {
+      const gameSpeed = this.getGameSpeed?.() || 1;
+      const scaledDelay = BOSS_SPAWN_DELAY_MS / gameSpeed;
+      this.scene.time.delayedCall(scaledDelay, () => {
+        for (const bossGroup of bossGroups) {
+          this.activeBossGroups.push(bossGroup);
           this.startParallelGroup(bossGroup);
         }
-        this.pendingBossGroups = [];
-        this.currentGroup = null;
+      });
+    } else {
+      for (const bossGroup of bossGroups) {
+        this.activeBossGroups.push(bossGroup);
+        this.startParallelGroup(bossGroup);
       }
     }
+
+    this.pendingBossGroups = [];
+    this.currentGroup = null;
   }
 
   private shouldStartNextGroup(): boolean {
@@ -377,6 +439,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
   getNextWaveInfo(): {
     types: Array<{ type: string; description: string }>;
+    groups: Array<Array<{ type: string; description: string }>>;
     waveNumber: number;
     waveType?: WaveType;
     isBossWave: boolean;
@@ -385,6 +448,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     if (nextWaveIndex >= WAVE_CONFIGS.length) return null;
 
     const waveDef = WAVE_CONFIGS[nextWaveIndex];
+    const groups = this.computeCreepGroups(waveDef);
 
     const uniqueTypes = [...new Set(waveDef.creeps.map((g) => g.type))];
     const typesWithDescriptions = uniqueTypes.map((type) => ({
@@ -394,6 +458,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     return {
       types: typesWithDescriptions,
+      groups,
       waveNumber: waveDef.waveNumber,
       waveType: waveDef.waveType,
       isBossWave: waveDef.waveType === 'boss',
@@ -402,6 +467,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
   getCurrentWaveInfo(): {
     types: Array<{ type: string; description: string }>;
+    groups: Array<Array<{ type: string; description: string }>>;
     waveNumber: number;
     waveType?: WaveType;
     isBossWave: boolean;
@@ -412,34 +478,114 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     const waveDef = WAVE_CONFIGS[this.currentWave - 1];
     if (!waveDef) return null;
 
+    const groups = this.computeCreepGroups(waveDef);
+
     const uniqueTypes = [...new Set(waveDef.creeps.map((g) => g.type))];
     const typesWithDescriptions = uniqueTypes.map((type) => ({
       type,
       description: CREEP_TYPES[type]?.description || 'Unknown creep type.',
     }));
 
-    let currentCreepType: string | null = null;
-
-    if (this.isParallelMode) {
-      const activeGroup =
-        this.parallelGroups.find((g) => g.spawned < g.group.count && !g.finished) ||
-        this.pendingBossGroups[0];
-      currentCreepType = activeGroup?.creepType || null;
-    } else {
-      currentCreepType =
-        this.currentGroup?.creepType ||
-        this.groupQueue[0]?.creepType ||
-        this.pendingBossGroups[0]?.creepType ||
-        null;
-    }
+    const currentCreepType = this.determineCurrentCreepType();
 
     return {
       types: typesWithDescriptions,
+      groups,
       waveNumber: waveDef.waveNumber,
       waveType: waveDef.waveType,
       isBossWave: waveDef.waveType === 'boss',
       currentCreepType,
     };
+  }
+
+  private determineCurrentCreepType(): string | null {
+    const activeCreeps = this.creepManager.getActiveCreeps();
+    const activeBossCreep = activeCreeps.find((c) => this.isBossType(c.getConfig().type));
+
+    if (activeBossCreep) {
+      return activeBossCreep.getConfig().type;
+    }
+
+    if (this.isParallelMode) {
+      const activeGroup =
+        this.parallelGroups.find((g) => g.spawned < g.group.count && !g.finished) ||
+        this.pendingBossGroups[0];
+      return activeGroup?.creepType || null;
+    }
+
+    const activeBossGroup = this.activeBossGroups.find(
+      (g) => g.spawned < g.group.count || !g.finished
+    );
+    return (
+      this.currentGroup?.creepType ||
+      this.groupQueue[0]?.creepType ||
+      this.pendingBossGroups[0]?.creepType ||
+      activeBossGroup?.creepType ||
+      null
+    );
+  }
+
+  /**
+   * Compute groups of creeps that spawn together (in parallel)
+   * Returns an array of groups, where each group is an array of creep types
+   */
+  private computeCreepGroups(
+    waveDef: (typeof WAVE_CONFIGS)[0]
+  ): Array<Array<{ type: string; description: string }>> {
+    if (waveDef.parallelSpawn) {
+      return this.computeParallelGroups(waveDef);
+    }
+    return this.computeSequentialGroups(waveDef);
+  }
+
+  private computeParallelGroups(
+    waveDef: (typeof WAVE_CONFIGS)[0]
+  ): Array<Array<{ type: string; description: string }>> {
+    const byDelay = new Map<number, string[]>();
+
+    for (const creep of waveDef.creeps) {
+      const delayBucket = Math.round((creep.delayStart || 0) / 5000) * 5000;
+      if (!byDelay.has(delayBucket)) {
+        byDelay.set(delayBucket, []);
+      }
+      byDelay.get(delayBucket)!.push(creep.type);
+    }
+
+    const sortedDelays = [...byDelay.keys()].sort((a, b) => a - b);
+    return sortedDelays.map((delay) => {
+      const types = [...new Set(byDelay.get(delay)!)];
+      return types.map((type) => ({
+        type,
+        description: CREEP_TYPES[type]?.description || 'Unknown creep type.',
+      }));
+    });
+  }
+
+  private computeSequentialGroups(
+    waveDef: (typeof WAVE_CONFIGS)[0]
+  ): Array<Array<{ type: string; description: string }>> {
+    const groups: Array<Array<{ type: string; description: string }>> = [];
+
+    const bossGuardTypes = waveDef.creeps.filter((c) => c.type.includes('boss')).map((c) => c.type);
+    const nonBossTypes = waveDef.creeps.filter((c) => !c.type.includes('boss')).map((c) => c.type);
+
+    // Add non-boss types as individual groups
+    for (const type of [...new Set(nonBossTypes)]) {
+      groups.push([{ type, description: CREEP_TYPES[type]?.description || 'Unknown creep type.' }]);
+    }
+
+    // Add boss + guards as a single group
+    if (bossGuardTypes.length > 0) {
+      const uniqueBossTypes = [...new Set(bossGuardTypes)];
+      groups.push(
+        uniqueBossTypes.map((type) => ({
+          type,
+          description: CREEP_TYPES[type]?.description || 'Unknown creep type.',
+        }))
+      );
+    }
+
+    return groups;
   }
 
   reset(): void {
@@ -454,6 +600,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     this.parallelTimers.clear();
     this.parallelGroups = [];
     this.pendingBossGroups = [];
+    this.activeBossGroups = [];
     this.isParallelMode = false;
 
     this.groupQueue = [];

@@ -17,7 +17,8 @@ export class NextWavePanel {
   private panelHeight: number = 0;
   private readonly ICON_SIZE = 42;
   private readonly ICON_SPACING = 56;
-  private readonly MAX_ICONS_PER_ROW = 5;
+  private readonly GROUP_PADDING = 8;
+  private readonly GROUP_SPACING = 12;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -30,7 +31,8 @@ export class NextWavePanel {
   show(
     waveNumber: number,
     creepTypes: Array<{ type: string; description: string }>,
-    waveType?: WaveType
+    waveType?: WaveType,
+    groups?: Array<Array<{ type: string; description: string }>>
   ): void {
     this.clearIcons();
     this.container.removeAll(true);
@@ -38,38 +40,56 @@ export class NextWavePanel {
     const height = this.scene.cameras.main.height;
     const isBossWave = waveType === 'boss';
 
-    const iconCount = Math.min(creepTypes.length, this.MAX_ICONS_PER_ROW);
-    const rows = Math.ceil(creepTypes.length / this.MAX_ICONS_PER_ROW);
-    this.panelWidth = Math.max(160, iconCount * this.ICON_SPACING + 50);
-    this.panelHeight = 95 + rows * this.ICON_SPACING;
-
+    // Calculate panel dimensions
+    const effectiveGroups = groups || creepTypes.map((t) => [t]);
+    const totalGroupWidth = this.calculateTotalGroupWidth(effectiveGroups);
+    this.panelWidth = Math.max(160, totalGroupWidth + 50);
+    this.panelHeight = 130;
     this.container.setPosition(this.panelX, height - this.panelYOffset - this.panelHeight / 2);
 
+    // Build panel components
     if (isBossWave) {
-      this.bossGlow = this.scene.add.graphics();
-      this.drawBossGlow(this.panelWidth, this.panelHeight, 0.3);
-      this.container.add(this.bossGlow);
-
-      this.glowTween = this.scene.tweens.add({
-        targets: { alpha: 0.3 },
-        alpha: 0.8,
-        duration: 800,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-        onUpdate: (tween) => {
-          const alpha = tween.getValue() ?? 0.3;
-          if (this.bossGlow) {
-            this.drawBossGlow(this.panelWidth, this.panelHeight, alpha);
-          }
-        },
-      });
+      this.setupBossGlow();
     }
+    this.setupPanelBackground(isBossWave);
+    this.setupHitBlocker();
+    this.setupHeader(waveNumber, isBossWave);
 
+    // Render creep icons
+    const startY = 50 + this.ICON_SIZE / 2 + 25;
+    this.renderCreepGroups(effectiveGroups, totalGroupWidth, startY);
+
+    this.container.setVisible(true);
+  }
+
+  private setupBossGlow(): void {
+    this.bossGlow = this.scene.add.graphics();
+    this.drawBossGlow(this.panelWidth, this.panelHeight, 0.3);
+    this.container.add(this.bossGlow);
+
+    this.glowTween = this.scene.tweens.add({
+      targets: { alpha: 0.3 },
+      alpha: 0.8,
+      duration: 800,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+      onUpdate: (tween) => {
+        const alpha = tween.getValue() ?? 0.3;
+        if (this.bossGlow) {
+          this.drawBossGlow(this.panelWidth, this.panelHeight, alpha);
+        }
+      },
+    });
+  }
+
+  private setupPanelBackground(isBossWave: boolean): void {
     const bg = this.scene.add.graphics();
     this.drawPanelBackground(bg, this.panelWidth, this.panelHeight, isBossWave);
     this.container.add(bg);
+  }
 
+  private setupHitBlocker(): void {
     const hitBlocker = this.scene.add.rectangle(
       this.panelWidth / 2,
       this.panelHeight / 2,
@@ -91,11 +111,13 @@ export class NextWavePanel {
       }
     );
     this.container.add(hitBlocker);
+  }
 
+  private setupHeader(waveNumber: number, isBossWave: boolean): void {
     const headerText = isBossWave ? '⚔️ BOSS WAVE' : 'Next Wave';
     const headerColor = isBossWave ? '#ff4444' : '#d4a574';
     const header = this.scene.add
-      .text(this.panelWidth / 2, 14, headerText, {
+      .text(this.panelWidth / 2, 12, headerText, {
         fontFamily: 'Arial',
         fontSize: isBossWave ? '16px' : '15px',
         fontStyle: isBossWave ? 'bold' : 'normal',
@@ -107,32 +129,75 @@ export class NextWavePanel {
     this.container.add(header);
 
     const subtitle = this.scene.add
-      .text(this.panelWidth / 2, 34, `Wave ${waveNumber}`, {
+      .text(this.panelWidth / 2, 30, `Wave ${waveNumber}`, {
         fontFamily: 'Arial',
         fontSize: '13px',
         color: '#888888',
       })
       .setOrigin(0.5, 0);
     this.container.add(subtitle);
+  }
 
-    const headerHeight = 55;
-    const iconAreaHeight = this.panelHeight - headerHeight - 10;
-    const totalIconHeight = rows * this.ICON_SPACING;
-    const startX = 25 + this.ICON_SIZE / 2;
-    const startY = headerHeight + (iconAreaHeight - totalIconHeight) / 2 + this.ICON_SIZE / 2;
+  private renderCreepGroups(
+    effectiveGroups: Array<Array<{ type: string; description: string }>>,
+    totalGroupWidth: number,
+    startY: number
+  ): void {
+    let currentX = (this.panelWidth - totalGroupWidth) / 2;
 
-    creepTypes.forEach((creepInfo, index) => {
-      const row = Math.floor(index / this.MAX_ICONS_PER_ROW);
-      const col = index % this.MAX_ICONS_PER_ROW;
-      const x = startX + col * this.ICON_SPACING;
-      const y = startY + row * this.ICON_SPACING;
+    effectiveGroups.forEach((group) => {
+      const groupWidth = this.calculateGroupWidth(group);
+      const isMultiGroup = group.length > 1;
 
-      const iconContainer = this.createIconWithHover(x, y, creepInfo.type, creepInfo.description);
-      this.container.add(iconContainer);
-      this.icons.push(iconContainer);
+      if (isMultiGroup) {
+        this.drawGroupBorder(currentX, startY, groupWidth);
+      }
+
+      group.forEach((creepInfo, index) => {
+        const x = currentX + index * this.ICON_SPACING + this.ICON_SIZE / 2;
+        const iconContainer = this.createIconWithHover(
+          x,
+          startY,
+          creepInfo.type,
+          creepInfo.description
+        );
+        this.container.add(iconContainer);
+        this.icons.push(iconContainer);
+      });
+
+      currentX += groupWidth + this.GROUP_SPACING;
     });
+  }
 
-    this.container.setVisible(true);
+  private drawGroupBorder(currentX: number, startY: number, groupWidth: number): void {
+    const groupBorder = this.scene.add.graphics();
+    const borderX = currentX - this.GROUP_PADDING / 2;
+    const borderY = startY - this.ICON_SIZE / 2 - this.GROUP_PADDING / 2;
+    const borderWidth = groupWidth + this.GROUP_PADDING;
+    const borderHeight = this.ICON_SIZE + this.GROUP_PADDING;
+
+    groupBorder.lineStyle(2, 0x66aaff, 0.8);
+    groupBorder.strokeRoundedRect(borderX, borderY, borderWidth, borderHeight, 6);
+    groupBorder.fillStyle(0x66aaff, 0.1);
+    groupBorder.fillRoundedRect(borderX, borderY, borderWidth, borderHeight, 6);
+    this.container.add(groupBorder);
+  }
+
+  private calculateGroupWidth(group: Array<{ type: string; description: string }>): number {
+    return group.length * this.ICON_SPACING - (this.ICON_SPACING - this.ICON_SIZE);
+  }
+
+  private calculateTotalGroupWidth(
+    groups: Array<Array<{ type: string; description: string }>>
+  ): number {
+    let total = 0;
+    groups.forEach((group, index) => {
+      total += this.calculateGroupWidth(group);
+      if (index < groups.length - 1) {
+        total += this.GROUP_SPACING;
+      }
+    });
+    return total;
   }
 
   private createIconWithHover(
