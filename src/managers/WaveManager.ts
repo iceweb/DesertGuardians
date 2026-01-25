@@ -500,29 +500,37 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
   private determineCurrentCreepType(): string | null {
     const activeCreeps = this.creepManager.getActiveCreeps();
-    const activeBossCreep = activeCreeps.find((c) => this.isBossType(c.getConfig().type));
 
+    // Priority 1: Active boss on the field
+    const activeBossCreep = activeCreeps.find((c) => this.isBossType(c.getConfig().type));
     if (activeBossCreep) {
       return activeBossCreep.getConfig().type;
     }
 
+    // Priority 2: Currently spawning group
     if (this.isParallelMode) {
       const activeGroup =
         this.parallelGroups.find((g) => g.spawned < g.group.count && !g.finished) ||
         this.pendingBossGroups[0];
-      return activeGroup?.creepType || null;
+      if (activeGroup) return activeGroup.creepType;
+    } else {
+      const activeBossGroup = this.activeBossGroups.find(
+        (g) => g.spawned < g.group.count || !g.finished
+      );
+      const spawningType =
+        this.currentGroup?.creepType ||
+        this.groupQueue[0]?.creepType ||
+        this.pendingBossGroups[0]?.creepType ||
+        activeBossGroup?.creepType;
+      if (spawningType) return spawningType;
     }
 
-    const activeBossGroup = this.activeBossGroups.find(
-      (g) => g.spawned < g.group.count || !g.finished
-    );
-    return (
-      this.currentGroup?.creepType ||
-      this.groupQueue[0]?.creepType ||
-      this.pendingBossGroups[0]?.creepType ||
-      activeBossGroup?.creepType ||
-      null
-    );
+    // Priority 3: Any active creep on the field (wave is winding down)
+    if (activeCreeps.length > 0) {
+      return activeCreeps[0].getConfig().type;
+    }
+
+    return null;
   }
 
   /**
