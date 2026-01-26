@@ -117,8 +117,8 @@ export const CREEP_TYPES: Record<string, CreepConfig> = {
 
   flame: {
     type: 'flame',
-    maxHealth: 24,
-    speed: 90,
+    maxHealth: 22,
+    speed: 80,
     armor: 2,
     goldReward: 9,
     onlyDamagedBy: 'ice',
@@ -458,8 +458,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'flame',
     announcement: '🔥 FLAME WAVE! USE ICE TOWERS!',
     creeps: [
-      { type: 'flame', count: 18, intervalMs: 1000 },
-      { type: 'runner', count: 22, intervalMs: 350, delayStart: 14400 },
+      { type: 'flame', count: 14, intervalMs: 1100 },
+      { type: 'runner', count: 22, intervalMs: 350, delayStart: 12200 },
     ],
   },
   {

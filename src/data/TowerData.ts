@@ -205,7 +205,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 220,
       fireRate: 1800,
-      damage: 25,
+      damage: 32,
       splashRadius: 70,
     },
   },
@@ -220,7 +220,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 240,
       fireRate: 1700,
-      damage: 32,
+      damage: 42,
       splashRadius: 85,
     },
   },
@@ -235,7 +235,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 260,
       fireRate: 1500,
-      damage: 47,
+      damage: 60,
       splashRadius: 100,
     },
   },
@@ -443,7 +443,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     stats: {
       range: 280,
       fireRate: 1400,
-      damage: 58,
+      damage: 75,
       splashRadius: 110,
     },
   },

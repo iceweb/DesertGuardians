@@ -114,7 +114,7 @@ Tower defense games are significantly more complex than platformers:
 - **Event-driven design** — Decoupled systems via GameEventBus
 - **Context-aware input** — InputSystem handles keyboard/mouse based on game state
 - **Modular components** — Split large files into focused, testable modules
-- **467 unit tests** — Comprehensive test coverage with Vitest
+- **543 unit tests** — Comprehensive test coverage with Vitest
 
 ---
 
@@ -195,7 +195,7 @@ npm run build
 Desert Guardians/
 ├── src/
 │   ├── main.ts              # Entry point
-│   ├── __tests__/           # Unit tests (467 tests)
+│   ├── __tests__/           # Unit tests (543 tests)
 │   ├── data/                # Game configuration & tower data
 │   ├── graphics/            # Tower and creep animations
 │   │   ├── creeps/          # Creep renderers by type
@@ -256,7 +256,12 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 ## � Changelog
-
+### v1.5 (January 26, 2026)
+- **Flame Wave Nerf**: Reduced flame creep count (18→14), speed (90→80), health (24→22), and spawn interval (1000ms→1100ms)
+- **Ice Tower Fix**: Ice towers no longer skip slowed flame creeps (damage source priority)
+- **Rock Cannon Buff**: Damage increased ~25-30% across all tiers (Lv4: 58→75 damage)
+- **Rock Cannon Abilities Buff**: Aftershock (50%→60%), Tremor (25→80 dmg), Shrapnel (35%→45%)
+- **Boss Health Bar Fix**: Health bars now properly reset when creeps are reused from pool
 ### v1.0 (January 23, 2026)
 - **Time Bonus Rework**: Changed from multiplier (×1.0-1.35) to additive bonus (+1.5 pts/sec under 40 min, max 3000 pts)
 - **In-Game Timer**: Timer now uses game time (scales with 2×/3× speed) instead of real time

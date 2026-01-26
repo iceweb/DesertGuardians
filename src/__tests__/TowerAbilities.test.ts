@@ -73,7 +73,7 @@ describe('Tower Abilities', () => {
       expect(aftershock).toBeDefined();
       expect(aftershock!.effectParams.count).toBe(3);
       expect(aftershock!.effectParams.radius).toBe(50);
-      expect(aftershock!.effectParams.damageMultiplier).toBe(0.5);
+      expect(aftershock!.effectParams.damageMultiplier).toBe(0.6);
     });
 
     it('should have Tremor with zone parameters', () => {
@@ -81,7 +81,7 @@ describe('Tower Abilities', () => {
       expect(tremor).toBeDefined();
       expect(tremor!.effectParams.radius).toBe(85);
       expect(tremor!.effectParams.duration).toBe(3000);
-      expect(tremor!.effectParams.damage).toBe(25);
+      expect(tremor!.effectParams.damage).toBe(80);
       expect(tremor!.effectParams.slowPercent).toBe(0.3);
     });
 
@@ -89,7 +89,7 @@ describe('Tower Abilities', () => {
       const shrapnel = abilities.find((a) => a.id === 'cannon_shrapnel');
       expect(shrapnel).toBeDefined();
       expect(shrapnel!.effectParams.count).toBe(6);
-      expect(shrapnel!.effectParams.damageMultiplier).toBe(0.35);
+      expect(shrapnel!.effectParams.damageMultiplier).toBe(0.45);
     });
   });
 
