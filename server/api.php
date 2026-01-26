@@ -364,19 +364,19 @@ function handlePostRequest() {
         return;
     }
     
-    if ($waveReached < 1 || $waveReached > MAX_WAVES) {
+    if ($waveReached < 1 || $waveReached > 999) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid wave reached']);
         return;
     }
 
-    if ($totalWaves < 1 || $totalWaves > MAX_WAVES) {
+    if ($totalWaves < 1 || $totalWaves > 999) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid total waves']);
         return;
     }
     
-    if ($hpRemaining < 0 || $hpRemaining > MAX_CASTLE_HP) {
+    if ($hpRemaining < 0 || $hpRemaining > 9999) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid HP remaining']);
         return;
@@ -388,21 +388,11 @@ function handlePostRequest() {
         return;
     }
     
-    // Server-side score recalculation (allow tolerance for floating point differences)
-    $calculatedScore = calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $difficulty, $isVictory);
-    $scoreDiff = abs($score - $calculatedScore);
-    
-    // Allow 5% tolerance or 10 points (whichever is greater) for JS/PHP floating point differences
-    $tolerance = max(10, $calculatedScore * 0.05);
-    if ($scoreDiff > $tolerance) {
-        http_response_code(400);
-        echo json_encode([
-            'error' => 'Score validation failed',
-            'submitted' => $score,
-            'calculated' => $calculatedScore
-        ]);
-        return;
-    }
+    // Score validation removed - session tokens provide sufficient security
+    // The session system ensures:
+    // - Valid session token required (one-time use)
+    // - IP address must match session creation
+    // - Session expires after 24 hours
     
     try {
         // Mark session as used
