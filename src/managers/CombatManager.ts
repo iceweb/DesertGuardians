@@ -134,9 +134,12 @@ export class CombatManager {
 
       let isSaturated = false;
       if (isIceTower) {
-        isSaturated = creep.isSlowed();
+        // Don't treat flame creeps as saturated - ice is their only damage source
+        isSaturated = creepConfig.onlyDamagedBy === 'ice' ? false : creep.isSlowed();
       } else if (isPoisonTower) {
-        isSaturated = creep.getPoisonStackCount() >= 3;
+        // Don't treat plaguebearer creeps as saturated - poison is their only damage source
+        isSaturated =
+          creepConfig.onlyDamagedBy === 'poison' ? false : creep.getPoisonStackCount() >= 3;
       }
 
       let value: number;

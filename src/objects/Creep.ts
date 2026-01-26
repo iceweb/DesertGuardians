@@ -175,6 +175,10 @@ export class Creep extends Phaser.GameObjects.Container {
     this.setActive(true);
     this.setVisible(true);
 
+    // Reset health bar alpha (in case previous creep was burrowed)
+    this.healthBarBg.setAlpha(1);
+    this.healthBarFg.setAlpha(1);
+
     this.redraw();
     this.updateHealthBar();
     this.updateShieldVisual();
