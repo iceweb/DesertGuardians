@@ -2,6 +2,14 @@ const API_URL = 'https://iceweb.ch/dg/api.php';
 
 import { VERSION } from '../version';
 
+export interface VersionCheckResult {
+  success: boolean;
+  isOutdated: boolean;
+  serverVersion: string;
+  clientVersion: string;
+  error?: string;
+}
+
 export interface ScoreSubmission {
   name: string;
   score: number;
@@ -169,5 +177,55 @@ export class HighscoreAPI {
 
   static clearSession(): void {
     this.sessionToken = null;
+  }
+
+  static async checkVersion(): Promise<VersionCheckResult> {
+    try {
+      const response = await fetch(`${API_URL}?action=version`, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) {
+        console.warn('HighscoreAPI: Failed to check version, status:', response.status);
+        return {
+          success: false,
+          isOutdated: false,
+          serverVersion: 'unknown',
+          clientVersion: VERSION,
+          error: 'Failed to check version',
+        };
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.version) {
+        const serverVersion = data.version;
+        const isOutdated = serverVersion !== VERSION;
+        return {
+          success: true,
+          isOutdated,
+          serverVersion,
+          clientVersion: VERSION,
+        };
+      } else {
+        return {
+          success: false,
+          isOutdated: false,
+          serverVersion: 'unknown',
+          clientVersion: VERSION,
+          error: 'Invalid response',
+        };
+      }
+    } catch (error) {
+      console.warn('HighscoreAPI: Network error checking version:', error);
+      return {
+        success: false,
+        isOutdated: false,
+        serverVersion: 'unknown',
+        clientVersion: VERSION,
+        error: 'Network error',
+      };
+    }
   }
 }

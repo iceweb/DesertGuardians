@@ -114,7 +114,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       id: 'sniper_headshot',
       name: 'Headshot',
       description: 'Instant kill if HP < 25%, else +50% damage',
-      triggerChance: 0.08,
+      triggerChance: 0.15,
       icon: { type: AbilityIconType.SKULL, primaryColor: 0x1a1a1a, secondaryColor: 0xff0000 },
       effectParams: { hpThreshold: 0.25, damageMultiplier: 1.5 },
     },

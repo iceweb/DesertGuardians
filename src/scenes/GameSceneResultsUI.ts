@@ -544,7 +544,7 @@ export class GameSceneResultsUI {
     this.saveSection.add(newHighScore);
 
     const nameLabel = this.host.add
-      .text(0, 5, 'Enter your name:', {
+      .text(0, 5, 'Enter name (min 3 chars):', {
         fontFamily: 'Arial',
         fontSize: '14px',
         color: '#888888',
@@ -788,9 +788,30 @@ export class GameSceneResultsUI {
    */
   private async saveScore(): Promise<void> {
     if (this.hasSubmitted || !this.resultData) return;
-    this.hasSubmitted = true;
 
-    const name = this.playerName.trim() || 'Anonymous';
+    const name = this.playerName.trim();
+
+    // Require at least 3 characters
+    if (name.length < 3) {
+      const width = this.host.cameras.main.width;
+      const errorText = this.host.add
+        .text(
+          width / 2,
+          this.host.cameras.main.height / 2 + 220,
+          'Name must be at least 3 characters!',
+          {
+            fontFamily: 'Arial',
+            fontSize: '14px',
+            color: '#ff6666',
+          }
+        )
+        .setOrigin(0.5)
+        .setDepth(300);
+      this.host.time.delayedCall(2000, () => errorText.destroy());
+      return;
+    }
+
+    this.hasSubmitted = true;
 
     if (this.cursorTimer) {
       this.cursorTimer.destroy();

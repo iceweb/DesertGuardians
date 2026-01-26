@@ -344,9 +344,9 @@ export class ResultsScene extends Phaser.Scene {
     this.nameInputContainer.add(newHighScore);
 
     const label = this.add
-      .text(0, -30, 'Enter Your Name:', {
+      .text(0, -30, 'Enter Your Name (min 3 chars):', {
         fontFamily: 'Arial',
-        fontSize: '20px',
+        fontSize: '18px',
         color: '#c9a86c',
       })
       .setOrigin(0.5);
@@ -653,7 +653,7 @@ export class ResultsScene extends Phaser.Scene {
 
   private updateNameDisplay(): void {
     const cursor = this.cursorVisible && !this.hasSubmitted ? '|' : '';
-    const displayName = this.playerName || (this.hasSubmitted ? 'Anonymous' : '');
+    const displayName = this.playerName || '';
     this.nameInputText.setText(displayName + cursor);
   }
 
@@ -662,9 +662,24 @@ export class ResultsScene extends Phaser.Scene {
    */
   private async saveScore(): Promise<void> {
     if (this.hasSubmitted) return;
-    this.hasSubmitted = true;
 
-    const name = this.playerName.trim() || 'Anonymous';
+    const name = this.playerName.trim();
+
+    // Require at least 3 characters
+    if (name.length < 3) {
+      const width = this.cameras.main.width;
+      const errorText = this.add
+        .text(width / 2, this.cameras.main.height - 50, 'Name must be at least 3 characters!', {
+          fontFamily: 'Arial',
+          fontSize: '16px',
+          color: '#ff6666',
+        })
+        .setOrigin(0.5);
+      this.time.delayedCall(2000, () => errorText.destroy());
+      return;
+    }
+
+    this.hasSubmitted = true;
 
     this.cursorTimer.destroy();
     this.updateNameDisplay();

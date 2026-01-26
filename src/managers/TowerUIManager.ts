@@ -577,6 +577,27 @@ export class TowerUIManager {
       }
     }
 
+    // Display splash radius for cannon towers
+    if (config.stats.splashRadius) {
+      const splashLabel = this.scene.add
+        .text(statsStartX + 280, yOffset, 'Splash:', {
+          fontFamily: 'Arial',
+          fontSize: '16px',
+          color: '#aaaaaa',
+        })
+        .setOrigin(0, 0.5);
+      this.upgradeMenuContainer.add(splashLabel);
+
+      const splashValue = this.scene.add
+        .text(statsStartX + 355, yOffset, `${config.stats.splashRadius}px`, {
+          fontFamily: 'Arial Black',
+          fontSize: '16px',
+          color: '#ffaa44',
+        })
+        .setOrigin(0, 0.5);
+      this.upgradeMenuContainer.add(splashValue);
+    }
+
     yOffset += statLineHeight + 2;
 
     if (hasSlow) {

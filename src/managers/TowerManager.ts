@@ -19,6 +19,11 @@ export class TowerManager {
 
   private animatorFactory: TowerAnimatorFactory;
 
+  private upgradeArrow: Phaser.GameObjects.Container | null = null;
+  private upgradeArrowTween: Phaser.Tweens.Tween | null = null;
+  private hasShownUpgradeHint: boolean = false;
+  private hasUpgradedAnyTower: boolean = false;
+
   private readonly PATH_BUFFER = GAME_CONFIG.TOWER_PATH_BUFFER;
   private readonly TOWER_RADIUS = GAME_CONFIG.TOWER_RADIUS;
   private readonly TOWER_SPACING = GAME_CONFIG.TOWER_SPACING;
@@ -226,6 +231,12 @@ export class TowerManager {
     this.updateAuraBuffs();
 
     this.uiManager.closeMenus();
+
+    // Show upgrade hint arrow on first tower built
+    if (!this.hasShownUpgradeHint && !this.hasUpgradedAnyTower) {
+      this.showUpgradeArrow(tower);
+      this.hasShownUpgradeHint = true;
+    }
   }
 
   private selectTower(tower: Tower): void {
@@ -263,6 +274,12 @@ export class TowerManager {
     tower.upgrade(newKey);
 
     this.onTowerUpgraded?.(tower, cost);
+
+    // Hide upgrade hint arrow on first upgrade
+    if (!this.hasUpgradedAnyTower) {
+      this.hasUpgradedAnyTower = true;
+      this.hideUpgradeArrow();
+    }
 
     this.updateAuraBuffs();
 
@@ -392,7 +409,73 @@ export class TowerManager {
     this.uiManager.clearPlacementGraphics();
   }
 
+  private showUpgradeArrow(tower: Tower): void {
+    const arrowX = tower.x;
+    const arrowY = tower.y - 60;
+
+    this.upgradeArrow = this.scene.add.container(arrowX, arrowY);
+    this.upgradeArrow.setDepth(100);
+
+    const arrow = this.scene.add.graphics();
+
+    arrow.fillStyle(0x000000, 0.3);
+    arrow.fillTriangle(-12, -22, 12, -22, 0, 2);
+
+    arrow.fillStyle(0x4a90d4, 1);
+    arrow.fillTriangle(-10, -25, 10, -25, 0, 0);
+
+    arrow.fillStyle(0x80c5f5, 1);
+    arrow.fillTriangle(-6, -23, 4, -23, 0, -8);
+
+    arrow.lineStyle(2, 0x14698b, 1);
+    arrow.strokeTriangle(-10, -25, 10, -25, 0, 0);
+
+    this.upgradeArrow.add(arrow);
+
+    const text = this.scene.add
+      .text(0, -45, '⬆ Upgrade', {
+        fontFamily: 'Arial Black',
+        fontSize: '14px',
+        color: '#87CEEB',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5);
+    this.upgradeArrow.add(text);
+
+    this.upgradeArrowTween = this.scene.tweens.add({
+      targets: this.upgradeArrow,
+      y: arrowY - 15,
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  private hideUpgradeArrow(): void {
+    if (this.upgradeArrow) {
+      if (this.upgradeArrowTween) {
+        this.upgradeArrowTween.stop();
+        this.upgradeArrowTween = null;
+      }
+
+      this.scene.tweens.add({
+        targets: this.upgradeArrow,
+        alpha: 0,
+        y: this.upgradeArrow.y - 30,
+        duration: 300,
+        ease: 'Cubic.easeOut',
+        onComplete: () => {
+          this.upgradeArrow?.destroy();
+          this.upgradeArrow = null;
+        },
+      });
+    }
+  }
+
   destroy(): void {
+    this.hideUpgradeArrow();
     this.uiManager.closeMenus();
     this.uiManager.destroy();
     for (const tower of this.towers) {

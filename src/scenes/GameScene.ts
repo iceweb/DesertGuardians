@@ -45,6 +45,9 @@ export class GameScene extends Phaser.Scene {
   private resultsUI!: GameSceneResultsUI;
   private difficultyOverlay: Phaser.GameObjects.Container | null = null;
   private gameReady: boolean = false;
+  private versionChecked: boolean = false;
+  private versionCheckInProgress: boolean = false;
+  private versionMismatchPopup: Phaser.GameObjects.Container | null = null;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -53,6 +56,11 @@ export class GameScene extends Phaser.Scene {
   init(_data?: Record<string, unknown>): void {}
 
   create(): void {
+    // Reset version check state for new game session
+    this.versionChecked = false;
+    this.versionCheckInProgress = false;
+    this.versionMismatchPopup = null;
+
     this.gameController = new GameController();
     this.gameController.reset();
 
@@ -372,7 +380,6 @@ export class GameScene extends Phaser.Scene {
       this.gameController.spendGold(cost);
       this.hudManager.updateGold(this.gameController.gold);
       this.audioManager.playSFX('tower_place');
-      this.audioManager.playSFX('coins');
     };
 
     this.goldMineManager.onMineUpgraded = (_mine, cost) => {
@@ -567,14 +574,28 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupHUDCallbacks(): void {
-    this.hudManager.onStartWaveClicked = () => {
+    this.hudManager.onStartWaveClicked = async () => {
       if (!this.gameReady) return;
       if (this.gameController.gameOver) return;
       if (this.hudManager.isCountdownActive()) return;
+      if (this.versionCheckInProgress) return;
 
       const nextWave = this.waveManager.getCurrentWave() + 1;
 
       if (this.waveManager.getCurrentWave() === 0) {
+        // Check version before starting first wave
+        if (!this.versionChecked) {
+          this.versionCheckInProgress = true;
+          const versionResult = await HighscoreAPI.checkVersion();
+          this.versionCheckInProgress = false;
+          this.versionChecked = true;
+
+          if (versionResult.success && versionResult.isOutdated) {
+            this.showVersionMismatchPopup(versionResult.clientVersion, versionResult.serverVersion);
+            return;
+          }
+        }
+
         // Show countdown before the first wave starts
         this.hudManager.updateWave(nextWave);
         this.hudManager.hideStartWaveButton();
@@ -786,5 +807,121 @@ export class GameScene extends Phaser.Scene {
 
   getTowerManager(): TowerManager {
     return this.towerManager;
+  }
+
+  private showVersionMismatchPopup(clientVersion: string, serverVersion: string): void {
+    if (this.versionMismatchPopup) return;
+
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    this.versionMismatchPopup = this.add.container(width / 2, height / 2);
+    this.versionMismatchPopup.setDepth(500);
+
+    // Darkened overlay
+    const overlay = this.add.rectangle(0, 0, width * 2, height * 2, 0x000000, 0.7);
+    overlay.setInteractive();
+    this.versionMismatchPopup.add(overlay);
+
+    // Background panel
+    const bg = this.add.graphics();
+    bg.fillStyle(0x000000, 0.6);
+    bg.fillRoundedRect(-215, -125, 430, 290, 18);
+    bg.fillStyle(0x1a0a00, 0.98);
+    bg.fillRoundedRect(-220, -130, 430, 290, 16);
+    bg.lineStyle(4, 0xd4a84b, 1);
+    bg.strokeRoundedRect(-220, -130, 430, 290, 16);
+    this.versionMismatchPopup.add(bg);
+
+    // Warning icon
+    const warningIcon = this.add
+      .text(0, -90, '⚠️', {
+        fontSize: '48px',
+      })
+      .setOrigin(0.5);
+    this.versionMismatchPopup.add(warningIcon);
+
+    // Title
+    const title = this.add
+      .text(0, -45, 'Update Required', {
+        fontFamily: 'Arial Black',
+        fontSize: '28px',
+        color: '#FFD700',
+        stroke: '#000000',
+        strokeThickness: 4,
+      })
+      .setOrigin(0.5);
+    this.versionMismatchPopup.add(title);
+
+    // Version info
+    const versionInfo = this.add
+      .text(0, 5, `Your version: ${clientVersion}\nLatest version: ${serverVersion}`, {
+        fontFamily: 'Arial',
+        fontSize: '18px',
+        color: '#FFFFFF',
+        align: 'center',
+      })
+      .setOrigin(0.5);
+    this.versionMismatchPopup.add(versionInfo);
+
+    // Instructions
+    const instructions = this.add
+      .text(0, 55, 'Please refresh your browser to get the latest version.', {
+        fontFamily: 'Arial',
+        fontSize: '14px',
+        color: '#CCCCCC',
+        align: 'center',
+      })
+      .setOrigin(0.5);
+    this.versionMismatchPopup.add(instructions);
+
+    // Refresh button
+    const buttonBg = this.add.graphics();
+    buttonBg.fillStyle(0x228b22, 1);
+    buttonBg.fillRoundedRect(-80, 80, 160, 45, 8);
+    buttonBg.lineStyle(2, 0x32cd32, 1);
+    buttonBg.strokeRoundedRect(-80, 80, 160, 45, 8);
+    this.versionMismatchPopup.add(buttonBg);
+
+    const buttonText = this.add
+      .text(0, 102, '🔄  REFRESH', {
+        fontFamily: 'Arial Black',
+        fontSize: '18px',
+        color: '#FFFFFF',
+        stroke: '#000000',
+        strokeThickness: 2,
+      })
+      .setOrigin(0.5);
+    this.versionMismatchPopup.add(buttonText);
+
+    const buttonHitArea = this.add.rectangle(0, 102, 160, 45, 0x000000, 0);
+    buttonHitArea.setInteractive({ useHandCursor: true });
+    buttonHitArea.on('pointerover', () => {
+      buttonBg.clear();
+      buttonBg.fillStyle(0x32cd32, 1);
+      buttonBg.fillRoundedRect(-80, 80, 160, 45, 8);
+      buttonBg.lineStyle(2, 0x50fa7b, 1);
+      buttonBg.strokeRoundedRect(-80, 80, 160, 45, 8);
+    });
+    buttonHitArea.on('pointerout', () => {
+      buttonBg.clear();
+      buttonBg.fillStyle(0x228b22, 1);
+      buttonBg.fillRoundedRect(-80, 80, 160, 45, 8);
+      buttonBg.lineStyle(2, 0x32cd32, 1);
+      buttonBg.strokeRoundedRect(-80, 80, 160, 45, 8);
+    });
+    buttonHitArea.on('pointerdown', () => {
+      this.audioManager.playSFX('ui_click');
+      window.location.reload();
+    });
+    this.versionMismatchPopup.add(buttonHitArea);
+
+    // Fade in
+    this.versionMismatchPopup.setAlpha(0);
+    this.tweens.add({
+      targets: this.versionMismatchPopup,
+      alpha: 1,
+      duration: 300,
+    });
   }
 }

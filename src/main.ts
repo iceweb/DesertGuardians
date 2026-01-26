@@ -32,4 +32,13 @@ const config: Phaser.Types.Core.GameConfig = {
 
 const game = new Phaser.Game(config);
 
+// Pause game when window loses focus to avoid throttled performance issues
+game.events.on(Phaser.Core.Events.BLUR, () => {
+  game.loop.sleep();
+});
+
+game.events.on(Phaser.Core.Events.FOCUS, () => {
+  game.loop.wake();
+});
+
 export default game;

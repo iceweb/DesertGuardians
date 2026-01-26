@@ -33,6 +33,9 @@ define('MAX_WAVES', 35);                // Total waves in game
 define('MAX_CASTLE_HP', 25);            // Max castle HP
 define('SESSION_EXPIRY_HOURS', 24);     // Session token expiry
 
+// Client version - update this when deploying new versions
+define('GAME_VERSION', '1.0');
+
 // Disable error display in production
 ini_set('display_errors', 0);
 error_reporting(0);

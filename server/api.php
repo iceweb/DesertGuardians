@@ -6,6 +6,7 @@
  * Endpoints:
  *   GET /api.php              - Fetch top 20 highscores
  *   GET /api.php?action=session - Request a new game session token
+ *   GET /api.php?action=version - Get current game version
  *   POST /api.php             - Submit a score with validation
  */
 
@@ -250,6 +251,15 @@ function markSessionUsed($pdo, $token) {
  * Handle GET request - fetch highscores
  */
 function handleGetRequest() {
+    // Check for version request
+    if (isset($_GET['action']) && $_GET['action'] === 'version') {
+        echo json_encode([
+            'success' => true,
+            'version' => GAME_VERSION
+        ]);
+        return;
+    }
+    
     // Check for session request
     if (isset($_GET['action']) && $_GET['action'] === 'session') {
         handleSessionRequest();

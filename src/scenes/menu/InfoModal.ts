@@ -81,7 +81,7 @@ export class InfoModal {
             'Archer — Fast, cheap, +200% vs flying',
             'Rapid Fire — Very fast, lower damage',
             'Sniper — Longest range, huge damage',
-            'Cannon — Splash AoE, ground only',
+            'Cannon — Splash 70-110px, ground only',
           ],
         },
         {
@@ -162,10 +162,10 @@ export class InfoModal {
           title: '💣 CANNON ABILITIES',
           content: [
             'Aftershock — 3 extra explosions',
-            '  → 50% dmg each, delayed impact',
-            'Tremor — Damage zone + 30% slow',
+            '  → 60% dmg each, delayed impact',
+            'Tremor — 80 dmg zone + 30% slow',
             '  → Area denial, synergy with slows',
-            'Shrapnel — 6 fragments (35% dmg)',
+            'Shrapnel — 6 fragments (45% dmg)',
             '  → Best for clustered waves',
           ],
         },
