@@ -75,10 +75,24 @@ export class StatusEffectHandler {
     const currentTime = this.scene.time.now;
 
     if (this.poisonStacks.length >= 3) {
-      this.poisonStacks[0] = {
-        damage: damagePerSecond,
-        endTime: currentTime + durationMs,
-      };
+      // Find the weakest stack
+      let weakestIndex = 0;
+      for (let i = 1; i < this.poisonStacks.length; i++) {
+        if (this.poisonStacks[i].damage < this.poisonStacks[weakestIndex].damage) {
+          weakestIndex = i;
+        }
+      }
+
+      // Only replace if the new DoT is stronger than the weakest existing stack
+      if (damagePerSecond > this.poisonStacks[weakestIndex].damage) {
+        this.poisonStacks[weakestIndex] = {
+          damage: damagePerSecond,
+          endTime: currentTime + durationMs,
+        };
+      } else {
+        // Refresh the duration of the weakest matching stack instead
+        this.poisonStacks[weakestIndex].endTime = currentTime + durationMs;
+      }
     } else {
       this.poisonStacks.push({
         damage: damagePerSecond,

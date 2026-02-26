@@ -34,6 +34,9 @@ export class UIScene extends Phaser.Scene {
     this.registry.events.on('final-wave-started', this.onFinalWaveStarted, this);
     this.registry.events.on('final-boss-spawning', this.onFinalBossSpawning, this);
     this.registry.events.on('game-over', this.onGameOver, this);
+
+    // Register shutdown handler to clean up registry event listeners
+    this.events.once('shutdown', this.shutdown, this);
   }
 
   private getCreepsFromGameScene(): Creep[] {

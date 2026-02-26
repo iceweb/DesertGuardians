@@ -61,6 +61,9 @@ export class GameScene extends Phaser.Scene {
     this.versionCheckInProgress = false;
     this.versionMismatchPopup = null;
 
+    // Ensure scene clock is unpaused (survives scene restart if paused before)
+    this.time.paused = false;
+
     this.gameController = new GameController();
     this.gameController.reset();
 
@@ -362,11 +365,17 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleShutdown(): void {
+    // Ensure scene clock is unpaused so it doesn't carry over to next game
+    this.time.paused = false;
+
     // Clear input queue handlers on shutdown
     InputQueue.getInstance().clearHandlers();
     InputQueue.getInstance().clearQueue();
 
+    this.waveManager?.destroy();
+    this.creepManager?.destroy();
     this.towerManager?.destroy();
+    this.projectileManager?.destroy();
     this.goldMineUIManager?.destroy();
     this.goldMineManager?.destroy();
     this.popupController?.destroy();

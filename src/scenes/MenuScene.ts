@@ -234,10 +234,11 @@ export class MenuScene extends Phaser.Scene {
   private startGame(): void {
     this.audioManager.unlockAudio();
 
-    if (this.scene.isActive('GameScene')) {
+    // Stop scenes in any state (active, paused, or sleeping)
+    if (this.scene.isActive('GameScene') || this.scene.isSleeping('GameScene')) {
       this.scene.stop('GameScene');
     }
-    if (this.scene.isActive('UIScene')) {
+    if (this.scene.isActive('UIScene') || this.scene.isSleeping('UIScene')) {
       this.scene.stop('UIScene');
     }
     MenuScene.setGameInProgress(true);

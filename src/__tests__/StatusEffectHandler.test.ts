@@ -34,17 +34,71 @@ describe('StatusEffectHandler Logic', () => {
       const MAX_STACKS = 3;
       const stacks: { damage: number; endTime: number }[] = [];
 
-      // Add 4 stacks
+      // Add 4 stacks with same damage
       for (let i = 0; i < 4; i++) {
         if (stacks.length >= MAX_STACKS) {
-          // Replace oldest stack
-          stacks[0] = { damage: 5, endTime: 5000 + i * 1000 };
+          // Find weakest stack
+          let weakestIndex = 0;
+          for (let j = 1; j < stacks.length; j++) {
+            if (stacks[j].damage < stacks[weakestIndex].damage) {
+              weakestIndex = j;
+            }
+          }
+          // Equal damage: refresh duration of weakest
+          stacks[weakestIndex].endTime = 5000 + i * 1000;
         } else {
           stacks.push({ damage: 5, endTime: 5000 + i * 1000 });
         }
       }
 
       expect(stacks.length).toBe(3);
+    });
+
+    it('should replace weakest stack when stronger DoT is applied at max stacks', () => {
+      const stacks = [
+        { damage: 5, endTime: 10000 },
+        { damage: 3, endTime: 10000 },
+        { damage: 8, endTime: 10000 },
+      ];
+
+      const newDamage = 10;
+      // Find weakest
+      let weakestIndex = 0;
+      for (let i = 1; i < stacks.length; i++) {
+        if (stacks[i].damage < stacks[weakestIndex].damage) {
+          weakestIndex = i;
+        }
+      }
+      // Replace weakest (damage 3) with stronger DoT
+      expect(stacks[weakestIndex].damage).toBe(3);
+      if (newDamage > stacks[weakestIndex].damage) {
+        stacks[weakestIndex] = { damage: newDamage, endTime: 15000 };
+      }
+
+      expect(stacks.length).toBe(3);
+      expect(stacks[1].damage).toBe(10);
+    });
+
+    it('should not replace stack when weaker DoT is applied at max stacks', () => {
+      const stacks = [
+        { damage: 5, endTime: 10000 },
+        { damage: 8, endTime: 10000 },
+        { damage: 12, endTime: 10000 },
+      ];
+
+      const newDamage = 3;
+      let weakestIndex = 0;
+      for (let i = 1; i < stacks.length; i++) {
+        if (stacks[i].damage < stacks[weakestIndex].damage) {
+          weakestIndex = i;
+        }
+      }
+      // New DoT (3) is weaker than weakest (5), so just refresh duration
+      expect(newDamage <= stacks[weakestIndex].damage).toBe(true);
+      stacks[weakestIndex].endTime = 15000;
+
+      expect(stacks[weakestIndex].damage).toBe(5); // Damage unchanged
+      expect(stacks[weakestIndex].endTime).toBe(15000); // Duration refreshed
     });
 
     it('should calculate total poison damage from all stacks', () => {
