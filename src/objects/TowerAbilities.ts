@@ -115,8 +115,8 @@ export class TowerAbilityHandler {
         return this.effects.executeMultiShot(context, params);
       case 'archer_piercing':
         return this.effects.executePiercingArrow(context, params);
-      case 'archer_heavyarrows':
-        return this.effects.executeHeavyArrows(context, params);
+      case 'archer_exploit':
+        return this.effects.executeExploitWeakness(context, params);
 
       default:
         return { triggered: false };
@@ -129,6 +129,10 @@ export class TowerAbilityHandler {
 
   getBulletStormSpeedMultiplier(): number {
     return this.effects.getBulletStormSpeedMultiplier();
+  }
+
+  getBulletStormDamageMultiplier(): number {
+    return this.effects.getBulletStormDamageMultiplier();
   }
 
   onCreepDeath(creep: Creep, allCreeps: Creep[]): void {

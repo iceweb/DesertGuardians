@@ -124,8 +124,8 @@ All towers start as **Archer Tower** and can branch into specialized paths at le
 
 | Tower | Type | Specialty | Signature Abilities |
 |:------|:-----|:----------|:--------------------|
-| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Multi-Shot, Piercing Arrow, Heavy Arrows |
-| ⚡ **Rapid Fire** | Physical | Extreme attack speed | Bullet Storm, Ricochet, Incendiary Rounds |
+| 🏹 **Archer** | Physical | Balanced damage, +200% vs air | Multi-Shot, Piercing Arrow, Exploit Weakness |
+| ⚡ **Rapid Fire** | Physical | Extreme attack speed, armor shred | Bullet Storm, Ricochet, Incendiary Rounds |
 | 🎯 **Sniper** | Physical | High damage, long range | Critical Strike, Armor Pierce, Headshot |
 | 💣 **Rock Cannon** | Physical | Splash damage (70-110px) | Aftershock, Tremor, Shrapnel Burst |
 | ❄️ **Ice Tower** | Magic | Slows enemies, 80% armor pen | Ice Trap, Frost Nova, Deep Freeze |
@@ -255,7 +255,29 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-## � Changelog
+## 📝 Changelog
+### v2.0 — Late-Game Balance & Hardware-Independent Timing
+
+**Tower Balance — Archer & Rapid Fire rework**
+- **Rapid Fire: Innate Armor Shred** — Every RF hit permanently reduces a creep's armor (1/1.5/2/2.5 per hit by tower level, max 40 total). This makes RF towers scale into the late game by softening high-armor targets for all towers. *Stack RF towers on a chokepoint to shred boss armor before your snipers fire.*
+- **Archer L4: Heavy Arrows → Exploit Weakness** — Replaced the marginal +50% damage ability with a conditional nuke: deals 2× magic damage to any debuffed target (slowed, poisoned, burning, etc.). *Pair archers with ice or poison towers to trigger Exploit Weakness consistently.*
+- **Rapid Fire L4: Bullet Storm Buff** — Fires 8 shots (was 5) with +10% escalating damage per shot, rewarding sustained fire.
+- **Rapid Fire L4: Incendiary Rounds Buff** — Burn DPS increased from 10 → 15 per stack (up to 3 stacks). Proc chance slightly raised.
+- **Cost Rebalancing** — Archer L3 cost 280 → 240, Archer L4 cost 800 → 600 (total investment 1240 → 1000g). RF L4 cost 650 → 600 (total 1440 → 1390g). This makes Archer and RF noticeably cheaper than Sniper (1670g) and Cannon (1570g), reflecting their support role.
+- **Armor Shred Cap** — Maximum armor reduction from all sources raised from 25 → 40, giving RF towers room to fully shred mid-tier armor.
+
+**Hardware-Independent Timing**
+- **Status Effects Fixed** — Slow, freeze, poison, burn, brittle, and immunity durations now use virtual game time instead of wall-clock time. Previously, ice/slow towers were ~3× weaker at 3× speed because effects expired in real seconds rather than game seconds. *Ice towers now slow for the same effective duration at any game speed.*
+- **Wave Spawning Fixed** — Creep spawn intervals now use delta-accumulated timers instead of wall-clock `delayedCall`. Changing game speed mid-wave no longer causes spawn timing glitches.
+- **Boss Rage Timing Fixed** — Boss 5's rage animation freeze now correctly uses game time, so it lasts the same in-game duration regardless of speed setting.
+- **Scoring Unchanged** — The scoring timer already used virtual game time, which is the fairest option (identical gameplay = identical score regardless of hardware or speed).
+
+**Strategy implications for players:**
+- RF towers are no longer useless late-game — they're now one of the best support towers. Place 2-3 RF towers early on the path to pre-shred armor before creeps reach your snipers/cannons.
+- Archer L4 with Exploit Weakness turns archers into burst damage towers when combined with any CC/debuff tower (ice, poison, or even other RF burn stacks).
+- Ice towers are now equally effective at 1×, 2×, and 3× speed — slowed creeps stay slowed for the correct game-time duration at all speeds.
+- Budget matters more: a fully upgraded Archer costs only 1000g vs Sniper's 1670g. Consider mixing cheap archers with expensive snipers instead of going all-sniper.
+
 ### v1.5 (January 26, 2026)
 - **Flame Wave Nerf**: Reduced flame creep count (18→14), speed (90→80), health (24→22), and spawn interval (1000ms→1100ms)
 - **Ice Tower Fix**: Ice towers no longer skip slowed flame creeps (damage source priority)

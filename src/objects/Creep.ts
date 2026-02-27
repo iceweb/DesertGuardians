@@ -31,6 +31,9 @@ export class Creep extends Phaser.GameObjects.Container {
   private bossRageAnimationActive: boolean = false;
   private bossRageAnimationEndTime: number = 0;
 
+  /** Virtual game time from last update — used by takeDamage for boss rage timing */
+  private lastGameTime: number = 0;
+
   private statusEffects!: StatusEffectHandler;
   private abilities!: CreepAbilities;
   private effects!: CreepEffects;
@@ -140,6 +143,7 @@ export class Creep extends Phaser.GameObjects.Container {
     this.bossIsPained = false;
     this.bossRageAnimationActive = false;
     this.bossRageAnimationEndTime = 0;
+    this.lastGameTime = 0;
 
     this.abilities.initialize(this.config);
 
@@ -228,13 +232,15 @@ export class Creep extends Phaser.GameObjects.Container {
     this.healthBarFg.fillRect(-barWidth / 2, yOffset, barWidth * healthPercent, barHeight);
   }
 
-  update(delta: number): void {
+  update(delta: number, gameTime: number): void {
     if (!this.isActive) return;
+
+    this.lastGameTime = gameTime;
 
     const state = this.abilities.getState();
     const wasBurrowed = state.isBurrowed;
 
-    this.statusEffects.update(delta);
+    this.statusEffects.update(delta, gameTime);
     this.abilities.updateJump(delta, this.config, this.pathSystem, this.distanceTraveled);
     this.abilities.updateDigger(delta, this.config);
     this.abilities.updateGhostPhase(delta, this.config, this.currentHealth, this.config.maxHealth);
@@ -250,7 +256,7 @@ export class Creep extends Phaser.GameObjects.Container {
 
     this.bounceTime += delta / 1000;
 
-    if (this.bossRageAnimationActive && this.scene.time.now >= this.bossRageAnimationEndTime) {
+    if (this.bossRageAnimationActive && gameTime >= this.bossRageAnimationEndTime) {
       this.bossRageAnimationActive = false;
     }
 
@@ -281,7 +287,7 @@ export class Creep extends Phaser.GameObjects.Container {
     this.bodyGraphics.scaleX = this.faceDirection * (1 / squash);
 
     if (state.shieldHitsRemaining > 0) this.updateShieldVisual();
-    this.statusEffects.draw(this.scene.time.now);
+    this.statusEffects.draw(gameTime);
 
     if (this.pathSystem.hasReachedEnd(this.distanceTraveled)) {
       this.reachEnd();
@@ -346,6 +352,25 @@ export class Creep extends Phaser.GameObjects.Container {
     return this.statusEffects.isSlowed();
   }
 
+  isBurning(): boolean {
+    return this.statusEffects.isBurning();
+  }
+
+  isPoisoned(): boolean {
+    return this.statusEffects.isPoisoned();
+  }
+
+  hasAnyDebuff(): boolean {
+    return (
+      this.statusEffects.isSlowed() ||
+      this.statusEffects.isFrozen() ||
+      this.statusEffects.isPoisoned() ||
+      this.statusEffects.isBurning() ||
+      this.statusEffects.isBrittle() ||
+      this.statusEffects.getArmorReduction() > 0
+    );
+  }
+
   /* eslint-disable complexity */
   takeDamage(amount: number, isMagic: boolean = false, towerBranch?: string): number {
     if (!this.isActive) return 0;
@@ -406,7 +431,7 @@ export class Creep extends Phaser.GameObjects.Container {
 
         if (this.config.type === 'boss_5') {
           this.bossRageAnimationActive = true;
-          this.bossRageAnimationEndTime = this.scene.time.now + 1500;
+          this.bossRageAnimationEndTime = this.lastGameTime + 1500;
         }
 
         this.emit('bossPainThreshold', this);

@@ -168,8 +168,9 @@ describe('Tower Abilities', () => {
     it('should have Bullet Storm with shot count and speed', () => {
       const bulletstorm = abilities.find((a) => a.id === 'rapid_bulletstorm');
       expect(bulletstorm).toBeDefined();
-      expect(bulletstorm!.effectParams.count).toBe(5);
+      expect(bulletstorm!.effectParams.count).toBe(8);
       expect(bulletstorm!.effectParams.speedMultiplier).toBe(2.0);
+      expect(bulletstorm!.effectParams.escalatingDamage).toBe(0.1);
     });
 
     it('should have Ricochet with bounce parameters', () => {
@@ -182,7 +183,7 @@ describe('Tower Abilities', () => {
     it('should have Incendiary Rounds with burn damage', () => {
       const incendiary = abilities.find((a) => a.id === 'rapid_incendiary');
       expect(incendiary).toBeDefined();
-      expect(incendiary!.effectParams.burnDamage).toBe(10);
+      expect(incendiary!.effectParams.burnDamage).toBe(15);
       expect(incendiary!.effectParams.burnDuration).toBe(3000);
     });
   });
@@ -232,11 +233,11 @@ describe('Tower Abilities', () => {
       expect(piercing!.effectParams.damageMultiplier).toBe(1.0);
     });
 
-    it('should have Heavy Arrows with knockback', () => {
-      const heavyArrows = abilities.find((a) => a.id === 'archer_heavyarrows');
-      expect(heavyArrows).toBeDefined();
-      expect(heavyArrows!.effectParams.knockbackDistance).toBe(20);
-      expect(heavyArrows!.triggerChance).toBe(0.15);
+    it('should have Exploit Weakness with damage multiplier', () => {
+      const exploit = abilities.find((a) => a.id === 'archer_exploit');
+      expect(exploit).toBeDefined();
+      expect(exploit!.effectParams.damageMultiplier).toBe(2.0);
+      expect(exploit!.triggerChance).toBe(0.18);
     });
   });
 

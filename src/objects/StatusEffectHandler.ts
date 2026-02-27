@@ -11,8 +11,10 @@ export interface BurnEffect {
 }
 
 export class StatusEffectHandler {
-  private scene: Phaser.Scene;
   private statusGraphics: Phaser.GameObjects.Graphics;
+
+  /** Virtual game time (ms) — updated each frame, used for all duration tracking */
+  private currentGameTime: number = 0;
 
   private slowAmount: number = 0;
   private slowEndTime: number = 0;
@@ -27,7 +29,7 @@ export class StatusEffectHandler {
   private static readonly MAX_BURN_STACKS = 3;
 
   private armorReduction: number = 0;
-  private static readonly MAX_ARMOR_REDUCTION = 25;
+  private static readonly MAX_ARMOR_REDUCTION = 40;
 
   private brittleEndTime: number = 0;
 
@@ -36,8 +38,7 @@ export class StatusEffectHandler {
   private onPoisonDamage?: (damage: number) => void;
   private onBurnDamage?: (damage: number) => void;
 
-  constructor(scene: Phaser.Scene, statusGraphics: Phaser.GameObjects.Graphics) {
-    this.scene = scene;
+  constructor(_scene: Phaser.Scene, statusGraphics: Phaser.GameObjects.Graphics) {
     this.statusGraphics = statusGraphics;
   }
 
@@ -52,16 +53,14 @@ export class StatusEffectHandler {
   applySlow(percent: number, durationMs: number): void {
     if (this.isImmune()) return;
 
-    const currentTime = this.scene.time.now;
     this.slowAmount = percent;
-    this.slowEndTime = currentTime + durationMs;
+    this.slowEndTime = this.currentGameTime + durationMs;
   }
 
   applyFreeze(durationMs: number): void {
     if (this.isImmune()) return;
 
-    const currentTime = this.scene.time.now;
-    this.freezeEndTime = currentTime + durationMs;
+    this.freezeEndTime = this.currentGameTime + durationMs;
   }
 
   clearSlow(): void {
@@ -72,7 +71,7 @@ export class StatusEffectHandler {
   applyPoison(damagePerSecond: number, durationMs: number): void {
     if (this.isImmune()) return;
 
-    const currentTime = this.scene.time.now;
+    const currentTime = this.currentGameTime;
 
     if (this.poisonStacks.length >= 3) {
       // Find the weakest stack
@@ -104,10 +103,9 @@ export class StatusEffectHandler {
   applyBurn(damagePerSecond: number, durationMs: number): void {
     if (this.isImmune()) return;
 
-    const currentTime = this.scene.time.now;
     const newBurn: BurnEffect = {
       damage: damagePerSecond,
-      endTime: currentTime + durationMs,
+      endTime: this.currentGameTime + durationMs,
     };
 
     if (this.burnStacks.length >= StatusEffectHandler.MAX_BURN_STACKS) {
@@ -129,12 +127,11 @@ export class StatusEffectHandler {
   applyBrittle(durationMs: number): void {
     if (this.isImmune()) return;
 
-    const currentTime = this.scene.time.now;
-    this.brittleEndTime = currentTime + durationMs;
+    this.brittleEndTime = this.currentGameTime + durationMs;
   }
 
   isBrittle(): boolean {
-    return this.brittleEndTime > this.scene.time.now;
+    return this.brittleEndTime > this.currentGameTime;
   }
 
   getBurnStackCount(): number {
@@ -145,8 +142,9 @@ export class StatusEffectHandler {
     return this.armorReduction;
   }
 
-  update(delta: number): number {
-    const currentTime = this.scene.time.now;
+  update(delta: number, gameTime: number): number {
+    this.currentGameTime = gameTime;
+    const currentTime = gameTime;
     let poisonDamage = 0;
 
     if (this.poisonStacks.length > 0) {
@@ -284,21 +282,19 @@ export class StatusEffectHandler {
   }
 
   getSpeedMultiplier(): number {
-    const currentTime = this.scene.time.now;
-
-    if (this.freezeEndTime > currentTime) {
+    if (this.freezeEndTime > this.currentGameTime) {
       return 0;
     }
 
-    return this.slowEndTime > currentTime ? 1 - this.slowAmount : 1;
+    return this.slowEndTime > this.currentGameTime ? 1 - this.slowAmount : 1;
   }
 
   isSlowed(): boolean {
-    return this.slowEndTime > this.scene.time.now;
+    return this.slowEndTime > this.currentGameTime;
   }
 
   isFrozen(): boolean {
-    return this.freezeEndTime > this.scene.time.now;
+    return this.freezeEndTime > this.currentGameTime;
   }
 
   isBurning(): boolean {
@@ -337,14 +333,14 @@ export class StatusEffectHandler {
     this.brittleEndTime = 0;
 
     if (immunityDurationMs > 0) {
-      this.immunityEndTime = this.scene.time.now + immunityDurationMs;
+      this.immunityEndTime = this.currentGameTime + immunityDurationMs;
     }
 
     return hadEffects;
   }
 
   isImmune(): boolean {
-    return this.immunityEndTime > this.scene.time.now;
+    return this.immunityEndTime > this.currentGameTime;
   }
 
   clear(): void {

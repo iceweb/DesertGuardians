@@ -142,9 +142,9 @@ export class CreepManager {
     }
   }
 
-  update(delta: number): void {
+  update(delta: number, gameTime: number): void {
     for (const creep of this.activeCreeps) {
-      creep.update(delta);
+      creep.update(delta, gameTime);
     }
   }
 

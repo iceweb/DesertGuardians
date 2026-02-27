@@ -3,6 +3,8 @@
         "npx tsc": true,
         "ForEach-Object": true,
         "npx prettier": true,
-        "npx vitest": true
+        "npx vitest": true,
+        "npx eslint": true,
+        "npx vite": true
     }
 }

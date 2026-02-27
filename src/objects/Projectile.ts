@@ -406,9 +406,22 @@ export class Projectile extends Phaser.GameObjects.Container {
           damage += abilityResult.extraDamage;
         }
 
-        if (abilityResult.abilityId === 'sniper_pierce') {
+        if (
+          abilityResult.abilityId === 'sniper_pierce' ||
+          abilityResult.abilityId === 'archer_exploit'
+        ) {
           isMagic = true;
         }
+      }
+    }
+
+    // Bullet Storm escalating damage
+    if (this.sourceTower?.getAbilityHandler()) {
+      const stormMultiplier = this.sourceTower
+        .getAbilityHandler()!
+        .getBulletStormDamageMultiplier();
+      if (stormMultiplier > 1.0) {
+        damage = Math.floor(damage * stormMultiplier);
       }
     }
 
@@ -440,6 +453,15 @@ export class Projectile extends Phaser.GameObjects.Container {
     }
 
     this.applySpecialEffects();
+
+    // Rapid Fire innate armor shred: each hit strips armor from the target
+    if (
+      this.config.branch === 'rapidfire' &&
+      this.config.stats.armorShredPerHit &&
+      this.target.getIsActive()
+    ) {
+      this.target.applyArmorReduction(this.config.stats.armorShredPerHit);
+    }
 
     if (this.config.branch === 'rockcannon' && stats.splashRadius) {
       this.emit(

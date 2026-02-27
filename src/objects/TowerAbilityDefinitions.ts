@@ -59,6 +59,7 @@ export interface AbilityDefinition {
     multicastChance?: number;
     brittleDuration?: number;
     slowPercent?: number;
+    escalatingDamage?: number;
   };
 }
 
@@ -179,14 +180,14 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'rapid_bulletstorm',
       name: 'Bullet Storm',
-      description: 'Next 5 shots at 2x speed',
-      triggerChance: 0.12,
+      description: 'Next 8 shots at 2x speed with escalating +10% damage per hit',
+      triggerChance: 0.14,
       icon: {
         type: AbilityIconType.BULLET_SPIRAL,
         primaryColor: 0xffcc00,
         secondaryColor: 0xff9900,
       },
-      effectParams: { count: 5, speedMultiplier: 2.0 },
+      effectParams: { count: 8, speedMultiplier: 2.0, escalatingDamage: 0.1 },
     },
     {
       id: 'rapid_ricochet',
@@ -199,14 +200,14 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'rapid_incendiary',
       name: 'Incendiary Rounds',
-      description: 'Apply burn: 10 dmg/sec for 3s (stacks 3×)',
-      triggerChance: 0.15,
+      description: 'Apply burn: 15 dmg/sec for 3s (stacks 3×, bypasses armor)',
+      triggerChance: 0.18,
       icon: {
         type: AbilityIconType.FLAME_BULLET,
         primaryColor: 0xff6600,
         secondaryColor: 0xff3300,
       },
-      effectParams: { burnDamage: 10, burnDuration: 3000 },
+      effectParams: { burnDamage: 15, burnDuration: 3000 },
     },
   ],
   aura: [
@@ -269,12 +270,12 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
       effectParams: { count: 2, damageMultiplier: 1.0 },
     },
     {
-      id: 'archer_heavyarrows',
-      name: 'Heavy Arrows',
-      description: '15% chance to Knockback target',
-      triggerChance: 0.15,
-      icon: { type: AbilityIconType.HEAVY_ARROW, primaryColor: 0x8b4513, secondaryColor: 0xa0522d },
-      effectParams: { knockbackDistance: 20 },
+      id: 'archer_exploit',
+      name: 'Exploit Weakness',
+      description: 'If target has any debuff, deal 2× damage as magic',
+      triggerChance: 0.18,
+      icon: { type: AbilityIconType.LIGHTNING, primaryColor: 0x9966ff, secondaryColor: 0xcc99ff },
+      effectParams: { damageMultiplier: 2.0 },
     },
   ],
 };

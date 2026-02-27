@@ -35,6 +35,8 @@ export class TowerAbilityEffects {
   private visuals: TowerAbilityVisuals;
 
   private bulletStormCount: number = 0;
+  private bulletStormEscalation: number = 0;
+  private bulletStormHitIndex: number = 0;
 
   private plagueMarkedTargets: Set<Creep> = new Set();
 
@@ -506,8 +508,10 @@ export class TowerAbilityEffects {
     context: AbilityContext,
     params: AbilityDefinition['effectParams']
   ): AbilityResult {
-    const count = params.count || 5;
+    const count = params.count || 8;
     this.bulletStormCount = count;
+    this.bulletStormEscalation = params.escalatingDamage || 0;
+    this.bulletStormHitIndex = 0;
     this.visuals.showFloatingText(context.tower.x, context.tower.y - 40, 'BULLET STORM!', 0xffcc00);
 
     return { triggered: true, abilityId: 'rapid_bulletstorm', message: 'BULLET STORM!' };
@@ -620,9 +624,31 @@ export class TowerAbilityEffects {
     return { triggered: true, abilityId: 'archer_heavyarrows', message: 'KNOCKBACK!' };
   }
 
+  executeExploitWeakness(
+    context: AbilityContext,
+    params: AbilityDefinition['effectParams']
+  ): AbilityResult {
+    const { target, damage } = context;
+    const damageMultiplier = params.damageMultiplier || 2.0;
+
+    if (target.hasAnyDebuff()) {
+      const extraDamage = Math.floor(damage * (damageMultiplier - 1));
+      this.visuals.showFloatingText(target.x, target.y - 30, 'EXPLOIT!', 0x9966ff);
+      // abilityId triggers magic damage conversion in Projectile.hitTarget
+      return { triggered: true, abilityId: 'archer_exploit', extraDamage, message: 'EXPLOIT!' };
+    }
+
+    return { triggered: false };
+  }
+
   consumeBulletStorm(): boolean {
     if (this.bulletStormCount > 0) {
       this.bulletStormCount--;
+      this.bulletStormHitIndex++;
+      if (this.bulletStormCount === 0) {
+        this.bulletStormHitIndex = 0;
+        this.bulletStormEscalation = 0;
+      }
       return true;
     }
     return false;
@@ -630,6 +656,13 @@ export class TowerAbilityEffects {
 
   getBulletStormSpeedMultiplier(): number {
     return this.bulletStormCount > 0 ? 2.0 : 1.0;
+  }
+
+  getBulletStormDamageMultiplier(): number {
+    if (this.bulletStormCount > 0 && this.bulletStormEscalation > 0) {
+      return 1 + this.bulletStormHitIndex * this.bulletStormEscalation;
+    }
+    return 1.0;
   }
 
   onCreepDeath(creep: Creep, allCreeps: Creep[]): void {

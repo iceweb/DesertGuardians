@@ -140,9 +140,9 @@ describe('Tower System', () => {
         return total;
       };
 
-      // Archer path: 50 + 110 + 280 + 800 = 1240
+      // Archer path: 50 + 110 + 240 + 600 = 1000
       expect(calculateInvestment('archer', 1)).toBe(50);
-      expect(calculateInvestment('archer', 4)).toBe(50 + 110 + 280 + 800);
+      expect(calculateInvestment('archer', 4)).toBe(50 + 110 + 240 + 600);
     });
 
     it('should calculate sell value at 70%', () => {
@@ -151,7 +151,7 @@ describe('Tower System', () => {
       };
 
       expect(calculateSellValue(100)).toBe(70);
-      expect(calculateSellValue(1240)).toBe(868);
+      expect(calculateSellValue(1000)).toBe(700);
     });
   });
 

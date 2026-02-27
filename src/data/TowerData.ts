@@ -12,6 +12,7 @@ export interface TowerStats {
   critMultiplier?: number;
   auraDamageMultiplier?: number;
   airDamageBonus?: number;
+  armorShredPerHit?: number;
 }
 
 export type TowerBranch =
@@ -83,8 +84,8 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'archer',
     level: 3,
-    upgradeCost: 280,
-    description: 'Master archer with +200% damage vs flying. High single-target DPS.',
+    upgradeCost: 240,
+    description: 'Expert marksman with 250px range. +200% vs flying creeps.',
     stats: {
       range: 250,
       fireRate: 700,
@@ -98,8 +99,9 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'archer',
     level: 4,
-    upgradeCost: 800,
-    description: 'Elite marksman. +200% vs flying. Abilities: Multi-Shot, Piercing, or Knockback.',
+    upgradeCost: 600,
+    description:
+      'Elite marksman. +200% vs flying. Abilities: Multi-Shot, Piercing, or Exploit Weakness.',
     stats: {
       range: 280,
       fireRate: 550,
@@ -115,11 +117,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 1,
     upgradeCost: 120,
-    description: 'Extremely fast attacks. Great vs unarmored. Weak vs heavy armor.',
+    description: 'Extremely fast attacks. Shreds 1 armor per hit. Great vs unarmored.',
     stats: {
       range: 185,
       fireRate: 300,
       damage: 10,
+      armorShredPerHit: 1,
     },
   },
   rapidfire_2: {
@@ -129,11 +132,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 2,
     upgradeCost: 200,
-    description: 'Faster attacks. Melts unarmored targets. Use with poison/ice vs armor.',
+    description: 'Faster attacks. Shreds 1.5 armor per hit. Softens targets for allies.',
     stats: {
       range: 195,
       fireRate: 250,
       damage: 14,
+      armorShredPerHit: 1.5,
     },
   },
   rapidfire_3: {
@@ -143,11 +147,12 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'rapidfire',
     level: 3,
     upgradeCost: 420,
-    description: 'Machine gun fury. ~95 DPS vs unarmored. Pair with armor shred.',
+    description: 'Machine gun fury. Shreds 2 armor per hit. Pair with physical DPS.',
     stats: {
       range: 210,
       fireRate: 210,
       damage: 20,
+      armorShredPerHit: 2,
     },
   },
 
@@ -408,12 +413,14 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     type: 'physical',
     branch: 'rapidfire',
     level: 4,
-    upgradeCost: 650,
-    description: '~144 DPS. Abilities: Bullet Storm, Ricochet, or Incendiary Burn.',
+    upgradeCost: 600,
+    description:
+      '~144 DPS. Shreds 2.5 armor per hit. Abilities: Bullet Storm, Ricochet, or Incendiary.',
     stats: {
       range: 230,
       fireRate: 180,
       damage: 26,
+      armorShredPerHit: 2.5,
     },
   },
 

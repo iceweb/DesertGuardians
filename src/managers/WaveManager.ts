@@ -48,6 +48,9 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   private isParallelMode: boolean = false;
   private activeBossGroups: GroupSpawnState[] = [];
 
+  /** Delta-accumulated timers that tick with game speed, replacing scene.time.delayedCall */
+  private pendingTimers: Array<{ remainingTime: number; callback: () => void }> = [];
+
   private creepsToSpawn: number = 0;
   private creepsSpawned: number = 0;
   private creepsKilled: number = 0;
@@ -55,8 +58,6 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
   private totalCreepsKilled: number = 0;
   private totalGoldEarned: number = 0;
-
-  public getGameSpeed?: () => number;
 
   constructor(scene: Phaser.Scene, creepManager: CreepManager) {
     super();
@@ -156,9 +157,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     for (const group of immediateGroups) {
       if (isBossWithGuards && this.isBossType(group.creepType)) {
         // Delay boss spawn so guards get a head start
-        const gameSpeed = this.getGameSpeed?.() || 1;
-        const scaledDelay = BOSS_SPAWN_DELAY_MS / gameSpeed;
-        this.scene.time.delayedCall(scaledDelay, () => {
+        this.addGameTimer(BOSS_SPAWN_DELAY_MS, () => {
           this.startParallelGroup(group);
         });
       } else {
@@ -167,12 +166,11 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     }
 
     for (const group of delayedGroups) {
-      const gameSpeed = this.getGameSpeed?.() || 1;
       // Add extra delay for bosses when guards are present
       const extraBossDelay =
         isBossWithGuards && this.isBossType(group.creepType) ? BOSS_SPAWN_DELAY_MS : 0;
-      const scaledDelay = (group.group.delayStart! + extraBossDelay) / gameSpeed;
-      this.scene.time.delayedCall(scaledDelay, () => {
+      const delay = group.group.delayStart! + extraBossDelay;
+      this.addGameTimer(delay, () => {
         if (group.creepType === 'boss_5') {
           this.emit('finalBossSpawning');
         }
@@ -195,7 +193,28 @@ export class WaveManager extends Phaser.Events.EventEmitter {
   private isGuardType(type: string): boolean {
     return type.startsWith('boss_guard_');
   }
+  /** Schedule a callback after `delayMs` of game time (automatically scales with speed). */
+  private addGameTimer(delayMs: number, callback: () => void): void {
+    this.pendingTimers.push({ remainingTime: delayMs, callback });
+  }
 
+  /** Advance all pending game timers and fire any that have elapsed. */
+  private tickGameTimers(scaledDelta: number): void {
+    const fired: Array<() => void> = [];
+
+    for (const timer of this.pendingTimers) {
+      timer.remainingTime -= scaledDelta;
+      if (timer.remainingTime <= 0) {
+        fired.push(timer.callback);
+      }
+    }
+
+    this.pendingTimers = this.pendingTimers.filter((t) => t.remainingTime > 0);
+
+    for (const cb of fired) {
+      cb();
+    }
+  }
   private startParallelGroup(groupState: GroupSpawnState): void {
     const spawnNext = () => {
       if (groupState.spawned >= groupState.group.count) {
@@ -214,10 +233,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
       this.emit('waveProgress', this.creepsSpawned, this.creepsToSpawn);
 
       if (groupState.spawned < groupState.group.count) {
-        const gameSpeed = this.getGameSpeed?.() || 1;
-        const scaledInterval = groupState.group.intervalMs / gameSpeed;
-        const timer = this.scene.time.delayedCall(scaledInterval, spawnNext);
-        this.parallelTimers.set(groupState.creepType, timer);
+        this.addGameTimer(groupState.group.intervalMs, spawnNext);
       }
     };
 
@@ -257,15 +273,16 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     this.emit('waveProgress', this.creepsSpawned, this.creepsToSpawn);
 
     if (group.spawned < group.group.count) {
-      const gameSpeed = this.getGameSpeed?.() || 1;
-      const scaledInterval = group.group.intervalMs / gameSpeed;
-      this.spawnTimer = this.scene.time.delayedCall(scaledInterval, () => this.spawnNextInGroup());
+      this.addGameTimer(group.group.intervalMs, () => this.spawnNextInGroup());
     } else {
       group.finished = true;
     }
   }
 
-  update(): void {
+  update(scaledDelta: number): void {
+    // Tick all pending game timers
+    this.tickGameTimers(scaledDelta);
+
     if (!this.waveInProgress) return;
     if (this.isParallelMode) return;
 
@@ -301,9 +318,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
 
     // Start bosses with delay if guards present
     if (isBossWithGuards && bossGroups.length > 0) {
-      const gameSpeed = this.getGameSpeed?.() || 1;
-      const scaledDelay = BOSS_SPAWN_DELAY_MS / gameSpeed;
-      this.scene.time.delayedCall(scaledDelay, () => {
+      this.addGameTimer(BOSS_SPAWN_DELAY_MS, () => {
         for (const bossGroup of bossGroups) {
           this.activeBossGroups.push(bossGroup);
           this.startParallelGroup(bossGroup);
@@ -610,6 +625,7 @@ export class WaveManager extends Phaser.Events.EventEmitter {
     this.pendingBossGroups = [];
     this.activeBossGroups = [];
     this.isParallelMode = false;
+    this.pendingTimers = [];
 
     this.groupQueue = [];
     this.currentGroup = null;

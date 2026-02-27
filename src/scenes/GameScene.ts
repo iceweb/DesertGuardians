@@ -439,8 +439,6 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupWaveCallbacks(): void {
-    this.waveManager.getGameSpeed = () => this.hudManager.getGameSpeed();
-
     this.waveManager.on('waveStart', (waveNumber: number) => {
       this.gameController.setWave(waveNumber);
       this.hudManager.updateWave(waveNumber);
@@ -739,9 +737,9 @@ export class GameScene extends Phaser.Scene {
       this.gameController.addVirtualTime(scaledDelta);
     }
 
-    this.creepManager.update(scaledDelta);
+    this.creepManager.update(scaledDelta, this.gameController.virtualGameTime);
 
-    this.waveManager.update();
+    this.waveManager.update(scaledDelta);
 
     this.projectileManager.update(scaledDelta);
 
