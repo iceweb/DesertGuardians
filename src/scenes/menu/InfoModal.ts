@@ -59,7 +59,7 @@ export class InfoModal {
             'Start: 200g Normal, 250g Easy, 150g Hard',
             'Earn gold by killing enemies',
             'Build Gold Mines for passive income',
-            'Sell towers for 60% refund',
+            'Sell towers for 70% refund',
           ],
         },
         {
@@ -79,7 +79,7 @@ export class InfoModal {
           title: '🏹 PHYSICAL TOWERS',
           content: [
             'Archer — Fast, cheap, +200% vs flying',
-            'Rapid Fire — Very fast, lower damage',
+            'Rapid Fire — Very fast, shreds armor',
             'Sniper — Longest range, huge damage',
             'Cannon — Splash 70-110px, ground only',
           ],
@@ -184,12 +184,12 @@ export class InfoModal {
         {
           title: '⚡ RAPID FIRE ABILITIES',
           content: [
-            'Bullet Storm — 2× speed, less dmg',
-            '  → More procs, faster status apply',
+            'Bullet Storm — 8 shots, escalating dmg',
+            '  → +10% damage per hit, 2× speed',
             'Ricochet — Bounces to 1 extra target',
             '  → Spread damage in clusters',
-            'Incendiary — Burn stacks (max 3×)',
-            '  → 30 DPS at full stacks!',
+            'Incendiary — 15 burn DPS (max 3×)',
+            '  → 45 DPS at full stacks!',
           ],
         },
         {
@@ -199,8 +199,8 @@ export class InfoModal {
             '  → Efficient vs swarms',
             'Piercing Arrow — Passes through +2',
             '  → Perfect for path chokes',
-            'Heavy Arrows — Knockback enemies',
-            '  → Buys time, 10% on bosses',
+            'Exploit Weakness — 2× magic dmg',
+            '  → Triggers on any debuffed target',
           ],
         },
       ],
@@ -226,7 +226,7 @@ export class InfoModal {
             'Toxic Explosion — 80 dmg on death',
             '  → Finisher, clears weakened mobs',
             'Corrosive Acid — Stacking -5 armor',
-            '  → Up to -25 armor! Tank shredder',
+            '  → Up to -40 armor! Tank shredder',
           ],
         },
         // RIGHT COLUMN
@@ -262,7 +262,7 @@ export class InfoModal {
             'Corrosive Acid + Cannons',
             '  → Strip armor, then AoE nuke',
             'Incendiary × 3 stacks',
-            '  → 30 burn DPS melts everything',
+            '  → 45 burn DPS melts everything',
           ],
         },
         {
@@ -272,8 +272,8 @@ export class InfoModal {
             '  → Double-shot crits = massive',
             'Tremor + Ice Trap',
             '  → Perma-slow kill zones',
-            'Heavy Arrows + Frost Nova',
-            '  → Knockback into freeze',
+            'Exploit Weakness + Ice/Poison',
+            '  → Debuff then 2× magic burst',
           ],
         },
         // RIGHT COLUMN
@@ -294,7 +294,7 @@ export class InfoModal {
             'Deep Freeze before Sniper burst',
             'Corrosive early to strip armor',
             'Save gold for emergency towers',
-            'Knockback buys extra shot time',
+            'RF armor shred softens bosses',
           ],
         },
       ],

@@ -170,7 +170,7 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'poison_corrosive',
       name: 'Corrosive Acid',
-      description: 'Reduce armor by 5 per stack (max -25)',
+      description: 'Reduce armor by 5 per stack (max -40)',
       triggerChance: 0.25,
       icon: { type: AbilityIconType.ACID_DROP, primaryColor: 0x9acd32, secondaryColor: 0xadff2f },
       effectParams: { armorReduction: 5 },

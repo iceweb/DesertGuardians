@@ -114,7 +114,7 @@ Tower defense games are significantly more complex than platformers:
 - **Event-driven design** — Decoupled systems via GameEventBus
 - **Context-aware input** — InputSystem handles keyboard/mouse based on game state
 - **Modular components** — Split large files into focused, testable modules
-- **543 unit tests** — Comprehensive test coverage with Vitest
+- **545 unit tests** — Comprehensive test coverage with Vitest
 
 ---
 
@@ -195,7 +195,7 @@ npm run build
 Desert Guardians/
 ├── src/
 │   ├── main.ts              # Entry point
-│   ├── __tests__/           # Unit tests (543 tests)
+│   ├── __tests__/           # Unit tests (545 tests)
 │   ├── data/                # Game configuration & tower data
 │   ├── graphics/            # Tower and creep animations
 │   │   ├── creeps/          # Creep renderers by type
