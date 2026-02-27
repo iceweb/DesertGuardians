@@ -259,7 +259,7 @@ This project is open source and available under the [MIT License](LICENSE).
 ### v2.0 — Late-Game Balance & Hardware-Independent Timing
 
 **Tower Balance — Archer & Rapid Fire rework**
-- **Rapid Fire: Innate Armor Shred** — Every RF hit permanently reduces a creep's armor (1/1.5/2/2.5 per hit by tower level, max 40 total). This makes RF towers scale into the late game by softening high-armor targets for all towers. *Stack RF towers on a chokepoint to shred boss armor before your snipers fire.*
+- **Rapid Fire: Innate Armor Shred** — Every RF hit reduces a creep's armor (1/1.5/2/2.5 per hit by tower level, max 40 total). Shred persists on normal creeps but bosses dispel it every 15s, creating a shred→burst→reset cycle. *Stack RF towers on a chokepoint to shred armor before your snipers fire.*
 - **Archer L4: Heavy Arrows → Exploit Weakness** — Replaced the marginal +50% damage ability with a conditional nuke: deals 2× magic damage to any debuffed target (slowed, poisoned, burning, etc.). *Pair archers with ice or poison towers to trigger Exploit Weakness consistently.*
 - **Rapid Fire L4: Bullet Storm Buff** — Fires 8 shots (was 5) with +10% escalating damage per shot, rewarding sustained fire.
 - **Rapid Fire L4: Incendiary Rounds Buff** — Burn DPS increased from 10 → 15 per stack (up to 3 stacks). Proc chance slightly raised.
