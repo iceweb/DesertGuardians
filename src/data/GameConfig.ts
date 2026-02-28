@@ -13,14 +13,14 @@ export const GAME_CONFIG = {
 
   WAVE_COMPLETE_DELAY: 500,
 
-  WAVE_HP_SCALING: 0.08,
+  WAVE_HP_SCALING: 0.07,
 
-  MAX_HP_MULTIPLIER: 3.0,
+  MAX_HP_MULTIPLIER: 2.75,
 
   // Armor scales more slowly than HP to keep early game balanced
-  WAVE_ARMOR_SCALING: 0.04,
+  WAVE_ARMOR_SCALING: 0.035,
 
-  MAX_ARMOR_MULTIPLIER: 2.0,
+  MAX_ARMOR_MULTIPLIER: 1.85,
 
   ARCHER_BUILD_COST: 50,
 

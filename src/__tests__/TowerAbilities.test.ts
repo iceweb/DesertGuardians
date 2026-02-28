@@ -123,7 +123,7 @@ describe('Tower Abilities', () => {
     it('should have Ice Trap with freeze duration', () => {
       const iceTrap = abilities.find((a) => a.id === 'ice_trap');
       expect(iceTrap).toBeDefined();
-      expect(iceTrap!.effectParams.duration).toBe(2000);
+      expect(iceTrap!.effectParams.duration).toBe(2600);
     });
 
     it('should have Frost Nova with AOE radius', () => {
@@ -135,7 +135,7 @@ describe('Tower Abilities', () => {
     it('should have Deep Freeze with brittle duration', () => {
       const deepFreeze = abilities.find((a) => a.id === 'ice_deepfreeze');
       expect(deepFreeze).toBeDefined();
-      expect(deepFreeze!.effectParams.brittleDuration).toBe(2500);
+      expect(deepFreeze!.effectParams.brittleDuration).toBe(3250);
     });
   });
 

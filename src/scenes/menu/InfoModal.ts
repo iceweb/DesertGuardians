@@ -56,7 +56,7 @@ export class InfoModal {
         {
           title: '💰 ECONOMY',
           content: [
-            'Start: 200g Normal, 250g Easy, 150g Hard',
+            'Start: 250g (all difficulties)',
             'Earn gold by killing enemies',
             'Build Gold Mines for passive income',
             'Sell towers for 70% refund',
@@ -87,8 +87,8 @@ export class InfoModal {
         {
           title: '🔮 MAGIC TOWERS',
           content: [
-            'Ice — Slows enemies, 80% armor pen',
-            'Poison — DoT, 80% armor pen, no air',
+            'Ice — Slows 40-65%, 2.6-4.5s duration',
+            'Poison — DoT 5-15/s, 6.5-7.5s, stacks 3×',
             'Magic uses only 20% of armor!',
             'Essential vs high-armor Tanks.',
           ],
@@ -210,12 +210,12 @@ export class InfoModal {
         {
           title: '❄️ ICE TOWER ABILITIES',
           content: [
-            'Ice Trap — Freeze target 2s',
+            'Ice Trap — Freeze target 2.6s',
             '  → Stops enemy completely',
             'Frost Nova — Slows all nearby',
             '  → AoE 80px slow effect',
             'Deep Freeze — Brittle: +20% phys',
-            '  → HUGE synergy with Snipers!',
+            '  → 3.25s duration, Sniper synergy!',
           ],
         },
         {
@@ -288,13 +288,13 @@ export class InfoModal {
           ],
         },
         {
-          title: '🎯 BOSS STRATEGY',
+          title: '⛏️ GOLD MINE SCALING',
           content: [
-            'Stack slows: Ice + Tremor combo',
-            'Deep Freeze before Sniper burst',
-            'Corrosive early to strip armor',
-            'Save gold for emergency towers',
-            'RF armor shred softens bosses',
+            '★ Level 1: 20g/wave (cost 75g)',
+            '★★ Level 2: 30g/wave (cost 125g)',
+            '★★★ Level 3: 40g/wave (cost 200g)',
+            '★★★★ Diamond: 60g/wave (cost 350g)',
+            'Build early for max ROI!',
           ],
         },
       ],

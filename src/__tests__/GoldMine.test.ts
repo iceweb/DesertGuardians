@@ -42,10 +42,10 @@ describe('GoldMine System', () => {
     });
 
     it('should have valid income values', () => {
-      expect(MINE_CONFIGS[1].incomePerWave).toBe(14);
-      expect(MINE_CONFIGS[2].incomePerWave).toBe(22);
-      expect(MINE_CONFIGS[3].incomePerWave).toBe(35);
-      expect(MINE_CONFIGS[4].incomePerWave).toBe(58);
+      expect(MINE_CONFIGS[1].incomePerWave).toBe(20);
+      expect(MINE_CONFIGS[2].incomePerWave).toBe(30);
+      expect(MINE_CONFIGS[3].incomePerWave).toBe(40);
+      expect(MINE_CONFIGS[4].incomePerWave).toBe(60);
     });
 
     it('should have names and descriptions for all levels', () => {
@@ -88,16 +88,16 @@ describe('GoldMine System', () => {
         return Math.ceil(totalCost / income);
       };
 
-      // Level 1: 75 / 14 = 5.36 -> 6 waves
-      expect(calculateBreakEven(1)).toBe(6);
+      // Level 1: 75 / 20 = 3.75 -> 4 waves
+      expect(calculateBreakEven(1)).toBe(4);
 
-      // Level 2: 200 / 22 = 9.1 -> 10 waves
-      expect(calculateBreakEven(2)).toBe(10);
+      // Level 2: 200 / 30 = 6.67 -> 7 waves
+      expect(calculateBreakEven(2)).toBe(7);
 
-      // Level 3: 400 / 35 = 11.43 -> 12 waves
-      expect(calculateBreakEven(3)).toBe(12);
+      // Level 3: 400 / 40 = 10 -> 10 waves
+      expect(calculateBreakEven(3)).toBe(10);
 
-      // Level 4: 750 / 58 = 12.93 -> 13 waves
+      // Level 4: 750 / 60 = 12.5 -> 13 waves
       expect(calculateBreakEven(4)).toBe(13);
     });
 
@@ -114,12 +114,12 @@ describe('GoldMine System', () => {
       };
 
       // Upgrade from 0 to 1 with 20 waves remaining
-      // Income diff: 14 - 0 = 14, Profit: 14 * 20 - 75 = 205
-      expect(calculateUpgradeValue(0, 20)).toBe(205);
+      // Income diff: 20 - 0 = 20, Profit: 20 * 20 - 75 = 325
+      expect(calculateUpgradeValue(0, 20)).toBe(325);
 
       // Upgrade from 1 to 2 with 16 waves remaining
-      // Income diff: 22 - 14 = 8, Profit: 8 * 16 - 125 = 3
-      expect(calculateUpgradeValue(1, 16)).toBe(3);
+      // Income diff: 30 - 20 = 10, Profit: 10 * 16 - 125 = 35
+      expect(calculateUpgradeValue(1, 16)).toBe(35);
     });
   });
 
@@ -219,12 +219,12 @@ describe('GoldMine System', () => {
       };
 
       expect(calculateTotalIncome([0, 0, 0])).toBe(0);
-      expect(calculateTotalIncome([1, 1, 1])).toBe(42);
-      expect(calculateTotalIncome([2, 2, 2])).toBe(66);
-      expect(calculateTotalIncome([3, 3, 3])).toBe(105);
-      expect(calculateTotalIncome([4, 4, 4])).toBe(174);
-      expect(calculateTotalIncome([1, 2, 3])).toBe(71);
-      expect(calculateTotalIncome([4, 4, 4])).toBe(174);
+      expect(calculateTotalIncome([1, 1, 1])).toBe(60);
+      expect(calculateTotalIncome([2, 2, 2])).toBe(90);
+      expect(calculateTotalIncome([3, 3, 3])).toBe(120);
+      expect(calculateTotalIncome([4, 4, 4])).toBe(180);
+      expect(calculateTotalIncome([1, 2, 3])).toBe(90);
+      expect(calculateTotalIncome([4, 4, 4])).toBe(180);
     });
 
     it('should calculate total investment from multiple mines', () => {

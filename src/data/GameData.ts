@@ -584,30 +584,30 @@ export const MINE_CONFIGS: Record<number, MineConfig> = {
   1: {
     level: 1,
     buildCost: 75,
-    incomePerWave: 14,
+    incomePerWave: 20,
     name: 'Gold Mine ★',
-    description: 'A basic mine that produces 14g per wave.',
+    description: 'A basic mine that produces 20g per wave.',
   },
   2: {
     level: 2,
     buildCost: 125,
-    incomePerWave: 22,
+    incomePerWave: 30,
     name: 'Gold Mine ★★',
-    description: 'An improved mine that produces 22g per wave.',
+    description: 'An improved mine that produces 30g per wave.',
   },
   3: {
     level: 3,
     buildCost: 200,
-    incomePerWave: 35,
+    incomePerWave: 40,
     name: 'Gold Mine ★★★',
-    description: 'A master mine that produces 35g per wave.',
+    description: 'A master mine that produces 40g per wave.',
   },
   4: {
     level: 4,
     buildCost: 350,
-    incomePerWave: 58,
+    incomePerWave: 60,
     name: 'Diamond Mine ★★★★',
-    description: 'An elite mining operation that produces 58g per wave.',
+    description: 'An elite mining operation that produces 60g per wave.',
   },
 };
 

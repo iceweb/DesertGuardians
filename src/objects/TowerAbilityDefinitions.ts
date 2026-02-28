@@ -124,10 +124,10 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'ice_trap',
       name: 'Ice Trap',
-      description: 'Freeze target completely for 2s',
+      description: 'Freeze target completely for 2.6s',
       triggerChance: 0.15,
       icon: { type: AbilityIconType.ICE_BLOCK, primaryColor: 0x88ccff, secondaryColor: 0xffffff },
-      effectParams: { duration: 2000 },
+      effectParams: { duration: 2600 },
     },
     {
       id: 'ice_frostnova',
@@ -140,10 +140,10 @@ export const TOWER_ABILITIES: Record<TowerBranch, AbilityDefinition[]> = {
     {
       id: 'ice_deepfreeze',
       name: 'Deep Freeze',
-      description: 'Target takes +20% Physical Damage for 2.5s',
+      description: 'Target takes +20% Physical Damage for 3.25s',
       triggerChance: 0.12,
       icon: { type: AbilityIconType.DEEP_FREEZE, primaryColor: 0x4488ff, secondaryColor: 0x88ccff },
-      effectParams: { brittleDuration: 2500 },
+      effectParams: { brittleDuration: 3250 },
     },
   ],
   poison: [

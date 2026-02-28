@@ -258,6 +258,13 @@ This project is open source and available under the [MIT License](LICENSE).
 ## 📝 Changelog
 ### v2.0 — Late-Game Balance & Hardware-Independent Timing
 
+**Difficulty Rebalance**
+- **Wave Scaling Reduction** — HP scaling per wave reduced from 0.08 → 0.07, max HP multiplier 3.0 → 2.75. Armor scaling 0.04 → 0.035, max armor 2.0 → 1.85. Late-game creeps are ~8% easier across all difficulty modes.
+- **Ice Tower Duration Buff** — Slow durations increased ~30% (L1: 2s→2.6s, L2: 2.5s→3.25s, L3: 3s→3.9s, L4: 3.5s→4.5s) to compensate for timing fix making them correctly tick in game time.
+- **Poison Tower Duration Buff** — DoT durations increased ~25-30% (L1-2: 5s→6.5s, L3-4: 6s→7.5s) for the same reason — poison now deals correct total damage at all speeds.
+- **Ice Ability Buff** — Ice Trap freeze 2s→2.6s, Deep Freeze brittle 2.5s→3.25s.
+- **Gold Mine Income Buff** — Income rounded up to clean values (14→20, 22→30, 35→40, 58→60g per wave). ~450g extra gold over a full game with 3 mines, biggest impact in early game.
+
 **Tower Balance — Archer & Rapid Fire rework**
 - **Rapid Fire: Innate Armor Shred** — Every RF hit reduces a creep's armor (1/1.5/2/2.5 per hit by tower level, max 40 total). Shred persists on normal creeps but bosses dispel it every 15s, creating a shred→burst→reset cycle. *Stack RF towers on a chokepoint to shred armor before your snipers fire.*
 - **Archer L4: Heavy Arrows → Exploit Weakness** — Replaced the marginal +50% damage ability with a conditional nuke: deals 2× magic damage to any debuffed target (slowed, poisoned, burning, etc.). *Pair archers with ice or poison towers to trigger Exploit Weakness consistently.*
