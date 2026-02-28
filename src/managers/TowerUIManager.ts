@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
-import { TOWER_CONFIGS } from '../data';
+import { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
 import { TOWER_BRANCH_COLORS, VETERAN_RANK_COLORS } from '../data/ThemeConfig';
 import { UIHelper } from './UIHelper';
 import type { UIHitDetector } from './UIHitDetector';
@@ -28,6 +28,16 @@ export class TowerUIManager {
   private buildMenuPosition: { x: number; y: number } | null = null;
 
   private reviewMode: boolean = false;
+
+  // Range preview state
+  private rangeBranchIndex: number = 0;
+  private rangePreviewActive: boolean = false;
+  private scrollHintUsed: boolean = false;
+  private scrollHintIcon: Phaser.GameObjects.Container | null = null;
+  private scrollHintTween: Phaser.Tweens.Tween | null = null;
+  private rangeLabelTexts: Phaser.GameObjects.Text[] = [];
+  private rangeBranchText: Phaser.GameObjects.Text | null = null;
+  private lastPreviewPos: { x: number; y: number } | null = null;
 
   private uiHitDetector: UIHitDetector | null = null;
   private popupController: PopupController | null = null;
@@ -61,29 +71,218 @@ export class TowerUIManager {
     this.reviewMode = enabled;
   }
 
+  private static readonly RANGE_RING_COLORS = [
+    0x00ff00, // L1 = green
+    0xffff00, // L2 = yellow
+    0xff8800, // L3 = orange
+    0x00ffff, // L4 = cyan
+  ];
+
   updatePlacementPreview(x: number, y: number, towerAt: Tower | null): void {
     this.placementGraphics.clear();
+    this.clearRangeLabels();
 
-    if (this.buildMenuContainer || this.upgradeMenuContainer || this.abilityMenuContainer) return;
-
-    if (towerAt) return;
-
-    if (this.uiHitDetector?.isOverUI(x, y)) return;
-
-    if (this.isInBuildableZone && !this.isInBuildableZone(x, y)) return;
+    if (this.shouldHidePreview(x, y, towerAt)) {
+      this.hideScrollHint();
+      return;
+    }
 
     const canPlace = this.canPlaceAt?.(x, y) ?? false;
-    const config = TOWER_CONFIGS['archer_1'];
-    const TOWER_RADIUS = 25;
 
     if (canPlace) {
-      this.placementGraphics.lineStyle(3, 0x00ff00, 0.8);
-      this.placementGraphics.strokeCircle(x, y, TOWER_RADIUS);
-      this.placementGraphics.fillStyle(0x00ff00, 0.2);
-      this.placementGraphics.fillCircle(x, y, TOWER_RADIUS);
-      this.placementGraphics.lineStyle(4, 0x00ff00, 0.5);
-      this.placementGraphics.strokeCircle(x, y, config.stats.range);
+      this.drawPlacementPreview(x, y);
+    } else {
+      this.lastPreviewPos = null;
+      this.hideScrollHint();
     }
+  }
+
+  private shouldHidePreview(x: number, y: number, towerAt: Tower | null): boolean {
+    if (this.buildMenuContainer || this.upgradeMenuContainer || this.abilityMenuContainer) {
+      return true;
+    }
+    if (towerAt) return true;
+    if (this.uiHitDetector?.isOverUI(x, y)) return true;
+    if (this.isInBuildableZone && !this.isInBuildableZone(x, y)) return true;
+    return false;
+  }
+
+  private drawPlacementPreview(x: number, y: number): void {
+    const TOWER_RADIUS = 25;
+    this.lastPreviewPos = { x, y };
+
+    // Tower footprint
+    this.placementGraphics.lineStyle(3, 0x00ff00, 0.8);
+    this.placementGraphics.strokeCircle(x, y, TOWER_RADIUS);
+    this.placementGraphics.fillStyle(0x00ff00, 0.2);
+    this.placementGraphics.fillCircle(x, y, TOWER_RADIUS);
+
+    if (!this.rangePreviewActive) {
+      this.drawSingleRangeRing(x, y);
+    } else {
+      this.drawMultiRangeRings(x, y, TOWER_RADIUS);
+    }
+
+    this.positionScrollHint(x, y, TOWER_RADIUS);
+  }
+
+  private drawSingleRangeRing(x: number, y: number): void {
+    // Default view: single green ring showing archer L1 range, no labels
+    const archerConfig = TOWER_CONFIGS['archer_1'];
+    this.placementGraphics.lineStyle(3, 0x00ff00, 0.5);
+    this.placementGraphics.strokeCircle(x, y, archerConfig.stats.range);
+  }
+
+  private drawMultiRangeRings(x: number, y: number, towerRadius: number): void {
+    // Multi-ring view: draw all 4 level rings for the current branch
+    const branch = BRANCH_OPTIONS[this.rangeBranchIndex];
+    for (let level = 1; level <= 4; level++) {
+      const key = `${branch}_${level}`;
+      const config = TOWER_CONFIGS[key];
+      if (!config) continue;
+
+      const color = TowerUIManager.RANGE_RING_COLORS[level - 1];
+      const alpha = level === 1 ? 0.6 : 0.4;
+      this.placementGraphics.lineStyle(level === 1 ? 3 : 2, color, alpha);
+      this.placementGraphics.strokeCircle(x, y, config.stats.range);
+
+      // Label on the right side of the ring
+      const labelX = x + config.stats.range + 8;
+      const label = this.scene.add
+        .text(labelX, y, `L${level}`, {
+          fontFamily: 'Arial',
+          fontSize: '12px',
+          color: `#${color.toString(16).padStart(6, '0')}`,
+          stroke: '#000000',
+          strokeThickness: 3,
+        })
+        .setOrigin(0, 0.5)
+        .setDepth(51)
+        .setAlpha(0.9);
+      this.rangeLabelTexts.push(label);
+    }
+
+    // Branch name above the tower
+    const branchName = BRANCH_NAMES[branch];
+    this.rangeBranchText = this.scene.add
+      .text(x, y - towerRadius - 14, branchName, {
+        fontFamily: 'Arial',
+        fontSize: '13px',
+        color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5, 1)
+      .setDepth(51)
+      .setAlpha(0.9);
+  }
+
+  private positionScrollHint(x: number, y: number, towerRadius: number): void {
+    // Show scroll hint on first placement preview
+    if (!this.scrollHintUsed && !this.scrollHintIcon) {
+      this.showScrollHint(x, y);
+    } else if (this.scrollHintIcon) {
+      this.scrollHintIcon.setPosition(x + 40, y - towerRadius - 30);
+    }
+  }
+
+  private clearRangeLabels(): void {
+    for (const label of this.rangeLabelTexts) {
+      label.destroy();
+    }
+    this.rangeLabelTexts = [];
+    if (this.rangeBranchText) {
+      this.rangeBranchText.destroy();
+      this.rangeBranchText = null;
+    }
+  }
+
+  private showScrollHint(x: number, y: number): void {
+    const TOWER_RADIUS = 25;
+    this.scrollHintIcon = this.scene.add.container(x + 40, y - TOWER_RADIUS - 30);
+    this.scrollHintIcon.setDepth(51);
+
+    // Draw a simple scroll wheel icon using graphics
+    const g = this.scene.add.graphics();
+    // Mouse body
+    g.lineStyle(2, 0xffffff, 0.8);
+    g.strokeRoundedRect(-8, -12, 16, 24, 6);
+    // Scroll wheel
+    g.lineStyle(2, 0xffd700, 1);
+    g.lineBetween(0, -6, 0, -1);
+    // Arrow up
+    g.lineBetween(-3, -4, 0, -7);
+    g.lineBetween(3, -4, 0, -7);
+    // Arrow down
+    g.lineBetween(-3, 1, 0, 4);
+    g.lineBetween(3, 1, 0, 4);
+    this.scrollHintIcon.add(g);
+
+    const hintText = this.scene.add
+      .text(14, 0, 'Scroll to\ncompare', {
+        fontFamily: 'Arial',
+        fontSize: '10px',
+        color: '#cccccc',
+        stroke: '#000000',
+        strokeThickness: 2,
+        lineSpacing: 1,
+      })
+      .setOrigin(0, 0.5);
+    this.scrollHintIcon.add(hintText);
+
+    // Bobbing animation
+    this.scrollHintTween = this.scene.tweens.add({
+      targets: this.scrollHintIcon,
+      y: this.scrollHintIcon.y - 6,
+      duration: 600,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  private hideScrollHint(): void {
+    if (this.scrollHintTween) {
+      this.scrollHintTween.stop();
+      this.scrollHintTween = null;
+    }
+    if (this.scrollHintIcon) {
+      this.scrollHintIcon.destroy();
+      this.scrollHintIcon = null;
+    }
+  }
+
+  cycleRangeBranch(direction: 1 | -1): void {
+    if (!this.rangePreviewActive) {
+      // First scroll: activate multi-ring mode starting with archer (index 0)
+      this.rangePreviewActive = true;
+      this.rangeBranchIndex = 0;
+    } else {
+      this.rangeBranchIndex =
+        (this.rangeBranchIndex + direction + BRANCH_OPTIONS.length) % BRANCH_OPTIONS.length;
+    }
+
+    // Dismiss scroll hint on first use
+    if (!this.scrollHintUsed) {
+      this.scrollHintUsed = true;
+      this.hideScrollHint();
+    }
+
+    // Re-draw preview at last known position
+    if (this.lastPreviewPos) {
+      this.updatePlacementPreview(this.lastPreviewPos.x, this.lastPreviewPos.y, null);
+    }
+  }
+
+  resetRangeBranch(): void {
+    this.rangeBranchIndex = 0;
+    this.rangePreviewActive = false;
+    this.hideScrollHint();
+    this.clearRangeLabels();
+  }
+
+  isShowingPlacementPreview(): boolean {
+    return this.lastPreviewPos !== null && !this.isMenuOpen();
   }
 
   /* eslint-disable complexity, max-lines-per-function */
@@ -1436,6 +1635,8 @@ export class TowerUIManager {
 
   destroy(): void {
     this.closeMenus();
+    this.clearRangeLabels();
+    this.hideScrollHint();
     this.placementGraphics.destroy();
   }
 }

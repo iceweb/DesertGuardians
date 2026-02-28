@@ -198,7 +198,7 @@ export const TOWER_HINTS: Record<TowerBranch, string> = {
 };
 
 export const BRANCH_NAMES: Record<TowerBranch, string> = {
-  archer: 'Archer II',
+  archer: 'Archer',
   rapidfire: 'Rapid Fire',
   sniper: 'Sniper',
   rockcannon: 'Cannon',

@@ -256,6 +256,40 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 ## 📝 Changelog
+### v2.1 — Quality of Life & UX Improvements
+
+**Mine Income Countdown**
+- **Collection Countdown** — After each wave ends, a 3-2-1 countdown (0.8s per number) appears near each built mine before income is collected. This gives players time to upgrade mines before the next income tick, rewarding tactical mine management.
+- **Simultaneous Collection** — All mines now collect income at once after the countdown (previously staggered one-by-one).
+- **Skipped When Empty** — If no mines are built, the countdown is skipped entirely.
+
+**Countdown Timing**
+- **Speed-Independent** — Both the mine countdown and wave countdown now tick at a fixed 0.8s per number (2.4s total), regardless of game speed (1×/2×/3×). Previously the wave countdown was affected by game speed.
+
+**Tower Range Preview (Scroll Wheel)**
+- **Default Preview** — Hovering over a valid placement spot shows the basic archer L1 range ring.
+- **Multi-Branch Preview** — Scroll the mouse wheel to enter comparison mode: see all L1–L4 range rings for the current branch, then keep scrolling to cycle through all 7 branches.
+- **Color-Coded Rings** — L1 = green, L2 = yellow, L3 = orange, L4 = cyan, with labels on each ring.
+- **Branch Name Display** — The currently previewed tower branch name is shown above the placement position.
+- **Scroll Hint** — A bobbing scroll-wheel icon appears the first time you enter placement mode, dismissed after first use.
+
+**Wave-Only Scoring Timer**
+- **Fair Time Bonus** — The scoring timer now only counts time during active waves (when creeps are on the field). Countdowns, mine collection delays, and idle time between waves no longer penalize the time bonus.
+- **HUD Timer Unchanged** — The in-game clock still shows total elapsed time for reference.
+
+**Archer Tower Renamed**
+- Archer towers now display level numbers: Archer Tower → Archer 2 → Archer 3 → Archer 4.
+
+**Aura Tower Range Buff**
+- **L1 Range** — 90 → 100px (+11%), making early aura placement more forgiving.
+- **L2 Range** — 105 → 120px (+14%).
+- **L3 Range** — 120 → 130px (+8%).
+- **L4 Range** — Unchanged at 140px.
+- Smoother progression: 100 → 120 → 130 → 140.
+
+**Simplified Pause Overlay**
+- Removed the dark semi-transparent background from the pause screen. The "⏸ PAUSED" text now floats directly over the game, letting players still see the battlefield while paused.
+
 ### v2.0 — Late-Game Balance & Hardware-Independent Timing
 
 **Difficulty Rebalance**

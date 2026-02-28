@@ -9,6 +9,8 @@ export class GameController extends Phaser.Events.EventEmitter {
   private _maxCastleHP: number;
 
   private _virtualGameTime: number = 0;
+  private _waveActiveTime: number = 0;
+  private _isWaveActive: boolean = false;
   private _gameStartTime: number = 0;
   private _hasGameStarted: boolean = false;
   private _totalPausedTime: number = 0;
@@ -198,6 +200,22 @@ export class GameController extends Phaser.Events.EventEmitter {
 
   addVirtualTime(delta: number): void {
     this._virtualGameTime += delta;
+    if (this._isWaveActive) {
+      this._waveActiveTime += delta;
+    }
+  }
+
+  setWaveActive(active: boolean): void {
+    this._isWaveActive = active;
+  }
+
+  /**
+   * Returns elapsed wave-active time in seconds.
+   * Only counts time when creeps are on the field (waves in progress).
+   * Used for time bonus scoring — excludes countdowns and idle time.
+   */
+  getWaveActiveTime(): number {
+    return Math.floor(this._waveActiveTime / 1000);
   }
 
   markGameStarted(): void {
@@ -233,6 +251,8 @@ export class GameController extends Phaser.Events.EventEmitter {
     this._castleHP = GAME_CONFIG.MAX_CASTLE_HP;
     this._maxCastleHP = GAME_CONFIG.MAX_CASTLE_HP;
     this._virtualGameTime = 0;
+    this._waveActiveTime = 0;
+    this._isWaveActive = false;
     this._gameStartTime = 0;
     this._hasGameStarted = false;
     this._totalPausedTime = 0;
@@ -258,7 +278,7 @@ export class GameController extends Phaser.Events.EventEmitter {
       maxCastleHP: this._maxCastleHP,
       currentWave: this._currentWave,
       totalWaves: this._totalWaves,
-      runTimeSeconds: this.getElapsedGameTime(),
+      runTimeSeconds: this.getWaveActiveTime(),
     };
   }
 }

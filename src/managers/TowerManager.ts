@@ -88,6 +88,16 @@ export class TowerManager {
     this.scene.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       this.handleClick(pointer.x, pointer.y);
     });
+
+    // Scroll wheel to cycle tower branch range preview
+    this.scene.input.on(
+      'wheel',
+      (_pointer: Phaser.Input.Pointer, _gos: unknown[], _dx: number, dy: number) => {
+        if (this.uiManager.isShowingPlacementPreview()) {
+          this.uiManager.cycleRangeBranch(dy > 0 ? 1 : -1);
+        }
+      }
+    );
   }
 
   private handleClick(x: number, y: number): void {
@@ -231,6 +241,7 @@ export class TowerManager {
     this.updateAuraBuffs();
 
     this.uiManager.closeMenus();
+    this.uiManager.resetRangeBranch();
 
     // Show upgrade hint arrow on first tower built
     if (!this.hasShownUpgradeHint && !this.hasUpgradedAnyTower) {
@@ -241,6 +252,7 @@ export class TowerManager {
 
   private selectTower(tower: Tower): void {
     this.deselectTower();
+    this.uiManager.resetRangeBranch();
 
     this.selectedTower = tower;
     tower.setSelected(true);

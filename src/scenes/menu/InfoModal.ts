@@ -67,7 +67,7 @@ export class InfoModal {
           content: [
             '+100 per wave | +0.2 per gold earned',
             '+100 per HP remaining at end',
-            'Time Bonus: +1.5 pts/sec under 80min',
+            'Time Bonus: wave-time only, not idle',
             'Difficulty: Easy×0.75 | Hard×1.25',
           ],
         },
@@ -98,7 +98,7 @@ export class InfoModal {
           title: '✨ AURA TOWER',
           content: [
             'Buffs ALL towers in its range',
-            'Does not attack directly',
+            'Range: 100/120/130/140px by level',
             'Choose: +Dmg, +Crit, or +Echo',
             'Position to buff multiple towers!',
           ],
@@ -281,8 +281,8 @@ export class InfoModal {
           title: '💡 PRO TIPS',
           content: [
             'Build Gold Mines in wave 1-5',
-            'Ice towers are ESSENTIAL for bosses',
-            'Mix tower types for all threats',
+            'Upgrade mines during countdown!',
+            'Scroll wheel to preview tower ranges',
             'Sell unused towers before bosses',
             'Aura placement affects many towers',
           ],

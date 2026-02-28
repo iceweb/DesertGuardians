@@ -111,6 +111,78 @@ export class GoldMine extends Phaser.GameObjects.Container {
   }
 
   /* eslint-disable max-lines-per-function */
+  showCountdownTimer(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.isBuilt()) {
+        resolve();
+        return;
+      }
+
+      const income = this.getIncomePerWave();
+      const countdownText = this.scene.add
+        .text(this.x, this.y + 40, '3', {
+          fontFamily: 'Arial Black',
+          fontSize: '20px',
+          color: '#ffd700',
+          stroke: '#000000',
+          strokeThickness: 4,
+        })
+        .setOrigin(0.5)
+        .setDepth(299);
+
+      // Show income hint below countdown
+      const incomeHint = this.scene.add
+        .text(this.x, this.y + 58, `+${income}g`, {
+          fontFamily: 'Arial',
+          fontSize: '13px',
+          color: '#aaddaa',
+          stroke: '#000000',
+          strokeThickness: 3,
+        })
+        .setOrigin(0.5)
+        .setDepth(299)
+        .setAlpha(0.8);
+
+      // Pulse on each tick
+      const pulse = () => {
+        this.scene.tweens.add({
+          targets: countdownText,
+          scaleX: 1.3,
+          scaleY: 1.3,
+          duration: 100,
+          yoyo: true,
+          ease: 'Quad.Out',
+        });
+      };
+
+      pulse();
+
+      this.scene.time.delayedCall(800, () => {
+        countdownText.setText('2');
+        pulse();
+      });
+
+      this.scene.time.delayedCall(1600, () => {
+        countdownText.setText('1');
+        pulse();
+      });
+
+      this.scene.time.delayedCall(2400, () => {
+        // Fade out and clean up
+        this.scene.tweens.add({
+          targets: [countdownText, incomeHint],
+          alpha: 0,
+          duration: 200,
+          onComplete: () => {
+            countdownText.destroy();
+            incomeHint.destroy();
+            resolve();
+          },
+        });
+      });
+    });
+  }
+
   playIncomeAnimation(): Promise<void> {
     return new Promise((resolve) => {
       const income = this.getIncomePerWave();

@@ -269,11 +269,6 @@ export class GameControlsManager {
     this.pauseOverlay = this.scene.add.container(width / 2, height / 2);
     this.pauseOverlay.setDepth(150);
 
-    const bg = this.scene.add.graphics();
-    bg.fillStyle(0x000000, 0.5);
-    bg.fillRect(-width / 2, -height / 2, width, height);
-    this.pauseOverlay.add(bg);
-
     const pauseText = this.scene.add
       .text(0, 0, '⏸ PAUSED', {
         fontFamily: 'Arial Black',
@@ -290,6 +285,8 @@ export class GameControlsManager {
         fontFamily: 'Arial',
         fontSize: '20px',
         color: '#cccccc',
+        stroke: '#000000',
+        strokeThickness: 3,
       })
       .setOrigin(0.5);
     this.pauseOverlay.add(hint);

@@ -570,9 +570,9 @@ export class HUDManager {
   }
 
   showCountdown(nextWave: number, onComplete: () => void): void {
-    // Initialize countdown state (3 seconds)
+    // Initialize countdown state (0.8s per number = 2.4s total)
     this.countdownActive = true;
-    this.countdownTimeRemaining = 3000; // 3 seconds in ms
+    this.countdownTimeRemaining = 2400; // 3 × 800ms
     this.countdownNextWave = nextWave;
     this.countdownOnComplete = onComplete;
     this.countdownLastDisplayed = 3;
@@ -584,11 +584,11 @@ export class HUDManager {
   updateCountdown(delta: number): void {
     if (!this.countdownActive) return;
 
-    // Subtract elapsed time
+    // Subtract elapsed real time (not game-speed scaled)
     this.countdownTimeRemaining -= delta;
 
-    // Calculate seconds remaining (ceiling to show current second)
-    const secondsRemaining = Math.ceil(this.countdownTimeRemaining / 1000);
+    // 800ms per number: 3 at 2400-1600, 2 at 1600-800, 1 at 800-0
+    const secondsRemaining = Math.ceil(this.countdownTimeRemaining / 800);
 
     // Update display if second changed
     if (secondsRemaining !== this.countdownLastDisplayed && secondsRemaining > 0) {

@@ -171,6 +171,55 @@ export class GoldMineManager {
     return this.mines.reduce((total, mine) => total + mine.getIncomePerWave(), 0);
   }
 
+  /**
+   * Show a synchronized 3-second countdown near each built mine.
+   * Returns a promise that resolves after the countdown finishes.
+   * Skips entirely if no mines are built.
+   */
+  async startMineCountdown(): Promise<void> {
+    const activeMines = this.mines.filter((m) => m.isBuilt());
+    if (activeMines.length === 0) return;
+
+    // All mines show countdown simultaneously — await all in parallel
+    await Promise.all(activeMines.map((mine) => mine.showCountdownTimer()));
+  }
+
+  /**
+   * Collect income from all mines simultaneously (no stagger).
+   * Used after the mine countdown to collect all at once.
+   */
+  async collectAllSimultaneous(onMineCollected?: (income: number) => void): Promise<number> {
+    const activeMines = this.mines.filter((m) => m.isBuilt());
+    if (activeMines.length === 0) return 0;
+
+    let totalIncome = 0;
+    for (const mine of activeMines) {
+      totalIncome += mine.getIncomePerWave();
+    }
+
+    // Fire all animations at once, with a safety timeout
+    await Promise.all(
+      activeMines.map((mine) => {
+        const mineIncome = mine.getIncomePerWave();
+        return new Promise<void>((resolve) => {
+          let resolved = false;
+          const safeResolve = () => {
+            if (!resolved) {
+              resolved = true;
+              onMineCollected?.(mineIncome);
+              resolve();
+            }
+          };
+
+          mine.playIncomeAnimation().then(safeResolve).catch(safeResolve);
+          this.scene.time.delayedCall(1500, safeResolve);
+        });
+      })
+    );
+
+    return totalIncome;
+  }
+
   async collectIncomeWithAnimation(onMineCollected?: (income: number) => void): Promise<number> {
     const activeMines = this.mines.filter((m) => m.isBuilt());
 

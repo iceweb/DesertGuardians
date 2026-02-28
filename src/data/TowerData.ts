@@ -65,7 +65,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
   },
   archer_2: {
     key: 'archer_2',
-    name: 'Archer Tower II',
+    name: 'Archer 2',
     type: 'physical',
     branch: 'archer',
     level: 2,
@@ -80,7 +80,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
   },
   archer_3: {
     key: 'archer_3',
-    name: 'Archer Tower III',
+    name: 'Archer 3',
     type: 'physical',
     branch: 'archer',
     level: 3,
@@ -95,7 +95,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
   },
   archer_4: {
     key: 'archer_4',
-    name: 'Elite Archer',
+    name: 'Archer 4',
     type: 'physical',
     branch: 'archer',
     level: 4,
@@ -355,7 +355,7 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     upgradeCost: 100,
     description: 'Buffs nearby towers +20% damage. Place next to DPS towers.',
     stats: {
-      range: 90,
+      range: 100,
       fireRate: 0,
       damage: 0,
       auraDamageMultiplier: 0.2,
@@ -368,9 +368,9 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'aura',
     level: 2,
     upgradeCost: 200,
-    description: '+30% damage buff. 105px range. Affects more towers.',
+    description: '+30% damage buff. 120px range. Affects more towers.',
     stats: {
-      range: 105,
+      range: 120,
       fireRate: 0,
       damage: 0,
       auraDamageMultiplier: 0.3,
@@ -383,9 +383,9 @@ export const TOWER_CONFIGS: Record<string, TowerConfig> = {
     branch: 'aura',
     level: 3,
     upgradeCost: 400,
-    description: '+40% damage buff. 120px range. Huge DPS multiplier.',
+    description: '+40% damage buff. 130px range. Huge DPS multiplier.',
     stats: {
-      range: 120,
+      range: 130,
       fireRate: 0,
       damage: 0,
       auraDamageMultiplier: 0.4,

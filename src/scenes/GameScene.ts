@@ -441,6 +441,7 @@ export class GameScene extends Phaser.Scene {
   private setupWaveCallbacks(): void {
     this.waveManager.on('waveStart', (waveNumber: number) => {
       this.gameController.setWave(waveNumber);
+      this.gameController.setWaveActive(true);
       this.hudManager.updateWave(waveNumber);
       this.hudManager.hideStartWaveButton();
 
@@ -463,6 +464,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('waveComplete', async (waveNumber: number) => {
+      this.gameController.setWaveActive(false);
       this.audioManager.playSFX('wave_complete');
 
       const waveBonus =
@@ -480,9 +482,11 @@ export class GameScene extends Phaser.Scene {
         return;
       }
 
-      await new Promise<void>((resolve) => this.time.delayedCall(300, () => resolve()));
+      // 3-second mine countdown — gives player time to upgrade mines before income
+      await this.goldMineManager.startMineCountdown();
 
-      const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
+      // All mines collect simultaneously after countdown
+      const mineIncome = await this.goldMineManager.collectAllSimultaneous(() => {
         this.audioManager.playSFX('coins');
       });
       if (mineIncome > 0) {
@@ -504,11 +508,16 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.waveManager.on('allWavesComplete', async () => {
+      this.gameController.setWaveActive(false);
+
       // Small delay to let player see the final boss gold reward text
       await new Promise((resolve) => this.time.delayedCall(800, resolve));
 
-      // Collect final mine income before calculating score
-      const mineIncome = await this.goldMineManager.collectIncomeWithAnimation(() => {
+      // 3-second mine countdown before final collection
+      await this.goldMineManager.startMineCountdown();
+
+      // Collect final mine income simultaneously before calculating score
+      const mineIncome = await this.goldMineManager.collectAllSimultaneous(() => {
         this.audioManager.playSFX('coins');
       });
       if (mineIncome > 0) {
@@ -721,9 +730,9 @@ export class GameScene extends Phaser.Scene {
     const gameSpeed = this.hudManager.getGameSpeed();
     const scaledDelta = cappedDelta * gameSpeed;
 
-    // Update countdown only when not paused (freezes on pause)
+    // Update countdown with real time (not scaled) - always 0.8s per number
     if (!this.hudManager.isPausedState()) {
-      this.hudManager.updateCountdown(scaledDelta);
+      this.hudManager.updateCountdown(cappedDelta);
     }
 
     // Update elapsed time display using in-game time (scales with game speed)
