@@ -283,7 +283,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveNumber: 6,
     creeps: [
       { type: 'furball', count: 14, intervalMs: 800 },
-      { type: 'tank', count: 3, intervalMs: 2500, delayStart: 11000 },
+      { type: 'tank', count: 3, intervalMs: 3125, delayStart: 11000 },
     ],
   },
   {
@@ -315,7 +315,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
   {
     waveNumber: 10,
     creeps: [
-      { type: 'tank', count: 6, intervalMs: 1600 },
+      { type: 'tank', count: 6, intervalMs: 2000 },
       { type: 'runner', count: 12, intervalMs: 400, delayStart: 8500 },
     ],
   },
@@ -325,7 +325,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'ghost',
     announcement: '👻 GHOST WAVE!\nThey phase when low HP!',
     creeps: [
-      { type: 'ghost', count: 10, intervalMs: 1200 },
+      { type: 'ghost', count: 10, intervalMs: 1500 },
       { type: 'furball', count: 12, intervalMs: 700, delayStart: 13100 },
     ],
   },
@@ -333,7 +333,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveNumber: 12,
     creeps: [
       { type: 'furball', count: 16, intervalMs: 650 },
-      { type: 'tank', count: 6, intervalMs: 1600, delayStart: 10250 },
+      { type: 'tank', count: 6, intervalMs: 2000, delayStart: 10250 },
       { type: 'jumper', count: 6, intervalMs: 1600, delayStart: 18750 },
     ],
   },
@@ -342,7 +342,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'digger',
     announcement: '🕳️ DIGGER WAVE!\nThey burrow underground!',
     creeps: [
-      { type: 'digger', count: 12, intervalMs: 1100 },
+      { type: 'digger', count: 12, intervalMs: 1375 },
       { type: 'runner', count: 12, intervalMs: 500, delayStart: 12600 },
     ],
   },
@@ -352,7 +352,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     announcement: '🦎 KOMODO WARLORD APPROACHES!',
     creeps: [
       { type: 'runner', count: 12, intervalMs: 500 },
-      { type: 'tank', count: 5, intervalMs: 1800, delayStart: 6000 },
+      { type: 'tank', count: 5, intervalMs: 2250, delayStart: 6000 },
       { type: 'boss_2', count: 1, intervalMs: 1000, delayStart: 13700 },
     ],
   },
@@ -361,7 +361,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     creeps: [
       { type: 'furball', count: 18, intervalMs: 650 },
       { type: 'shielded', count: 6, intervalMs: 1800, delayStart: 9600 },
-      { type: 'tank', count: 7, intervalMs: 1400, delayStart: 16700 },
+      { type: 'tank', count: 7, intervalMs: 1750, delayStart: 16700 },
     ],
   },
   {
@@ -394,7 +394,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
   {
     waveNumber: 19,
     creeps: [
-      { type: 'tank', count: 16, intervalMs: 1200 },
+      { type: 'tank', count: 16, intervalMs: 1500 },
       { type: 'shielded', count: 8, intervalMs: 1500, delayStart: 15900 },
     ],
   },
@@ -403,8 +403,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'ghost',
     announcement: '👻 GHOST WAVE!\nDamage fast before they phase!',
     creeps: [
-      { type: 'ghost', count: 14, intervalMs: 1000 },
-      { type: 'digger', count: 10, intervalMs: 1200, delayStart: 11300 },
+      { type: 'ghost', count: 14, intervalMs: 1250 },
+      { type: 'digger', count: 10, intervalMs: 1500, delayStart: 11300 },
     ],
   },
   {
@@ -412,7 +412,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'boss',
     announcement: '🐉 DRAKE CHAMPION APPROACHES!\nWith Drake Knight Escorts!',
     creeps: [
-      { type: 'tank', count: 12, intervalMs: 1200 },
+      { type: 'tank', count: 12, intervalMs: 1500 },
       { type: 'shielded', count: 8, intervalMs: 1400, delayStart: 10300 },
       { type: 'jumper', count: 12, intervalMs: 1200, delayStart: 18000 },
       { type: 'boss_guard_1', count: 2, intervalMs: 1500, delayStart: 26000 },
@@ -424,7 +424,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'broodmother',
     announcement: '🕷️ BROODMOTHER WAVE!\nKill fast, expect babies!',
     creeps: [
-      { type: 'tank', count: 10, intervalMs: 1200 },
+      { type: 'tank', count: 10, intervalMs: 1500 },
       { type: 'broodmother', count: 4, intervalMs: 3000, delayStart: 7500 },
     ],
   },
@@ -440,7 +440,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'digger',
     announcement: '🕳️ DIGGER ASSAULT!\nStrike when they surface!',
     creeps: [
-      { type: 'digger', count: 18, intervalMs: 900 },
+      { type: 'digger', count: 18, intervalMs: 1125 },
       { type: 'shielded', count: 10, intervalMs: 1300, delayStart: 13500 },
     ],
   },
@@ -448,7 +448,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
   {
     waveNumber: 25,
     creeps: [
-      { type: 'tank', count: 14, intervalMs: 1100 },
+      { type: 'tank', count: 14, intervalMs: 1375 },
       { type: 'shielded', count: 12, intervalMs: 1200, delayStart: 12200 },
       { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 23200 },
     ],
@@ -478,7 +478,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     creeps: [
       { type: 'shielded', count: 12, intervalMs: 1100 },
       { type: 'jumper', count: 14, intervalMs: 1000, delayStart: 10300 },
-      { type: 'tank', count: 12, intervalMs: 1300, delayStart: 21600 },
+      { type: 'tank', count: 12, intervalMs: 1625, delayStart: 21600 },
       { type: 'boss_guard_2', count: 2, intervalMs: 1500, delayStart: 30000 },
       { type: 'boss_4', count: 1, intervalMs: 500, delayStart: 32000 },
     ],
@@ -488,8 +488,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'ghost',
     announcement: '👻 ELITE GHOSTS!\n5 sec immunity at 15% HP!',
     creeps: [
-      { type: 'ghost', count: 20, intervalMs: 800 },
-      { type: 'tank', count: 12, intervalMs: 1200, delayStart: 13500 },
+      { type: 'ghost', count: 20, intervalMs: 1000 },
+      { type: 'tank', count: 12, intervalMs: 1500, delayStart: 13500 },
     ],
   },
   {
@@ -498,7 +498,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     announcement: '☠️ PLAGUEBEARER WAVE! USE POISON TOWERS!',
     creeps: [
       { type: 'plaguebearer', count: 16, intervalMs: 1600 },
-      { type: 'tank', count: 12, intervalMs: 1200, delayStart: 22000 },
+      { type: 'tank', count: 12, intervalMs: 1500, delayStart: 22000 },
     ],
   },
 
@@ -508,7 +508,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     announcement: '🕷️ NIGHTMARE WAVE!\nGhosts + Broodmothers!',
     parallelSpawn: true,
     creeps: [
-      { type: 'ghost', count: 18, intervalMs: 850 },
+      { type: 'ghost', count: 18, intervalMs: 1063 },
       { type: 'broodmother', count: 5, intervalMs: 2500 },
       { type: 'jumper', count: 16, intervalMs: 900, delayStart: 19900 },
     ],
@@ -519,7 +519,7 @@ export const WAVE_CONFIGS: WaveDef[] = [
     creeps: [
       { type: 'furball', count: 30, intervalMs: 400 },
       { type: 'runner', count: 35, intervalMs: 250 },
-      { type: 'tank', count: 20, intervalMs: 900, delayStart: 17700 },
+      { type: 'tank', count: 20, intervalMs: 1125, delayStart: 17700 },
       { type: 'shielded', count: 16, intervalMs: 1000, delayStart: 33600 },
       { type: 'jumper', count: 18, intervalMs: 900, delayStart: 47300 },
     ],
@@ -530,8 +530,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     announcement: '🕳️ DIGGER MASS ASSAULT!\n25 underground burrowers!',
     parallelSpawn: true,
     creeps: [
-      { type: 'digger', count: 25, intervalMs: 700 },
-      { type: 'tank', count: 16, intervalMs: 950 },
+      { type: 'digger', count: 25, intervalMs: 875 },
+      { type: 'tank', count: 16, intervalMs: 1188 },
     ],
   },
   {
@@ -541,10 +541,10 @@ export const WAVE_CONFIGS: WaveDef[] = [
     parallelSpawn: true,
     creeps: [
       { type: 'flying', count: 18, intervalMs: 700 },
-      { type: 'digger', count: 14, intervalMs: 800 },
-      { type: 'ghost', count: 14, intervalMs: 800, delayStart: 19900 },
+      { type: 'digger', count: 14, intervalMs: 1000 },
+      { type: 'ghost', count: 14, intervalMs: 1000, delayStart: 19900 },
       { type: 'broodmother', count: 5, intervalMs: 2400, delayStart: 29400 },
-      { type: 'tank', count: 16, intervalMs: 900, delayStart: 38300 },
+      { type: 'tank', count: 16, intervalMs: 1125, delayStart: 38300 },
     ],
   },
   {
@@ -555,9 +555,9 @@ export const WAVE_CONFIGS: WaveDef[] = [
     creeps: [
       { type: 'runner', count: 30, intervalMs: 300 },
       { type: 'flying', count: 18, intervalMs: 650 },
-      { type: 'ghost', count: 14, intervalMs: 850 },
+      { type: 'ghost', count: 14, intervalMs: 1063 },
       { type: 'shielded', count: 16, intervalMs: 900 },
-      { type: 'tank', count: 18, intervalMs: 850 },
+      { type: 'tank', count: 18, intervalMs: 1063 },
       { type: 'broodmother', count: 5, intervalMs: 2400 },
       { type: 'boss_guard_3', count: 2, intervalMs: 2000, delayStart: 38000 },
       { type: 'boss_5', count: 1, intervalMs: 500, delayStart: 40000 },

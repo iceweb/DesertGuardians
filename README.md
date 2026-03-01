@@ -256,11 +256,16 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 ## 📝 Changelog
-### v2.2 — Plaguebearer Wave Balance
+### v2.2 — Spawn Spacing Balance
 
-**Plaguebearer Wave Spawn Spacing**
+**Plaguebearer Wave Spacing**
 - **Spawn Interval Increase** — Plaguebearer creep spawn interval increased from 1100ms → 1600ms (+45%). Units are now spaced further apart, giving poison towers enough time to attack each creep before the next one arrives.
-- **Tank Group Timing** — Adjusted tank sub-wave delay (14500ms → 22000ms) to match the longer plaguebearer spawn duration.
+- **Tank Group Timing** — Adjusted tank sub-wave delay to match the longer plaguebearer spawn duration.
+
+**Ghost, Digger & Tank Spawn Spacing (+25%)**
+- **Tank Creeps** — Spawn intervals increased by 25% across all waves (e.g. 1200ms → 1500ms, 900ms → 1125ms). Tanks are now more spread out, giving towers more time to focus fire each one.
+- **Ghost Creeps** — Spawn intervals increased by 25% across all waves (e.g. 1200ms → 1500ms, 800ms → 1000ms). Reduces overwhelming clusters of phasing enemies.
+- **Digger Creeps** — Spawn intervals increased by 25% across all waves (e.g. 1100ms → 1375ms, 700ms → 875ms). More time to deal damage between burrow cycles.
 
 ### v2.1 — Quality of Life & UX Improvements
 
