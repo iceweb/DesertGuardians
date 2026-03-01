@@ -6,6 +6,7 @@
         "npx vitest": true,
         "npx eslint": true,
         "npx vite": true,
-        "git add": true
+        "git add": true,
+        "git push": true
     }
 }

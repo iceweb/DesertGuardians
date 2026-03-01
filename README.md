@@ -256,6 +256,12 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 ## 📝 Changelog
+### v2.2 — Plaguebearer Wave Balance
+
+**Plaguebearer Wave Spawn Spacing**
+- **Spawn Interval Increase** — Plaguebearer creep spawn interval increased from 1100ms → 1600ms (+45%). Units are now spaced further apart, giving poison towers enough time to attack each creep before the next one arrives.
+- **Tank Group Timing** — Adjusted tank sub-wave delay (14500ms → 22000ms) to match the longer plaguebearer spawn duration.
+
 ### v2.1 — Quality of Life & UX Improvements
 
 **Mine Income Countdown**

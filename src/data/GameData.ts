@@ -497,8 +497,8 @@ export const WAVE_CONFIGS: WaveDef[] = [
     waveType: 'plaguebearer',
     announcement: '☠️ PLAGUEBEARER WAVE! USE POISON TOWERS!',
     creeps: [
-      { type: 'plaguebearer', count: 16, intervalMs: 1100 },
-      { type: 'tank', count: 12, intervalMs: 1200, delayStart: 14500 },
+      { type: 'plaguebearer', count: 16, intervalMs: 1600 },
+      { type: 'tank', count: 12, intervalMs: 1200, delayStart: 22000 },
     ],
   },
 
