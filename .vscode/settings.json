@@ -5,6 +5,7 @@
         "npx prettier": true,
         "npx vitest": true,
         "npx eslint": true,
-        "npx vite": true
+        "npx vite": true,
+        "git add": true
     }
 }
