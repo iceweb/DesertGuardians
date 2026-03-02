@@ -124,17 +124,16 @@ function calculateScore($waveReached, $goldEarned, $hpRemaining, $timeSeconds, $
     $goldScore = floor($goldEarned * GOLD_BONUS_MULTIPLIER);
     $hpBonus = $hpRemaining * HP_BONUS_POINTS;
     
-    // Time bonus only applies on victory (additive, not multiplicative)
+    // Time bonus only applies on victory (additive, no cap)
     $timeBonus = 0;
     if ($isVictory) {
-        // Additive time bonus: every second saved from 80-min baseline = 1.5 pts
-        // Capped at 3000 points
-        $maxTime = TIME_BONUS_MAX_TIME;      // 80 minutes
-        $pointsPerSec = TIME_BONUS_POINTS_PER_SEC; // 1.5
-        $cap = TIME_BONUS_CAP;               // 3000
+        // Additive time bonus: every second saved from 60-min baseline = 1.0 pts
+        // No cap - faster completions always rewarded
+        $maxTime = TIME_BONUS_MAX_TIME;      // 60 minutes
+        $pointsPerSec = TIME_BONUS_POINTS_PER_SEC; // 1.0
         
         $secondsSaved = max(0, $maxTime - $timeSeconds);
-        $timeBonus = min($cap, floor($secondsSaved * $pointsPerSec));
+        $timeBonus = floor($secondsSaved * $pointsPerSec);
     }
     
     $difficultyMultiplier = getDifficultyMultiplier($difficulty);

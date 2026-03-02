@@ -92,12 +92,11 @@ export class ResultsScene extends Phaser.Scene {
     const hpBonus = data.castleHP * GAME_CONFIG.HP_BONUS_POINTS;
 
     // Time Bonus: Additive points for fast completion
-    // 80 min baseline, 1.5 pts per second saved, cap at 3000
-    const MAX_TIME = 4800;
-    const POINTS_PER_SECOND = 1.5;
-    const CAP = 3000;
+    // 60 min baseline, 1.0 pts per second saved, no cap
+    const MAX_TIME = 3600;
+    const POINTS_PER_SECOND = 1.0;
     const secondsSaved = Math.max(0, MAX_TIME - data.runTimeSeconds);
-    const timeBonus = Math.min(CAP, Math.floor(secondsSaved * POINTS_PER_SECOND));
+    const timeBonus = Math.floor(secondsSaved * POINTS_PER_SECOND);
 
     // Final score: base scores + time bonus (no difficulty multiplier in legacy scene)
     this.finalScore = Math.floor(waveScore + goldScore + hpBonus + timeBonus);

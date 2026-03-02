@@ -99,26 +99,25 @@ export class GameSceneResultsUI {
     const hpBonus = result.castleHP * GAME_CONFIG.HP_BONUS_POINTS;
 
     // Time Bonus - Additive points for fast completion (victory only)
-    // Every second saved from 40-minute baseline = 1.5 points, capped at 3000
+    // Linear scale: 25 min = max bonus, 60 min = 0, no cap
     let timeBonus = 0;
 
     if (isVictory) {
-      // Additive time bonus: every second counts equally
-      // - 80 min (4800s) baseline: 0 bonus
-      // - Every second faster: +1.5 points
-      // - Cap at 3000 points (prevents extreme speedrun abuse)
+      // Linear time bonus: every second under 60 min earns points
+      // - 60 min (3600s) or slower: 0 bonus
+      // - 25 min (1500s) or faster: max bonus (2100 pts)
+      // - Every second faster than 60 min: +1.0 points, no cap
       //
       // Examples:
-      //   30 min (1800s): 3000 pts (capped) | 60 min (3600s): 1800 pts
-      //   40 min (2400s): 3000 pts (capped) | 70 min (4200s): 900 pts
-      //   50 min (3000s): 2700 pts          | 80 min (4800s): 0 pts
+      //   25 min (1500s): 2100 pts (max) | 40 min (2400s): 1200 pts
+      //   30 min (1800s): 1800 pts       | 50 min (3000s): 600 pts
+      //   35 min (2100s): 1500 pts       | 60 min (3600s): 0 pts
       //
-      const MAX_TIME = 4800; // 80 minutes - baseline (no bonus)
-      const POINTS_PER_SECOND = 1.5; // Every second matters equally
-      const CAP = 3000; // Maximum bonus points
+      const MAX_TIME = 3600; // 60 minutes - baseline (no bonus)
+      const POINTS_PER_SECOND = 1.0; // Every second matters equally
 
       const secondsSaved = Math.max(0, MAX_TIME - result.runTimeSeconds);
-      timeBonus = Math.min(CAP, Math.floor(secondsSaved * POINTS_PER_SECOND));
+      timeBonus = Math.floor(secondsSaved * POINTS_PER_SECOND);
     }
 
     // Difficulty Multiplier

@@ -256,6 +256,14 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 ## 📝 Changelog
+### v2.3 — Time Bonus Rebalance
+
+**Time Bonus Scoring Overhaul**
+- **Removed Cap** — Time bonus is no longer capped at 3000 points. Faster completions are always rewarded.
+- **New Baseline** — Reduced from 80 minutes to 60 minutes. Finishing at or above 60 min = 0 time bonus.
+- **Linear Scaling** — Every second under 60 min earns +1.5 points. At 25 min = 3150 pts, at 40 min = 1800 pts. No ceiling.
+- **Score Recalculation** — All existing leaderboard scores recalculated server-side using the new formula.
+
 ### v2.2 — Spawn Spacing Balance
 
 **Plaguebearer Wave Spacing**
