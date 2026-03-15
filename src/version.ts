@@ -1,3 +1,3 @@
 // Auto-generated version file - do not edit manually
 // This file is updated automatically during the build process
-export const VERSION = '2.3';
+export const VERSION = '2.4';

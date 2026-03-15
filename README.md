@@ -256,6 +256,12 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 ## 📝 Changelog
+### v2.4 — UI Click Reliability Fix
+
+**Menu Click Fix at High Game Speeds**
+- **Root Cause Fixed** — Upgrade, build, and ability selection buttons could silently fail at 3× speed during busy waves. The menu UI was being destroyed and fully recreated every frame that gold changed (frequent at 3× speed from creep kills). Phaser 3's input system delays newly created interactive objects by one frame before they become click-targetable, creating a window where clicks hit the popup overlay instead of buttons — closing the menu without executing the action.
+- **Lightweight Visual Refresh** — Menu buttons are now created once and persist for the menu's lifetime. Gold-dependent visuals (text colors, button backgrounds, enabled/disabled states) are updated in-place without destroying any game objects.
+- **Always-Active Hit Areas** — Button hit areas are always created regardless of initial affordability. Click handlers re-check affordability at click time, so buttons correctly enable/disable as gold changes without any rebuild.
 ### v2.3 — Time Bonus Rebalance
 
 **Time Bonus Scoring Overhaul**

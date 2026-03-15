@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { Tower } from '../objects/Tower';
 import { TOWER_CONFIGS, BRANCH_OPTIONS } from '../data';
-import { TOWER_BRANCH_COLORS, VETERAN_RANK_COLORS } from '../data/ThemeConfig';
+import { THEME, TOWER_BRANCH_COLORS, VETERAN_RANK_COLORS } from '../data/ThemeConfig';
 import { UIHelper } from './UIHelper';
 import type { UIHitDetector } from './UIHitDetector';
 import type { PopupController } from './PopupController';
@@ -22,10 +22,13 @@ export class TowerUIManager {
   private upgradeMenuContainer: Phaser.GameObjects.Container | null = null;
   private abilityMenuContainer: Phaser.GameObjects.Container | null = null;
 
-  private selectedTower: Tower | null = null;
   private lastKnownGold: number = 0;
 
-  private buildMenuPosition: { x: number; y: number } | null = null;
+  // Stored references for lightweight visual refresh (avoids destructive menu rebuild)
+  private goldDependentElements: Array<{
+    cost: number;
+    updateVisuals: (canAfford: boolean) => void;
+  }> = [];
 
   private reviewMode: boolean = false;
 
@@ -287,7 +290,6 @@ export class TowerUIManager {
 
   /* eslint-disable complexity, max-lines-per-function */
   showBuildMenu(x: number, y: number): void {
-    this.buildMenuPosition = { x, y };
     this.lastKnownGold = this.getPlayerGold?.() || 0;
 
     this.closeMenus(true, false);
@@ -295,6 +297,7 @@ export class TowerUIManager {
     const playerGold = this.getPlayerGold?.() || 0;
     const archerConfig = TOWER_CONFIGS['archer_1'];
     const canAfford = playerGold >= (archerConfig.buildCost || 70);
+    const buildAffordState = { current: canAfford };
 
     this.buildMenuContainer = this.scene.add.container(x, y - 120);
     this.buildMenuContainer.setDepth(200);
@@ -465,38 +468,101 @@ export class TowerUIManager {
       .setOrigin(0.5);
     this.buildMenuContainer.add(costText);
 
-    if (canAfford) {
-      const hitArea = this.scene.add.rectangle(0, 10, 320, 100, 0xffffff, 0);
-      hitArea.setInteractive({ useHandCursor: true });
-      hitArea.on(
-        'pointerdown',
-        (
-          _pointer: Phaser.Input.Pointer,
-          _localX: number,
-          _localY: number,
-          event: Phaser.Types.Input.EventData
-        ) => {
-          event.stopPropagation();
-          this.onBuildRequested?.(x, y, 'archer_1');
-          this.closeMenus();
+    // Collect all stat text elements for visual refresh
+    const buildStatTexts: Phaser.GameObjects.Text[] = [
+      nameText,
+      dmgLabel,
+      dmgValue,
+      rateLabel,
+      rateValue,
+      dpsLabel,
+      dpsValue,
+      rangeLabel,
+      rangeValue,
+    ];
+    const buildStatEnabledColors = [
+      '#ffffff',
+      '#aaaaaa',
+      '#ff6666',
+      '#aaaaaa',
+      '#66ccff',
+      '#aaaaaa',
+      '#ffcc44',
+      '#aaaaaa',
+      '#66ff66',
+    ];
+    const buildStatDisabledColors = [
+      '#666666',
+      '#555555',
+      '#555555',
+      '#555555',
+      '#555555',
+      '#555555',
+      '#555555',
+      '#555555',
+      '#555555',
+    ];
+
+    // Always create hitArea so it persists across gold changes
+    const buildCost = archerConfig.buildCost || 70;
+    const hitArea = this.scene.add.rectangle(0, 10, 320, 100, 0xffffff, 0);
+    hitArea.setInteractive({ useHandCursor: true });
+    if (!canAfford) hitArea.disableInteractive();
+    hitArea.on(
+      'pointerdown',
+      (
+        _pointer: Phaser.Input.Pointer,
+        _localX: number,
+        _localY: number,
+        event: Phaser.Types.Input.EventData
+      ) => {
+        event.stopPropagation();
+        const currentGold = this.getPlayerGold?.() || 0;
+        if (currentGold < buildCost) return;
+        this.onBuildRequested?.(x, y, 'archer_1');
+        this.closeMenus();
+      }
+    );
+    hitArea.on('pointerover', () => {
+      btnBg.clear();
+      btnBg.fillStyle(0x3a3025, 1);
+      btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
+      btnBg.lineStyle(2, 0xffd700, 1);
+      btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
+    });
+    hitArea.on('pointerout', () => {
+      btnBg.clear();
+      btnBg.fillStyle(buildAffordState.current ? 0x2a2015 : 0x1a1510, 1);
+      btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
+      btnBg.lineStyle(2, buildAffordState.current ? 0xc49564 : 0x555555, 1);
+      btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
+    });
+    this.buildMenuContainer.add(hitArea);
+
+    this.goldDependentElements.push({
+      cost: buildCost,
+      updateVisuals: (afford: boolean) => {
+        buildAffordState.current = afford;
+        btnBg.clear();
+        btnBg.fillStyle(afford ? 0x2a2015 : 0x1a1510, 1);
+        btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
+        btnBg.lineStyle(2, afford ? 0xc49564 : 0x555555, 1);
+        btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
+        towerIcon.clear();
+        TowerIconRenderer.drawArcherTowerIcon(towerIcon, afford);
+        costText.setColor(afford ? '#ffd700' : '#ff4444');
+        for (let i = 0; i < buildStatTexts.length; i++) {
+          buildStatTexts[i].setColor(
+            afford ? buildStatEnabledColors[i] : buildStatDisabledColors[i]
+          );
         }
-      );
-      hitArea.on('pointerover', () => {
-        btnBg.clear();
-        btnBg.fillStyle(0x3a3025, 1);
-        btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
-        btnBg.lineStyle(2, 0xffd700, 1);
-        btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
-      });
-      hitArea.on('pointerout', () => {
-        btnBg.clear();
-        btnBg.fillStyle(0x2a2015, 1);
-        btnBg.fillRoundedRect(-160, -40, 320, 100, 10);
-        btnBg.lineStyle(2, 0xc49564, 1);
-        btnBg.strokeRoundedRect(-160, -40, 320, 100, 10);
-      });
-      this.buildMenuContainer.add(hitArea);
-    }
+        if (afford) {
+          hitArea.setInteractive({ useHandCursor: true });
+        } else {
+          hitArea.disableInteractive();
+        }
+      },
+    });
 
     const closeBtn = this.scene.add
       .text(160, -75, '✕', {
@@ -527,30 +593,18 @@ export class TowerUIManager {
 
   update(): void {
     const currentGold = this.getPlayerGold?.() || 0;
+    if (currentGold === this.lastKnownGold) return;
+    this.lastKnownGold = currentGold;
 
-    if (this.upgradeMenuContainer && this.selectedTower) {
-      if (currentGold !== this.lastKnownGold) {
-        this.lastKnownGold = currentGold;
-
-        const tower = this.selectedTower;
-        this.showUpgradeMenu(tower);
-      }
-    }
-
-    if (this.buildMenuContainer && this.buildMenuPosition) {
-      if (currentGold !== this.lastKnownGold) {
-        this.lastKnownGold = currentGold;
-
-        const pos = this.buildMenuPosition;
-        this.showBuildMenu(pos.x, pos.y);
-      }
+    // Lightweight visual refresh — no destroy/recreate, so clicks are never lost
+    for (const elem of this.goldDependentElements) {
+      elem.updateVisuals(currentGold >= elem.cost);
     }
   }
   /* eslint-enable complexity, max-lines-per-function */
 
   /* eslint-disable complexity, max-lines-per-function */
   showUpgradeMenu(tower: Tower): void {
-    this.selectedTower = tower;
     this.lastKnownGold = this.getPlayerGold?.() || 0;
 
     this.closeMenus(true, false);
@@ -956,6 +1010,7 @@ export class TowerUIManager {
         const cost = branchConfig.upgradeCost;
         const canAfford = playerGold >= cost;
         const color = TOWER_BRANCH_COLORS[branch];
+        const affordState = { current: canAfford };
 
         const btn = this.scene.add.graphics();
         btn.fillStyle(canAfford ? 0x2a2a2a : 0x1a1a1a, 1);
@@ -1013,56 +1068,80 @@ export class TowerUIManager {
             color: canAfford ? '#ffd700' : '#ff4444',
           })
           .setOrigin(0.5);
+
         this.upgradeMenuContainer!.add(costText);
 
-        if (canAfford) {
-          const hitArea = this.scene.add.rectangle(
-            bx,
-            by + btnHeight / 2,
-            btnWidth,
-            btnHeight,
-            0xffffff,
-            0
-          );
-          hitArea.setInteractive({ useHandCursor: true });
-          // Capture references at creation time
-          const capturedTower = tower;
-          const capturedBranchKey = branchKey;
-          hitArea.on(
-            'pointerdown',
-            (
-              _pointer: Phaser.Input.Pointer,
-              _localX: number,
-              _localY: number,
-              event: Phaser.Types.Input.EventData
-            ) => {
-              event.stopPropagation();
-              // Re-check affordability at click time
-              const currentGold = this.getPlayerGold?.() || 0;
-              const requiredCost = TOWER_CONFIGS[capturedBranchKey]?.upgradeCost || 0;
-              if (currentGold < requiredCost) {
-                console.warn('Cannot afford upgrade anymore:', currentGold, '<', requiredCost);
-                return;
-              }
-              this.onUpgradeRequested?.(capturedTower, capturedBranchKey);
+        // Always create hitArea so it persists across gold changes
+        const hitArea = this.scene.add.rectangle(
+          bx,
+          by + btnHeight / 2,
+          btnWidth,
+          btnHeight,
+          0xffffff,
+          0
+        );
+        hitArea.setInteractive({ useHandCursor: true });
+        if (!canAfford) hitArea.disableInteractive();
+        // Capture references at creation time
+        const capturedTower = tower;
+        const capturedBranchKey = branchKey;
+        hitArea.on(
+          'pointerdown',
+          (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData
+          ) => {
+            event.stopPropagation();
+            // Re-check affordability at click time
+            const currentGold = this.getPlayerGold?.() || 0;
+            const requiredCost = TOWER_CONFIGS[capturedBranchKey]?.upgradeCost || 0;
+            if (currentGold < requiredCost) {
+              console.warn('Cannot afford upgrade anymore:', currentGold, '<', requiredCost);
+              return;
             }
-          );
-          hitArea.on('pointerover', () => {
+            this.onUpgradeRequested?.(capturedTower, capturedBranchKey);
+          }
+        );
+        hitArea.on('pointerover', () => {
+          btn.clear();
+          btn.fillStyle(0x4a4a4a, 1);
+          btn.fillRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
+          btn.lineStyle(3, color, 1);
+          btn.strokeRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
+        });
+        hitArea.on('pointerout', () => {
+          btn.clear();
+          btn.fillStyle(affordState.current ? 0x2a2a2a : 0x1a1a1a, 1);
+          btn.fillRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
+          btn.lineStyle(2, affordState.current ? color : 0x444444, 1);
+          btn.strokeRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
+        });
+        this.upgradeMenuContainer!.add(hitArea);
+
+        this.goldDependentElements.push({
+          cost,
+          updateVisuals: (afford: boolean) => {
+            affordState.current = afford;
             btn.clear();
-            btn.fillStyle(0x4a4a4a, 1);
+            btn.fillStyle(afford ? 0x2a2a2a : 0x1a1a1a, 1);
             btn.fillRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
-            btn.lineStyle(3, color, 1);
+            btn.lineStyle(2, afford ? color : 0x444444, 1);
             btn.strokeRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
-          });
-          hitArea.on('pointerout', () => {
-            btn.clear();
-            btn.fillStyle(0x2a2a2a, 1);
-            btn.fillRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
-            btn.lineStyle(2, color, 1);
-            btn.strokeRoundedRect(bx - btnWidth / 2, by, btnWidth, btnHeight, 8);
-          });
-          this.upgradeMenuContainer!.add(hitArea);
-        }
+            towerIcon.clear();
+            TowerIconRenderer.drawMiniTowerIcon(towerIcon, bx, by + 38, branch, afford);
+            nameText.setColor(afford ? '#ffffff' : '#666666');
+            descText.setColor(afford ? '#aaaaaa' : '#555555');
+            previewText.setColor(afford ? '#88ff88' : '#555555');
+            costText.setColor(afford ? '#ffd700' : '#ff4444');
+            if (afford) {
+              hitArea.setInteractive({ useHandCursor: true });
+            } else {
+              hitArea.disableInteractive();
+            }
+          },
+        });
       });
 
       yOffset += btnHeight + 10;
@@ -1088,24 +1167,36 @@ export class TowerUIManager {
           disabledBorderColor: 0x444444,
           paddingX: 20,
           paddingY: 10,
-          enabled: canAfford,
-          onClick: canAfford
-            ? () => {
-                // Re-check affordability at click time
-                const currentGold = this.getPlayerGold?.() || 0;
-                const requiredCost = levelUpConfig.upgradeCost || 0;
-                if (currentGold < requiredCost) {
-                  console.warn('Cannot afford upgrade anymore:', currentGold, '<', requiredCost);
-                  return;
-                }
-                if (isLevel4) {
-                  this.showAbilitySelection(tower, upgradeOptions.levelUp!);
-                } else {
-                  this.onUpgradeRequested?.(tower, upgradeOptions.levelUp!);
-                }
-              }
-            : undefined,
+          enabled: true,
+          onClick: () => {
+            // Re-check affordability at click time
+            const currentGold = this.getPlayerGold?.() || 0;
+            const requiredCost = levelUpConfig.upgradeCost || 0;
+            if (currentGold < requiredCost) {
+              return;
+            }
+            if (isLevel4) {
+              this.showAbilitySelection(tower, upgradeOptions.levelUp!);
+            } else {
+              this.onUpgradeRequested?.(tower, upgradeOptions.levelUp!);
+            }
+          },
         });
+        if (!canAfford) {
+          upgradeBtn.hitArea.disableInteractive();
+          // Draw disabled visual state immediately
+          const bg = upgradeBtn.background;
+          const w = upgradeBtn.width;
+          const h = upgradeBtn.height;
+          bg.clear();
+          bg.fillStyle(THEME.colors.warmShadow, 0.15);
+          bg.fillRoundedRect(-w / 2 + 2, -h / 2 + 3, w, h, 6);
+          bg.fillStyle(0x2a2a2a, 1);
+          bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
+          bg.lineStyle(1, 0x444444, 0.5);
+          bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 6);
+          upgradeBtn.text.setColor('#666666');
+        }
         this.upgradeMenuContainer.add(upgradeBtn.container);
 
         const newStats = levelUpConfig.stats;
@@ -1332,6 +1423,40 @@ export class TowerUIManager {
           })
           .setOrigin(0.5);
         this.upgradeMenuContainer.add(costText);
+
+        const levelUpBgColor = isLevel4 ? 0x4a3a2a : 0x2a4a2a;
+        const levelUpBorderColor = isLevel4 ? 0xffd700 : 0x00ff00;
+        const levelUpTextColor = isLevel4 ? '#ffd700' : '#00ff00';
+        this.goldDependentElements.push({
+          cost,
+          updateVisuals: (afford: boolean) => {
+            const bg = upgradeBtn.background;
+            const w = upgradeBtn.width;
+            const h = upgradeBtn.height;
+            bg.clear();
+            if (afford) {
+              bg.fillStyle(THEME.colors.warmShadow, 0.3);
+              bg.fillRoundedRect(-w / 2 + 2, -h / 2 + 3, w, h, 6);
+              bg.fillStyle(levelUpBgColor, 1);
+              bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
+              bg.fillStyle(THEME.colors.warmHighlight, 0.12);
+              bg.fillRoundedRect(-w / 2 + 3, -h / 2 + 3, w - 6, 8, 5);
+              bg.lineStyle(2, levelUpBorderColor, 1);
+              bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 6);
+              upgradeBtn.hitArea.setInteractive({ useHandCursor: true });
+            } else {
+              bg.fillStyle(THEME.colors.warmShadow, 0.15);
+              bg.fillRoundedRect(-w / 2 + 2, -h / 2 + 3, w, h, 6);
+              bg.fillStyle(0x2a2a2a, 1);
+              bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
+              bg.lineStyle(1, 0x444444, 0.5);
+              bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 6);
+              upgradeBtn.hitArea.disableInteractive();
+            }
+            upgradeBtn.text.setColor(afford ? levelUpTextColor : '#666666');
+            costText.setColor(afford ? '#ffd700' : '#ff4444');
+          },
+        });
 
         yOffset += 75;
       }
@@ -1597,7 +1722,9 @@ export class TowerUIManager {
     this.uiHelper.clampToScreen(this.abilityMenuContainer, menuWidth, menuHeight, 0.5, 0.5);
   }
 
-  closeMenus(preserveSelection: boolean = false, notifyController: boolean = true): void {
+  closeMenus(_preserveSelection: boolean = false, notifyController: boolean = true): void {
+    this.goldDependentElements = [];
+
     if (this.buildMenuContainer) {
       this.buildMenuContainer.destroy();
       this.buildMenuContainer = null;
@@ -1609,11 +1736,6 @@ export class TowerUIManager {
     if (this.abilityMenuContainer) {
       this.abilityMenuContainer.destroy();
       this.abilityMenuContainer = null;
-    }
-
-    if (!preserveSelection) {
-      this.selectedTower = null;
-      this.buildMenuPosition = null;
     }
 
     if (notifyController) {
